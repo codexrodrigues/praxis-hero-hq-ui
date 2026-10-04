@@ -60,13 +60,8 @@ export const routes: Routes = [
   {
     path: 'operacoes/missoes',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/operacoes/missoes-page.component').then((m) => m.MissoesPageComponent),
     title: 'Praxis Hero HQ | Centro de Missões',
-    data: {
-      title: 'Centro de Missões',
-      description: 'Despacho operacional, planejamento de incursões e relatórios de campo.',
-      resourcePath: 'operations/missoes',
-    },
   },
   {
     path: 'operacoes/equipes',
@@ -104,13 +99,8 @@ export const routes: Routes = [
   {
     path: 'ativos/equipamentos',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/ativos/equipamentos-page.component').then((m) => m.EquipamentosPageComponent),
     title: 'Praxis Hero HQ | Equipamentos & Armaduras',
-    data: {
-      title: 'Equipamentos & Armaduras',
-      description: 'Inventário, trajes de combate e manutenções em laboratório.',
-      resourcePath: 'operationalassets/equipamentos',
-    },
   },
   {
     path: 'ativos/veiculos',
@@ -120,19 +110,14 @@ export const routes: Routes = [
     data: {
       title: 'Frota & Veículos',
       description: 'Aeronaves, veículos terrestres e navais para mobilização rápida.',
-      resourcePath: 'operationalassets/veiculos',
+      resourcePath: 'assets/veiculos',
     },
   },
   {
     path: 'suprimentos/contratos',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/suprimentos/contratos-page.component').then((m) => m.ContratosPageComponent),
     title: 'Praxis Hero HQ | Fornecedores & Contratos',
-    data: {
-      title: 'Fornecedores & Contratos',
-      description: 'Parcerias com indústrias bélicas, tecnologia e logística.',
-      resourcePath: 'procurement/contracts',
-    },
   },
   {
     path: 'suprimentos/pedidos',
@@ -148,13 +133,8 @@ export const routes: Routes = [
   {
     path: 'risco/ameacas',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/risco/ameacas-page.component').then((m) => m.AmeacasPageComponent),
     title: 'Praxis Hero HQ | Radar de Ameaças',
-    data: {
-      title: 'Radar de Ameaças Globais',
-      description: 'Detecção antecipada de vilões, mutações e anomalias cósmicas.',
-      resourcePath: 'riskintelligence/ameacas',
-    },
   },
   {
     path: 'risco/indicadores',
