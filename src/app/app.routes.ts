@@ -28,13 +28,8 @@ export const routes: Routes = [
   {
     path: 'rh/cargos-departamentos',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/rh/departamentos-page.component').then((m) => m.DepartamentosPageComponent),
     title: 'Praxis Hero HQ | Cargos & Departamentos',
-    data: {
-      title: 'Cargos & Departamentos',
-      description: 'Estrutura organizacional, divisões táticas e hierarquia de comando.',
-      resourcePath: 'human-resources/departamentos',
-    },
   },
   {
     path: 'rh/reputacao',
@@ -87,13 +82,8 @@ export const routes: Routes = [
   {
     path: 'suprimentos/pedidos',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/suprimentos/pedidos-page.component').then((m) => m.PedidosPageComponent),
     title: 'Praxis Hero HQ | Pedidos de Compra',
-    data: {
-      title: 'Pedidos de Compra',
-      description: 'Aquisição estratégica de insumos, protótipos e suprimentos.',
-      resourcePath: 'procurement/purchase-orders',
-    },
   },
   {
     path: 'risco/ameacas',
@@ -104,13 +94,8 @@ export const routes: Routes = [
   {
     path: 'risco/indicadores',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/risco/indicadores-page.component').then((m) => m.IndicadoresPageComponent),
     title: 'Praxis Hero HQ | Indicadores & Indenizações',
-    data: {
-      title: 'Indicadores & Indenizações',
-      description: 'Mitigação de riscos patrimoniais e compensações civis.',
-      resourcePath: 'riskintelligence/vw-indicadores-incidentes',
-    },
   },
   {
     path: '**',
