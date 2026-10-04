@@ -1,0 +1,195 @@
+/* ==========================================================================
+   Praxis Hero HQ - Tactical Operations & HR Enterprise Design Tokens
+   OKLCH Palette, Glassmorphism, Bento Grid & Host Theme Ownership
+   ========================================================================== */
+
+:root {
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 1rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Light Theme (Corporate Clean SaaS) */
+  --background: oklch(0.982 0.004 247);
+  --foreground: oklch(0.208 0.042 265.755);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.035 247);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.52 0.16 244);
+  --primary-foreground: oklch(0.99 0.004 220);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.94 0.018 230);
+  --accent-foreground: oklch(0.3 0.06 230);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.929 0.013 255.508 / 85%);
+  --input: oklch(0.929 0.013 255.508 / 85%);
+  --ring: oklch(0.57 0.13 224);
+
+  --sidebar: oklch(0.99 0.002 240);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.49 0.12 224);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  --ready: oklch(0.58 0.16 154);
+  --warning: oklch(0.65 0.15 72);
+  --alert: oklch(0.61 0.2 29);
+  --command: oklch(0.22 0.035 247);
+  --command-foreground: oklch(0.96 0.01 230);
+  --overlay: oklch(0.12 0.02 250 / 72%);
+  --cobalt: oklch(0.49 0.23 264);
+
+  /* Semantic Domain Tokens */
+  --rh: oklch(0.55 0.16 232);
+  --operations: oklch(0.7 0.17 70);
+  --assets: oklch(0.62 0.17 155);
+  --supplies: oklch(0.55 0.2 295);
+  --risk: oklch(0.58 0.22 20);
+
+  --shadow-panel: 0 1px 2px oklch(0.2 0.03 240 / 4%), 0 8px 24px oklch(0.2 0.03 240 / 5%);
+  --shadow-command: 0 24px 70px oklch(0.1 0.03 240 / 28%);
+}
+
+.dark {
+  /* Dark Theme (Tactical Bento / Cyber Command) */
+  --background: oklch(0.105 0.025 264);
+  --foreground: oklch(0.94 0.012 230);
+  --card: oklch(0.185 0.04 260 / 70%);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.16 0.035 260 / 96%);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.77 0.14 205);
+  --primary-foreground: oklch(0.17 0.025 248);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.27 0.035 240);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.45 0.06 247 / 34%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.77 0.14 205);
+
+  --sidebar: oklch(0.09 0.02 260 / 88%);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.77 0.14 205);
+  --sidebar-primary-foreground: oklch(0.16 0.03 250);
+  --sidebar-accent: oklch(0.24 0.035 242);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+
+  --ready: oklch(0.75 0.16 154);
+  --warning: oklch(0.8 0.16 78);
+  --alert: oklch(0.71 0.2 30);
+  --command: oklch(0.13 0.025 250);
+  --command-foreground: oklch(0.95 0.012 230);
+  --overlay: oklch(0.06 0.02 250 / 82%);
+  --cobalt: oklch(0.62 0.2 255);
+
+  --rh: oklch(0.78 0.14 205);
+  --operations: oklch(0.8 0.16 78);
+  --assets: oklch(0.75 0.16 154);
+  --supplies: oklch(0.7 0.18 300);
+  --risk: oklch(0.7 0.2 20);
+
+  --shadow-panel: 0 1px 0 oklch(0.85 0.06 210 / 5%), 0 18px 40px oklch(0.05 0.02 250 / 20%);
+  --shadow-command: 0 25px 80px oklch(0.04 0.02 250 / 55%);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--background);
+  background-image: radial-gradient(ellipse 80% 55% at 50% -20%, color-mix(in oklab, var(--primary) 18%, transparent), transparent);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  background: color-mix(in oklab, var(--card) 88%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(18px) saturate(130%);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  }
+}
+
+/* Title Gradient */
+.title-gradient {
+  color: transparent;
+  background: linear-gradient(90deg, var(--foreground), color-mix(in oklab, var(--primary) 72%, var(--foreground)));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.dark .title-gradient {
+  background: linear-gradient(90deg, var(--primary), oklch(0.82 0.11 220), var(--cobalt));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Primary Button / Highlight Gradient */
+.primary-gradient {
+  color: var(--primary-foreground);
+  background: linear-gradient(135deg, var(--primary), var(--cobalt));
+  box-shadow: 0 10px 28px color-mix(in oklab, var(--primary) 24%, transparent);
+}
+
+/* Operational Status Glow */
+.operational-glow {
+  box-shadow: 0 0 16px color-mix(in oklab, var(--ready) 34%, transparent);
+}
+
+/* Background Grid Pattern */
+.bg-grid {
+  background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Material Symbols alignment */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+/* Praxis Components Integration Overrides */
+praxis-crud, praxis-table, praxis-dynamic-form {
+  --praxis-color-primary: var(--primary);
+  --praxis-color-surface: var(--card);
+  --praxis-color-text: var(--foreground);
+  --praxis-color-border: var(--border);
+  font-family: var(--font-sans);
+}
