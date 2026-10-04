@@ -1,6 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import {
+  MissionBriefingDrawerComponent,
+  type MissionProfile,
+} from './mission-briefing-drawer.component';
 
 export const MISSOES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -78,7 +82,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
 @Component({
   selector: 'app-missoes-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, MissionBriefingDrawerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -131,8 +135,15 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         <praxis-crud
           crudId="heroes-hq-missoes-crud"
           [metadata]="crudMetadata"
+          (rowClick)="onMissionRowClicked($event)"
         />
       </section>
+
+      <!-- Mission Briefing Drawer -->
+      <app-mission-briefing-drawer
+        [mission]="selectedMission()"
+        (close)="selectedMission.set(null)"
+      />
     </div>
   `,
   styles: [`
@@ -244,4 +255,23 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
 })
 export class MissoesPageComponent {
   protected readonly crudMetadata = MISSOES_CRUD_METADATA;
+  protected readonly selectedMission = signal<MissionProfile | null>(null);
+
+  protected onMissionRowClicked(event: unknown): void {
+    const raw = (event as any)?.row ?? (event as any)?.data ?? event;
+    if (!raw || typeof raw !== 'object' || !('id' in raw)) {
+      return;
+    }
+    const mission: MissionProfile = {
+      id: raw.id,
+      titulo: raw.titulo || 'Operação Tática',
+      descricao: raw.descricao,
+      prioridade: raw.prioridade || 'MEDIA',
+      status: raw.status || 'EM_ANDAMENTO',
+      localizacao: raw.localizacao || 'Setor Global',
+      dataInicioPrevista: raw.dataInicioPrevista,
+      dataFimPrevista: raw.dataFimPrevista,
+    };
+    this.selectedMission.set(mission);
+  }
 }

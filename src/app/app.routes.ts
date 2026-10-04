@@ -22,13 +22,8 @@ export const routes: Routes = [
   {
     path: 'rh/afastamentos',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/rh/afastamentos-page.component').then((m) => m.AfastamentosPageComponent),
     title: 'Praxis Hero HQ | Férias & Afastamentos',
-    data: {
-      title: 'Férias & Afastamentos',
-      description: 'Controle de disponibilidade operacional, férias e licenças táticas.',
-      resourcePath: 'human-resources/ferias-afastamentos',
-    },
   },
   {
     path: 'rh/cargos-departamentos',
@@ -44,13 +39,8 @@ export const routes: Routes = [
   {
     path: 'rh/reputacao',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/rh/reputacao-page.component').then((m) => m.ReputacaoPageComponent),
     title: 'Praxis Hero HQ | Ranking de Reputação',
-    data: {
-      title: 'Ranking de Reputação',
-      description: 'Índices públicos de aprovação e governança de heróis.',
-      resourcePath: 'human-resources/vw-ranking-reputacao',
-    },
   },
   {
     path: 'operacoes/missoes',
@@ -67,13 +57,8 @@ export const routes: Routes = [
   {
     path: 'operacoes/bases',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/operacoes/bases-page.component').then((m) => m.BasesPageComponent),
     title: 'Praxis Hero HQ | Bases & Acessos',
-    data: {
-      title: 'Bases & Acessos',
-      description: 'Gestão de instalações táticas, quarentenas e credenciais de segurança.',
-      resourcePath: 'operations/bases',
-    },
   },
   {
     path: 'operacoes/incidentes',
