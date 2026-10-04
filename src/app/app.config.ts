@@ -4,7 +4,7 @@ import {
   provideEnvironmentInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   CurrencyPipe,
   DatePipe,
@@ -43,7 +43,24 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
     provideRouter(routes),
-    provideHttpClient(withPraxisHttpLoading()),
+    provideHttpClient(
+      withPraxisHttpLoading(),
+      withInterceptors([
+        (req, next) => {
+          const tenant =
+            typeof localStorage !== 'undefined'
+              ? localStorage.getItem('pax.api.tenant') || 'demo'
+              : 'demo';
+          const cloned = req.clone({
+            setHeaders: {
+              'X-Tenant-ID': tenant,
+              'X-Tenant': tenant,
+            },
+          });
+          return next(cloned);
+        },
+      ]),
+    ),
     ...providePraxisDynamicFieldsCore(),
     providePraxisDynamicFormMetadata(),
     providePraxisTableMetadata(),

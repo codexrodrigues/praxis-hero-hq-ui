@@ -1,0 +1,281 @@
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+
+export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
+  component: 'praxis-crud',
+  resource: {
+    path: 'operations/incidentes',
+    idField: 'id',
+  },
+  table: {
+    columns: [
+      {
+        field: 'id',
+        header: 'ID',
+        width: '80px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'descricao',
+        header: 'Descrição do Sinistro / Ocorrência',
+        width: '320px',
+        sortable: true,
+      },
+      {
+        field: 'severidade',
+        header: 'Severidade',
+        width: '130px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'local',
+        header: 'Teatro / Localização',
+        width: '200px',
+        sortable: true,
+      },
+      {
+        field: 'ocorridoEm',
+        header: 'Data / Hora',
+        type: 'date',
+        format: 'dd/MM/yyyy HH:mm',
+        width: '180px',
+        sortable: true,
+      },
+      {
+        field: 'danosCivis',
+        header: 'Danos Civis (R$)',
+        type: 'currency',
+        format: 'BRL',
+        width: '170px',
+        align: 'right',
+        sortable: true,
+      },
+      {
+        field: 'feridos',
+        header: 'Feridos',
+        type: 'number',
+        width: '100px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'mortos',
+        header: 'Vítimas Fatais',
+        type: 'number',
+        width: '120px',
+        align: 'center',
+        sortable: true,
+      },
+    ],
+  } as unknown as CrudMetadata['table'],
+  actions: [
+    {
+      id: 'edit',
+      label: 'Investigar Incidente',
+      action: 'edit',
+      openMode: 'modal',
+      formId: 'incidentes-edit',
+      params: [{ from: 'id', to: 'input', name: 'id' }],
+    },
+    {
+      id: 'create',
+      label: 'Reportar Sinistro',
+      action: 'create',
+      openMode: 'modal',
+      formId: 'incidentes-create',
+    },
+  ],
+  defaults: {
+    openMode: 'modal',
+    modal: { width: '920px', maxWidth: '95vw' },
+  },
+};
+
+@Component({
+  selector: 'app-incidentes-page',
+  standalone: true,
+  imports: [CommonModule, PraxisCrudComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="page-container">
+      <header class="section-header">
+        <div class="header-intro">
+          <div class="domain-tag tone-risk-bg">
+            <span class="material-symbols-outlined">siren</span>
+            Operações & Gestão de Risco
+          </div>
+          <h1 class="title-gradient page-title">Incidentes Táticos & Sinistros</h1>
+          <p class="page-subtitle">
+            Auditoria pós-missão, contabilidade de danos colaterais a infraestrutura civil e contenção de impacto operacional.
+          </p>
+        </div>
+      </header>
+
+      <!-- Bento Grid de KPIs -->
+      <section class="kpi-grid">
+        <div class="glass-panel kpi-card">
+          <div class="kpi-icon-wrap tone-risk">
+            <span class="material-symbols-outlined">emergency</span>
+          </div>
+          <p class="kpi-label">Total de Ocorrências</p>
+          <p class="kpi-value">74 Registradas</p>
+          <p class="kpi-detail">Histórico completo de engajamentos</p>
+        </div>
+
+        <div class="glass-panel kpi-card">
+          <div class="kpi-icon-wrap tone-warning">
+            <span class="material-symbols-outlined">warning</span>
+          </div>
+          <p class="kpi-label">Severidade Crítica</p>
+          <p class="kpi-value">18 Ocorrências</p>
+          <p class="kpi-detail text-warning">Danos estruturais severos</p>
+        </div>
+
+        <div class="glass-panel kpi-card">
+          <div class="kpi-icon-wrap tone-operations">
+            <span class="material-symbols-outlined">monetization_on</span>
+          </div>
+          <p class="kpi-label">Danos Civis Acumulados</p>
+          <p class="kpi-value">R$ 82,4M</p>
+          <p class="kpi-detail">Cobertos por seguro e acordos</p>
+        </div>
+
+        <div class="glass-panel kpi-card">
+          <div class="kpi-icon-wrap tone-ready">
+            <span class="material-symbols-outlined">health_and_safety</span>
+          </div>
+          <p class="kpi-label">Taxa de Resguardo Civil</p>
+          <p class="kpi-value">98,2%</p>
+          <p class="kpi-detail text-ready">População evacuada com êxito</p>
+        </div>
+      </section>
+
+      <!-- Tabela CRUD Governança Canônica -->
+      <section class="glass-panel crud-surface">
+        <praxis-crud
+          crudId="heroes-hq-incidentes-crud"
+          [metadata]="crudMetadata"
+        />
+      </section>
+    </div>
+  `,
+  styles: [`
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 1540px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .domain-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+
+      span { font-size: 14px; }
+    }
+
+    .tone-risk-bg {
+      background: color-mix(in oklab, var(--risk) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--risk) 30%, transparent);
+      color: var(--risk);
+    }
+
+    .page-title {
+      margin: 10px 0 0;
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .page-subtitle {
+      margin: 8px 0 0;
+      font-size: 0.88rem;
+      color: var(--muted-foreground);
+      max-width: 720px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .kpi-card {
+      padding: 18px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .kpi-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+
+      span { font-size: 22px; }
+    }
+
+    .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 12%, transparent); }
+    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
+    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
+    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
+
+    .kpi-label {
+      margin: 0;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted-foreground);
+    }
+
+    .kpi-value {
+      margin: 4px 0 0;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .kpi-detail {
+      margin: 4px 0 0;
+      font-size: 0.72rem;
+      color: var(--muted-foreground);
+    }
+
+    .text-ready { color: var(--ready) !important; }
+    .text-warning { color: var(--warning) !important; }
+
+    .crud-surface {
+      border-radius: 18px;
+      padding: 20px;
+      overflow: hidden;
+    }
+  `],
+})
+export class IncidentesPageComponent {
+  protected readonly crudMetadata = INCIDENTES_CRUD_METADATA;
+}

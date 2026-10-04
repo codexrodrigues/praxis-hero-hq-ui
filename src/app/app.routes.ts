@@ -16,13 +16,8 @@ export const routes: Routes = [
   {
     path: 'rh/folha-pagamento',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/rh/folha-pagamento-page.component').then((m) => m.FolhaPagamentoPageComponent),
     title: 'Praxis Hero HQ | Folha de Pagamento',
-    data: {
-      title: 'Folha de Pagamento',
-      description: 'Processamento de remunerações, eventos mensais e aprovação de pagamentos.',
-      resourcePath: 'human-resources/folhas-pagamento',
-    },
   },
   {
     path: 'rh/afastamentos',
@@ -66,13 +61,8 @@ export const routes: Routes = [
   {
     path: 'operacoes/equipes',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/operacoes/equipes-page.component').then((m) => m.EquipesPageComponent),
     title: 'Praxis Hero HQ | Equipes & Squads',
-    data: {
-      title: 'Equipes & Squads',
-      description: 'Composição de forças operacionais, sinergia e lideranças.',
-      resourcePath: 'operations/equipes',
-    },
   },
   {
     path: 'operacoes/bases',
@@ -88,13 +78,8 @@ export const routes: Routes = [
   {
     path: 'operacoes/incidentes',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/operacoes/incidentes-page.component').then((m) => m.IncidentesPageComponent),
     title: 'Praxis Hero HQ | Incidentes Táticos',
-    data: {
-      title: 'Incidentes Táticos',
-      description: 'Registro de sinistros em combate, danos urbanos e resposta coordenada.',
-      resourcePath: 'operations/incidentes',
-    },
   },
   {
     path: 'ativos/equipamentos',
@@ -105,13 +90,8 @@ export const routes: Routes = [
   {
     path: 'ativos/veiculos',
     loadComponent: () =>
-      import('./pages/shared/resource-hub-page.component').then((m) => m.ResourceHubPageComponent),
+      import('./pages/ativos/veiculos-page.component').then((m) => m.VeiculosPageComponent),
     title: 'Praxis Hero HQ | Frota & Veículos',
-    data: {
-      title: 'Frota & Veículos',
-      description: 'Aeronaves, veículos terrestres e navais para mobilização rápida.',
-      resourcePath: 'assets/veiculos',
-    },
   },
   {
     path: 'suprimentos/contratos',

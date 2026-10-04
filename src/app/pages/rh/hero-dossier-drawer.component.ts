@@ -1,27 +1,71 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  inject,
+  signal,
+} from '@angular/core';
+import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 
 export interface HeroProfile {
   id: number;
   nomeCompleto: string;
-  codinome: string;
-  cargoNome: string;
-  departamentoNome: string;
-  universo: string;
+  codinome?: string;
+  cargoNome?: string;
+  departamentoNome?: string;
+  universo?: string;
   ativo: boolean;
-  salario: number;
-  cpf: string;
-  telefone: string;
-  email: string;
-  scorePublico: number;
-  scoreGovernamental: number;
-  dataAdmissao: string;
+  salario?: number;
+  cpf?: string;
+  telefone?: string;
+  email?: string;
+  avatarUrl?: string;
+  fotoPerfilUrl?: string;
+  scorePublico?: number;
+  scoreGovernamental?: number;
+  dataAdmissao?: string;
+  resourceVersion?: string;
+}
+
+export interface PayrollRecord {
+  id: number;
+  ano: number;
+  mes: number;
+  salarioBruto: number;
+  totalDescontos: number;
+  salarioLiquido: number;
+  dataPagamento: string;
+}
+
+export interface MissionParticipantRecord {
+  id: number;
+  missaoId: number;
+  missaoTitulo: string;
+  papel: string;
+  ordem?: number;
+  principal?: boolean;
+  resultado?: string;
+}
+
+export interface EquipmentRecord {
+  id: number;
+  nome: string;
+  tipo: string;
+  resistencia?: number;
+  status: string;
+  proprietarioNome?: string;
 }
 
 @Component({
   selector: 'app-hero-dossier-drawer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CurrencyPipe, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (hero) {
@@ -31,7 +75,15 @@ export interface HeroProfile {
           <header class="drawer-header">
             <div class="hero-id-card">
               <div class="avatar-box primary-gradient">
-                {{ getInitials(hero.nomeCompleto) }}
+                @if (hero.fotoPerfilUrl || hero.avatarUrl) {
+                  <img
+                    [src]="hero.fotoPerfilUrl || hero.avatarUrl"
+                    [alt]="hero.nomeCompleto"
+                    class="avatar-img"
+                  />
+                } @else {
+                  <span>{{ getInitials(hero.nomeCompleto) }}</span>
+                }
                 <span class="status-indicator" [class.active]="hero.ativo"></span>
               </div>
               <div class="hero-titles">
@@ -42,7 +94,7 @@ export interface HeroProfile {
                   </span>
                 </div>
                 <h2 class="title-gradient hero-name">{{ hero.nomeCompleto }}</h2>
-                <p class="hero-alias">{{ hero.codinome }} · {{ hero.cargoNome }}</p>
+                <p class="hero-alias">{{ hero.codinome || hero.nomeCompleto }} · {{ hero.cargoNome }}</p>
               </div>
             </div>
 
@@ -51,12 +103,13 @@ export interface HeroProfile {
                 class="action-btn"
                 [class.btn-danger]="hero.ativo"
                 [class.btn-success]="!hero.ativo"
+                [disabled]="isTransitioning()"
                 (click)="toggleStatus.emit(hero)"
               >
                 <span class="material-symbols-outlined">
-                  {{ hero.ativo ? 'person_off' : 'verified_user' }}
+                  {{ isTransitioning() ? 'sync' : hero.ativo ? 'person_off' : 'verified_user' }}
                 </span>
-                {{ hero.ativo ? 'Mover para Reserva' : 'Reativar no Quadro' }}
+                {{ isTransitioning() ? 'Processando...' : hero.ativo ? 'Mover para Reserva' : 'Reativar no Quadro' }}
               </button>
               <button class="close-icon-btn" (click)="close.emit()" aria-label="Fechar Dossiê">
                 <span class="material-symbols-outlined">close</span>
@@ -68,35 +121,35 @@ export interface HeroProfile {
           <nav class="dossier-tabs">
             <button
               [class.active]="activeTab() === 'identity'"
-              (click)="activeTab.set('identity')"
+              (click)="selectTab('identity')"
             >
               <span class="material-symbols-outlined">badge</span>
               Identidade
             </button>
             <button
               [class.active]="activeTab() === 'skills'"
-              (click)="activeTab.set('skills')"
+              (click)="selectTab('skills')"
             >
               <span class="material-symbols-outlined">bolt</span>
               Competências
             </button>
             <button
               [class.active]="activeTab() === 'payroll'"
-              (click)="activeTab.set('payroll')"
+              (click)="selectTab('payroll')"
             >
               <span class="material-symbols-outlined">payments</span>
               Folha
             </button>
             <button
               [class.active]="activeTab() === 'missions'"
-              (click)="activeTab.set('missions')"
+              (click)="selectTab('missions')"
             >
               <span class="material-symbols-outlined">military_tech</span>
               Missões
             </button>
             <button
               [class.active]="activeTab() === 'assets'"
-              (click)="activeTab.set('assets')"
+              (click)="selectTab('assets')"
             >
               <span class="material-symbols-outlined">inventory_2</span>
               Ativos
@@ -118,6 +171,10 @@ export interface HeroProfile {
                     <span class="info-value">{{ hero.departamentoNome }}</span>
                   </div>
                   <div class="info-item">
+                    <span class="info-label">Cargo / Posto</span>
+                    <span class="info-value">{{ hero.cargoNome }}</span>
+                  </div>
+                  <div class="info-item">
                     <span class="info-label">Data de Admissão</span>
                     <span class="info-value">{{ hero.dataAdmissao || '01/01/2020' }}</span>
                   </div>
@@ -128,10 +185,6 @@ export interface HeroProfile {
                   <div class="info-item">
                     <span class="info-label">Telefone Tático</span>
                     <span class="info-value">{{ hero.telefone || '+55 (11) 98888-0000' }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">Localização Principal</span>
-                    <span class="info-value">Base Vingadores · Complexo Central</span>
                   </div>
                 </div>
 
@@ -167,130 +220,141 @@ export interface HeroProfile {
                 <div class="skills-list">
                   <div class="skill-item glass-panel">
                     <div class="skill-top">
-                      <span class="skill-name">Armaduras Tecnológicas & Exoesqueletos</span>
-                      <span class="skill-origin origin-tech">TECNOLOGIA AVANÇADA</span>
+                      <span class="skill-name">Combate Avançado & Resposta Tática</span>
+                      <span class="skill-origin origin-training">TREINAMENTO</span>
                     </div>
                     <div class="progress-bar">
-                      <div class="progress-fill fill-tech" style="width: 96%"></div>
+                      <div class="progress-fill fill-training" style="width: 95%"></div>
                     </div>
-                    <span class="skill-pct">Proficiência: 96%</span>
+                    <span class="skill-pct">Proficiência: 95%</span>
                   </div>
 
                   <div class="skill-item glass-panel">
                     <div class="skill-top">
-                      <span class="skill-name">Intelecto Genial & Engenharia Quântica</span>
-                      <span class="skill-origin origin-natural">HABILIDADE NATURAL</span>
+                      <span class="skill-name">Engenharia de Campo & Suporte Quântico</span>
+                      <span class="skill-origin origin-tech">TECNOLOGIA</span>
                     </div>
                     <div class="progress-bar">
-                      <div class="progress-fill fill-natural" style="width: 99%"></div>
+                      <div class="progress-fill fill-tech" style="width: 92%"></div>
                     </div>
-                    <span class="skill-pct">Proficiência: 99%</span>
+                    <span class="skill-pct">Proficiência: 92%</span>
                   </div>
 
                   <div class="skill-item glass-panel">
                     <div class="skill-top">
-                      <span class="skill-name">Combate Tático & Liderança em Campo</span>
-                      <span class="skill-origin origin-training">TREINAMENTO DE COMBATE</span>
+                      <span class="skill-name">Liderança Operacional & Coordenação de Crise</span>
+                      <span class="skill-origin origin-natural">HABILIDADE</span>
                     </div>
                     <div class="progress-bar">
-                      <div class="progress-fill fill-training" style="width: 88%"></div>
+                      <div class="progress-fill fill-natural" style="width: 98%"></div>
                     </div>
-                    <span class="skill-pct">Proficiência: 88%</span>
+                    <span class="skill-pct">Proficiência: 98%</span>
                   </div>
                 </div>
               </div>
             }
 
-            <!-- TAB 3: FOLHA -->
+            <!-- TAB 3: FOLHA (DADOS REAIS DA API) -->
             @if (activeTab() === 'payroll') {
               <div class="tab-panel">
-                <div class="cycles-list">
-                  <div class="cycle-item glass-panel">
-                    <span class="material-symbols-outlined cycle-icon tone-rh">payments</span>
-                    <div class="cycle-info">
-                      <h4>Competência 10/2026</h4>
-                      <p>Bruto: R$ 95.000,00 · Líquido: R$ 77.900,00</p>
-                    </div>
-                    <span class="tag-status status-programada">PROGRAMADA</span>
+                @if (isLoadingTab()) {
+                  <div class="tab-loader">
+                    <span class="material-symbols-outlined spin">sync</span>
+                    <span>Carregando histórico financeiro da API...</span>
                   </div>
-
-                  <div class="cycle-item glass-panel">
-                    <span class="material-symbols-outlined cycle-icon tone-ready">check_circle</span>
-                    <div class="cycle-info">
-                      <h4>Competência 09/2026</h4>
-                      <p>Bruto: R$ 95.000,00 · Líquido: R$ 76.850,00</p>
-                    </div>
-                    <span class="tag-status status-paga">PAGA</span>
+                } @else if (payrollCycles().length > 0) {
+                  <div class="cycles-list">
+                    @for (cycle of payrollCycles(); track cycle.id) {
+                      <div class="cycle-item glass-panel">
+                        <span class="material-symbols-outlined cycle-icon tone-rh">payments</span>
+                        <div class="cycle-info">
+                          <h4>Competência {{ cycle.mes }}/{{ cycle.ano }}</h4>
+                          <p>
+                            Bruto: {{ cycle.salarioBruto | currency: 'BRL' }} ·
+                            Líquido: {{ cycle.salarioLiquido | currency: 'BRL' }} ·
+                            Descontos: {{ cycle.totalDescontos | currency: 'BRL' }}
+                          </p>
+                          <small>Pagamento: {{ cycle.dataPagamento | date: 'dd/MM/yyyy' }}</small>
+                        </div>
+                        <span class="tag-status status-paga">CONSOLIDADA</span>
+                      </div>
+                    }
                   </div>
-
-                  <div class="cycle-item glass-panel">
-                    <span class="material-symbols-outlined cycle-icon tone-ready">check_circle</span>
-                    <div class="cycle-info">
-                      <h4>Competência 08/2026</h4>
-                      <p>Bruto: R$ 95.000,00 · Líquido: R$ 77.900,00</p>
-                    </div>
-                    <span class="tag-status status-paga">PAGA</span>
+                } @else {
+                  <div class="empty-tab-state glass-panel">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    <p>Nenhum lançamento de folha encontrado para este colaborador.</p>
                   </div>
-                </div>
+                }
               </div>
             }
 
-            <!-- TAB 4: MISSÕES -->
+            <!-- TAB 4: MISSÕES (DADOS REAIS DA API) -->
             @if (activeTab() === 'missions') {
               <div class="tab-panel">
-                <div class="missions-list">
-                  <div class="mission-item glass-panel">
-                    <span class="material-symbols-outlined mission-icon tone-operations">military_tech</span>
-                    <div class="mission-info">
-                      <h4>Batalha de Nova York</h4>
-                      <p>Papel: Comandante da Unidade Aérea · Incursão Primária</p>
-                    </div>
-                    <span class="tag-status status-sucesso">SUCESSO</span>
+                @if (isLoadingTab()) {
+                  <div class="tab-loader">
+                    <span class="material-symbols-outlined spin">sync</span>
+                    <span>Carregando histórico de missões...</span>
                   </div>
-
-                  <div class="mission-item glass-panel">
-                    <span class="material-symbols-outlined mission-icon tone-operations">military_tech</span>
-                    <div class="mission-info">
-                      <h4>Protocolo Ultron</h4>
-                      <p>Papel: Especialista em Guerra Cibernética</p>
-                    </div>
-                    <span class="tag-status status-sucesso">SUCESSO</span>
+                } @else if (missions().length > 0) {
+                  <div class="missions-list">
+                    @for (mission of missions(); track mission.id) {
+                      <div class="mission-item glass-panel">
+                        <span class="material-symbols-outlined mission-icon tone-operations">military_tech</span>
+                        <div class="mission-info">
+                          <h4>{{ mission.missaoTitulo }}</h4>
+                          <p>
+                            Papel: <strong>{{ mission.papel }}</strong> ·
+                            {{ mission.principal ? 'Participação Primária' : 'Força de Apoio' }}
+                          </p>
+                        </div>
+                        <span
+                          class="tag-status"
+                          [class.status-sucesso]="mission.resultado === 'OK'"
+                          [class.status-andamento]="mission.resultado !== 'OK'"
+                        >
+                          {{ mission.resultado === 'OK' ? 'CONCLUÍDA' : 'EM ANDAMENTO' }}
+                        </span>
+                      </div>
+                    }
                   </div>
-
-                  <div class="mission-item glass-panel">
-                    <span class="material-symbols-outlined mission-icon tone-warning">pending</span>
-                    <div class="mission-info">
-                      <h4>Escudo Boreal</h4>
-                      <p>Papel: Suporte Logístico de Alta Altitude</p>
-                    </div>
-                    <span class="tag-status status-andamento">EM ANDAMENTO</span>
+                } @else {
+                  <div class="empty-tab-state glass-panel">
+                    <span class="material-symbols-outlined">flag</span>
+                    <p>Nenhuma missão registrada para este herói até o momento.</p>
                   </div>
-                </div>
+                }
               </div>
             }
 
-            <!-- TAB 5: ATIVOS & CUSTÓDIA -->
+            <!-- TAB 5: ATIVOS (DADOS REAIS DA API) -->
             @if (activeTab() === 'assets') {
               <div class="tab-panel">
-                <div class="assets-list">
-                  <div class="asset-item glass-panel">
-                    <span class="material-symbols-outlined asset-icon tone-assets">inventory_2</span>
-                    <div class="asset-info">
-                      <h4>Armadura Mark VII (Traje Tático)</h4>
-                      <p>Série: STARK-MK7-001 · Estado: Operacional Total</p>
-                    </div>
-                    <button class="outline-sm-btn">Auditar</button>
+                @if (isLoadingTab()) {
+                  <div class="tab-loader">
+                    <span class="material-symbols-outlined spin">sync</span>
+                    <span>Consultando ativos em custódia...</span>
                   </div>
-
-                  <div class="asset-item glass-panel">
-                    <span class="material-symbols-outlined asset-icon tone-assets">cell_tower</span>
-                    <div class="asset-info">
-                      <h4>Comunicador Quântico Trans-Dimensional</h4>
-                      <p>Série: CQT-889 · Estado: Ativo em Frequência Segura</p>
-                    </div>
-                    <button class="outline-sm-btn">Auditar</button>
+                } @else if (assets().length > 0) {
+                  <div class="assets-list">
+                    @for (asset of assets(); track asset.id) {
+                      <div class="asset-item glass-panel">
+                        <span class="material-symbols-outlined asset-icon tone-assets">inventory_2</span>
+                        <div class="asset-info">
+                          <h4>{{ asset.nome }}</h4>
+                          <p>Tipo: {{ asset.tipo }} · Resistência: {{ asset.resistencia || 8 }}/10</p>
+                        </div>
+                        <span class="tag-status status-programada">{{ asset.status }}</span>
+                      </div>
+                    }
                   </div>
-                </div>
+                } @else {
+                  <div class="empty-tab-state glass-panel">
+                    <span class="material-symbols-outlined">shield_moon</span>
+                    <p>Nenhum equipamento vinculado à custódia deste herói.</p>
+                  </div>
+                }
               </div>
             }
           </div>
@@ -348,6 +412,13 @@ export interface HeroProfile {
       font-weight: 700;
       position: relative;
       flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .status-indicator {
@@ -429,6 +500,11 @@ export interface HeroProfile {
       transition: all 0.2s;
 
       span { font-size: 16px; }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
     }
 
     .btn-danger {
@@ -436,7 +512,7 @@ export interface HeroProfile {
       color: var(--destructive);
       border: 1px solid color-mix(in oklab, var(--destructive) 30%, transparent);
 
-      &:hover {
+      &:hover:not(:disabled) {
         background: var(--destructive);
         color: #fff;
       }
@@ -447,7 +523,7 @@ export interface HeroProfile {
       color: var(--ready);
       border: 1px solid color-mix(in oklab, var(--ready) 30%, transparent);
 
-      &:hover {
+      &:hover:not(:disabled) {
         background: var(--ready);
         color: #fff;
       }
@@ -471,7 +547,6 @@ export interface HeroProfile {
       }
     }
 
-    /* Tabs */
     .dossier-tabs {
       display: flex;
       gap: 6px;
@@ -510,7 +585,6 @@ export interface HeroProfile {
       }
     }
 
-    /* Body */
     .dossier-body {
       flex: 1;
       overflow-y: auto;
@@ -602,7 +676,6 @@ export interface HeroProfile {
     .fill-natural { background: #10b981; }
     .fill-training { background: #f59e0b; }
 
-    /* Skills */
     .skills-list {
       display: flex;
       flex-direction: column;
@@ -646,7 +719,6 @@ export interface HeroProfile {
       text-align: right;
     }
 
-    /* List Rows */
     .cycles-list, .missions-list, .assets-list {
       display: flex;
       flex-direction: column;
@@ -692,6 +764,13 @@ export interface HeroProfile {
         font-size: 0.75rem;
         color: var(--muted-foreground);
       }
+
+      small {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.7rem;
+        color: var(--muted-foreground);
+      }
     }
 
     .tag-status {
@@ -707,19 +786,45 @@ export interface HeroProfile {
     .status-sucesso { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
     .status-andamento { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
 
-    .outline-sm-btn {
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--muted);
-      color: var(--foreground);
-      font-size: 0.72rem;
-      font-weight: 600;
-      cursor: pointer;
+    .tab-loader {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 30px;
+      justify-content: center;
+      color: var(--muted-foreground);
+      font-size: 0.85rem;
 
-      &:hover {
-        border-color: var(--primary);
+      span.spin {
+        animation: spin 1s linear infinite;
+        font-size: 20px;
       }
+    }
+
+    .empty-tab-state {
+      padding: 32px;
+      border-radius: 14px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted-foreground);
+
+      span {
+        font-size: 32px;
+        opacity: 0.6;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.85rem;
+      }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     @keyframes slideIn {
@@ -728,12 +833,99 @@ export interface HeroProfile {
     }
   `],
 })
-export class HeroDossierDrawerComponent {
+export class HeroDossierDrawerComponent implements OnChanges {
   @Input() hero: HeroProfile | null = null;
+  @Input() isTransitioning = signal(false);
   @Output() close = new EventEmitter<void>();
   @Output() toggleStatus = new EventEmitter<HeroProfile>();
 
   protected readonly activeTab = signal<'identity' | 'skills' | 'payroll' | 'missions' | 'assets'>('identity');
+  protected readonly isLoadingTab = signal(false);
+  protected readonly payrollCycles = signal<PayrollRecord[]>([]);
+  protected readonly missions = signal<MissionParticipantRecord[]>([]);
+  protected readonly assets = signal<EquipmentRecord[]>([]);
+
+  private readonly http = inject(HttpClient);
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['hero'] && this.hero) {
+      this.refreshTab(this.activeTab());
+    }
+  }
+
+  protected selectTab(tab: 'identity' | 'skills' | 'payroll' | 'missions' | 'assets'): void {
+    this.activeTab.set(tab);
+    this.refreshTab(tab);
+  }
+
+  private refreshTab(tab: string): void {
+    if (!this.hero?.id) return;
+
+    if (tab === 'payroll') {
+      this.fetchPayroll(this.hero.id);
+    } else if (tab === 'missions') {
+      this.fetchMissions(this.hero.id);
+    } else if (tab === 'assets') {
+      this.fetchAssets(this.hero.id);
+    }
+  }
+
+  private fetchPayroll(heroId: number): void {
+    this.isLoadingTab.set(true);
+    this.http
+      .post<{ data?: { content?: PayrollRecord[] } }>(
+        `${PRAXIS_API_BASE_URL}/human-resources/folhas-pagamento/filter`,
+        { funcionarioId: heroId }
+      )
+      .subscribe({
+        next: (res) => {
+          this.payrollCycles.set(res.data?.content || []);
+          this.isLoadingTab.set(false);
+        },
+        error: () => {
+          this.payrollCycles.set([]);
+          this.isLoadingTab.set(false);
+        },
+      });
+  }
+
+  private fetchMissions(heroId: number): void {
+    this.isLoadingTab.set(true);
+    this.http
+      .post<{ data?: { content?: MissionParticipantRecord[] } }>(
+        `${PRAXIS_API_BASE_URL}/operations/missao-participantes/filter`,
+        { funcionarioId: heroId }
+      )
+      .subscribe({
+        next: (res) => {
+          this.missions.set(res.data?.content || []);
+          this.isLoadingTab.set(false);
+        },
+        error: () => {
+          this.missions.set([]);
+          this.isLoadingTab.set(false);
+        },
+      });
+  }
+
+  private fetchAssets(heroId: number): void {
+    this.isLoadingTab.set(true);
+    this.http
+      .post<{ data?: { content?: EquipmentRecord[] } }>(
+        `${PRAXIS_API_BASE_URL}/assets/equipamentos/filter`,
+        { proprietarioId: heroId }
+      )
+      .subscribe({
+        next: (res) => {
+          this.assets.set(res.data?.content || []);
+          this.isLoadingTab.set(false);
+        },
+        error: () => {
+          this.assets.set([]);
+          this.isLoadingTab.set(false);
+        },
+      });
+  }
 
   protected getInitials(name: string): string {
     if (!name) return 'H';

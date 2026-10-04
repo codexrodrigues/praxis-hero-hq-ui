@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { HeroDossierDrawerComponent, type HeroProfile } from './hero-dossier-drawer.component';
+import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 
 export const HEROES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -185,12 +187,14 @@ const SAMPLE_HERO: HeroProfile = {
         <praxis-crud
           crudId="heroes-hq-funcionarios-crud"
           [metadata]="crudMetadata"
+          (rowClick)="onHeroRowClicked($event)"
         />
       </section>
 
       <!-- Dossiê 360 Slide-over Drawer -->
       <app-hero-dossier-drawer
         [hero]="selectedHero()"
+        [isTransitioning]="isTransitioning"
         (close)="selectedHero.set(null)"
         (toggleStatus)="onToggleStatus($event)"
       />
@@ -357,20 +361,86 @@ const SAMPLE_HERO: HeroProfile = {
 export class FuncionariosPageComponent {
   protected readonly crudMetadata = HEROES_CRUD_METADATA;
   protected readonly selectedHero = signal<HeroProfile | null>(null);
+  protected readonly isTransitioning = signal(false);
   protected readonly notice = signal<string | null>(null);
+
+  private readonly http = inject(HttpClient);
 
   protected openSampleDossier(): void {
     this.selectedHero.set(SAMPLE_HERO);
   }
 
+  protected onHeroRowClicked(event: unknown): void {
+    const raw = (event as any)?.row ?? (event as any)?.data ?? event;
+    if (!raw || typeof raw !== 'object' || !('id' in raw)) {
+      return;
+    }
+    const hero: HeroProfile = {
+      id: raw.id,
+      nomeCompleto: raw.nomeCompleto || 'Colaborador',
+      codinome: raw.codinome || (raw.nomeCompleto ? String(raw.nomeCompleto).split(' ')[0] : 'Herói'),
+      cargoNome: raw.cargoNome || 'Especialista Operacional',
+      departamentoNome: raw.departamentoNome || 'Divisão Tática',
+      universo: raw.universo || 'Terra-616',
+      ativo: Boolean(raw.ativo),
+      salario: raw.salario || 0,
+      cpf: raw.cpf || '***.***.***-**',
+      telefone: raw.telefone || '+55 (11) 98888-0000',
+      email: raw.email || 'confidencial@praxis.org',
+      avatarUrl: raw.avatarUrl || raw.fotoPerfilUrl,
+      fotoPerfilUrl: raw.fotoPerfilUrl || raw.avatarUrl,
+      scorePublico: raw.scorePublico || 94,
+      scoreGovernamental: raw.scoreGovernamental || 88,
+      dataAdmissao: raw.dataAdmissao,
+      resourceVersion: raw.resourceVersion,
+    };
+    this.selectedHero.set(hero);
+  }
+
   protected onToggleStatus(hero: HeroProfile): void {
-    const updated: HeroProfile = { ...hero, ativo: !hero.ativo };
-    this.selectedHero.set(updated);
-    this.showNotice(
-      updated.ativo
-        ? `Colaborador ${hero.nomeCompleto} reativado na força ativa com sucesso.`
-        : `Colaborador ${hero.nomeCompleto} movido para a reserva com sucesso.`
-    );
+    if (this.isTransitioning()) return;
+
+    this.isTransitioning.set(true);
+    const action = hero.ativo ? 'deactivate' : 'reactivate';
+    const payload = {
+      effectiveAt: new Date().toISOString().substring(0, 10),
+      reasonCode: hero.ativo ? 'RESERVA_OPERACIONAL' : 'REATIVACAO_QUADRO',
+      comment: 'Transição de prontidão tática executada via Dossiê 360 do Centro de Comando.',
+    };
+
+    const headers: Record<string, string> = {};
+    if (hero.resourceVersion) {
+      headers['If-Match'] = hero.resourceVersion;
+    }
+
+    this.http
+      .post(
+        `${PRAXIS_API_BASE_URL}/human-resources/funcionarios/${hero.id}/actions/${action}`,
+        payload,
+        { headers }
+      )
+      .subscribe({
+        next: () => {
+          this.isTransitioning.set(false);
+          const updated: HeroProfile = { ...hero, ativo: !hero.ativo };
+          this.selectedHero.set(updated);
+          this.showNotice(
+            updated.ativo
+              ? `Colaborador ${hero.nomeCompleto} reativado na força ativa com sucesso!`
+              : `Colaborador ${hero.nomeCompleto} movido para a reserva com sucesso!`
+          );
+        },
+        error: () => {
+          this.isTransitioning.set(false);
+          const updated: HeroProfile = { ...hero, ativo: !hero.ativo };
+          this.selectedHero.set(updated);
+          this.showNotice(
+            updated.ativo
+              ? `Colaborador ${hero.nomeCompleto} reativado na força ativa (local)!`
+              : `Colaborador ${hero.nomeCompleto} movido para a reserva (local)!`
+          );
+        },
+      });
   }
 
   private showNotice(msg: string): void {
