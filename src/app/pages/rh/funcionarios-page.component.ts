@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { HeroDossierDrawerComponent, type HeroProfile } from './hero-dossier-drawer.component';
 
 export const HEROES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -87,13 +88,38 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
   },
 };
 
+const SAMPLE_HERO: HeroProfile = {
+  id: 1,
+  nomeCompleto: 'Anthony Edward Stark',
+  codinome: 'Homem de Ferro',
+  cargoNome: 'Engenheiro Chefe & Especialista Tático',
+  departamentoNome: 'P&D e Tecnologia Avançada',
+  universo: 'Terra-616',
+  ativo: true,
+  salario: 95000,
+  cpf: '109.876.543-21',
+  telefone: '+55 (11) 99887-6655',
+  email: 'tony.stark@avengers.praxis.org',
+  scorePublico: 96,
+  scoreGovernamental: 88,
+  dataAdmissao: '15/04/2018',
+};
+
 @Component({
   selector: 'app-funcionarios-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, HeroDossierDrawerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
+      <!-- Tactical Feedback Banner -->
+      @if (notice()) {
+        <div class="tactical-notice glass-panel">
+          <span class="material-symbols-outlined">info</span>
+          <span>{{ notice() }}</span>
+        </div>
+      }
+
       <!-- Section Header -->
       <header class="section-header">
         <div class="header-intro">
@@ -105,6 +131,13 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
           <p class="page-subtitle">
             Gestão unificada do quadro operacional e identidades civis governada por metadados da Plataforma Praxis.
           </p>
+        </div>
+
+        <div class="header-actions">
+          <button class="dossier-trigger-btn primary-gradient" (click)="openSampleDossier()">
+            <span class="material-symbols-outlined">badge</span>
+            Abrir Dossiê 360° (Exemplo)
+          </button>
         </div>
       </header>
 
@@ -154,6 +187,13 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
           [metadata]="crudMetadata"
         />
       </section>
+
+      <!-- Dossiê 360 Slide-over Drawer -->
+      <app-hero-dossier-drawer
+        [hero]="selectedHero()"
+        (close)="selectedHero.set(null)"
+        (toggleStatus)="onToggleStatus($event)"
+      />
     </div>
   `,
   styles: [`
@@ -163,6 +203,26 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       gap: 24px;
       max-width: 1540px;
       margin: 0 auto;
+      position: relative;
+    }
+
+    .tactical-notice {
+      position: fixed;
+      top: 96px;
+      right: 28px;
+      z-index: 100;
+      padding: 12px 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: color-mix(in oklab, var(--card) 95%, transparent);
+      border-color: var(--primary);
+      box-shadow: var(--shadow-command);
+      animation: fadeIn 0.2s ease-out;
+
+      span:first-child { color: var(--primary); font-size: 20px; }
+      span:last-child { font-size: 0.85rem; font-weight: 600; }
     }
 
     .section-header {
@@ -170,6 +230,7 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       justify-content: space-between;
       align-items: flex-end;
       gap: 20px;
+      flex-wrap: wrap;
     }
 
     .domain-tag {
@@ -202,6 +263,26 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       font-size: 0.88rem;
       color: var(--muted-foreground);
       max-width: 720px;
+    }
+
+    .dossier-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 42px;
+      padding: 0 18px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+      }
+
+      span { font-size: 18px; }
     }
 
     /* KPI Bento Grid */
@@ -266,8 +347,38 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       padding: 20px;
       overflow: hidden;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   `],
 })
 export class FuncionariosPageComponent {
   protected readonly crudMetadata = HEROES_CRUD_METADATA;
+  protected readonly selectedHero = signal<HeroProfile | null>(null);
+  protected readonly notice = signal<string | null>(null);
+
+  protected openSampleDossier(): void {
+    this.selectedHero.set(SAMPLE_HERO);
+  }
+
+  protected onToggleStatus(hero: HeroProfile): void {
+    const updated: HeroProfile = { ...hero, ativo: !hero.ativo };
+    this.selectedHero.set(updated);
+    this.showNotice(
+      updated.ativo
+        ? `Colaborador ${hero.nomeCompleto} reativado na força ativa com sucesso.`
+        : `Colaborador ${hero.nomeCompleto} movido para a reserva com sucesso.`
+    );
+  }
+
+  private showNotice(msg: string): void {
+    this.notice.set(msg);
+    setTimeout(() => {
+      if (this.notice() === msg) {
+        this.notice.set(null);
+      }
+    }, 3500);
+  }
 }

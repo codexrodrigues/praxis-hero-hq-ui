@@ -1,11 +1,104 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PraxisChartComponent, type PraxisChartConfig } from '@praxisui/charts';
+
+export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
+  id: 'hero-payroll-trend-chart',
+  type: 'line',
+  title: 'Evolução da Folha Salarial & Benefícios',
+  subtitle: 'Execução orçamentária dos últimos ciclos de pagamento tático',
+  sizing: { mode: 'fixed', height: 320 },
+  dataSource: {
+    kind: 'local',
+    items: [
+      { competencia: 'Mai/2026', totalLiquido: 3820000, encargos: 840000 },
+      { competencia: 'Jun/2026', totalLiquido: 3950000, encargos: 860000 },
+      { competencia: 'Jul/2026', totalLiquido: 4120000, encargos: 910000 },
+      { competencia: 'Ago/2026', totalLiquido: 4400000, encargos: 970000 },
+      { competencia: 'Set/2026', totalLiquido: 4680000, encargos: 1020000 },
+      { competencia: 'Out/2026', totalLiquido: 4850000, encargos: 1080000 },
+    ],
+  },
+  axes: {
+    x: { field: 'competencia', type: 'category', label: 'Competência' },
+    y: {
+      type: 'value',
+      label: 'Volume (R$)',
+      labels: { format: 'BRL|symbol|0|compact' },
+    },
+  },
+  series: [
+    {
+      id: 'totalLiquido',
+      name: 'Salário Líquido',
+      type: 'line',
+      metric: { field: 'totalLiquido', aggregation: 'sum' },
+      color: '#38bdf8',
+      smooth: true,
+    },
+    {
+      id: 'encargos',
+      name: 'Encargos & Suporte',
+      type: 'line',
+      metric: { field: 'encargos', aggregation: 'sum' },
+      color: '#a855f7',
+      smooth: true,
+    },
+  ],
+  theme: {
+    tooltip: { enabled: true, trigger: 'axis' },
+    palette: ['#38bdf8', '#a855f7', '#22c55e'],
+  },
+};
+
+export const REPUTATION_RANKING_CHART_CONFIG: PraxisChartConfig = {
+  id: 'hero-reputation-ranking-chart',
+  type: 'bar',
+  title: 'Ranking Reputacional da Força',
+  subtitle: 'Aprovação pública vs. respaldo regulatório por herói',
+  sizing: { mode: 'fixed', height: 320 },
+  dataSource: {
+    kind: 'local',
+    items: [
+      { heroi: 'Tony Stark', scorePublico: 96, scoreGoverno: 88 },
+      { heroi: 'Steve Rogers', scorePublico: 98, scoreGoverno: 95 },
+      { heroi: 'Thor Odinson', scorePublico: 92, scoreGoverno: 82 },
+      { heroi: 'Bruce Banner', scorePublico: 78, scoreGoverno: 91 },
+      { heroi: 'Natasha R.', scorePublico: 89, scoreGoverno: 96 },
+      { heroi: 'Peter Parker', scorePublico: 99, scoreGoverno: 84 },
+    ],
+  },
+  axes: {
+    x: { field: 'heroi', type: 'category', label: 'Herói' },
+    y: { type: 'value', min: 0, max: 100, label: 'Score' },
+  },
+  series: [
+    {
+      id: 'scorePublico',
+      name: 'Aprovação Pública',
+      type: 'bar',
+      metric: { field: 'scorePublico', aggregation: 'avg' },
+      color: '#06b6d4',
+    },
+    {
+      id: 'scoreGoverno',
+      name: 'Confiança Governamental',
+      type: 'bar',
+      metric: { field: 'scoreGoverno', aggregation: 'avg' },
+      color: '#10b981',
+    },
+  ],
+  theme: {
+    tooltip: { enabled: true, trigger: 'axis' },
+    palette: ['#06b6d4', '#10b981'],
+  },
+};
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PraxisChartComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dashboard-container">
@@ -19,7 +112,7 @@ import { RouterLink } from '@angular/router';
             </span>
             <span class="status-pill cobalt-pill">
               <span class="material-symbols-outlined">shield</span>
-              Praxis Platform 9.0
+              Praxis Platform 9.0 · Metadata-Driven
             </span>
           </div>
 
@@ -115,6 +208,39 @@ import { RouterLink } from '@angular/router';
             <div class="progress-fill fill-risk" style="width: 25%"></div>
           </div>
           <p class="card-footnote">Danos colaterais e indenizações contidas</p>
+        </article>
+      </section>
+
+      <!-- Tactical Analytics Charts Section -->
+      <section class="charts-section">
+        <article class="glass-panel chart-card">
+          <header class="chart-header">
+            <div class="chart-title-wrap">
+              <span class="material-symbols-outlined chart-icon tone-rh">payments</span>
+              <div>
+                <h3>Orçamento & Folha Salarial</h3>
+                <p>Evolução de despesas com heróis, benefícios e suporte técnico</p>
+              </div>
+            </div>
+          </header>
+          <div class="chart-wrapper">
+            <praxis-chart [config]="payrollTrendConfig" />
+          </div>
+        </article>
+
+        <article class="glass-panel chart-card">
+          <header class="chart-header">
+            <div class="chart-title-wrap">
+              <span class="material-symbols-outlined chart-icon tone-operations">monitoring</span>
+              <div>
+                <h3>Índices de Reputação & Confiança</h3>
+                <p>Métricas comparativas entre percepção civil e aprovação governamental</p>
+              </div>
+            </div>
+          </header>
+          <div class="chart-wrapper">
+            <praxis-chart [config]="reputationRankingConfig" />
+          </div>
         </article>
       </section>
 
@@ -420,6 +546,61 @@ import { RouterLink } from '@angular/router';
       color: var(--muted-foreground);
     }
 
+    /* Charts Section */
+    .charts-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 20px;
+    }
+
+    .chart-card {
+      padding: 24px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chart-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      h3 {
+        margin: 0 0 2px;
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+      }
+    }
+
+    .chart-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .chart-wrapper {
+      min-height: 320px;
+      width: 100%;
+    }
+
     /* Hub Section */
     .hub-section {
       display: flex;
@@ -504,7 +685,13 @@ import { RouterLink } from '@angular/router';
       .hero-radar-preview {
         display: none;
       }
+      .charts-section {
+        grid-template-columns: 1fr;
+      }
     }
   `],
 })
-export class DashboardPageComponent {}
+export class DashboardPageComponent {
+  protected readonly payrollTrendConfig = PAYROLL_TREND_CHART_CONFIG;
+  protected readonly reputationRankingConfig = REPUTATION_RANKING_CHART_CONFIG;
+}

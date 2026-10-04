@@ -27,6 +27,7 @@ import {
   withPraxisHttpLoading,
 } from '@praxisui/core';
 import { providePraxisDynamicFieldsCore } from '@praxisui/dynamic-fields';
+import { providePraxisCharts, providePraxisChartsI18n } from '@praxisui/charts';
 import { providePraxisDynamicFormMetadata } from '@praxisui/dynamic-form';
 import { providePraxisTableMetadata } from '@praxisui/table';
 import { routes } from './app.routes';
@@ -46,6 +47,8 @@ export const appConfig: ApplicationConfig = {
     ...providePraxisDynamicFieldsCore(),
     providePraxisDynamicFormMetadata(),
     providePraxisTableMetadata(),
+    ...providePraxisCharts(),
+    ...providePraxisChartsI18n({ locale: 'pt-BR', fallbackLocale: 'pt-BR' }),
     ...providePraxisLoadingDefaults(),
     { provide: API_URL, useValue: API_URL_VALUE },
     GenericCrudService,
