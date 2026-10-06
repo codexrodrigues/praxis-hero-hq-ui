@@ -888,5 +888,81 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
   2. *Test Case 2 (Dual Window Action Affordances)*: Configurar widget com `windowActions: { expandable: true, fullscreen: true }`. Aferir que o cabeçalho renderiza ambos os botões (`expand` e `fullscreen`), e que ao clicar em `expand`, o widget recebe a classe `.expanded` (com dimensões `min(920px, 92vw)`), enquanto ao clicar em `fullscreen`, recebe `.fullscreen` com `inset: 0`.
   3. *Test Case 3 (Responsive Fullscreen Body Padding)*: Em tela cheia, aferir que o `.pdx-shell-body` possui padding >= 20px, prevenindo que tooltips ou eixos de `praxis-chart` colidam com as bordas da viewport.
 
+---
+
+### ISSUE-016: Ausência de Tokens Canônicos de Superfície Invertida e Tooltip no Theme Bridge (`--mat-sys-inverse-surface` e `--mat-tooltip-*`)
+* **Biblioteca:** `@praxisui/core` (`theme-bridge.css`, `@praxisui/core/theming`)
+* **Status:** `[PENDING]`
+* **Gravidade:** Alta (Quebra de visualização de acessibilidade e renderização de tooltips com fundo transparente em toda a plataforma)
+* **Diagnóstico Técnico & Evidência Real:**
+  Na captura de tela fornecida e na inspeção minuciosa dos estilos compilados em `@angular/material/tooltip` (v21 / M3 tokens), foi constatado que o elemento `.mat-mdc-tooltip-surface` é estilizado estritamente da seguinte forma:
+  ```css
+  .mat-mdc-tooltip-surface {
+    background-color: var(--mat-tooltip-container-color, var(--mat-sys-inverse-surface));
+    color: var(--mat-tooltip-supporting-text-color, var(--mat-sys-inverse-on-surface));
+    border-radius: var(--mat-tooltip-container-shape, var(--mat-sys-corner-extra-small));
+    font-family: var(--mat-tooltip-supporting-text-font, var(--mat-sys-body-small-font));
+    font-size: var(--mat-tooltip-supporting-text-size, var(--mat-sys-body-small-size));
+    font-weight: var(--mat-tooltip-supporting-text-weight, var(--mat-sys-body-small-weight));
+    line-height: var(--mat-tooltip-supporting-text-line-height, var(--mat-sys-body-small-line-height));
+    letter-spacing: var(--mat-tooltip-supporting-text-tracking, var(--mat-sys-body-small-tracking));
+  }
+  ```
+  **O Mecanismo da Falha:**
+  1. No CSS do Angular Material M3, **não há nenhum fallback de cor hexadecimal estático** (como `#313033` ou `#000000`) nas propriedades `background-color` ou `color` do tooltip.
+  2. A regra tenta ler `var(--mat-tooltip-container-color)`. Se não encontrar, tenta `var(--mat-sys-inverse-surface)`.
+  3. Se nenhum dos dois estiver definido, o valor da propriedade CSS torna-se inválido e cai no valor padrão do navegador: **`transparent`**.
+  4. Da mesma forma, `color` herda a cor do elemento pai (o `body`), que é preto/cinza escuro no tema claro.
+  5. O raio de borda cai em 0 e o tamanho da fonte herda do `body` (16px), gerando o efeito visual aberrante de letras pretas soltas flutuando no vácuo sem balão, sem contraste e sem legibilidade.
+  
+  **Onde está a omissão da plataforma Praxis:**
+  - Os componentes de `@praxisui/core`, `@praxisui/page-builder`, `@praxisui/rich-content` e `@praxisui/dynamic-form` utilizam amplamente a diretiva `matTooltip` (ex: botões de ação do widget shell, controles da barra do Page Builder, botões de ação rápida).
+  - O arquivo canônico `theme-bridge.css` em `@praxisui/core`:
+    * Mapeia apenas uma ponte unilateral para cores de superfície normal (`--md-sys-color-surface: var(--mat-sys-surface)`).
+    * **OMITE COMPLETAMENTE** os tokens de superfícies invertidas (`--md-sys-color-inverse-surface`, `--md-sys-color-inverse-on-surface`, `--mat-sys-inverse-surface`, `--mat-sys-inverse-on-surface`).
+    * **OMITE COMPLETAMENTE** os tokens específicos de componentes CDK Overlay (`--mat-tooltip-container-color`, `--mat-tooltip-supporting-text-color`, `--mat-tooltip-container-shape`, etc.).
+  - Como a plataforma ainda não disponibiliza o `@mixin define-praxis-theme` (apontado na `ISSUE-014`), qualquer aplicação moderna que utilize seus próprios tokens de design (como OKLCH, Tailwind ou tokens de marca do cliente) sem importar o CSS pré-fabricado legado do Angular Material sofre com a quebra completa de todos os tooltips.
+
+* **Proposta Canônica de Evolução da Plataforma:**
+  1. **Atualizar `theme-bridge.css` em `@praxisui/core`:**
+     Incluir a ponte canônica e os fallbacks seguros para superfícies invertidas e tooltips:
+     ```css
+     :root {
+       /* Material 3 Inverse Surface System Tokens */
+       --md-sys-color-inverse-surface: var(--mat-sys-inverse-surface, #313033);
+       --md-sys-color-inverse-on-surface: var(--mat-sys-inverse-on-surface, #f4f0f4);
+
+       /* Bidirectional Bridge to Angular Material M3 Tokens */
+       --mat-sys-inverse-surface: var(--md-sys-color-inverse-surface, #313033);
+       --mat-sys-inverse-on-surface: var(--md-sys-color-inverse-on-surface, #f4f0f4);
+       --mat-sys-corner-extra-small: var(--radius-sm, 6px);
+       --mat-sys-body-small-font: var(--md-sys-typescale-body-small-font, inherit);
+       --mat-sys-body-small-size: 12px;
+       --mat-sys-body-small-weight: 500;
+       --mat-sys-body-small-line-height: 16px;
+
+       /* Angular Material Tooltip Component Tokens */
+       --mat-tooltip-container-color: var(--mat-sys-inverse-surface);
+       --mat-tooltip-supporting-text-color: var(--mat-sys-inverse-on-surface);
+       --mat-tooltip-container-shape: var(--mat-sys-corner-extra-small);
+       --mat-tooltip-supporting-text-font: var(--mat-sys-body-small-font);
+       --mat-tooltip-supporting-text-size: var(--mat-sys-body-small-size);
+       --mat-tooltip-supporting-text-weight: var(--mat-sys-body-small-weight);
+       --mat-tooltip-supporting-text-line-height: var(--mat-sys-body-small-line-height);
+     }
+     ```
+  2. **Incorporar no Mixin de Temas (`ISSUE-014`):**
+     Garantir que a função geradora de temas do `@praxisui/core/theming` derive automaticamente `inverse-surface` e `inverse-on-surface` para temas claros e escuros, garantindo tooltips com alto contraste nativo.
+
+* **Solução Canônica Aplicada no Host Consumidor (`praxis-hero-hq-ui`):**
+  No arquivo [`src/styles/theme-praxis.scss`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/src/styles/theme-praxis.scss), foram mapeados:
+  - Tokens de sistema M3: `--md-sys-color-inverse-surface` (`oklch(0.24 0.03 260)` no light / `oklch(0.24 0.035 260)` no dark) e `--md-sys-color-inverse-on-surface`.
+  - Ponte bidirecional Angular Material M3: `--mat-sys-inverse-surface`, `--mat-tooltip-container-color`, `--mat-tooltip-supporting-text-color`, shape e tipografia de 12px.
+  - Refinamento visual empresarial: `.mat-mdc-tooltip-surface` com padding de 6px 12px, border sutil, elevação suave e backdrop-blur de 8px.
+
+* **Casos de Teste para o Agente de Plataforma:**
+  1. *Test Case 1 (Tooltip Contrast & Visibility)*: Montar teste Playwright disparando mouseenter sobre um elemento com `matTooltip`. Aferir que `.mat-mdc-tooltip-surface` possui `background-color` computado com canal alfa = 1.0 (ou > 0.9) e que o contraste de cor entre `background-color` e `color` atende aos critérios WCAG AA (>= 4.5:1).
+  2. *Test Case 2 (No Prebuilt Material Theme Required)*: Em aplicação de teste sem `@angular/material/prebuilt-themes/*.css` importado, aferir que os tokens `--mat-tooltip-container-color` e `--mat-tooltip-supporting-text-color` são devidamente populados por `@praxisui/core/theme-bridge.css`.
+
 
 
