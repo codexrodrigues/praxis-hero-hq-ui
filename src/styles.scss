@@ -3,6 +3,8 @@
    OKLCH Palette, Glassmorphism, Bento Grid & Host Theme Ownership
    ========================================================================== */
 
+@use './styles/theme-praxis.scss';
+
 :root {
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;

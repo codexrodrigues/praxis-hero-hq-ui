@@ -541,17 +541,24 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
         display: flex !important;
         flex-direction: column !important;
         border-radius: 16px !important;
-        padding: 20px !important;
+        padding: 22px !important;
         border: 1px solid var(--border) !important;
         background: color-mix(in oklab, var(--card) 60%, transparent) !important;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         cursor: pointer;
-        transition: transform 0.2s ease, border-color 0.2s ease;
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 
         &:hover {
           transform: translateY(-2px);
-          border-color: var(--primary) !important;
+          border-color: color-mix(in oklab, var(--primary) 60%, var(--border)) !important;
+          box-shadow: 0 8px 24px color-mix(in oklab, var(--primary) 12%, transparent);
+
+          .prx-rich-action-button:not(:hover),
+          .pdx-rich-action-button:not(:hover) {
+            border-color: color-mix(in oklab, var(--primary) 45%, var(--border)) !important;
+            color: var(--primary) !important;
+          }
         }
       }
 
@@ -562,20 +569,103 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
+        min-height: 170px;
+      }
+
+      .hub-card-action .prx-rich-action-card__copy,
+      .hub-card-action .pdx-rich-action-card__copy {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 auto !important;
+        margin-bottom: 18px !important;
+      }
+
+      .hub-card-action .prx-rich-action-card__title-row,
+      .hub-card-action .pdx-rich-action-card__title-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .hub-card-action .prx-rich-action-card__icon,
+      .hub-card-action .pdx-rich-action-card__icon {
+        font-size: 24px !important;
+        color: var(--primary) !important;
       }
 
       .hub-card-action .prx-rich-action-card__title,
       .hub-card-action .pdx-rich-action-card__title {
         font-family: var(--font-display) !important;
-        font-size: 1rem !important;
+        font-size: 1.05rem !important;
         font-weight: 700 !important;
+        color: var(--foreground) !important;
       }
 
       .hub-card-action .prx-rich-action-card__subtitle,
       .hub-card-action .pdx-rich-action-card__subtitle {
-        font-size: 0.75rem !important;
+        font-size: 0.8rem !important;
         color: var(--muted-foreground) !important;
-        line-height: 1.35 !important;
+        line-height: 1.45 !important;
+        margin-bottom: 0 !important;
+      }
+
+      .hub-card-action .prx-rich-action-card__actions,
+      .hub-card-action .pdx-rich-action-card__actions {
+        margin-top: auto !important;
+        padding-top: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        border-top: 1px dashed color-mix(in oklab, var(--border) 60%, transparent) !important;
+      }
+
+      .hub-card-action .prx-rich-action-button,
+      .hub-card-action .pdx-rich-action-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        height: 36px !important;
+        padding: 0 16px !important;
+        border-radius: 10px !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 80%, transparent) !important;
+        color: var(--foreground) !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-shadow: 0 1px 3px oklch(0 0 0 / 5%) !important;
+
+        span.material-symbols-outlined,
+        .prx-rich-action-button__icon {
+          font-size: 17px !important;
+          color: currentColor !important;
+          transition: transform 0.2s ease !important;
+        }
+
+        &:hover {
+          background: var(--primary) !important;
+          color: var(--primary-foreground) !important;
+          border-color: var(--primary) !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 4px 16px color-mix(in oklab, var(--primary) 40%, transparent) !important;
+
+          span.material-symbols-outlined,
+          .prx-rich-action-button__icon {
+            transform: translateX(3px) !important;
+            color: var(--primary-foreground) !important;
+          }
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--ring) !important;
+          outline-offset: 2px !important;
+        }
+
+        &:active {
+          transform: translateY(0) scale(0.98) !important;
+        }
       }
     }
   `],

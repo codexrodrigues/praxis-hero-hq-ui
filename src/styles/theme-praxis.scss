@@ -1,0 +1,192 @@
+/* ==========================================================================
+   Praxis Platform - Canonical Theme & Design Token Bridge
+   Bridges Hero HQ OKLCH tokens to Material 3 & Praxis Platform Core Tokens
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------------
+     1. Material Design 3 System Color Tokens (--md-sys-color-*)
+     Consumed by @praxisui/rich-content, @praxisui/dynamic-form, @praxisui/table
+     ------------------------------------------------------------------------ */
+  --md-sys-color-primary: var(--primary);
+  --md-sys-color-on-primary: var(--primary-foreground);
+  --md-sys-color-primary-container: color-mix(in oklab, var(--primary) 16%, var(--card));
+  --md-sys-color-on-primary-container: var(--primary);
+
+  --md-sys-color-secondary: var(--secondary);
+  --md-sys-color-on-secondary: var(--secondary-foreground);
+  --md-sys-color-secondary-container: color-mix(in oklab, var(--secondary) 30%, var(--card));
+  --md-sys-color-on-secondary-container: var(--foreground);
+
+  --md-sys-color-tertiary: var(--cobalt);
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: color-mix(in oklab, var(--cobalt) 18%, var(--card));
+  --md-sys-color-on-tertiary-container: var(--cobalt);
+
+  --md-sys-color-error: var(--destructive);
+  --md-sys-color-on-error: var(--destructive-foreground);
+  --md-sys-color-error-container: color-mix(in oklab, var(--destructive) 18%, var(--card));
+  --md-sys-color-on-error-container: var(--destructive);
+
+  --md-sys-color-surface: var(--card);
+  --md-sys-color-surface-container-lowest: var(--card);
+  --md-sys-color-surface-container-low: color-mix(in oklab, var(--card) 95%, var(--background));
+  --md-sys-color-surface-container: color-mix(in oklab, var(--card) 90%, var(--background));
+  --md-sys-color-surface-container-high: color-mix(in oklab, var(--card) 85%, var(--background));
+  --md-sys-color-surface-container-highest: color-mix(in oklab, var(--card) 80%, var(--background));
+  --md-sys-color-surface-variant: var(--muted);
+
+  --md-sys-color-on-surface: var(--foreground);
+  --md-sys-color-on-surface-variant: var(--muted-foreground);
+
+  --md-sys-color-outline: var(--border);
+  --md-sys-color-outline-variant: color-mix(in oklab, var(--border) 60%, transparent);
+
+  --md-sys-color-shadow: oklch(0.1 0.02 240 / 12%);
+  --md-sys-color-scrim: oklch(0.05 0.01 240 / 45%);
+
+  --md-sys-elevation-level1: var(--shadow-panel);
+  --md-sys-elevation-level2: var(--shadow-panel);
+  --md-sys-elevation-level3: var(--shadow-command);
+
+  /* ------------------------------------------------------------------------
+     2. Praxis Core Bridge Tokens (--pdx-material-*, --pdx-overlay-*)
+     ------------------------------------------------------------------------ */
+  --pdx-material-surface: var(--card);
+  --pdx-material-surface-high: color-mix(in oklab, var(--card) 90%, var(--background));
+  --pdx-material-on-surface: var(--foreground);
+  --pdx-material-on-surface-muted: var(--muted-foreground);
+  --pdx-material-outline: var(--border);
+  --pdx-material-focus-outline: var(--primary);
+
+  --pdx-overlay-surface: var(--popover);
+  --pdx-overlay-on-surface: var(--popover-foreground);
+  --pdx-overlay-on-surface-muted: var(--muted-foreground);
+  --pdx-overlay-state-layer: color-mix(in oklab, var(--primary) 10%, transparent);
+
+  /* ------------------------------------------------------------------------
+     3. Dynamic Widget Page & Widget Shell Tokens (--pdx-page-*, --pdx-shell-*)
+     ------------------------------------------------------------------------ */
+  --pdx-page-bg: transparent;
+  --pdx-page-surface: var(--card);
+  --pdx-page-gap: 20px;
+  --pdx-page-card-radius: var(--radius-lg);
+  --pdx-page-card-shadow: var(--shadow-panel);
+  --pdx-page-accent: var(--primary);
+
+  --pdx-shell-card-bg: color-mix(in oklab, var(--card) 75%, transparent);
+  --pdx-shell-card-border: var(--border);
+  --pdx-shell-card-radius: var(--radius-lg);
+  --pdx-shell-card-shadow: var(--shadow-panel);
+  --pdx-shell-card-backdrop-filter: blur(14px);
+  --pdx-shell-header-bg: transparent;
+  --pdx-shell-header-border: var(--border);
+  --pdx-shell-title-color: var(--foreground);
+  --pdx-shell-subtitle-color: var(--muted-foreground);
+  --pdx-shell-icon-color: var(--primary);
+  --pdx-shell-body-bg: transparent;
+  --pdx-shell-body-color: var(--foreground);
+  --pdx-shell-body-padding: 16px;
+
+  /* ------------------------------------------------------------------------
+     4. Praxis Rich Content Tokens (--prx-rich-*)
+     ------------------------------------------------------------------------ */
+  --prx-rich-card-tone-bg: color-mix(in oklab, var(--card) 80%, transparent);
+  --prx-rich-content-inline-gap: 8px;
+
+  /* ------------------------------------------------------------------------
+     5. Legacy Praxis Component Bridge Tokens
+     ------------------------------------------------------------------------ */
+  --praxis-color-primary: var(--primary);
+  --praxis-color-surface: var(--card);
+  --praxis-color-text: var(--foreground);
+  --praxis-color-border: var(--border);
+}
+
+.dark {
+  /* ------------------------------------------------------------------------
+     1. Dark Mode: Material Design 3 System Color Tokens
+     ------------------------------------------------------------------------ */
+  --md-sys-color-primary: var(--primary);
+  --md-sys-color-on-primary: var(--primary-foreground);
+  --md-sys-color-primary-container: color-mix(in oklab, var(--primary) 22%, var(--card));
+  --md-sys-color-on-primary-container: var(--primary-foreground);
+
+  --md-sys-color-secondary: var(--secondary);
+  --md-sys-color-on-secondary: var(--secondary-foreground);
+  --md-sys-color-secondary-container: color-mix(in oklab, var(--secondary) 40%, var(--card));
+  --md-sys-color-on-secondary-container: var(--foreground);
+
+  --md-sys-color-tertiary: var(--cobalt);
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: color-mix(in oklab, var(--cobalt) 25%, var(--card));
+  --md-sys-color-on-tertiary-container: var(--foreground);
+
+  --md-sys-color-error: var(--destructive);
+  --md-sys-color-on-error: var(--destructive-foreground);
+  --md-sys-color-error-container: color-mix(in oklab, var(--destructive) 25%, var(--card));
+  --md-sys-color-on-error-container: var(--destructive-foreground);
+
+  --md-sys-color-surface: var(--card);
+  --md-sys-color-surface-container-lowest: oklch(0.12 0.025 264);
+  --md-sys-color-surface-container-low: oklch(0.15 0.03 260);
+  --md-sys-color-surface-container: var(--card);
+  --md-sys-color-surface-container-high: oklch(0.22 0.035 260);
+  --md-sys-color-surface-container-highest: oklch(0.26 0.04 260);
+  --md-sys-color-surface-variant: var(--muted);
+
+  --md-sys-color-on-surface: var(--foreground);
+  --md-sys-color-on-surface-variant: var(--muted-foreground);
+
+  --md-sys-color-outline: var(--border);
+  --md-sys-color-outline-variant: color-mix(in oklab, var(--border) 50%, transparent);
+
+  --md-sys-color-shadow: oklch(0.02 0.01 250 / 60%);
+  --md-sys-color-scrim: oklch(0.02 0.01 250 / 80%);
+
+  /* ------------------------------------------------------------------------
+     2. Dark Mode: Praxis Core Bridge Tokens
+     ------------------------------------------------------------------------ */
+  --pdx-material-surface: var(--card);
+  --pdx-material-surface-high: oklch(0.22 0.035 260);
+  --pdx-material-on-surface: var(--foreground);
+  --pdx-material-on-surface-muted: var(--muted-foreground);
+  --pdx-material-outline: var(--border);
+  --pdx-material-focus-outline: var(--primary);
+
+  --pdx-overlay-surface: var(--popover);
+  --pdx-overlay-on-surface: var(--popover-foreground);
+  --pdx-overlay-on-surface-muted: var(--muted-foreground);
+  --pdx-overlay-state-layer: color-mix(in oklab, var(--primary) 15%, transparent);
+
+  /* ------------------------------------------------------------------------
+     3. Dark Mode: Dynamic Widget Page & Widget Shell Tokens
+     ------------------------------------------------------------------------ */
+  --pdx-page-bg: transparent;
+  --pdx-page-surface: var(--card);
+  --pdx-page-accent: var(--primary);
+
+  --pdx-shell-card-bg: color-mix(in oklab, var(--card) 60%, transparent);
+  --pdx-shell-card-border: var(--border);
+  --pdx-shell-card-backdrop-filter: blur(16px);
+  --pdx-shell-header-bg: transparent;
+  --pdx-shell-header-border: var(--border);
+  --pdx-shell-title-color: var(--foreground);
+  --pdx-shell-subtitle-color: var(--muted-foreground);
+  --pdx-shell-icon-color: var(--primary);
+  --pdx-shell-body-bg: transparent;
+  --pdx-shell-body-color: var(--foreground);
+
+  /* ------------------------------------------------------------------------
+     4. Dark Mode: Rich Content Tokens
+     ------------------------------------------------------------------------ */
+  --prx-rich-card-tone-bg: color-mix(in oklab, var(--card) 65%, transparent);
+
+  /* ------------------------------------------------------------------------
+     5. Dark Mode: Legacy Praxis Component Bridge Tokens
+     ------------------------------------------------------------------------ */
+  --praxis-color-primary: var(--primary);
+  --praxis-color-surface: var(--card);
+  --praxis-color-text: var(--foreground);
+  --praxis-color-border: var(--border);
+}

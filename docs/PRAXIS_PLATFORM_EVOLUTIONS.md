@@ -26,6 +26,8 @@
 | **ISSUE-010** | `@praxisui/rich-content` | Funcional / KPIs | Indicador de progresso integrado (`variant: 'bar' \| 'ring'`) em `RichStatItem` | `[DONE]` |
 | **ISSUE-011** | `@praxisui/core` | Navegação / SPA | Handler nativo e autônomo para navegação de rotas SPA (`praxis:router.navigate`, `navigation.navigate`) | `[DONE]` |
 | **ISSUE-012** | `@praxisui/page-builder` | Design / Shell | Presets canônicos Glassmorphism (`glass-dark`, `glass-light`) e `backdropFilter` em `WidgetShell` | `[DONE]` |
+| **ISSUE-013** | `@praxisui/rich-content` | Design / Interatividade | Layout Vertical, Espaçamento de Rodapé (`margin-top: auto`) e Microinterações de `:hover`/`:focus-visible` em `RichActionCardNode` | `[PENDING]` |
+| **ISSUE-014** | `@praxisui/core` | Arquitetural / DX | Governança Canônica de Temas: Ausência de SCSS Starter/Mixin e Mapeamento Obrigatório de Tokens Material 3 | `[PENDING]` |
 
 ---
 
@@ -542,4 +544,184 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
     ```
 * **Perguntas / Alinhamento para o Agente do Hero HQ:**
   - Além de `blur()`, há necessidade de suportar outros filtros combinados nos presets (como `saturate(180%)`) ou o desfoque gaussiano de 12px a 16px atende com fidelidade a identidade visual do projeto?
+
+---
+
+### ISSUE-013: Layout Vertical, Espaçamento de Rodapé (`margin-top: auto`) e Microinterações de `:hover`/`:focus-visible` Nativos em `RichActionCardNode`
+* **Biblioteca:** `@praxisui/rich-content` / `@praxisui/core`
+* **Status:** `[PENDING]`
+* **Gravidade:** Alta (Degradação de usabilidade, quebra de ritmo vertical e ausência de feedback interativo na principal CTA de navegação)
+* **Diagnóstico Técnico & Evidência Real:**
+  No template de `RichActionCardNode` em `praxis-rich-content.ts` (linhas 1123–1160):
+  ```html
+  <section class="prx-rich-action-card">
+    <div class="prx-rich-action-card__copy">
+      <div class="prx-rich-action-card__title-row">
+        @if (node.icon) {
+          <span class="prx-rich-action-card__icon material-symbols-outlined">{{ node.icon }}</span>
+        }
+        @if (resolveActionCardTitle(node); as actionCardTitle) {
+          <div class="prx-rich-action-card__title">{{ actionCardTitle }}</div>
+        }
+      </div>
+      @if (resolveActionCardSubtitle(node); as actionCardSubtitle) {
+        <div class="prx-rich-action-card__subtitle">{{ actionCardSubtitle }}</div>
+      }
+      @if (resolveActionCardMessage(node); as actionCardMessage) {
+        <div class="prx-rich-action-card__message">{{ actionCardMessage }}</div>
+      }
+      @if (resolveActionCardMeta(node); as actionCardMeta) {
+        <div class="prx-rich-action-card__meta">{{ actionCardMeta }}</div>
+      }
+    </div>
+    <div class="prx-rich-action-card__actions">
+      <button type="button" class="prx-rich-action-button" ...>
+        @if (node.ctaIcon) {
+          <span class="prx-rich-action-button__icon material-symbols-outlined">{{ node.ctaIcon }}</span>
+        }
+        <span>{{ resolveActionCardCtaLabel(node) }}</span>
+      </button>
+    </div>
+  </section>
+  ```
+  Entretanto, duas falhas estruturais ocorrem na biblioteca canônica:
+  1. **Ausência Total de Folha de Estilos para `.prx-rich-action-card`:**
+     - No bloco de `styles` de `praxis-rich-content.ts`, **não há nenhuma regra CSS** para `.prx-rich-action-card`, `.prx-rich-action-card__copy` ou `.prx-rich-action-card__actions`.
+     - Como `<section>` é um elemento de bloco sem flexbox nativo, o container não preenche 100% da altura da célula da grade e não distribui o espaço vertical.
+     - A div `.prx-rich-action-card__actions` não possui `margin-top: auto` nem padding superior, ficando colada a meros ~2px de distância da última linha do subtítulo descritivo.
+     - Em cards adjacentes onde um card tem 2 linhas de descrição e outro tem 3 linhas, os botões ficam em alturas verticais desalinhadas ("efeito escada"), destruindo a simetria visual do dashboard.
+  2. **Botão Inanimado sem Estados de `:hover` ou `:focus-visible`:**
+     - A classe `.prx-rich-action-button` (linhas 2908–2928) possui apenas estilos estáticos:
+       ```css
+       .prx-rich-action-button {
+         appearance: none;
+         border: 1px solid var(--md-sys-color-outline-variant, #cac4d0);
+         border-radius: 999px;
+         background: var(--md-sys-color-surface, #fff);
+         color: var(--md-sys-color-on-surface, #1d1b20);
+         padding: 8px 12px;
+         cursor: pointer;
+       }
+       .prx-rich-action-button:disabled { opacity: 0.56; cursor: default; }
+       ```
+     - **Não há `:hover`, `:active` ou `:focus-visible` definidos.**
+     - Quando o usuário posiciona o cursor sobre o botão "Acessar RH" ou "Operações", o botão permanece estático (sem alteração de contraste, sem elevação e sem microinteração no ícone de seta), não comunicando que se trata de um elemento interativo acionável.
+* **Proposta Canônica de Evolução da Plataforma:**
+  1. **Estilos Canônicos em `praxis-rich-content.ts`:**
+     ```css
+     .prx-rich-action-card {
+       display: flex;
+       flex-direction: column;
+       justify-content: space-between;
+       height: 100%;
+       min-height: 140px;
+     }
+
+     .prx-rich-action-card__copy {
+       display: flex;
+       flex-direction: column;
+       flex: 1 1 auto;
+       margin-bottom: 16px;
+     }
+
+     .prx-rich-action-card__title-row {
+       display: flex;
+       align-items: center;
+       gap: 10px;
+       margin-bottom: 8px;
+     }
+
+     .prx-rich-action-card__actions {
+       margin-top: auto;
+       padding-top: 16px;
+       display: flex;
+       align-items: center;
+       justify-content: flex-start;
+     }
+
+     .prx-rich-action-button {
+       transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+     }
+
+     .prx-rich-action-button:hover:not(:disabled) {
+       background: var(--md-sys-color-primary, #006a6a);
+       color: var(--md-sys-color-on-primary, #ffffff);
+       border-color: var(--md-sys-color-primary, #006a6a);
+       box-shadow: var(--md-sys-elevation-level1);
+       transform: translateY(-1px);
+     }
+
+     .prx-rich-action-button:focus-visible {
+       outline: 2px solid var(--md-sys-color-primary, #006a6a);
+       outline-offset: 2px;
+     }
+
+     .prx-rich-action-button:active:not(:disabled) {
+       transform: translateY(0);
+     }
+     ```
+  2. **Evolução de Contrato em `RichActionCardNode` (`@praxisui/core`):**
+     ```typescript
+     export interface RichActionCardNode extends RichBlockBaseNode {
+       type: 'actionCard';
+       title?: string;
+       subtitle?: string;
+       message?: string;
+       meta?: string;
+       icon?: string;
+       ctaLabel?: string;
+       ctaIcon?: string;
+       ctaPlacement?: 'bottom' | 'inline' | 'trailing'; // Canônico (default: 'bottom')
+       ctaVariant?: 'elevated' | 'stroked' | 'flat' | 'tonal';
+       color?: 'primary' | 'accent' | 'warn';
+     }
+     ```
+* **Casos de Teste para o Agente de Plataforma:**
+  1. *Test Case 1 (Alinhamento de CTA na Base)*: Renderizar um grid com 3 `actionCard`. O Card 1 possui 1 linha de texto; o Card 2 possui 4 linhas de texto. O teste Playwright deve aferir que `bottom` bounding box de `.prx-rich-action-card__actions` em todos os cards está alinhado à base do container.
+  2. *Test Case 2 (Hover Feedback no Botão)*: Fazer hover no elemento `.prx-rich-action-button`. Aferir via computed style que `background-color` e `color` mudam para o token de destaque primário e que `box-shadow` é ativado.
+  3. *Test Case 3 (Navegação por Teclado e Foco Acessível)*: Focar o botão via `Tab`. Aferir que `:focus-visible` produz `outline` visível com espessura mínima de 2px.
+
+---
+
+### ISSUE-014: Governança Canônica de Temas — Ausência de Starter/Mixin SCSS e Fallbacks Material 3 Opacos em Ambientes Customizados
+* **Biblioteca:** `@praxisui/core` / `@praxisui/*`
+* **Status:** `[PENDING]`
+* **Gravidade:** Alta (Dificuldade de adoção por aplicações com design system moderno, proliferação de `::ng-deep` e inconsistência visual de componentes da plataforma)
+* **Diagnóstico Técnico & Evidência Real:**
+  1. A plataforma Praxis utiliza internamente uma combinação de namespaces de tokens CSS:
+     - `--md-sys-color-*` (Material Design 3 tokens)
+     - `--pdx-material-*` e `--pdx-overlay-*` (Praxis theme bridge)
+     - `--pdx-page-*` e `--pdx-shell-*` (Page Builder e Widget Shell)
+     - `--praxis-color-*` (Componentes legados como CRUD e Table)
+  2. **Ausência de Starter/Mixin SCSS Exportado:**
+     - O monorepo possui o arquivo interno `theme-bridge.css` em `@praxisui/core`, mas não exporta um arquivo SCSS estruturado (ex.: `@praxisui/core/theming` com `@mixin praxis-theme($config)`) que permita a uma aplicação consumidora mapear suas variáveis de design de forma declarativa e completa.
+  3. **Consequências Práticas Observadas:**
+     - Aplicações que adotam tokens modernos em OKLCH ou Tailwind (como Hero HQ) acabam definindo variáveis próprias (`--background`, `--foreground`, `--primary`, `--card`) que não são reconhecidas pelos componentes internos da plataforma.
+     - Ao não receberem essas variáveis, os componentes Praxis caem nos seus fallbacks hardcoded:
+       * Badges caem em `--md-sys-color-primary-container, #e8def8` (roxo padrão Material 3), gerando o bug visual de "caixa roxa dentro de card verde".
+       * Cards caem em `var(--md-sys-color-surface, #fff)` (branco opaco), gerando o bug visual de "caixa branca dentro de painel translúcido".
+       * Botões de ação caem em `--md-sys-color-outline-variant, #cac4d0`.
+     - Isso força o desenvolvedor do app consumidor a escrever dezenas de seletores com `::ng-deep` e `!important` para sobrescrever os componentes, violando a boa arquitetura de software e desestabilizando o isolamento de escopo.
+* **Proposta Canônica de Evolução da Plataforma:**
+  1. **Criação de `theming.scss` em `@praxisui/core`:**
+     Exportar mixins canônicos:
+     ```scss
+     // @praxisui/core/theming
+     @mixin define-praxis-theme($theme-map) {
+       --md-sys-color-primary: map-get($theme-map, primary);
+       --md-sys-color-on-primary: map-get($theme-map, on-primary);
+       --md-sys-color-surface: map-get($theme-map, surface);
+       --md-sys-color-on-surface: map-get($theme-map, text);
+       --md-sys-color-outline-variant: map-get($theme-map, border);
+       --pdx-page-surface: map-get($theme-map, surface);
+       --pdx-shell-card-bg: map-get($theme-map, card-bg);
+       // ... todos os tokens da plataforma mapeados
+     }
+     ```
+  2. **Fallbacks Mais Inteligentes nos Componentes Praxis:**
+     - Em vez de usar fallbacks opacos como `#fff` ou `#cac4d0`, os componentes canônicos devem adotar `inherit`, `currentColor` ou `transparent` quando apropriado, respeitando o tema herdado do elemento pai.
+* **Casos de Teste para o Agente de Plataforma:**
+  1. *Test Case 1 (Token Consumption Validation)*: Montar teste unitário em `praxis-rich-content.spec.ts` verificando que a alteração de `--md-sys-color-primary` reflete imediatamente na cor computada de badges e botões primários.
+  2. *Test Case 2 (Dark Mode Parity)*: Validar em bateria Playwright que uma aplicação com classe `.dark` e tokens mapeados não renderiza nenhum elemento interno com fundo branco `#ffffff` ou roxo `#e8def8`.
+
 
