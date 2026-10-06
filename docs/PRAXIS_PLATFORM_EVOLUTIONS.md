@@ -740,82 +740,102 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ---
 
-### ISSUE-015: Fundo Translúcido e Ausência de Respiro (*Viewport Inset*) em Widgets no Modo Fullscreen / Maximizado
-* **Biblioteca:** `@praxisui/core` (`WidgetShellComponent`)
+### ISSUE-015: Fundo Translúcido em Widgets Sobrepostos e Omissão do Modo de Inspeção de Janela ('expand') na Toolbar de WidgetShell
+* **Biblioteca:** `@praxisui/core` (`WidgetShellComponent`, `widget-shell.model.ts`)
 * **Status:** `[PENDING]`
-* **Gravidade:** Alta (Interferência visual grave, vazamento de tela de fundo e falta de respiro perimetral em modo de foco profundo)
+* **Gravidade:** Alta (Interferência visual crítica por vazamento de tela de fundo e confusão semântica de UX entre Tela Cheia Edge-to-Edge vs. Modal Flutuante de Inspeção)
 * **Diagnóstico Técnico & Evidência Real:**
-  No componente `WidgetShellComponent` (`widget-shell.component.ts`), quando a ação `fullscreen` é acionada (`action.id === 'fullscreen'`), o widget recebe a classe `.pdx-shell.fullscreen`.
-  A regra CSS na biblioteca é:
-  ```css
-  .pdx-shell.fullscreen {
-    position: fixed;
-    inset: 0;
-    width: auto;
-    height: auto;
-    transform: none;
-    border-radius: 0;
-    z-index: var(--praxis-layer-widget-shell-fullscreen, 1291);
-    box-shadow: var(--mat-elevation-level8);
-  }
-  ```
-  Duas falhas graves ocorrem nessa implementação:
-  1. **Fundo Translúcido / Ausência de Superfície Opaca no Fullscreen:**
-     - `.pdx-shell.fullscreen` **não possui nenhuma declaração de `background` própria**.
-     - O container continua herdando a regra de `.pdx-shell.dashboard`:
+  Na investigação aprofundada do código-fonte compilado em `@praxisui/core@9.0.5-rc.10` e no monorepo, foram identificadas duas falhas estruturais independentes que originaram o problema visual relatado:
+
+  1. **Falha de Superfície (Bug Crítico): Fundo Translúcido em Modos Sobrepostos (`fullscreen` e `expanded`):**
+     - Em `WidgetShellComponent` (`widget-shell.component.ts`), as classes `.pdx-shell.fullscreen` e `.pdx-shell.expanded` **não possuem nenhuma declaração de `background` própria**.
+     - Ambas herdam o `background` do estado de repouso em `.pdx-shell.dashboard`:
        ```css
        background: var(--pdx-shell-card-bg, var(--pdx-dashboard-card-bg, var(--md-sys-color-surface-container-low)));
        ```
-     - Em aplicações com temas modernos translúcidos (Glassmorphism, Cyber Command ou painéis translúcidos com `color-mix(..., transparent)`), ou quando um widget hospeda componentes com canvas transparente (como `praxis-chart`), o conteúdo inteiro da página de fundo (cards bento, banners hero, sidebars, tabelas) vaza através do gráfico maximizado. O usuário vê as linhas do gráfico sobrepostas a números, textos e botões da página de baixo, gerando poluição cognitiva extrema e aparência de bug de renderização.
-  2. **Ausência de Respiro / Inset Flutuante em Termos de UX:**
-     - O modo `fullscreen` fixa o elemento em `inset: 0` forçado e remove o raio de borda (`border-radius: 0`), colando os eixos do gráfico, cabeçalho e legendas diretamente nas bordas da janela do navegador.
-     - Segundo as diretrizes de UX Enterprise (Material Design 3, Nielsen Norman Group, Carbon Design System), o modo de expansão/inspeção de dashboards corporativos deve operar como uma **Superfície Flutuante com Respiro (Floating Viewport Inset)** (ex.: gap perimetral de 24px com cantos arredondados e backdrop escurecido/desfocado), garantindo contexto espacial, foco e estética refinada.
+     - A própria plataforma Praxis estimula e fornece presets translúcidos (`glass-dark`, `glass-light`), que utilizam `color-mix(..., transparent)`. Além disso, aplicações com identidade visual moderna (*Cyber Command*, *Glassmorphism*) utilizam `--pdx-shell-card-bg` semitransparente com desfoque.
+     - Como o `praxis-chart` (ECharts) possui canvas 100% transparente por padrão, quando o widget entra em modo sobreposto, o container maximizado **continua translúcido**, e todo o dashboard subjacente (banners hero, cards bento, outros gráficos e sidebar) vaza sob o gráfico. O usuário vê textos e números colidindo diretamente com as curvas do gráfico, inutilizando a visualização.
+     - *Nota arquitetural:* O repositório local de `praxis-ui-angular` tentou contornar isso recentemente adicionando `<div class="pdx-shell-overlay-surface">` com `background: var(--md-sys-color-surface)`. Porém, além de essa versão não estar publicada no npm (`9.0.5-rc.10`), criar uma `<div>` externa com `pointer-events: none` no mesmo z-index é um remendo tático frágil. A superfície opaca deve pertencer canonicamente à própria `<section class="pdx-shell">`.
+
+  2. **Falha de UX e Contrato: Confusão Semântica entre "Fullscreen" (Edge-to-Edge) vs. "Expanded" (Modal de Inspeção com Respiro):**
+     - A literatura e os padrões de UX (W3C HTML5 Fullscreen, Material Design 3, Nielsen Norman Group, Carbon Design System) distinguem dois comportamentos distintos:
+       * **Fullscreen (Tela Cheia Autêntica):** Deve ser **Edge-to-Edge (`inset: 0; border-radius: 0`)**, cobrindo 100% do viewport do monitor. É essencial para telões de operação contínua (NOC / War Room), projeções em reuniões executivas e monitores com espaço útil crítico.
+       * **Expanded / Focus View (Janela Flutuante de Inspeção):** Deve possuir **respiro perimetral (gap)**, cantos arredondados, sombra pronunciada e backdrop desfocado (`top: 10vh`, `width: 92vw`, etc.). Permite ao usuário inspecionar um gráfico com conforto e detalhe sem perder o contexto espacial do dashboard corporativo.
+     - **A plataforma Praxis já possui o CSS do modo com respiro!** A classe `.pdx-shell.expanded` já está implementada:
+       ```css
+       .pdx-shell.expanded {
+         position: fixed;
+         top: 10vh;
+         left: 50%;
+         width: min(920px, 92vw);
+         height: min(640px, 82vh);
+         transform: translateX(-50%);
+         z-index: var(--praxis-layer-widget-shell-expanded, 1290);
+         box-shadow: var(--mat-elevation-level8);
+       }
+       ```
+     - **Onde está a falha de plataforma?**
+       * O contrato `WidgetShellWindowActions` em `widget-shell.model.ts` contém apenas `collapsible?: boolean` e `fullscreen?: boolean`. **A propriedade `expandable?: boolean` foi omitida!**
+       * O método `buildWindowActions()` em `widget-shell.component.ts` **não constrói o botão da ação `expand`** (apenas `collapse` e `fullscreen`).
+       * Consequentemente, o usuário é obrigado a clicar no botão `fullscreen`, que o projeta em um `inset: 0` forçado sem respiro.
+       * Transformar o `fullscreen` canônico para ter `inset: 24px` seria um erro conceitual de plataforma, pois destruiria o suporte a telões de monitoramento (NOC). A solução correta é expor e governar os dois modos na API!
+
 * **Proposta Canônica de Evolução da Plataforma:**
-  1. **Definir Superfície Sólida Nativamente em `widget-shell.component.ts`:**
+  1. **Superfície Sólida Nativamente em `widget-shell.component.ts`:**
+     Eliminar a div auxiliar `.pdx-shell-overlay-surface` e atribuir a superfície sólida diretamente aos seletores sobrepostos:
      ```css
      .pdx-shell.fullscreen,
      .pdx-shell.expanded {
-       background: var(--pdx-shell-fullscreen-bg, var(--md-sys-color-surface, #ffffff));
+       background: var(--pdx-shell-overlay-bg, var(--md-sys-color-surface, #ffffff));
        color: var(--md-sys-color-on-surface);
      }
      ```
-  2. **Evolução de Contrato em `WidgetShellConfig` (`@praxisui/core`):**
-     Adicionar propriedades no contrato de ações de janela:
-     ```typescript
-     export interface WidgetShellWindowActionsConfig {
-       collapsible?: boolean;
-       expandable?: boolean;
-       fullscreen?: boolean;
-       fullscreenMode?: 'viewport-inset' | 'edge-to-edge'; // Canônico (default: 'viewport-inset')
-       fullscreenInset?: string; // Default: '24px'
-     }
-     ```
-  3. **Estilos Canônicos de Respiro e Backdrop:**
+  2. **Padding Interno de Respiro no Fullscreen Edge-to-Edge:**
+     Garantir que no modo `fullscreen`, o corpo do widget não cole nos cantos físicos da tela:
      ```css
-     .pdx-shell.fullscreen:not(.edge-to-edge) {
-       inset: var(--pdx-shell-fullscreen-inset, 24px);
-       border-radius: var(--pdx-shell-fullscreen-radius, 16px);
-       overflow: hidden;
-     }
-
-     .pdx-shell-backdrop {
-       position: fixed;
-       inset: 0;
-       z-index: var(--praxis-layer-widget-shell-backdrop, 1280);
-       background: rgba(0, 0, 0, 0.65);
-       backdrop-filter: blur(12px);
-       -webkit-backdrop-filter: blur(12px);
+     .pdx-shell.fullscreen > .pdx-shell-body {
+       padding: var(--pdx-shell-fullscreen-body-padding, 24px);
      }
      ```
-* **Workaround Atual no Consumidor:**
-  Aplicar regras globais em `src/styles/theme-praxis.scss` forçando:
-  - `.pdx-shell.fullscreen, .pdx-shell.expanded { background: var(--card) !important; }`
-  - `.pdx-shell.fullscreen { inset: 24px !important; border-radius: 20px !important; }`
-  - `.pdx-shell-backdrop { backdrop-filter: blur(14px) saturate(130%) !important; }`
+  3. **Evolução de Contrato em `WidgetShellWindowActions` (`widget-shell.model.ts`):**
+     ```typescript
+     export interface WidgetShellWindowActions {
+       /** Exibe controle de recolher/expandir corpo do widget. */
+       collapsible?: boolean;
+       /** Exibe botão de expansão em Janela Flutuante com respiro (modal centralizado). */
+       expandable?: boolean;
+       /** Exibe botão de tela cheia absoluta (edge-to-edge). */
+       fullscreen?: boolean;
+       /** Define a ação de ampliação quando um único botão for exposto ('expand' | 'fullscreen', padrão: 'expand'). */
+       maximizeMode?: 'expand' | 'fullscreen';
+     }
+     ```
+  4. **Construção Automática da Ação `expand` em `buildWindowActions()`:**
+     No método `buildWindowActions()`, suportar a criação da ação `expand`:
+     ```typescript
+     if (allowExpand && !reserved.has('expand')) {
+       actions.push({
+         id: 'expand',
+         placement: 'window',
+         icon: this.expanded ? 'ms:collapse_content' : 'ms:open_in_new',
+         tooltip: this.expanded
+           ? this.t('controls.collapseWindow', 'Restaurar janela')
+           : this.t('controls.expandWindow', 'Expandir em janela'),
+         variant: 'icon',
+       });
+     }
+     ```
+
+* **Workaround Atual no Host Consumidor (`praxis-hero-hq-ui`):**
+  Como a biblioteca `@praxisui/core@9.0.5-rc.10` só expõe o botão `fullscreen`:
+  - No [`src/styles/theme-praxis.scss`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/src/styles/theme-praxis.scss), forçamos:
+    1. Superfície 100% sólida: `.pdx-shell.fullscreen, .pdx-shell.expanded { background: var(--card) !important; }`
+    2. Respiro perimetral no fullscreen: `.pdx-shell.fullscreen { inset: 24px !important; border-radius: 20px !important; }` (adaptando o botão único de tela cheia para se comportar visualmente como a janela modal de inspeção que o usuário espera no dashboard executivo).
+
 * **Casos de Teste para o Agente de Plataforma:**
-  1. *Test Case 1 (Opaque Surface Validation)*: Acionar fullscreen em widget com card translúcido. Aferir via computed style que `.pdx-shell.fullscreen` possui fundo 100% opaco e que nenhum elemento sob ele vaza.
-  2. *Test Case 2 (Viewport Inset Breathing Room)*: Em resolução desktop (1920x1080), aferir que o bounding box do widget em fullscreen possui margem perimetral >= 24px em relação às bordas do viewport.
-  3. *Test Case 3 (Responsividade Mobile)*: Em resolução mobile (< 768px), o inset deve se ajustar dinamicamente para <= 10px para preservar a área útil de leitura.
+  1. *Test Case 1 (Opaque Surface on Overlay)*: Renderizar um widget com `shell.preset: 'glass-dark'` ou fundo translúcido sobre elementos com texto e cores vivas. Acionar `expand` e `fullscreen`. Aferir via Playwright/computedStyle que a opacidade efetiva de fundo da `.pdx-shell` é 1.0 e que nenhum texto do elemento pai é visível através da área do gráfico.
+  2. *Test Case 2 (Dual Window Action Affordances)*: Configurar widget com `windowActions: { expandable: true, fullscreen: true }`. Aferir que o cabeçalho renderiza ambos os botões (`expand` e `fullscreen`), e que ao clicar em `expand`, o widget recebe a classe `.expanded` (com dimensões `min(920px, 92vw)`), enquanto ao clicar em `fullscreen`, recebe `.fullscreen` com `inset: 0`.
+  3. *Test Case 3 (Responsive Fullscreen Body Padding)*: Em tela cheia, aferir que o `.pdx-shell-body` possui padding >= 20px, prevenindo que tooltips ou eixos de `praxis-chart` colidam com as bordas da viewport.
 
 
 
