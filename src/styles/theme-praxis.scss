@@ -287,9 +287,9 @@
   overflow: hidden !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 800px) {
   .pdx-shell.fullscreen {
-    inset: 10px !important;
+    inset: 12px !important;
     border-radius: var(--radius-lg, 14px) !important;
   }
 }
@@ -313,11 +313,25 @@
   }
 }
 
+@media (max-height: 800px) {
+  .pdx-shell.fullscreen > .pdx-shell-header,
+  .pdx-shell.expanded > .pdx-shell-header {
+    padding: 10px 18px !important;
+  }
+}
+
 /* 5. Corpo do Widget em Modo Expandido: Espaço de respiro generoso para dados */
 .pdx-shell.fullscreen > .pdx-shell-body,
 .pdx-shell.expanded > .pdx-shell-body {
   padding: 24px 32px !important;
   background: var(--card) !important;
+}
+
+@media (max-height: 800px) {
+  .pdx-shell.fullscreen > .pdx-shell-body,
+  .pdx-shell.expanded > .pdx-shell-body {
+    padding: 14px 20px !important;
+  }
 }
 
 /* 6. Garantir que os gráficos dentro de widget expandido ocupem 100% da área útil */
