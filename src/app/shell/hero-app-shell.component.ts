@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
   NavigationCancel,
   NavigationEnd,
@@ -32,7 +32,13 @@ import { ThemeService } from '../core/theme.service';
     <div class="shell-container" [class.dark]="isDark()">
       <!-- Tactical Top-Bar Neon Shimmer Loading -->
       @if (isAnyLoading()) {
-        <div class="hud-top-progress" role="progressbar" aria-label="Sincronizando sistemas táticos">
+        <div
+          class="hud-top-progress"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-label="Sincronizando sistemas táticos com barramento Praxis"
+        >
           <div class="hud-progress-laser"></div>
         </div>
       }
@@ -128,8 +134,13 @@ import { ThemeService } from '../core/theme.service';
             <div class="title-with-sync">
               <span class="section-title">{{ activeItem().label }}</span>
               @if (isAnyLoading()) {
-                <div class="hud-sync-badge" title="Sincronizando com barramento de metadados da Plataforma Praxis">
-                  <span class="sync-pulse"></span>
+                <div
+                  class="hud-sync-badge"
+                  role="status"
+                  aria-live="polite"
+                  title="Sincronizando com barramento de metadados da Plataforma Praxis"
+                >
+                  <span class="sync-pulse" aria-hidden="true"></span>
                   <span class="sync-text">Sincronizando</span>
                 </div>
               }
@@ -929,7 +940,7 @@ export class HeroAppShellComponent {
   });
 
   constructor() {
-    this.router.events.subscribe((event) => {
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.isRouteLoading.set(true);
         this.currentRouteCtx = {

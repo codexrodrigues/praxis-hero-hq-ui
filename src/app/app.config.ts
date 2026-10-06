@@ -1,10 +1,15 @@
 import {
   ApplicationConfig,
+  inject,
   provideBrowserGlobalErrorListeners,
   provideEnvironmentInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpInterceptorFn,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import {
   CurrencyPipe,
   DatePipe,
@@ -14,12 +19,16 @@ import {
   TitleCasePipe,
   UpperCasePipe,
 } from '@angular/common';
+import { finalize } from 'rxjs';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import {
   API_URL,
   type ApiUrlConfig,
   GenericCrudService,
+  LoadingContext,
+  LoadingOrchestrator,
+  PRAXIS_LOADING_CTX,
   provideGlobalConfig,
   provideGlobalConfigReady,
   provideGlobalConfigSeed,
@@ -35,6 +44,38 @@ import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config'
 
 const API_URL_VALUE: ApiUrlConfig = {
   default: { baseUrl: PRAXIS_API_BASE_URL },
+};
+
+const praxisApiLoadingBridgeInterceptor: HttpInterceptorFn = (req, next) => {
+  const orchestrator = inject(LoadingOrchestrator);
+
+  if (req.context.get(PRAXIS_LOADING_CTX)) {
+    return next(req);
+  }
+
+  const isPraxisResource = req.url.includes('/api/') || req.url.includes('/schemas/');
+  if (!isPraxisResource) {
+    return next(req);
+  }
+
+  const isSchema = req.url.includes('/schemas');
+  const ctx: LoadingContext = {
+    scope: {
+      componentType: 'HttpClient',
+      componentId: 'praxis-api-bridge',
+      routeKey: req.url,
+    },
+    phase: isSchema ? 'schema' : 'data',
+    label: isSchema ? 'Carregando esquemas governados...' : 'Sincronizando dados táticos...',
+    blocking: false,
+  };
+
+  orchestrator.begin(ctx);
+  return next(req).pipe(
+    finalize(() => {
+      orchestrator.end(ctx);
+    }),
+  );
 };
 
 export const appConfig: ApplicationConfig = {
@@ -59,6 +100,7 @@ export const appConfig: ApplicationConfig = {
           });
           return next(cloned);
         },
+        praxisApiLoadingBridgeInterceptor,
       ]),
     ),
     ...providePraxisDynamicFieldsCore(),
