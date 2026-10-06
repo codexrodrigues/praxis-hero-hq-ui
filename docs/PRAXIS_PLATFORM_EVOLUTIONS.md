@@ -77,6 +77,9 @@
     padding: 0 !important;
   }
   ```
+* **Atualização Pós-Introdução da Governança de Temas (`theme-praxis.scss`):**
+  Com o mapeamento de tokens via ponte de tema, o fundo interno `--prx-rich-card-tone-bg` e a borda `--md-sys-color-outline-variant` agora assumem os valores semânticos da aplicação em vez do fallback estático branco `#fff` e cinza `#cac4d0`. 
+  No entanto, **o problema estrutural da casca duplicada no DOM (`prx-rich-node` + `prx-rich-card`) permanece inalterado**: os cards continuam com duplo padding e dupla borda concêntrica quando o consumidor adiciona classes de estilo (`.glass-panel`, `.bento-kpi-card`) ao nó. A necessidade da variante `'unstyled'` ou repasse de `node.className` para a `<section>` interna continua 100% prioritária.
 
 ---
 
@@ -127,6 +130,12 @@
 * **Workaround Atual no Consumidor:**
   - Resetar `.status-pill .prx-rich-badge { background: transparent !important; color: inherit !important; padding: 0 !important; }`.
   - Usar nó `compose` com `direction: 'row'` agrupando `{ type: 'icon' }` e `{ type: 'badge' }`.
+* **Atualização Pós-Introdução da Governança de Temas (`theme-praxis.scss`):**
+  Com a ponte de tema, o token `--md-sys-color-primary-container` agora é alimentado pela cor primária da aplicação, eliminando a exibição acidental do roxo Material 3 (`#e8def8`) por padrão.
+  Contudo, **as três deficiências centrais permanecem abertas**:
+  1. `RichBadgeNode` não possui propriedade semântica `tone?: 'ready' | 'operations' | 'success' | 'warning' | ...`, impedindo a coloração declarativa contextual por tipo de status.
+  2. A tag interna `<span class="prx-rich-badge">` continua desenhando uma caixa própria com background ativo que conflita e sobrepõe classes customizadas do consumidor aplicadas em `div.prx-rich-node`.
+  3. A propriedade `icon?: string` declarada no contrato de TypeScript continua sendo **completamente ignorada** pelo template de `praxis-rich-content.ts`.
 
 ---
 
@@ -332,6 +341,8 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
   export type RichSemanticTone = 'primary' | 'secondary' | 'tertiary' | 'info' | 'success' | 'warning' | 'danger' | 'error' | 'neutral';
   ```
   Com mapeamento interno tolerante onde `'danger'` e `'error'` sejam sinônimos.
+* **Atualização Pós-Introdução da Governança de Temas (`theme-praxis.scss`):**
+  Com a consolidação de tokens de tema no projeto (que definem variáveis semânticas como `--ready`, `--operations`, `--warning`, `--alert`, `--risk`), a discrepância de contratos em TypeScript entre `RichStatItem.tone` (que aceita `'danger'` mas não `'error'`) e `RichTimelineItem.markerColor` (que aceita `'error'` mas não `'danger'`) torna o mapeamento de classes e variáveis de CSS mais complexo e frágil. A criação de `RichSemanticTone` em `@praxisui/core` se torna um pré-requisito para que a plataforma forneça classes utilitárias e mixins de cores semânticas unificadas.
 
 ---
 
@@ -723,5 +734,7 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 * **Casos de Teste para o Agente de Plataforma:**
   1. *Test Case 1 (Token Consumption Validation)*: Montar teste unitário em `praxis-rich-content.spec.ts` verificando que a alteração de `--md-sys-color-primary` reflete imediatamente na cor computada de badges e botões primários.
   2. *Test Case 2 (Dark Mode Parity)*: Validar em bateria Playwright que uma aplicação com classe `.dark` e tokens mapeados não renderiza nenhum elemento interno com fundo branco `#ffffff` ou roxo `#e8def8`.
+* **Referência Concreta de Implementação Criada no Hero HQ:**
+  O arquivo [`src/styles/theme-praxis.scss`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/src/styles/theme-praxis.scss) foi implementado na aplicação hospedeira como especificação técnica funcional do mapeamento completo de todos os tokens exigidos pelos componentes da plataforma (Material 3 System, Praxis Core Bridge, Widget Shell e Rich Content) para Light e Dark mode. Esse arquivo pode ser utilizado diretamente pelo agente da plataforma como base para a criação do starter oficial em `@praxisui/core/theming`.
 
 
