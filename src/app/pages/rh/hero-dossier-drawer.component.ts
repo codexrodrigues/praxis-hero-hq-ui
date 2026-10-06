@@ -1,16 +1,20 @@
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
+  computed,
+  effect,
   inject,
+  input,
+  output,
   signal,
 } from '@angular/core';
+import {
+  type RichBlockHostCapabilities,
+  type RichContentDocument,
+} from '@praxisui/core';
+import { PraxisRichContent } from '@praxisui/rich-content';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 
 export interface HeroProfile {
@@ -62,302 +66,315 @@ export interface EquipmentRecord {
   proprietarioNome?: string;
 }
 
+export function buildHeroDossierDocument(
+  hero: HeroProfile,
+  payroll: PayrollRecord[],
+  missions: MissionParticipantRecord[],
+  assets: EquipmentRecord[],
+  isTransitioning: boolean
+): RichContentDocument {
+  const isAtivo = hero.ativo;
+  const toggleLabel = isTransitioning
+    ? 'Processando...'
+    : isAtivo
+    ? 'Mover para Reserva'
+    : 'Reativar no Quadro';
+  const toggleIcon = isTransitioning
+    ? 'sync'
+    : isAtivo
+    ? 'person_off'
+    : 'verified_user';
+
+  return {
+    kind: 'praxis.rich-content',
+    version: '1.0.0',
+    nodes: [
+      // 1. Header Hero Identity Card
+      {
+        type: 'card',
+        variant: 'elevated',
+        tone: 'neutral',
+        className: 'glass-panel dossier-hero-card',
+        title: hero.nomeCompleto,
+        subtitle: `${hero.codinome || hero.nomeCompleto} · ${hero.cargoNome || 'Especialista Tático'}`,
+        media: {
+          kind: 'avatar',
+          src: hero.fotoPerfilUrl || hero.avatarUrl || '',
+          placement: 'leading',
+        },
+        headerAction: {
+          type: 'actionButton',
+          label: toggleLabel,
+          icon: toggleIcon,
+          variant: isAtivo ? 'stroked' : 'raised',
+          color: isAtivo ? 'warn' : 'primary',
+          action: {
+            actionId: 'hero.toggleStatus',
+            payload: hero,
+          },
+        },
+        content: [
+          {
+            type: 'compose',
+            direction: 'row',
+            gap: 'xs',
+            items: [
+              {
+                type: 'badge',
+                label: hero.universo || 'Terra-616',
+                className: 'status-pill cobalt-pill',
+              },
+              {
+                type: 'badge',
+                label: isAtivo ? 'Em Prontidão' : 'Inativo / Reserva',
+                className: isAtivo ? 'status-pill ready-pill' : 'status-pill reserve-pill',
+              },
+            ],
+          },
+        ],
+      },
+
+      // 2. Tabs: Identidade, Competências, Folha, Missões, Ativos
+      {
+        type: 'tabs',
+        appearance: 'pills',
+        defaultTabId: 'tab-identity',
+        items: [
+          // TAB 1: IDENTIDADE & REPUTAÇÃO
+          {
+            id: 'tab-identity',
+            label: 'Identidade & Reputação',
+            icon: 'badge',
+            content: [
+              {
+                type: 'propertySheet',
+                title: 'Ficha Cadastral & Segurança Civil',
+                columns: 2,
+                items: [
+                  { id: 'cpf', label: 'CPF Mascarado (LGPD)', value: hero.cpf || '***.***.001-75', icon: 'fingerprint' },
+                  { id: 'departamento', label: 'Departamento', value: hero.departamentoNome || 'Divisão Tática', icon: 'business' },
+                  { id: 'cargo', label: 'Cargo / Posto Tático', value: hero.cargoNome || 'Especialista Operacional', icon: 'military_tech' },
+                  { id: 'admissao', label: 'Data de Admissão', value: hero.dataAdmissao || '01/01/2020', icon: 'calendar_today' },
+                  { id: 'email', label: 'Canal Seguro / E-mail', value: hero.email || 'confidencial@praxis.org', icon: 'mail' },
+                  { id: 'telefone', label: 'Telefone Tático', value: hero.telefone || '+55 (11) 98888-0000', icon: 'call' },
+                  { id: 'remuneracao', label: 'Remuneração Base', value: `R$ ${(hero.salario || 95000).toLocaleString('pt-BR')},00`, icon: 'payments' },
+                ],
+              },
+              {
+                type: 'statGroup',
+                title: 'Avaliação Reputacional 360°',
+                layout: 'inline',
+                className: 'glass-panel scores-card',
+                items: [
+                  {
+                    id: 'scorePublico',
+                    label: 'Aprovação Pública',
+                    value: `${hero.scorePublico || 94}%`,
+                    icon: 'public',
+                    tone: 'info',
+                  },
+                  {
+                    id: 'scoreGov',
+                    label: 'Confiança Governamental',
+                    value: `${hero.scoreGovernamental || 88}%`,
+                    icon: 'account_balance',
+                    tone: 'success',
+                  },
+                ],
+              },
+            ],
+          },
+
+          // TAB 2: COMPETÊNCIAS OPERACIONAIS
+          {
+            id: 'tab-skills',
+            label: 'Competências',
+            icon: 'bolt',
+            content: [
+              {
+                type: 'card',
+                variant: 'elevated',
+                tone: 'neutral',
+                className: 'glass-panel skills-card',
+                title: 'Matriz de Proficiência Tática',
+                content: [
+                  {
+                    type: 'compose',
+                    direction: 'column',
+                    gap: 'sm',
+                    items: [
+                      {
+                        type: 'text',
+                        text: 'Combate Avançado & Resposta Tática — 95%',
+                      },
+                      {
+                        type: 'progress',
+                        valueExpr: '95',
+                        showPercent: false,
+                        className: 'fill-training',
+                      },
+                      {
+                        type: 'text',
+                        text: 'Engenharia de Campo & Suporte Quântico — 92%',
+                      },
+                      {
+                        type: 'progress',
+                        valueExpr: '92',
+                        showPercent: false,
+                        className: 'fill-tech',
+                      },
+                      {
+                        type: 'text',
+                        text: 'Liderança Operacional & Coordenação de Crise — 98%',
+                      },
+                      {
+                        type: 'progress',
+                        valueExpr: '98',
+                        showPercent: false,
+                        className: 'fill-ready',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+
+          // TAB 3: FOLHA & HOLERITES (DADOS REAIS DA API)
+          {
+            id: 'tab-payroll',
+            label: 'Folha & Holerites',
+            icon: 'payments',
+            badge: payroll.length > 0 ? String(payroll.length) : undefined,
+            content: payroll.length > 0
+              ? payroll.map((cycle) => ({
+                  type: 'card' as const,
+                  variant: 'outlined' as const,
+                  className: 'glass-panel cycle-card-item',
+                  title: `Competência ${cycle.mes}/${cycle.ano}`,
+                  subtitle: `Bruto: R$ ${cycle.salarioBruto.toLocaleString('pt-BR')} · Líquido: R$ ${cycle.salarioLiquido.toLocaleString('pt-BR')} · Descontos: R$ ${cycle.totalDescontos.toLocaleString('pt-BR')}`,
+                  content: [
+                    {
+                      type: 'badge' as const,
+                      label: 'CONSOLIDADA',
+                      className: 'status-tag status-paga',
+                    },
+                  ],
+                }))
+              : [
+                  {
+                    type: 'emptyState' as const,
+                    icon: 'receipt_long',
+                    title: 'Sem lançamentos recentes',
+                    message: 'Nenhum lançamento de folha salarial registrado para este colaborador na base de dados.',
+                  },
+                ],
+          },
+
+          // TAB 4: HISTÓRICO DE MISSÕES (TIMELINE REAL DA API)
+          {
+            id: 'tab-missions',
+            label: 'Missões Táticas',
+            icon: 'military_tech',
+            badge: missions.length > 0 ? String(missions.length) : undefined,
+            content: missions.length > 0
+              ? [
+                  {
+                    type: 'timeline' as const,
+                    density: 'comfortable' as const,
+                    connectorVariant: 'solid' as const,
+                    items: missions.map((m) => ({
+                      id: String(m.id),
+                      title: m.missaoTitulo,
+                      subtitle: `Papel: ${m.papel} · ${m.principal ? 'Participação Primária' : 'Força de Apoio'}`,
+                      icon: m.resultado === 'OK' ? 'check_circle' : 'pending',
+                      badge: m.resultado === 'OK' ? 'CONCLUÍDA' : 'EM ANDAMENTO',
+                      markerColor: m.resultado === 'OK' ? ('success' as const) : ('info' as const),
+                    })),
+                  },
+                ]
+              : [
+                  {
+                    type: 'emptyState' as const,
+                    icon: 'flag',
+                    title: 'Nenhuma missão registrada',
+                    message: 'Este herói não possui histórico de engajamento tático em campo até o momento.',
+                  },
+                ],
+          },
+
+          // TAB 5: ATIVOS EM CUSTÓDIA (DADOS REAIS DA API)
+          {
+            id: 'tab-assets',
+            label: 'Ativos & Armaduras',
+            icon: 'inventory_2',
+            badge: assets.length > 0 ? String(assets.length) : undefined,
+            content: assets.length > 0
+              ? assets.map((asset) => ({
+                  type: 'card' as const,
+                  variant: 'outlined' as const,
+                  className: 'glass-panel asset-card-item',
+                  title: asset.nome,
+                  subtitle: `Tipo: ${asset.tipo} · Resistência: ${asset.resistencia || 8}/10 · Status: ${asset.status}`,
+                  content: [
+                    {
+                      type: 'badge' as const,
+                      label: asset.status,
+                      className: 'status-tag status-programada',
+                    },
+                  ],
+                }))
+              : [
+                  {
+                    type: 'emptyState' as const,
+                    icon: 'shield_moon',
+                    title: 'Nenhum ativo vinculado',
+                    message: 'Nenhum equipamento, armadura ou veículo registrado sob custódia deste herói.',
+                  },
+                ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
 @Component({
   selector: 'app-hero-dossier-drawer',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, PraxisRichContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (hero) {
+    @if (hero()) {
       <div class="drawer-overlay" (click)="close.emit()">
         <aside class="drawer-content" (click)="$event.stopPropagation()">
-          <!-- Drawer Header -->
-          <header class="drawer-header">
-            <div class="hero-id-card">
-              <div class="avatar-box primary-gradient">
-                @if (hero.fotoPerfilUrl || hero.avatarUrl) {
-                  <img
-                    [src]="hero.fotoPerfilUrl || hero.avatarUrl"
-                    [alt]="hero.nomeCompleto"
-                    class="avatar-img"
-                  />
-                } @else {
-                  <span>{{ getInitials(hero.nomeCompleto) }}</span>
-                }
-                <span class="status-indicator" [class.active]="hero.ativo"></span>
-              </div>
-              <div class="hero-titles">
-                <div class="badge-line">
-                  <span class="universo-pill">{{ hero.universo || 'Terra-616' }}</span>
-                  <span class="status-pill" [class.active]="hero.ativo">
-                    {{ hero.ativo ? 'Em Prontidão' : 'Inativo / Reserva' }}
-                  </span>
-                </div>
-                <h2 class="title-gradient hero-name">{{ hero.nomeCompleto }}</h2>
-                <p class="hero-alias">{{ hero.codinome || hero.nomeCompleto }} · {{ hero.cargoNome }}</p>
-              </div>
+          <header class="drawer-top-bar">
+            <div class="dossier-badge">
+              <span class="material-symbols-outlined">badge</span>
+              <span>DOSSIÊ TÁTICO 360° · PRAXIS GOVERNED</span>
             </div>
-
-            <div class="header-controls">
-              <button
-                class="action-btn"
-                [class.btn-danger]="hero.ativo"
-                [class.btn-success]="!hero.ativo"
-                [disabled]="isTransitioning()"
-                (click)="toggleStatus.emit(hero)"
-              >
-                <span class="material-symbols-outlined">
-                  {{ isTransitioning() ? 'sync' : hero.ativo ? 'person_off' : 'verified_user' }}
-                </span>
-                {{ isTransitioning() ? 'Processando...' : hero.ativo ? 'Mover para Reserva' : 'Reativar no Quadro' }}
-              </button>
-              <button class="close-icon-btn" (click)="close.emit()" aria-label="Fechar Dossiê">
-                <span class="material-symbols-outlined">close</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              class="close-icon-btn"
+              (click)="close.emit()"
+              aria-label="Fechar Dossiê"
+            >
+              <span class="material-symbols-outlined">close</span>
+            </button>
           </header>
 
-          <!-- Tab Navigation -->
-          <nav class="dossier-tabs">
-            <button
-              [class.active]="activeTab() === 'identity'"
-              (click)="selectTab('identity')"
-            >
-              <span class="material-symbols-outlined">badge</span>
-              Identidade
-            </button>
-            <button
-              [class.active]="activeTab() === 'skills'"
-              (click)="selectTab('skills')"
-            >
-              <span class="material-symbols-outlined">bolt</span>
-              Competências
-            </button>
-            <button
-              [class.active]="activeTab() === 'payroll'"
-              (click)="selectTab('payroll')"
-            >
-              <span class="material-symbols-outlined">payments</span>
-              Folha
-            </button>
-            <button
-              [class.active]="activeTab() === 'missions'"
-              (click)="selectTab('missions')"
-            >
-              <span class="material-symbols-outlined">military_tech</span>
-              Missões
-            </button>
-            <button
-              [class.active]="activeTab() === 'assets'"
-              (click)="selectTab('assets')"
-            >
-              <span class="material-symbols-outlined">inventory_2</span>
-              Ativos
-            </button>
-          </nav>
-
-          <!-- Tab Panels -->
-          <div class="dossier-body">
-            <!-- TAB 1: IDENTIDADE -->
-            @if (activeTab() === 'identity') {
-              <div class="tab-panel">
-                <div class="info-grid">
-                  <div class="info-item">
-                    <span class="info-label">CPF Mascarado (LGPD)</span>
-                    <span class="info-value">{{ hero.cpf || '***.***.001-75' }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">Departamento</span>
-                    <span class="info-value">{{ hero.departamentoNome }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">Cargo / Posto</span>
-                    <span class="info-value">{{ hero.cargoNome }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">Data de Admissão</span>
-                    <span class="info-value">{{ hero.dataAdmissao || '01/01/2020' }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">Canal Seguro / E-mail</span>
-                    <span class="info-value">{{ hero.email || 'confidencial@praxis.org' }}</span>
-                  </div>
-                  <div class="info-item">
-                    <span class="info-label">Telefone Tático</span>
-                    <span class="info-value">{{ hero.telefone || '+55 (11) 98888-0000' }}</span>
-                  </div>
-                </div>
-
-                <div class="scores-card glass-panel">
-                  <h3>Avaliação Reputacional 360°</h3>
-                  <div class="score-bars">
-                    <div>
-                      <div class="score-header">
-                        <span>Aprovação Pública</span>
-                        <span class="score-val text-primary">{{ hero.scorePublico || 94 }}%</span>
-                      </div>
-                      <div class="progress-bar">
-                        <div class="progress-fill fill-primary" [style.width.%]="hero.scorePublico || 94"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div class="score-header">
-                        <span>Confiança Governamental</span>
-                        <span class="score-val text-ready">{{ hero.scoreGovernamental || 88 }}%</span>
-                      </div>
-                      <div class="progress-bar">
-                        <div class="progress-fill fill-ready" [style.width.%]="hero.scoreGovernamental || 88"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <main class="drawer-body">
+            @if (isLoading()) {
+              <div class="dossier-loading">
+                <span class="material-symbols-outlined spin">sync</span>
+                <span>Sincronizando registros operacionais do herói...</span>
               </div>
             }
-
-            <!-- TAB 2: COMPETÊNCIAS -->
-            @if (activeTab() === 'skills') {
-              <div class="tab-panel">
-                <div class="skills-list">
-                  <div class="skill-item glass-panel">
-                    <div class="skill-top">
-                      <span class="skill-name">Combate Avançado & Resposta Tática</span>
-                      <span class="skill-origin origin-training">TREINAMENTO</span>
-                    </div>
-                    <div class="progress-bar">
-                      <div class="progress-fill fill-training" style="width: 95%"></div>
-                    </div>
-                    <span class="skill-pct">Proficiência: 95%</span>
-                  </div>
-
-                  <div class="skill-item glass-panel">
-                    <div class="skill-top">
-                      <span class="skill-name">Engenharia de Campo & Suporte Quântico</span>
-                      <span class="skill-origin origin-tech">TECNOLOGIA</span>
-                    </div>
-                    <div class="progress-bar">
-                      <div class="progress-fill fill-tech" style="width: 92%"></div>
-                    </div>
-                    <span class="skill-pct">Proficiência: 92%</span>
-                  </div>
-
-                  <div class="skill-item glass-panel">
-                    <div class="skill-top">
-                      <span class="skill-name">Liderança Operacional & Coordenação de Crise</span>
-                      <span class="skill-origin origin-natural">HABILIDADE</span>
-                    </div>
-                    <div class="progress-bar">
-                      <div class="progress-fill fill-natural" style="width: 98%"></div>
-                    </div>
-                    <span class="skill-pct">Proficiência: 98%</span>
-                  </div>
-                </div>
-              </div>
-            }
-
-            <!-- TAB 3: FOLHA (DADOS REAIS DA API) -->
-            @if (activeTab() === 'payroll') {
-              <div class="tab-panel">
-                @if (isLoadingTab()) {
-                  <div class="tab-loader">
-                    <span class="material-symbols-outlined spin">sync</span>
-                    <span>Carregando histórico financeiro da API...</span>
-                  </div>
-                } @else if (payrollCycles().length > 0) {
-                  <div class="cycles-list">
-                    @for (cycle of payrollCycles(); track cycle.id) {
-                      <div class="cycle-item glass-panel">
-                        <span class="material-symbols-outlined cycle-icon tone-rh">payments</span>
-                        <div class="cycle-info">
-                          <h4>Competência {{ cycle.mes }}/{{ cycle.ano }}</h4>
-                          <p>
-                            Bruto: {{ cycle.salarioBruto | currency: 'BRL' }} ·
-                            Líquido: {{ cycle.salarioLiquido | currency: 'BRL' }} ·
-                            Descontos: {{ cycle.totalDescontos | currency: 'BRL' }}
-                          </p>
-                          <small>Pagamento: {{ cycle.dataPagamento | date: 'dd/MM/yyyy' }}</small>
-                        </div>
-                        <span class="tag-status status-paga">CONSOLIDADA</span>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <div class="empty-tab-state glass-panel">
-                    <span class="material-symbols-outlined">receipt_long</span>
-                    <p>Nenhum lançamento de folha encontrado para este colaborador.</p>
-                  </div>
-                }
-              </div>
-            }
-
-            <!-- TAB 4: MISSÕES (DADOS REAIS DA API) -->
-            @if (activeTab() === 'missions') {
-              <div class="tab-panel">
-                @if (isLoadingTab()) {
-                  <div class="tab-loader">
-                    <span class="material-symbols-outlined spin">sync</span>
-                    <span>Carregando histórico de missões...</span>
-                  </div>
-                } @else if (missions().length > 0) {
-                  <div class="missions-list">
-                    @for (mission of missions(); track mission.id) {
-                      <div class="mission-item glass-panel">
-                        <span class="material-symbols-outlined mission-icon tone-operations">military_tech</span>
-                        <div class="mission-info">
-                          <h4>{{ mission.missaoTitulo }}</h4>
-                          <p>
-                            Papel: <strong>{{ mission.papel }}</strong> ·
-                            {{ mission.principal ? 'Participação Primária' : 'Força de Apoio' }}
-                          </p>
-                        </div>
-                        <span
-                          class="tag-status"
-                          [class.status-sucesso]="mission.resultado === 'OK'"
-                          [class.status-andamento]="mission.resultado !== 'OK'"
-                        >
-                          {{ mission.resultado === 'OK' ? 'CONCLUÍDA' : 'EM ANDAMENTO' }}
-                        </span>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <div class="empty-tab-state glass-panel">
-                    <span class="material-symbols-outlined">flag</span>
-                    <p>Nenhuma missão registrada para este herói até o momento.</p>
-                  </div>
-                }
-              </div>
-            }
-
-            <!-- TAB 5: ATIVOS (DADOS REAIS DA API) -->
-            @if (activeTab() === 'assets') {
-              <div class="tab-panel">
-                @if (isLoadingTab()) {
-                  <div class="tab-loader">
-                    <span class="material-symbols-outlined spin">sync</span>
-                    <span>Consultando ativos em custódia...</span>
-                  </div>
-                } @else if (assets().length > 0) {
-                  <div class="assets-list">
-                    @for (asset of assets(); track asset.id) {
-                      <div class="asset-item glass-panel">
-                        <span class="material-symbols-outlined asset-icon tone-assets">inventory_2</span>
-                        <div class="asset-info">
-                          <h4>{{ asset.nome }}</h4>
-                          <p>Tipo: {{ asset.tipo }} · Resistência: {{ asset.resistencia || 8 }}/10</p>
-                        </div>
-                        <span class="tag-status status-programada">{{ asset.status }}</span>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <div class="empty-tab-state glass-panel">
-                    <span class="material-symbols-outlined">shield_moon</span>
-                    <p>Nenhum equipamento vinculado à custódia deste herói.</p>
-                  </div>
-                }
-              </div>
-            }
-          </div>
+            <praxis-rich-content
+              [document]="dossierDocument()"
+              [hostCapabilities]="hostCapabilities"
+            />
+          </main>
         </aside>
       </div>
     }
@@ -369,164 +386,46 @@ export interface EquipmentRecord {
       z-index: 90;
       background: var(--overlay);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       display: flex;
       justify-content: flex-end;
     }
 
     .drawer-content {
       width: 100%;
-      max-width: 680px;
+      max-width: 720px;
       height: 100%;
       background: var(--background);
       border-left: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       box-shadow: var(--shadow-command);
-      animation: slideIn 0.25s ease-out;
+      animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .drawer-header {
-      padding: 24px 28px;
+    .drawer-top-bar {
+      padding: 16px 24px;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
+      align-items: center;
       background: color-mix(in oklab, var(--card) 60%, transparent);
     }
 
-    .hero-id-card {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .avatar-box {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      position: relative;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-
-    .avatar-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .status-indicator {
-      position: absolute;
-      bottom: -2px;
-      right: -2px;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--warning);
-      border: 2px solid var(--background);
-
-      &.active {
-        background: var(--ready);
-      }
-    }
-
-    .badge-line {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-
-    .universo-pill {
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      background: color-mix(in oklab, var(--primary) 14%, transparent);
-      color: var(--primary);
-    }
-
-    .status-pill {
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      background: color-mix(in oklab, var(--warning) 14%, transparent);
-      color: var(--warning);
-
-      &.active {
-        background: color-mix(in oklab, var(--ready) 14%, transparent);
-        color: var(--ready);
-      }
-    }
-
-    .hero-name {
-      margin: 0;
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-
-    .hero-alias {
-      margin: 2px 0 0;
-      font-size: 0.8rem;
-      color: var(--muted-foreground);
-    }
-
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .action-btn {
+    .dossier-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 36px;
-      padding: 0 14px;
-      border-radius: 10px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: color-mix(in oklab, var(--primary) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--primary) 28%, transparent);
+      color: var(--primary);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
 
       span { font-size: 16px; }
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    }
-
-    .btn-danger {
-      background: color-mix(in oklab, var(--destructive) 15%, transparent);
-      color: var(--destructive);
-      border: 1px solid color-mix(in oklab, var(--destructive) 30%, transparent);
-
-      &:hover:not(:disabled) {
-        background: var(--destructive);
-        color: #fff;
-      }
-    }
-
-    .btn-success {
-      background: color-mix(in oklab, var(--ready) 15%, transparent);
-      color: var(--ready);
-      border: 1px solid color-mix(in oklab, var(--ready) 30%, transparent);
-
-      &:hover:not(:disabled) {
-        background: var(--ready);
-        color: #fff;
-      }
     }
 
     .close-icon-btn {
@@ -540,6 +439,7 @@ export interface EquipmentRecord {
       width: 36px;
       height: 36px;
       border-radius: 8px;
+      transition: all 0.15s ease;
 
       &:hover {
         background: var(--accent);
@@ -547,369 +447,182 @@ export interface EquipmentRecord {
       }
     }
 
-    .dossier-tabs {
-      display: flex;
-      gap: 6px;
-      padding: 12px 28px;
-      border-bottom: 1px solid var(--border);
-      background: color-mix(in oklab, var(--muted) 30%, transparent);
-      overflow-x: auto;
-
-      button {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        height: 36px;
-        padding: 0 14px;
-        border-radius: 10px;
-        border: none;
-        background: transparent;
-        color: var(--muted-foreground);
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-
-        span { font-size: 16px; }
-
-        &:hover {
-          color: var(--foreground);
-          background: var(--accent);
-        }
-
-        &.active {
-          color: var(--primary);
-          background: color-mix(in oklab, var(--primary) 14%, transparent);
-          box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 30%, transparent);
-        }
-      }
-    }
-
-    .dossier-body {
+    .drawer-body {
       flex: 1;
       overflow-y: auto;
-      padding: 28px;
-    }
-
-    .tab-panel {
+      padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px;
-    }
-
-    .info-item {
-      padding: 14px;
-      border-radius: 12px;
-      background: color-mix(in oklab, var(--muted) 40%, transparent);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .info-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
-
-    .info-value {
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .scores-card {
-      padding: 20px;
-      border-radius: 16px;
-
-      h3 {
-        margin: 0 0 16px;
-        font-family: var(--font-display);
-        font-size: 0.95rem;
-        font-weight: 700;
-      }
-    }
-
-    .score-bars {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .score-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--muted-foreground);
-      margin-bottom: 6px;
-    }
-
-    .score-val {
-      font-family: var(--font-mono);
-    }
-
-    .progress-bar {
-      height: 6px;
-      border-radius: 9999px;
-      background: var(--muted);
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      border-radius: 9999px;
-    }
-
-    .fill-primary { background: var(--primary); }
-    .fill-ready { background: var(--ready); }
-    .fill-tech { background: #38bdf8; }
-    .fill-natural { background: #10b981; }
-    .fill-training { background: #f59e0b; }
-
-    .skills-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .skill-item {
-      padding: 16px;
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .skill-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .skill-name {
-      font-size: 0.88rem;
-      font-weight: 600;
-    }
-
-    .skill-origin {
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 6px;
-    }
-
-    .origin-tech { color: #38bdf8; background: color-mix(in oklab, #38bdf8 15%, transparent); }
-    .origin-natural { color: #10b981; background: color-mix(in oklab, #10b981 15%, transparent); }
-    .origin-training { color: #f59e0b; background: color-mix(in oklab, #f59e0b 15%, transparent); }
-
-    .skill-pct {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-      text-align: right;
-    }
-
-    .cycles-list, .missions-list, .assets-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .cycle-item, .mission-item, .asset-item {
-      padding: 16px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .cycle-icon, .mission-icon, .asset-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+    .dossier-loading {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 14%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
-    .tone-assets { color: var(--assets); background: color-mix(in oklab, var(--assets) 14%, transparent); }
-
-    .cycle-info, .mission-info, .asset-info {
-      flex: 1;
-
-      h4 {
-        margin: 0 0 2px;
-        font-size: 0.88rem;
-        font-weight: 700;
-      }
-
-      p {
-        margin: 0;
-        font-size: 0.75rem;
-        color: var(--muted-foreground);
-      }
-
-      small {
-        display: block;
-        margin-top: 4px;
-        font-size: 0.7rem;
-        color: var(--muted-foreground);
-      }
-    }
-
-    .tag-status {
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 9999px;
-    }
-
-    .status-programada { color: var(--primary); background: color-mix(in oklab, var(--primary) 14%, transparent); }
-    .status-paga { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .status-sucesso { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .status-andamento { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
-
-    .tab-loader {
-      display: flex;
-      align-items: center;
       gap: 10px;
-      padding: 30px;
-      justify-content: center;
+      padding: 12px;
+      border-radius: 10px;
+      background: color-mix(in oklab, var(--card) 70%, transparent);
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
       color: var(--muted-foreground);
-      font-size: 0.85rem;
-
-      span.spin {
-        animation: spin 1s linear infinite;
-        font-size: 20px;
-      }
     }
 
-    .empty-tab-state {
-      padding: 32px;
-      border-radius: 14px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted-foreground);
-
-      span {
-        font-size: 32px;
-        opacity: 0.6;
+    /* Rich Content Styles Inside Drawer */
+    ::ng-deep {
+      .dossier-hero-card {
+        border-radius: 20px !important;
+        padding: 24px !important;
+        margin-bottom: 16px;
       }
 
-      p {
-        margin: 0;
-        font-size: 0.85rem;
+      .hero-dossier-name {
+        margin: 4px 0 2px !important;
+        font-family: var(--font-display) !important;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
       }
-    }
 
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      .hero-dossier-subtitle {
+        margin: 0 !important;
+        font-size: 0.85rem !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .hero-dossier-avatar {
+        width: 72px !important;
+        height: 72px !important;
+        border-radius: 50% !important;
+        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
+      }
+
+      .universo-badge {
+        background: color-mix(in oklab, var(--cobalt) 15%, transparent);
+        color: var(--cobalt);
+        border: 1px solid color-mix(in oklab, var(--cobalt) 30%, transparent);
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 9999px;
+      }
+
+      .reserve-pill {
+        background: color-mix(in oklab, var(--warning) 15%, transparent);
+        color: var(--warning);
+        border: 1px solid color-mix(in oklab, var(--warning) 30%, transparent);
+      }
+
+      .cycle-card-item,
+      .asset-card-item {
+        border-radius: 14px !important;
+        padding: 14px 18px !important;
+        transition: transform 0.15s ease;
+
+        &:hover {
+          transform: translateY(-1px);
+        }
+      }
+
+      .fill-training progress::-webkit-progress-value { background: var(--secondary) !important; border-radius: 9999px; }
+      .fill-tech progress::-webkit-progress-value { background: var(--primary) !important; border-radius: 9999px; }
+
+      .status-paga {
+        color: var(--ready);
+        background: color-mix(in oklab, var(--ready) 12%, transparent);
+      }
+      .status-programada {
+        color: var(--operations);
+        background: color-mix(in oklab, var(--operations) 12%, transparent);
+      }
     }
 
     @keyframes slideIn {
       from { transform: translateX(100%); }
       to { transform: translateX(0); }
     }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spin { animation: spin 1s infinite linear; }
   `],
 })
-export class HeroDossierDrawerComponent implements OnChanges {
-  @Input() hero: HeroProfile | null = null;
-  @Input() isTransitioning = signal(false);
-  @Output() close = new EventEmitter<void>();
-  @Output() toggleStatus = new EventEmitter<HeroProfile>();
+export class HeroDossierDrawerComponent {
+  readonly hero = input<HeroProfile | null>(null);
+  readonly isTransitioning = input<boolean>(false);
+  readonly close = output<void>();
+  readonly toggleStatus = output<HeroProfile>();
 
-  protected readonly activeTab = signal<'identity' | 'skills' | 'payroll' | 'missions' | 'assets'>('identity');
-  protected readonly isLoadingTab = signal(false);
-  protected readonly payrollCycles = signal<PayrollRecord[]>([]);
+  protected readonly isLoading = signal<boolean>(false);
+  protected readonly payroll = signal<PayrollRecord[]>([]);
   protected readonly missions = signal<MissionParticipantRecord[]>([]);
   protected readonly assets = signal<EquipmentRecord[]>([]);
 
   private readonly http = inject(HttpClient);
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['hero'] && this.hero) {
-      this.refreshTab(this.activeTab());
+  protected readonly hostCapabilities: RichBlockHostCapabilities = {
+    dispatchAction: (actionId: string, payload: unknown) => {
+      if (actionId === 'hero.toggleStatus') {
+        const h = (payload || this.hero()) as HeroProfile;
+        if (h) this.toggleStatus.emit(h);
+      }
+    },
+    isActionAvailable: () => true,
+  };
+
+  protected readonly dossierDocument = computed<RichContentDocument>(() => {
+    const h = this.hero();
+    if (!h) {
+      return { kind: 'praxis.rich-content', version: '1.0.0', nodes: [] };
     }
+    return buildHeroDossierDocument(
+      h,
+      this.payroll(),
+      this.missions(),
+      this.assets(),
+      this.isTransitioning()
+    );
+  });
+
+  constructor() {
+    effect(() => {
+      const h = this.hero();
+      if (!h?.id) {
+        this.payroll.set([]);
+        this.missions.set([]);
+        this.assets.set([]);
+        return;
+      }
+      this.fetchAllHeroData(h.id);
+    });
   }
 
-  protected selectTab(tab: 'identity' | 'skills' | 'payroll' | 'missions' | 'assets'): void {
-    this.activeTab.set(tab);
-    this.refreshTab(tab);
-  }
+  private fetchAllHeroData(heroId: number): void {
+    this.isLoading.set(true);
 
-  private refreshTab(tab: string): void {
-    if (!this.hero?.id) return;
-
-    if (tab === 'payroll') {
-      this.fetchPayroll(this.hero.id);
-    } else if (tab === 'missions') {
-      this.fetchMissions(this.hero.id);
-    } else if (tab === 'assets') {
-      this.fetchAssets(this.hero.id);
-    }
-  }
-
-  private fetchPayroll(heroId: number): void {
-    this.isLoadingTab.set(true);
+    // Parallel fetch from backend endpoints
     this.http
       .post<{ data?: { content?: PayrollRecord[] } }>(
         `${PRAXIS_API_BASE_URL}/human-resources/folhas-pagamento/filter`,
         { funcionarioId: heroId }
       )
       .subscribe({
-        next: (res) => {
-          this.payrollCycles.set(res.data?.content || []);
-          this.isLoadingTab.set(false);
-        },
-        error: () => {
-          this.payrollCycles.set([]);
-          this.isLoadingTab.set(false);
-        },
+        next: (res) => this.payroll.set(res.data?.content || []),
+        error: () => this.payroll.set([]),
       });
-  }
 
-  private fetchMissions(heroId: number): void {
-    this.isLoadingTab.set(true);
     this.http
       .post<{ data?: { content?: MissionParticipantRecord[] } }>(
         `${PRAXIS_API_BASE_URL}/operations/missao-participantes/filter`,
         { funcionarioId: heroId }
       )
       .subscribe({
-        next: (res) => {
-          this.missions.set(res.data?.content || []);
-          this.isLoadingTab.set(false);
-        },
-        error: () => {
-          this.missions.set([]);
-          this.isLoadingTab.set(false);
-        },
+        next: (res) => this.missions.set(res.data?.content || []),
+        error: () => this.missions.set([]),
       });
-  }
 
-  private fetchAssets(heroId: number): void {
-    this.isLoadingTab.set(true);
     this.http
       .post<{ data?: { content?: EquipmentRecord[] } }>(
         `${PRAXIS_API_BASE_URL}/assets/equipamentos/filter`,
@@ -918,22 +631,12 @@ export class HeroDossierDrawerComponent implements OnChanges {
       .subscribe({
         next: (res) => {
           this.assets.set(res.data?.content || []);
-          this.isLoadingTab.set(false);
+          this.isLoading.set(false);
         },
         error: () => {
           this.assets.set([]);
-          this.isLoadingTab.set(false);
+          this.isLoading.set(false);
         },
       });
-  }
-
-  protected getInitials(name: string): string {
-    if (!name) return 'H';
-    return name
-      .split(' ')
-      .map((part) => part[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
   }
 }

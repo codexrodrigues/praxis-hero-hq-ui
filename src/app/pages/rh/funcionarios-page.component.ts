@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { type RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 import { HeroDossierDrawerComponent, type HeroProfile } from './hero-dossier-drawer.component';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 
@@ -90,6 +92,52 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
   },
 };
 
+export const HEROES_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'heroes-kpi-grid',
+      items: [
+        {
+          id: 'total',
+          label: 'Efetivo Total',
+          value: '24 Cadastrados',
+          caption: 'Quadro ativo e reserva',
+          icon: 'group',
+          tone: 'info',
+        },
+        {
+          id: 'ativos',
+          label: 'Em Prontidão Ativa',
+          value: '21 Ativos',
+          caption: '87,5% da força operacional',
+          icon: 'verified_user',
+          tone: 'success',
+        },
+        {
+          id: 'inativos',
+          label: 'Em Reserva / Licença',
+          value: '03 Inativos',
+          caption: 'Clark Kent · em licença civil',
+          icon: 'person_off',
+          tone: 'warning',
+        },
+        {
+          id: 'reputacao',
+          label: 'Score Reputacional Médio',
+          value: '91,2 / 100',
+          caption: 'Índice combinado público-governo',
+          icon: 'auto_awesome',
+          tone: 'neutral',
+        },
+      ],
+    },
+  ],
+};
+
 const SAMPLE_HERO: HeroProfile = {
   id: 1,
   nomeCompleto: 'Anthony Edward Stark',
@@ -110,7 +158,12 @@ const SAMPLE_HERO: HeroProfile = {
 @Component({
   selector: 'app-funcionarios-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, HeroDossierDrawerComponent],
+  imports: [
+    CommonModule,
+    PraxisCrudComponent,
+    PraxisRichContent,
+    HeroDossierDrawerComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -143,43 +196,9 @@ const SAMPLE_HERO: HeroProfile = {
         </div>
       </header>
 
-      <!-- KPI Bento Grid -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-rh">
-            <span class="material-symbols-outlined">group</span>
-          </div>
-          <p class="kpi-label">Efetivo Total</p>
-          <p class="kpi-value">24 Cadastrados</p>
-          <p class="kpi-detail">Quadro ativo e reserva</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-ready">
-            <span class="material-symbols-outlined">verified_user</span>
-          </div>
-          <p class="kpi-label">Em Prontidão Ativa</p>
-          <p class="kpi-value">21 Ativos</p>
-          <p class="kpi-detail text-ready">87,5% da força operacional</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-warning">
-            <span class="material-symbols-outlined">person_off</span>
-          </div>
-          <p class="kpi-label">Em Reserva / Licença</p>
-          <p class="kpi-value">03 Inativos</p>
-          <p class="kpi-detail text-warning">Clark Kent · em licença civil</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-operations">
-            <span class="material-symbols-outlined">auto_awesome</span>
-          </div>
-          <p class="kpi-label">Score Reputacional Médio</p>
-          <p class="kpi-value">91,2 / 100</p>
-          <p class="kpi-detail">Índice combinado público-governo</p>
-        </div>
+      <!-- KPI Bento Grid Declarativo (praxis-rich-content) -->
+      <section class="kpi-section">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Canonical Metadata-Driven CRUD Runtime -->
@@ -191,10 +210,10 @@ const SAMPLE_HERO: HeroProfile = {
         />
       </section>
 
-      <!-- Dossiê 360 Slide-over Drawer -->
+      <!-- Dossiê 360 Slide-over Drawer (praxis-rich-content inside) -->
       <app-hero-dossier-drawer
         [hero]="selectedHero()"
-        [isTransitioning]="isTransitioning"
+        [isTransitioning]="isTransitioning()"
         (close)="selectedHero.set(null)"
         (toggleStatus)="onToggleStatus($event)"
       />
@@ -289,61 +308,65 @@ const SAMPLE_HERO: HeroProfile = {
       span { font-size: 18px; }
     }
 
-    /* KPI Bento Grid */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
+    /* KPI Grid Enhancements */
+    ::ng-deep {
+      .heroes-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
+
+      .bento-kpi-card {
+        border-radius: 18px !important;
+        padding: 20px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
+
+      .bento-kpi-card .prx-rich-card__title,
+      .bento-kpi-card .pdx-rich-card__title {
+        font-family: var(--font-display) !important;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 6px 0 8px !important;
+      }
+
+      .bento-kpi-card .prx-rich-card__subtitle,
+      .bento-kpi-card .pdx-rich-card__subtitle {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .card-footnote {
+        font-size: 0.72rem;
+        color: var(--muted-foreground);
+      }
+
+      .text-ready { color: var(--ready) !important; }
+      .text-warning { color: var(--warning) !important; }
     }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon-wrap {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-
-      span { font-size: 22px; }
-    }
-
-    .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
-
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
-
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
-
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
 
     /* CRUD Surface */
     .crud-surface {
@@ -360,6 +383,7 @@ const SAMPLE_HERO: HeroProfile = {
 })
 export class FuncionariosPageComponent {
   protected readonly crudMetadata = HEROES_CRUD_METADATA;
+  protected readonly kpiDocument = HEROES_KPI_DOCUMENT;
   protected readonly selectedHero = signal<HeroProfile | null>(null);
   protected readonly isTransitioning = signal(false);
   protected readonly notice = signal<string | null>(null);
