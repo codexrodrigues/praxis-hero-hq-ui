@@ -171,24 +171,69 @@
 
 ---
 
-### ISSUE-004: Suporte a Nós Canônicos de Layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode`)
+### ISSUE-004: Suporte a Nós Canônicos de Layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode` ou `compose` com `layout: 'grid'`)
 * **Biblioteca:** `@praxisui/rich-content` / `@praxisui/core`
 * **Status:** `[PENDING]`
-* **Gravidade:** Média (Flexibilidade de composição e alinhamento de blocos ricos)
-* **Diagnóstico Técnico:**
-  O nó `compose` suporta apenas alinhamento linear unidirecional (`direction: 'row' | 'column'`). Não há no vocabulário canônico de `RichContentNode` suporte a definição de colunas com proporções explícitas (ex.: coluna esquerda 40% com card de perfil, coluna direita 60% com timeline de histórico). Isso obriga os consumidores a recorrerem a `::ng-deep` com regras ad-hoc de grid CSS sobre classes do nó.
+* **Gravidade:** Alta (Impacto direto no alinhamento visual de conjuntos de cards e formulários)
+* **Diagnóstico Técnico & Evidência Real:**
+  Na tela do Dashboard Executivo (*Centros de Comando & Especialidades* com 6 `actionCard`), foi observado um desalinhamento grave: 3 cards na primeira linha, 2 cards na segunda linha com um buraco vazio à direita, e 1 card isolado na terceira linha.
+  
+  **Causa-Raiz na Plataforma:**
+  1. O único nó de agrupamento multi-filhos disponível em `RichContentDocument` é o `compose`.
+  2. O nó `compose` é estritamente codificado como Flexbox em `praxis-rich-content.ts`:
+     ```css
+     .prx-rich-compose {
+       display: flex;
+       align-items: center;
+       gap: 8px;
+     }
+     .prx-rich-compose.wrap {
+       flex-wrap: wrap;
+     }
+     ```
+  3. No HTML, `praxis-rich-content` renderiza um wrapper extra em volta do compose:
+     ```html
+     <div class="prx-rich-node [node.className]">
+       <div class="prx-rich-compose wrap">
+         <div class="prx-rich-node hub-card-action">...</div>
+         <div class="prx-rich-node hub-card-action">...</div>
+       </div>
+     </div>
+     ```
+  4. Quando o desenvolvedor tenta transformar o bloco em grid adicionando `className: 'hub-action-cards-grid'` com `display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr))`, o CSS Grid é aplicado ao wrapper `<div class="prx-rich-node">`, que contém **apenas um único filho** (`<div class="prx-rich-compose">`).
+  5. A `div.prx-rich-compose` interna permanece como um `display: flex; flex-wrap: wrap;`. Em Flexbox puro com wrap, cada card assume largura intrínseca pelo volume de texto de sua descrição. Como os cards 4 e 5 possuem textos descritivos ligeiramente maiores, o card 6 não coube na segunda linha e foi forçado para a terceira linha, gerando a distribuição assimétrica 3 + 2 + 1.
 * **Proposta Canônica de Evolução:**
-  Adicionar nó `columns` ou `grid`:
-  ```typescript
-  export interface RichColumnsNode extends RichBlockBaseNode {
-    type: 'columns';
-    columns: Array<{
-      span?: number;
-      width?: string;
-      items: RichContentNode[];
-    }>;
-    gap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-    responsive?: boolean;
+  1. Adicionar suporte nativo a `layout: 'grid'` no nó `RichComposeNode`:
+     ```typescript
+     export interface RichComposeNode extends RichBlockBaseNode {
+       type: 'compose';
+       layout?: 'flex' | 'grid'; // Padrão 'flex'
+       columns?: number | 'auto-fit' | 'auto-fill';
+       minColumnWidth?: string; // ex: '300px'
+       direction?: 'row' | 'column';
+       gap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+       wrap?: boolean;
+     }
+     ```
+  2. No template de `praxis-rich-content.ts`, quando `node.layout === 'grid'`, renderizar com classe `.prx-rich-compose--grid` aplicando CSS Grid diretamente no container dos itens com `align-items: stretch`.
+  3. Ou alternativamente introduzir o nó canônico de primeira classe `RichGridNode` / `RichColumnsNode`.
+* **Workaround Atual no Consumidor:**
+  Sobrescrever via CSS direcionando explicitamente para a `div.prx-rich-compose` interna:
+  ```scss
+  .hub-action-cards-grid .prx-rich-compose {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    align-items: stretch !important;
+  }
+  .hub-action-cards-grid .prx-rich-compose > .prx-rich-node {
+    width: 100% !important;
+    display: flex !important;
+  }
+  .hub-card-action {
+    width: 100% !important;
+    height: 100% !important;
   }
   ```
 

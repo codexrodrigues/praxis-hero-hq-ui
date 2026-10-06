@@ -518,17 +518,30 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
         margin-top: 6px;
       }
 
-      /* Hub Action Cards Grid */
-      .hub-action-cards-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 16px;
-        width: 100%;
+      /* Hub Action Cards Grid - Proper Grid targeting on inner compose container */
+      .hub-action-cards-grid .prx-rich-compose,
+      .hub-action-cards-grid .pdx-rich-compose {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+        gap: 16px !important;
+        width: 100% !important;
+        align-items: stretch !important;
+      }
+
+      .hub-action-cards-grid .prx-rich-compose > .prx-rich-node,
+      .hub-action-cards-grid .pdx-rich-compose > .pdx-rich-node {
+        width: 100% !important;
+        display: flex !important;
+        min-width: 0 !important;
       }
 
       .hub-card-action {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
         border-radius: 16px !important;
-        padding: 18px !important;
+        padding: 20px !important;
         border: 1px solid var(--border) !important;
         background: color-mix(in oklab, var(--card) 60%, transparent) !important;
         backdrop-filter: blur(12px);
@@ -540,6 +553,15 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
           transform: translateY(-2px);
           border-color: var(--primary) !important;
         }
+      }
+
+      .hub-card-action .prx-rich-action-card,
+      .hub-card-action .pdx-rich-action-card {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
       }
 
       .hub-card-action .prx-rich-action-card__title,
