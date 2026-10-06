@@ -1,71 +1,61 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 
 export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'risk-intelligence/vw-indicadores-incidentes',
-    idField: 'incidenteId',
+    path: 'risk-management/sinistros',
+    idField: 'id',
   },
   table: {
     columns: [
       {
-        field: 'incidenteId',
-        header: 'ID Incidente',
-        width: '110px',
+        field: 'id',
+        header: 'Registro',
+        width: '100px',
         align: 'center',
         sortable: true,
       },
       {
-        field: 'missao',
+        field: 'missaoTitulo',
         header: 'Missão de Origem',
-        width: '220px',
+        width: '240px',
         sortable: true,
       },
       {
         field: 'descricao',
-        header: 'Descrição do Sinistro / Impacto',
-        width: '280px',
+        header: 'Incidente / Dano Patrimonial',
+        width: '320px',
+        sortable: true,
+      },
+      {
+        field: 'local',
+        header: 'Local do Dano',
+        width: '180px',
         sortable: true,
       },
       {
         field: 'severidade',
         header: 'Severidade',
-        width: '120px',
+        width: '140px',
         align: 'center',
         sortable: true,
       },
       {
         field: 'danosCivis',
-        header: 'Danos Civis (R$)',
+        header: 'Prejuízo Civil Estimado',
         type: 'currency',
         format: 'BRL',
-        width: '160px',
+        width: '180px',
         align: 'right',
         sortable: true,
       },
       {
-        field: 'totalIndenizacoes',
-        header: 'Indenizações Totais (R$)',
-        type: 'currency',
-        format: 'BRL',
-        width: '170px',
-        align: 'right',
-        sortable: true,
-      },
-      {
-        field: 'totalPago',
-        header: 'Total Liquidado (R$)',
-        type: 'currency',
-        format: 'BRL',
-        width: '160px',
-        align: 'right',
-        sortable: true,
-      },
-      {
-        field: 'totalPendente',
-        header: 'Saldo Pendente (R$)',
+        field: 'valorAcordo',
+        header: 'Compensação Aprovada',
         type: 'currency',
         format: 'BRL',
         width: '160px',
@@ -77,10 +67,56 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   actions: [],
 };
 
+export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'indicadores-kpi-grid',
+      items: [
+        {
+          id: 'passivo',
+          label: 'Sinistros com Passivo',
+          value: '74 Casos',
+          caption: 'Histórico de acordos regulados',
+          icon: 'gavel',
+          tone: 'danger',
+        },
+        {
+          id: 'total',
+          label: 'Volume Total de Indenizações',
+          value: 'R$ 82,4M',
+          caption: 'Compensações acordadas com o judiciário',
+          icon: 'payments',
+          tone: 'warning',
+        },
+        {
+          id: 'liquidadas',
+          label: 'Compensações Liquidadas',
+          value: 'R$ 44,1M',
+          caption: '53,5% dos valores já quitados',
+          icon: 'price_check',
+          tone: 'success',
+        },
+        {
+          id: 'saldo',
+          label: 'Saldo em Conciliação',
+          value: 'R$ 38,3M',
+          caption: 'Em análise de perícia e seguros',
+          icon: 'hourglass_top',
+          tone: 'neutral',
+        },
+      ],
+    },
+  ],
+};
+
 @Component({
   selector: 'app-indicadores-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -97,43 +133,9 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         </div>
       </header>
 
-      <!-- Bento Grid de KPIs -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-risk">
-            <span class="material-symbols-outlined">gavel</span>
-          </div>
-          <p class="kpi-label">Sinistros com Passivo</p>
-          <p class="kpi-value">74 Casos</p>
-          <p class="kpi-detail">Histórico de acordos regulados</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-warning">
-            <span class="material-symbols-outlined">payments</span>
-          </div>
-          <p class="kpi-label">Volume Total de Indenizações</p>
-          <p class="kpi-value">R$ 82,4M</p>
-          <p class="kpi-detail text-warning">Compensações acordadas com o judiciário</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-ready">
-            <span class="material-symbols-outlined">price_check</span>
-          </div>
-          <p class="kpi-label">Compensações Liquidadas</p>
-          <p class="kpi-value">R$ 44,1M</p>
-          <p class="kpi-detail text-ready">53,5% dos valores já quitados</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-operations">
-            <span class="material-symbols-outlined">hourglass_top</span>
-          </div>
-          <p class="kpi-label">Saldo em Conciliação</p>
-          <p class="kpi-value">R$ 38,3M</p>
-          <p class="kpi-detail">Em análise de perícia e seguros</p>
-        </div>
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Tabela CRUD Governança Canônica -->
@@ -172,6 +174,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+
       span { font-size: 14px; }
     }
 
@@ -196,59 +199,64 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
       max-width: 720px;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
+    .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
+    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
+    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
+    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
+
+    /* KPI Bento Grid Styling */
+    ::ng-deep {
+      .indicadores-kpi-grid .prx-rich-stat-group__items,
+      .indicadores-kpi-grid .pdx-rich-stat-group__items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
+
+      .indicadores-kpi-grid .prx-rich-stat-group__item,
+      .indicadores-kpi-grid .pdx-rich-stat-group__item {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
+
+      .indicadores-kpi-grid .prx-rich-stat-group__value,
+      .indicadores-kpi-grid .pdx-rich-stat-group__value {
+        font-family: var(--font-display) !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 4px 0 0 !important;
+      }
+
+      .indicadores-kpi-grid .prx-rich-stat-group__label,
+      .indicadores-kpi-grid .pdx-rich-stat-group__label {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .indicadores-kpi-grid .prx-rich-stat-group__caption,
+      .indicadores-kpi-grid .pdx-rich-stat-group__caption {
+        font-size: 0.72rem !important;
+        color: var(--muted-foreground) !important;
+        margin-top: 4px !important;
+      }
     }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon-wrap {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      span { font-size: 22px; }
-    }
-
-    .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 12%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
-
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
-
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
-
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
 
     .crud-surface {
       border-radius: 18px;
@@ -259,4 +267,5 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
 })
 export class IndicadoresPageComponent {
   protected readonly crudMetadata = INDICADORES_CRUD_METADATA;
+  protected readonly kpiDocument = INDICADORES_KPI_DOCUMENT;
 }

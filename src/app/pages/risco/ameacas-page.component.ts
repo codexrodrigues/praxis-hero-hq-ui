@@ -1,51 +1,47 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 
 export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'risk-intelligence/ameacas',
+    path: 'risk-management/ameacas',
     idField: 'id',
   },
   table: {
     columns: [
       {
         field: 'nome',
-        header: 'Designação da Ameaça',
-        width: '260px',
+        header: 'Designação do Alvo',
+        width: '240px',
         sortable: true,
       },
       {
-        field: 'classe',
-        header: 'Classe Taxonômica',
+        field: 'nivelAmeaca',
+        header: 'Classificação de Risco',
         width: '180px',
         sortable: true,
       },
       {
-        field: 'planeta',
-        header: 'Teatro / Setor',
-        width: '180px',
-        sortable: true,
-      },
-      {
-        field: 'nivel',
-        header: 'Nível de Perigo',
-        type: 'number',
-        width: '140px',
-        sortable: true,
-      },
-      {
-        field: 'status',
-        header: 'Status Operacional',
-        width: '160px',
+        field: 'localizacao',
+        header: 'Último Vetor Detectado',
+        width: '220px',
         sortable: true,
       },
       {
         field: 'recompensa',
-        header: 'Recompensa Tática (R$)',
-        type: 'number',
+        header: 'Recompensa Ativa (R$)',
+        type: 'currency',
+        format: 'BRL',
         width: '180px',
+        sortable: true,
+      },
+      {
+        field: 'status',
+        header: 'Status de Contenção',
+        width: '160px',
         sortable: true,
       },
     ],
@@ -53,7 +49,7 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   actions: [
     {
       id: 'edit',
-      label: 'Atualizar Intel',
+      label: 'Atualizar Inteligência',
       action: 'edit',
       openMode: 'modal',
       formId: 'ameacas-edit',
@@ -61,7 +57,7 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
     },
     {
       id: 'create',
-      label: 'Registrar Ameaça',
+      label: 'Catalogar Nova Ameaça',
       action: 'create',
       openMode: 'modal',
       formId: 'ameacas-create',
@@ -73,10 +69,56 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
+export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'ameacas-kpi-grid',
+      items: [
+        {
+          id: 'ameacas',
+          label: 'Ameaças Monitoradas',
+          value: '16 Alvos',
+          caption: 'Radar contínuo em frequência quântica',
+          icon: 'warning',
+          tone: 'danger',
+        },
+        {
+          id: 'omega',
+          label: 'Prioridade Ômega Ativa',
+          value: '02 Críticas',
+          caption: 'Thanos · Doutor Destino',
+          icon: 'crisis_alert',
+          tone: 'warning',
+        },
+        {
+          id: 'contidos',
+          label: 'Contidos / Quarentena',
+          value: '09 Neutralizados',
+          caption: 'Custodiados na Prisão Raft',
+          icon: 'lock',
+          tone: 'success',
+        },
+        {
+          id: 'recompensas',
+          label: 'Fundo Total de Recompensas',
+          value: 'R$ 18,5 M',
+          caption: 'Garantido pelo Acordo de Sokovia',
+          icon: 'payments',
+          tone: 'info',
+        },
+      ],
+    },
+  ],
+};
+
 @Component({
   selector: 'app-ameacas-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -93,35 +135,9 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
         </div>
       </header>
 
-      <!-- KPI Bento Grid -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-risk"><span class="material-symbols-outlined">warning</span></div>
-          <p class="kpi-label">Ameaças Monitoradas</p>
-          <p class="kpi-value">16 Alvos</p>
-          <p class="kpi-detail text-risk">Radar contínuo em frequência quântica</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-warning"><span class="material-symbols-outlined">crisis_alert</span></div>
-          <p class="kpi-label">Prioridade Ômega Ativa</p>
-          <p class="kpi-value">02 Críticas</p>
-          <p class="kpi-detail text-warning">Thanos · Doutor Destino</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-ready"><span class="material-symbols-outlined">lock</span></div>
-          <p class="kpi-label">Contidos / Quarentena</p>
-          <p class="kpi-value">09 Neutralizados</p>
-          <p class="kpi-detail text-ready">Custodiados na Prisão Raft</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-operations"><span class="material-symbols-outlined">payments</span></div>
-          <p class="kpi-label">Fundo Total de Recompensas</p>
-          <p class="kpi-value">R$ 18,5 M</p>
-          <p class="kpi-detail">Garantido pelo Acordo de Sokovia</p>
-        </div>
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Metadata-Driven CRUD Runtime -->
@@ -178,60 +194,64 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
       max-width: 720px;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      span { font-size: 22px; }
-    }
-
     .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
     .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
     .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
     .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
 
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
+    /* KPI Bento Grid Styling */
+    ::ng-deep {
+      .ameacas-kpi-grid .prx-rich-stat-group__items,
+      .ameacas-kpi-grid .pdx-rich-stat-group__items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
 
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
+      .ameacas-kpi-grid .prx-rich-stat-group__item,
+      .ameacas-kpi-grid .pdx-rich-stat-group__item {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
 
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
 
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
-    .text-risk { color: var(--risk) !important; }
+      .ameacas-kpi-grid .prx-rich-stat-group__value,
+      .ameacas-kpi-grid .pdx-rich-stat-group__value {
+        font-family: var(--font-display) !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 4px 0 0 !important;
+      }
+
+      .ameacas-kpi-grid .prx-rich-stat-group__label,
+      .ameacas-kpi-grid .pdx-rich-stat-group__label {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .ameacas-kpi-grid .prx-rich-stat-group__caption,
+      .ameacas-kpi-grid .pdx-rich-stat-group__caption {
+        font-size: 0.72rem !important;
+        color: var(--muted-foreground) !important;
+        margin-top: 4px !important;
+      }
+    }
 
     .crud-surface {
       border-radius: 18px;
@@ -242,4 +262,5 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
 })
 export class AmeacasPageComponent {
   protected readonly crudMetadata = AMEACAS_CRUD_METADATA;
+  protected readonly kpiDocument = AMEACAS_KPI_DOCUMENT;
 }
