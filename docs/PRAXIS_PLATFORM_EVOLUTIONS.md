@@ -28,6 +28,7 @@
 | **ISSUE-012** | `@praxisui/page-builder` | Design / Shell | Presets canônicos Glassmorphism (`glass-dark`, `glass-light`) e `backdropFilter` em `WidgetShell` | `[DONE]` |
 | **ISSUE-013** | `@praxisui/rich-content` | Design / Interatividade | Layout Vertical, Espaçamento de Rodapé (`margin-top: auto`) e Microinterações de `:hover`/`:focus-visible` em `RichActionCardNode` | `[PENDING]` |
 | **ISSUE-014** | `@praxisui/core` | Arquitetural / DX | Governança Canônica de Temas: Ausência de SCSS Starter/Mixin e Mapeamento Obrigatório de Tokens Material 3 | `[PENDING]` |
+| **ISSUE-015** | `@praxisui/core` | Design / UX & Layout | Fundo Translúcido e Ausência de Respiro (*Viewport Inset*) em Widgets no Modo Fullscreen / Maximizado | `[PENDING]` |
 
 ---
 
@@ -736,5 +737,85 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
   2. *Test Case 2 (Dark Mode Parity)*: Validar em bateria Playwright que uma aplicação com classe `.dark` e tokens mapeados não renderiza nenhum elemento interno com fundo branco `#ffffff` ou roxo `#e8def8`.
 * **Referência Concreta de Implementação Criada no Hero HQ:**
   O arquivo [`src/styles/theme-praxis.scss`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/src/styles/theme-praxis.scss) foi implementado na aplicação hospedeira como especificação técnica funcional do mapeamento completo de todos os tokens exigidos pelos componentes da plataforma (Material 3 System, Praxis Core Bridge, Widget Shell e Rich Content) para Light e Dark mode. Esse arquivo pode ser utilizado diretamente pelo agente da plataforma como base para a criação do starter oficial em `@praxisui/core/theming`.
+
+---
+
+### ISSUE-015: Fundo Translúcido e Ausência de Respiro (*Viewport Inset*) em Widgets no Modo Fullscreen / Maximizado
+* **Biblioteca:** `@praxisui/core` (`WidgetShellComponent`)
+* **Status:** `[PENDING]`
+* **Gravidade:** Alta (Interferência visual grave, vazamento de tela de fundo e falta de respiro perimetral em modo de foco profundo)
+* **Diagnóstico Técnico & Evidência Real:**
+  No componente `WidgetShellComponent` (`widget-shell.component.ts`), quando a ação `fullscreen` é acionada (`action.id === 'fullscreen'`), o widget recebe a classe `.pdx-shell.fullscreen`.
+  A regra CSS na biblioteca é:
+  ```css
+  .pdx-shell.fullscreen {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    height: auto;
+    transform: none;
+    border-radius: 0;
+    z-index: var(--praxis-layer-widget-shell-fullscreen, 1291);
+    box-shadow: var(--mat-elevation-level8);
+  }
+  ```
+  Duas falhas graves ocorrem nessa implementação:
+  1. **Fundo Translúcido / Ausência de Superfície Opaca no Fullscreen:**
+     - `.pdx-shell.fullscreen` **não possui nenhuma declaração de `background` própria**.
+     - O container continua herdando a regra de `.pdx-shell.dashboard`:
+       ```css
+       background: var(--pdx-shell-card-bg, var(--pdx-dashboard-card-bg, var(--md-sys-color-surface-container-low)));
+       ```
+     - Em aplicações com temas modernos translúcidos (Glassmorphism, Cyber Command ou painéis translúcidos com `color-mix(..., transparent)`), ou quando um widget hospeda componentes com canvas transparente (como `praxis-chart`), o conteúdo inteiro da página de fundo (cards bento, banners hero, sidebars, tabelas) vaza através do gráfico maximizado. O usuário vê as linhas do gráfico sobrepostas a números, textos e botões da página de baixo, gerando poluição cognitiva extrema e aparência de bug de renderização.
+  2. **Ausência de Respiro / Inset Flutuante em Termos de UX:**
+     - O modo `fullscreen` fixa o elemento em `inset: 0` forçado e remove o raio de borda (`border-radius: 0`), colando os eixos do gráfico, cabeçalho e legendas diretamente nas bordas da janela do navegador.
+     - Segundo as diretrizes de UX Enterprise (Material Design 3, Nielsen Norman Group, Carbon Design System), o modo de expansão/inspeção de dashboards corporativos deve operar como uma **Superfície Flutuante com Respiro (Floating Viewport Inset)** (ex.: gap perimetral de 24px com cantos arredondados e backdrop escurecido/desfocado), garantindo contexto espacial, foco e estética refinada.
+* **Proposta Canônica de Evolução da Plataforma:**
+  1. **Definir Superfície Sólida Nativamente em `widget-shell.component.ts`:**
+     ```css
+     .pdx-shell.fullscreen,
+     .pdx-shell.expanded {
+       background: var(--pdx-shell-fullscreen-bg, var(--md-sys-color-surface, #ffffff));
+       color: var(--md-sys-color-on-surface);
+     }
+     ```
+  2. **Evolução de Contrato em `WidgetShellConfig` (`@praxisui/core`):**
+     Adicionar propriedades no contrato de ações de janela:
+     ```typescript
+     export interface WidgetShellWindowActionsConfig {
+       collapsible?: boolean;
+       expandable?: boolean;
+       fullscreen?: boolean;
+       fullscreenMode?: 'viewport-inset' | 'edge-to-edge'; // Canônico (default: 'viewport-inset')
+       fullscreenInset?: string; // Default: '24px'
+     }
+     ```
+  3. **Estilos Canônicos de Respiro e Backdrop:**
+     ```css
+     .pdx-shell.fullscreen:not(.edge-to-edge) {
+       inset: var(--pdx-shell-fullscreen-inset, 24px);
+       border-radius: var(--pdx-shell-fullscreen-radius, 16px);
+       overflow: hidden;
+     }
+
+     .pdx-shell-backdrop {
+       position: fixed;
+       inset: 0;
+       z-index: var(--praxis-layer-widget-shell-backdrop, 1280);
+       background: rgba(0, 0, 0, 0.65);
+       backdrop-filter: blur(12px);
+       -webkit-backdrop-filter: blur(12px);
+     }
+     ```
+* **Workaround Atual no Consumidor:**
+  Aplicar regras globais em `src/styles/theme-praxis.scss` forçando:
+  - `.pdx-shell.fullscreen, .pdx-shell.expanded { background: var(--card) !important; }`
+  - `.pdx-shell.fullscreen { inset: 24px !important; border-radius: 20px !important; }`
+  - `.pdx-shell-backdrop { backdrop-filter: blur(14px) saturate(130%) !important; }`
+* **Casos de Teste para o Agente de Plataforma:**
+  1. *Test Case 1 (Opaque Surface Validation)*: Acionar fullscreen em widget com card translúcido. Aferir via computed style que `.pdx-shell.fullscreen` possui fundo 100% opaco e que nenhum elemento sob ele vaza.
+  2. *Test Case 2 (Viewport Inset Breathing Room)*: Em resolução desktop (1920x1080), aferir que o bounding box do widget em fullscreen possui margem perimetral >= 24px em relação às bordas do viewport.
+  3. *Test Case 3 (Responsividade Mobile)*: Em resolução mobile (< 768px), o inset deve se ajustar dinamicamente para <= 10px para preservar a área útil de leitura.
+
 
 

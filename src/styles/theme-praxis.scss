@@ -101,6 +101,8 @@
   --praxis-color-surface: var(--card);
   --praxis-color-text: var(--foreground);
   --praxis-color-border: var(--border);
+
+  --pdx-shell-fullscreen-bg: var(--card);
 }
 
 .dark {
@@ -189,4 +191,81 @@
   --praxis-color-surface: var(--card);
   --praxis-color-text: var(--foreground);
   --praxis-color-border: var(--border);
+
+  --pdx-shell-fullscreen-bg: var(--card);
 }
+
+/* ==========================================================================
+   Widget Shell Expanded & Fullscreen Overlays (UX Best Practice & Solid Surface)
+   ========================================================================== */
+
+/* 1. Backdrop: Foco imersivo com desfoque elegante */
+.pdx-shell-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1280 !important;
+  background: color-mix(in oklab, var(--overlay) 85%, black) !important;
+  backdrop-filter: blur(14px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+}
+
+/* 2. Fullscreen & Expanded: Superfície 100% Sólida do Tema (Zero Sangramento) */
+.pdx-shell.fullscreen,
+.pdx-shell.expanded {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-command) !important;
+}
+
+/* 3. Modo Tela Cheia com Respiro de UX (Floating Inset com Gap perimetral) */
+.pdx-shell.fullscreen {
+  /* Respiro generoso de 24px em relação às bordas da janela */
+  inset: 24px !important;
+  width: auto !important;
+  height: auto !important;
+  border-radius: var(--radius-xl, 20px) !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 768px) {
+  .pdx-shell.fullscreen {
+    inset: 10px !important;
+    border-radius: var(--radius-lg, 14px) !important;
+  }
+}
+
+/* 4. Cabeçalho do Widget em Modo Expandido/Fullscreen */
+.pdx-shell.fullscreen > .pdx-shell-header,
+.pdx-shell.expanded > .pdx-shell-header {
+  padding: 16px 24px !important;
+  background: color-mix(in oklab, var(--card) 95%, var(--background)) !important;
+  border-bottom: 1px solid var(--border) !important;
+
+  .pdx-shell-title-text {
+    font-family: var(--font-display) !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+  }
+
+  .pdx-shell-subtitle {
+    font-size: 0.85rem !important;
+    color: var(--muted-foreground) !important;
+  }
+}
+
+/* 5. Corpo do Widget em Modo Expandido: Espaço de respiro generoso para dados */
+.pdx-shell.fullscreen > .pdx-shell-body,
+.pdx-shell.expanded > .pdx-shell-body {
+  padding: 24px 32px !important;
+  background: var(--card) !important;
+}
+
+/* 6. Garantir que os gráficos dentro de widget expandido ocupem 100% da área útil */
+.pdx-shell.fullscreen praxis-chart,
+.pdx-shell.expanded praxis-chart {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
