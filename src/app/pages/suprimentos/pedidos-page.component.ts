@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 
 export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'procurement/purchase-orders',
+    path: 'supply-chain/pedidos',
     idField: 'id',
   },
   table: {
@@ -18,54 +20,44 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
       {
-        field: 'contractId',
-        header: 'ID Contrato',
-        width: '120px',
-        align: 'center',
+        field: 'numeroPedido',
+        header: 'Ordem de Compra',
+        width: '180px',
         sortable: true,
       },
       {
-        field: 'supplierId',
-        header: 'ID Fornecedor',
-        width: '130px',
-        align: 'center',
+        field: 'fornecedorNome',
+        header: 'Fornecedor Parceiro',
+        width: '260px',
         sortable: true,
       },
       {
-        field: 'productId',
-        header: 'ID Insumo/Item',
-        width: '130px',
-        align: 'center',
+        field: 'insumo',
+        header: 'Material / Insumo Tático',
+        width: '240px',
         sortable: true,
       },
       {
-        field: 'quantity',
-        header: 'Quantidade',
+        field: 'quantidade',
+        header: 'Qtd.',
         type: 'number',
         width: '120px',
         align: 'center',
         sortable: true,
       },
       {
-        field: 'currency',
-        header: 'Moeda',
-        width: '90px',
-        align: 'center',
+        field: 'valorTotal',
+        header: 'Montante (R$)',
+        type: 'currency',
+        format: 'BRL',
+        width: '160px',
         sortable: true,
       },
       {
         field: 'status',
-        header: 'Status da Ordem',
-        width: '150px',
+        header: 'Status de Expedição',
+        width: '160px',
         align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'orderDate',
-        header: 'Data do Pedido',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '150px',
         sortable: true,
       },
     ],
@@ -93,10 +85,56 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
+export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'pedidos-kpi-grid',
+      items: [
+        {
+          id: 'ordens',
+          label: 'Ordens de Compra',
+          value: '10 Pedidos',
+          caption: 'Ciclo de suprimento em andamento',
+          icon: 'local_shipping',
+          tone: 'info',
+        },
+        {
+          id: 'aprovacao',
+          label: 'Aguardando Aprovação',
+          value: '4 Ordens Draft',
+          caption: 'Compliance de compras e finanças',
+          icon: 'pending_actions',
+          tone: 'warning',
+        },
+        {
+          id: 'insumos',
+          label: 'Insumos Críticos',
+          value: 'Vibranium & Grafeno',
+          caption: 'Fornecedores certificados pelo HQ',
+          icon: 'inventory',
+          tone: 'success',
+        },
+        {
+          id: 'leadTime',
+          label: 'Lead Time de Entrega',
+          value: '< 48 Horas',
+          caption: 'Prioridade tática em campo',
+          icon: 'schedule',
+          tone: 'neutral',
+        },
+      ],
+    },
+  ],
+};
+
 @Component({
   selector: 'app-pedidos-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -113,43 +151,9 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
         </div>
       </header>
 
-      <!-- Bento Grid de KPIs -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-supplies">
-            <span class="material-symbols-outlined">local_shipping</span>
-          </div>
-          <p class="kpi-label">Ordens de Compra</p>
-          <p class="kpi-value">10 Pedidos</p>
-          <p class="kpi-detail">Ciclo de suprimento em andamento</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-warning">
-            <span class="material-symbols-outlined">pending_actions</span>
-          </div>
-          <p class="kpi-label">Aguardando Aprovação</p>
-          <p class="kpi-value">4 Ordens Draft</p>
-          <p class="kpi-detail text-warning">Compliance de compras e finanças</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-ready">
-            <span class="material-symbols-outlined">inventory</span>
-          </div>
-          <p class="kpi-label">Insumos Críticos</p>
-          <p class="kpi-value">Vibranium & Grafeno</p>
-          <p class="kpi-detail text-ready">Fornecedores certificados pelo HQ</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-operations">
-            <span class="material-symbols-outlined">schedule</span>
-          </div>
-          <p class="kpi-label">Lead Time de Entrega</p>
-          <p class="kpi-value">&lt; 48 Horas</p>
-          <p class="kpi-detail">Prioridade tática em campo</p>
-        </div>
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Tabela CRUD Governança Canônica -->
@@ -188,6 +192,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+
       span { font-size: 14px; }
     }
 
@@ -212,59 +217,64 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       max-width: 720px;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
+    .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 14%, transparent); }
+    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
+    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
+    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
+
+    /* KPI Bento Grid Styling */
+    ::ng-deep {
+      .pedidos-kpi-grid .prx-rich-stat-group__items,
+      .pedidos-kpi-grid .pdx-rich-stat-group__items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
+
+      .pedidos-kpi-grid .prx-rich-stat-group__item,
+      .pedidos-kpi-grid .pdx-rich-stat-group__item {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
+
+      .pedidos-kpi-grid .prx-rich-stat-group__value,
+      .pedidos-kpi-grid .pdx-rich-stat-group__value {
+        font-family: var(--font-display) !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 4px 0 0 !important;
+      }
+
+      .pedidos-kpi-grid .prx-rich-stat-group__label,
+      .pedidos-kpi-grid .pdx-rich-stat-group__label {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .pedidos-kpi-grid .prx-rich-stat-group__caption,
+      .pedidos-kpi-grid .pdx-rich-stat-group__caption {
+        font-size: 0.72rem !important;
+        color: var(--muted-foreground) !important;
+        margin-top: 4px !important;
+      }
     }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon-wrap {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      span { font-size: 22px; }
-    }
-
-    .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 12%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
-
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
-
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
-
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
 
     .crud-surface {
       border-radius: 18px;
@@ -275,4 +285,5 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
 })
 export class PedidosPageComponent {
   protected readonly crudMetadata = PEDIDOS_CRUD_METADATA;
+  protected readonly kpiDocument = PEDIDOS_KPI_DOCUMENT;
 }

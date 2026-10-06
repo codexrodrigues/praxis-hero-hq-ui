@@ -1,39 +1,41 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 
 export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'procurement/contracts',
+    path: 'supply-chain/contratos',
     idField: 'id',
   },
   table: {
     columns: [
       {
-        field: 'number',
-        header: 'Número Legal',
-        width: '200px',
+        field: 'numeroContrato',
+        header: 'Nº do Contrato',
+        width: '180px',
         sortable: true,
       },
       {
-        field: 'supplierName',
-        header: 'Fornecedor Homologado',
+        field: 'fornecedorNome',
+        header: 'Fornecedor / Fabricante',
         width: '260px',
         sortable: true,
       },
       {
-        field: 'currency',
-        header: 'Moeda',
-        width: '120px',
+        field: 'objeto',
+        header: 'Objeto / Escopo de Fornecimento',
+        width: '320px',
         sortable: true,
       },
       {
-        field: 'validUntil',
-        header: 'Vigência Final',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '160px',
+        field: 'valorTotal',
+        header: 'Valor Global (R$)',
+        type: 'currency',
+        format: 'BRL',
+        width: '180px',
         sortable: true,
       },
       {
@@ -42,12 +44,20 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
         width: '160px',
         sortable: true,
       },
+      {
+        field: 'dataFim',
+        header: 'Vigência Até',
+        type: 'date',
+        format: 'dd/MM/yyyy',
+        width: '160px',
+        sortable: true,
+      },
     ],
   } as unknown as CrudMetadata['table'],
   actions: [
     {
       id: 'edit',
-      label: 'Editar Contrato',
+      label: 'Auditar Acordo',
       action: 'edit',
       openMode: 'modal',
       formId: 'contratos-edit',
@@ -63,14 +73,60 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
   ],
   defaults: {
     openMode: 'modal',
-    modal: { width: '880px', maxWidth: '95vw' },
+    modal: { width: '920px', maxWidth: '95vw' },
   },
+};
+
+export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'contratos-kpi-grid',
+      items: [
+        {
+          id: 'vigentes',
+          label: 'Contratos Vigentes',
+          value: '12 Ativos',
+          caption: 'Indústrias Stark, Pym Tech e Oscorp',
+          icon: 'description',
+          tone: 'info',
+        },
+        {
+          id: 'compliance',
+          label: 'Compliance & SLAs',
+          value: '99,1%',
+          caption: 'Entregas dentro do prazo tático',
+          icon: 'verified',
+          tone: 'success',
+        },
+        {
+          id: 'renovacao',
+          label: 'Em Renovação Trimestral',
+          value: '03 Contratos',
+          caption: 'Aditivos de fornecimento de vibranium',
+          icon: 'event_repeat',
+          tone: 'warning',
+        },
+        {
+          id: 'volume',
+          label: 'Volume Anual Contratado',
+          value: 'R$ 42,0 M',
+          caption: 'Orçamento aprovado para 2026',
+          icon: 'attach_money',
+          tone: 'neutral',
+        },
+      ],
+    },
+  ],
 };
 
 @Component({
   selector: 'app-contratos-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -87,35 +143,9 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
         </div>
       </header>
 
-      <!-- KPI Bento Grid -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-supplies"><span class="material-symbols-outlined">description</span></div>
-          <p class="kpi-label">Contratos Vigentes</p>
-          <p class="kpi-value">12 Ativos</p>
-          <p class="kpi-detail">Indústrias Stark, Pym Tech e Oscorp</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-ready"><span class="material-symbols-outlined">verified</span></div>
-          <p class="kpi-label">Compliance & SLAs</p>
-          <p class="kpi-value">99,1%</p>
-          <p class="kpi-detail text-ready">Entregas dentro do prazo tático</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-warning"><span class="material-symbols-outlined">event_repeat</span></div>
-          <p class="kpi-label">Em Renovação Trimestral</p>
-          <p class="kpi-value">03 Contratos</p>
-          <p class="kpi-detail text-warning">Aditivos de fornecimento de vibranium</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-operations"><span class="material-symbols-outlined">attach_money</span></div>
-          <p class="kpi-label">Volume Anual Contratado</p>
-          <p class="kpi-value">R$ 42,0 M</p>
-          <p class="kpi-detail">Orçamento aprovado para 2026</p>
-        </div>
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Metadata-Driven CRUD Runtime -->
@@ -172,59 +202,64 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
       max-width: 720px;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      span { font-size: 22px; }
-    }
-
     .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 14%, transparent); }
     .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
     .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
     .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
 
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
+    /* KPI Bento Grid Styling */
+    ::ng-deep {
+      .contratos-kpi-grid .prx-rich-stat-group__items,
+      .contratos-kpi-grid .pdx-rich-stat-group__items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
 
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
+      .contratos-kpi-grid .prx-rich-stat-group__item,
+      .contratos-kpi-grid .pdx-rich-stat-group__item {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
 
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
 
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
+      .contratos-kpi-grid .prx-rich-stat-group__value,
+      .contratos-kpi-grid .pdx-rich-stat-group__value {
+        font-family: var(--font-display) !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 4px 0 0 !important;
+      }
+
+      .contratos-kpi-grid .prx-rich-stat-group__label,
+      .contratos-kpi-grid .pdx-rich-stat-group__label {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .contratos-kpi-grid .prx-rich-stat-group__caption,
+      .contratos-kpi-grid .pdx-rich-stat-group__caption {
+        font-size: 0.72rem !important;
+        color: var(--muted-foreground) !important;
+        margin-top: 4px !important;
+      }
+    }
 
     .crud-surface {
       border-radius: 18px;
@@ -235,4 +270,5 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
 })
 export class ContratosPageComponent {
   protected readonly crudMetadata = CONTRATOS_CRUD_METADATA;
+  protected readonly kpiDocument = CONTRATOS_KPI_DOCUMENT;
 }
