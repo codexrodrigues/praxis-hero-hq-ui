@@ -175,6 +175,37 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
 
     /* Rich Content & Widget Shell Enhancements */
     ::ng-deep {
+      /* Elimination of redundant inner card shells ("caixa dentro de caixa") */
+      .hero-executive-banner .prx-rich-card,
+      .hero-executive-banner .pdx-rich-card,
+      .bento-kpi-card .prx-rich-card,
+      .bento-kpi-card .pdx-rich-card,
+      .hub-card-action .prx-rich-action-card,
+      .hub-card-action .pdx-rich-action-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+
+      /* Clean and unified badge pills: eliminate nested purple badge container */
+      .status-pill .prx-rich-badge,
+      .status-pill .pdx-rich-badge,
+      .tag-status .prx-rich-badge,
+      .tag-status .pdx-rich-badge {
+        background: transparent !important;
+        color: inherit !important;
+        padding: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        font-family: inherit !important;
+        font-size: inherit !important;
+        font-weight: inherit !important;
+        letter-spacing: inherit !important;
+        text-transform: inherit !important;
+        line-height: inherit !important;
+      }
+
       /* Hero Executive Banner */
       .hero-executive-banner {
         position: relative;
@@ -255,28 +286,84 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
         z-index: 2;
       }
 
+      .hero-executive-banner .prx-rich-card__actions,
+      .hero-executive-banner .pdx-rich-card__actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+
+      .hero-executive-banner .prx-rich-action-button,
+      .hero-executive-banner .pdx-rich-action-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        height: 42px !important;
+        padding: 0 20px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        font-size: 0.86rem !important;
+        cursor: pointer !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+
+        &:hover {
+          transform: translateY(-2px) !important;
+        }
+
+        span.material-symbols-outlined {
+          font-size: 20px !important;
+        }
+      }
+
+      .hero-executive-banner .prx-rich-action-button--raised,
+      .hero-executive-banner .pdx-rich-action-button--raised {
+        background: linear-gradient(135deg, var(--primary), var(--cobalt)) !important;
+        color: var(--primary-foreground) !important;
+        border: none !important;
+        box-shadow: 0 6px 18px color-mix(in oklab, var(--primary) 32%, transparent) !important;
+      }
+
+      .hero-executive-banner .prx-rich-action-button--stroked,
+      .hero-executive-banner .pdx-rich-action-button--stroked {
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        color: var(--foreground) !important;
+        border: 1px solid var(--border) !important;
+        backdrop-filter: blur(8px) !important;
+
+        &:hover {
+          border-color: var(--primary) !important;
+          color: var(--primary) !important;
+        }
+      }
+
       .status-pill {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         padding: 4px 12px;
         border-radius: 9999px;
-        font-size: 0.7rem;
+        font-size: 0.72rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.06em;
+
+        span.prx-rich-icon {
+          font-size: 15px;
+        }
       }
 
       .ready-pill {
-        background: color-mix(in oklab, var(--ready) 15%, transparent);
+        background: color-mix(in oklab, var(--ready) 14%, transparent);
         color: var(--ready);
-        border: 1px solid color-mix(in oklab, var(--ready) 30%, transparent);
+        border: 1px solid color-mix(in oklab, var(--ready) 32%, transparent);
       }
 
       .cobalt-pill {
-        background: color-mix(in oklab, var(--cobalt) 15%, transparent);
+        background: color-mix(in oklab, var(--cobalt) 14%, transparent);
         color: var(--cobalt);
-        border: 1px solid color-mix(in oklab, var(--cobalt) 30%, transparent);
+        border: 1px solid color-mix(in oklab, var(--cobalt) 32%, transparent);
       }
 
       /* Bento KPI Cards */
@@ -323,17 +410,36 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
       }
 
       .tag-status {
-        font-size: 0.65rem;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.68rem;
         font-weight: 700;
         text-transform: uppercase;
-        padding: 3px 8px;
+        letter-spacing: 0.06em;
+        padding: 3px 10px;
         border-radius: 9999px;
       }
 
-      .ready-tag { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-      .operations-tag { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
-      .rh-tag { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
-      .risk-tag { color: var(--risk); background: color-mix(in oklab, var(--risk) 12%, transparent); }
+      .ready-tag {
+        color: var(--ready);
+        background: color-mix(in oklab, var(--ready) 14%, transparent);
+        border: 1px solid color-mix(in oklab, var(--ready) 28%, transparent);
+      }
+      .operations-tag {
+        color: var(--operations);
+        background: color-mix(in oklab, var(--operations) 14%, transparent);
+        border: 1px solid color-mix(in oklab, var(--operations) 28%, transparent);
+      }
+      .rh-tag {
+        color: var(--rh);
+        background: color-mix(in oklab, var(--rh) 14%, transparent);
+        border: 1px solid color-mix(in oklab, var(--rh) 28%, transparent);
+      }
+      .risk-tag {
+        color: var(--risk);
+        background: color-mix(in oklab, var(--risk) 14%, transparent);
+        border: 1px solid color-mix(in oklab, var(--risk) 28%, transparent);
+      }
 
       .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
       .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
@@ -342,47 +448,69 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
       .tone-assets { color: var(--assets); background: color-mix(in oklab, var(--assets) 14%, transparent); }
       .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 14%, transparent); }
 
-      /* Cross-Browser Styled Native Progress Bars */
+      /* Cross-Browser Styled Active Progress Bars */
+      .prx-rich-progress,
+      .pdx-rich-progress {
+        width: 100%;
+        margin: 10px 0 6px;
+      }
+
       .prx-rich-progress progress,
       .pdx-rich-progress progress {
         appearance: none;
         -webkit-appearance: none;
         display: block;
         width: 100%;
-        height: 6px;
+        height: 7px;
         border-radius: 9999px;
         border: none;
-        background: color-mix(in oklab, var(--muted) 50%, transparent);
+        background: color-mix(in oklab, var(--foreground) 10%, transparent);
         overflow: hidden;
       }
 
       .prx-rich-progress progress::-webkit-progress-bar,
       .pdx-rich-progress progress::-webkit-progress-bar {
-        background: color-mix(in oklab, var(--muted) 50%, transparent);
+        background: color-mix(in oklab, var(--foreground) 10%, transparent);
         border-radius: 9999px;
       }
 
       .fill-ready progress::-webkit-progress-value {
         background: var(--ready) !important;
         border-radius: 9999px;
+        box-shadow: 0 0 10px color-mix(in oklab, var(--ready) 50%, transparent);
       }
       .fill-operations progress::-webkit-progress-value {
         background: var(--operations) !important;
         border-radius: 9999px;
+        box-shadow: 0 0 10px color-mix(in oklab, var(--operations) 50%, transparent);
       }
       .fill-rh progress::-webkit-progress-value {
         background: var(--rh) !important;
         border-radius: 9999px;
+        box-shadow: 0 0 10px color-mix(in oklab, var(--rh) 50%, transparent);
       }
       .fill-risk progress::-webkit-progress-value {
         background: var(--risk) !important;
         border-radius: 9999px;
+        box-shadow: 0 0 10px color-mix(in oklab, var(--risk) 50%, transparent);
       }
 
-      .fill-ready progress::-moz-progress-bar { background: var(--ready) !important; }
-      .fill-operations progress::-moz-progress-bar { background: var(--operations) !important; }
-      .fill-rh progress::-moz-progress-bar { background: var(--rh) !important; }
-      .fill-risk progress::-moz-progress-bar { background: var(--risk) !important; }
+      .fill-ready progress::-moz-progress-bar {
+        background: var(--ready) !important;
+        border-radius: 9999px;
+      }
+      .fill-operations progress::-moz-progress-bar {
+        background: var(--operations) !important;
+        border-radius: 9999px;
+      }
+      .fill-rh progress::-moz-progress-bar {
+        background: var(--rh) !important;
+        border-radius: 9999px;
+      }
+      .fill-risk progress::-moz-progress-bar {
+        background: var(--risk) !important;
+        border-radius: 9999px;
+      }
 
       .card-footnote {
         font-size: 0.72rem;

@@ -203,16 +203,24 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                     gap: 'sm',
                     items: [
                       {
-                        type: 'badge',
-                        label: 'Sistemas Táticos Ativos',
-                        icon: 'verified_user',
+                        type: 'compose',
+                        direction: 'row',
+                        gap: 'xs',
                         className: 'status-pill ready-pill',
+                        items: [
+                          { type: 'icon', icon: 'verified_user' },
+                          { type: 'badge', label: 'Sistemas Táticos Ativos' },
+                        ],
                       },
                       {
-                        type: 'badge',
-                        label: 'Praxis Platform 9.0 · Metadata-Driven',
-                        icon: 'shield',
+                        type: 'compose',
+                        direction: 'row',
+                        gap: 'xs',
                         className: 'status-pill cobalt-pill',
+                        items: [
+                          { type: 'icon', icon: 'shield' },
+                          { type: 'badge', label: 'Praxis Platform 9.0 · Metadata-Driven' },
+                        ],
                       },
                     ],
                   },
@@ -266,6 +274,9 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
       definition: {
         id: 'praxis-rich-content',
         inputs: {
+          context: {
+            progressValue: 98.4,
+          },
           document: {
             kind: 'praxis.rich-content',
             version: '1.0.0',
@@ -299,7 +310,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 content: [
                   {
                     type: 'progress',
-                    valueExpr: '98.4',
+                    valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-ready',
                   },
@@ -326,6 +337,9 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
       definition: {
         id: 'praxis-rich-content',
         inputs: {
+          context: {
+            progressValue: 70,
+          },
           document: {
             kind: 'praxis.rich-content',
             version: '1.0.0',
@@ -359,7 +373,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 content: [
                   {
                     type: 'progress',
-                    valueExpr: '65',
+                    valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-operations',
                   },
@@ -386,6 +400,9 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
       definition: {
         id: 'praxis-rich-content',
         inputs: {
+          context: {
+            progressValue: 84.5,
+          },
           document: {
             kind: 'praxis.rich-content',
             version: '1.0.0',
@@ -419,7 +436,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 content: [
                   {
                     type: 'progress',
-                    valueExpr: '80.8',
+                    valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-rh',
                   },
@@ -446,6 +463,9 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
       definition: {
         id: 'praxis-rich-content',
         inputs: {
+          context: {
+            progressValue: 25,
+          },
           document: {
             kind: 'praxis.rich-content',
             version: '1.0.0',
@@ -479,7 +499,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 content: [
                   {
                     type: 'progress',
-                    valueExpr: '25',
+                    valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-risk',
                   },
