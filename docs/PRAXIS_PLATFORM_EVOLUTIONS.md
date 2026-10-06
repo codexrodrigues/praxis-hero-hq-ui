@@ -20,7 +20,7 @@
 | **ISSUE-004** | `@praxisui/rich-content` | Estrutural / Layout | Suporte a nós canônicos de layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode`) | `[DONE]` |
 | **ISSUE-005** | `@praxisui/core` | Arquitetural / Tipos | Harmonização de tokens semânticos de cores entre nós (`statGroup`, `timeline`, `badge`) | `[DONE]` |
 | **ISSUE-006** | `@praxisui/rich-content` | Interatividade / DX | Callbacks de ação e eventos interativos nativos em itens de `statGroup` e `timeline` | `[DONE]` |
-| **ISSUE-007** | `@praxisui/page-builder` | Reatividade / Estado | Binding reativo granular para atualização de widgets sem rerender do canvas | `[PENDING]` |
+| **ISSUE-007** | `@praxisui/page-builder` & `@praxisui/core` | Reatividade / Estado | Binding reativo granular para atualização de widgets sem rerender do canvas | `[DONE]` |
 | **ISSUE-008** | `@praxisui/rich-content` | Consistência / API | Exportação pública padronizada (`PraxisRichContent` vs `PraxisRichContentComponent`) | `[DONE]` |
 | **ISSUE-009** | `@praxisui/rich-content` | Visual / Telemetria | Suporte nativo a kind `'telemetry'` (radar, pulse, wave, signal) e Lottie em `RichCardMedia` | `[DONE]` |
 | **ISSUE-010** | `@praxisui/rich-content` | Funcional / KPIs | Indicador de progresso integrado (`variant: 'bar' \| 'ring'`) em `RichStatItem` | `[DONE]` |
@@ -78,8 +78,10 @@
          box-shadow: none !important;
          padding: 0 !important;
          border-radius: 0 !important;
+         overflow: visible !important;
        }
        ```
+     - **Nota Crítica de Geometria:** A inclusão de `overflow: visible !important` e `border-radius: 0 !important` é mandatória porque a `<section class="prx-rich-card">` possui nativamente `border-radius: 16px; overflow: hidden;`. Quando o padding é zerado para delegar a borda/fundo ao container pai, o conteúdo do rodapé encosta na quina inferior esquerda e sofre clipping involuntário (cortando números e textos descritivos como na primeira letra da footnote).
   3. **Validação, IA & Editor:**
      - `RichContentDocumentValidator` atualizado para validar `'unstyled'` em nós `card` e `actionCard`.
      - Manifesto de IA de autoria atualizado com `'unstyled'`.
@@ -527,13 +529,64 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 ---
 
 ### ISSUE-007: Binding Reativo Granular para Atualização de Widgets sem Rerender do Canvas
-* **Biblioteca:** `@praxisui/page-builder`
-* **Status:** `[PENDING]`
-* **Gravidade:** Média (Eficiência em dashboards de telemetria em tempo real)
-* **Diagnóstico Técnico:**
-  No `DynamicPageBuilderComponent`, para atualizar dados de um widget (como dados de websockets ou polling de telemetria), é preciso substituir a árvore inteira do `WidgetPageDefinition`, disparando recálculos no canvas.
-* **Proposta Canônica de Evolução:**
-  Permitir que `PageBuilderWidget.definition.inputs` aceite `Signal` ou identificador de canal reativo, atualizando o widget em isolamento sem remontar o DOM dos nós adjacentes.
+* **Biblioteca:** `@praxisui/page-builder` & `@praxisui/core`
+* **Status:** `[DONE]`
+* **Gravidade:** Alta (Eficiência e desempenho crítico em dashboards operacionais e telemetria em tempo real)
+* **Diagnóstico Técnico & Limitação Prévia:**
+  1. No `DynamicWidgetPageComponent` e `DynamicPageBuilderComponent`, a atualização de entradas (`inputs`) de widgets requeria a substituição do objeto `page` inteiro (`WidgetPageDefinition`) ou disparava o ciclo completo de recálculo responsivo e reconstrução de layout do canvas.
+  2. A serialização ingênua via `JSON.parse(JSON.stringify(page))` nos motores de composição (`CompositionRuntimeEngine`, `WidgetPageCompositionFactory`, `WidgetPageCompositionSerialization`) e nos métodos de clonagem do builder destruía referências a Angular Signals (convertendo funções em `undefined`) e Observables (transformando-os em objetos mortos).
+  3. Não existiam métodos públicos imperativos para injetar valores ou patches de entradas diretamente em um widget específico pelo seu `widgetKey`.
+* **Implementação Realizada na Plataforma (PR #546 / Commit `8003aa6e6`):**
+  1. **Diretiva de Carregamento Reativo (`DynamicWidgetLoaderDirective` em `@praxisui/core`):**
+     - Suporte nativo e transparente a Angular Signals (`isSignal(inputVal)`): configurado `effect()` reativo vinculado ao injector do nó para propagar automaticamente novas emissões ao `ComponentRef.setInput()`.
+     - Suporte nativo a RxJS Observables e Subscribables (`isObservable(inputVal)` ou `isSubscribable(inputVal)`): subscrição automática gerenciada pelo ciclo de vida da diretiva, com desinscrição e limpeza rigorosa no `ngOnDestroy` e re-binding seguro quando o input é substituído.
+     - Suporte a métodos imperativos granulares `setInput(inputName, value)` e `patchInputs(inputPatch)` no próprio loader, desembrulhando fontes reativas se fornecidas.
+  2. **APIs Públicas Granulares (`DynamicWidgetPageComponent` & `DynamicPageBuilderComponent`):**
+     - `setWidgetInput(widgetKey: string, inputName: string, value: unknown): boolean`: localiza o loader do widget alvo pelo `widgetKey` e atualiza isoladamente o input via `loader.setInput()`, mantendo o snapshot em memória sincronizado sem remontar o DOM, sem recalcular breakpoints responsivos e sem afetar widgets vizinhos.
+     - `patchWidgetInputs(widgetKey: string, inputPatch: Record<string, unknown>): boolean`: aplica um conjunto de alterações de entrada de uma só vez de forma isolada.
+  3. **Preservação de Referências Vivas em Motores de Composição & Clonagem:**
+     - `DynamicPageBuilderComponent.clonePagePreservingInputs` e `cloneInputsPreservingLiveReferences`: algoritmo recursivo que preserva Signals, Observables, Subscribables e funções em `definition.inputs`.
+     - `CompositionRuntimeEngine.cloneJson`, `WidgetPageCompositionFactory.clone` e `WidgetPageCompositionSerialization.clone`: algoritmos atualizados para preservar instâncias reativas vivas sem passar por serialização destrutiva de JSON.
+  4. **Normalização Limpa de Estado:**
+     - `WidgetPageStateRuntimeService.normalizeState` e `clonePageDefinition`: omissão explícita de chaves `schema` e `derived` quando não fornecidas, evitando inserção de propriedades espúrias `{ schema: undefined, derived: undefined }`.
+  5. **Correção Visual no Connection Editor:**
+     - `connection.id` exibido na linha da dock do editor de conexões, garantindo visibilidade independente de densidade visual.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - **Modo Reativo Declarativo (Signals & Observables):** Pode-se declarar fontes reativas vivas diretamente no objeto `definition.inputs`:
+    ```typescript
+    const heroTelemetry$ = new BehaviorSubject({ radarSpeed: 'fast', activeTargets: 14 });
+    const liveAlerts = signal(['Alpha-1', 'Bravo-7']);
+
+    pageDefinition: WidgetPageDefinition = {
+      widgets: [
+        {
+          key: 'telemetry-widget',
+          definition: {
+            id: 'hero-tactical-radar',
+            inputs: {
+              data: heroTelemetry$,
+              alerts: liveAlerts,
+            },
+          },
+        },
+      ],
+      ...
+    };
+    ```
+    O widget renderizado receberá atualizações em tempo real a cada `heroTelemetry$.next(...)` ou `liveAlerts.set(...)` sem nenhum flicker, sem recriação do componente e sem recálculo do canvas.
+  - **Modo Imperativo Granular (via ViewChild):**
+    ```typescript
+    @ViewChild(DynamicPageBuilderComponent) pageBuilder!: DynamicPageBuilderComponent;
+
+    // Atualiza um único input isoladamente:
+    this.pageBuilder.setWidgetInput('telemetry-widget', 'radarSpeed', 'ultra-fast');
+
+    // Aplica patch em lote de inputs:
+    this.pageBuilder.patchWidgetInputs('telemetry-widget', {
+      radarSpeed: 'normal',
+      activeTargets: 22,
+    });
+    ```
 
 ---
 
