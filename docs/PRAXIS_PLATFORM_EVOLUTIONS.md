@@ -22,6 +22,10 @@
 | **ISSUE-006** | `@praxisui/rich-content` | Interatividade / DX | Callbacks de ação e eventos interativos nativos em itens de `statGroup` e `timeline` | `[PENDING]` |
 | **ISSUE-007** | `@praxisui/page-builder` | Reatividade / Estado | Binding reativo granular para atualização de widgets sem rerender do canvas | `[PENDING]` |
 | **ISSUE-008** | `@praxisui/rich-content` | Consistência / API | Exportação pública padronizada (`PraxisRichContent` vs `PraxisRichContentComponent`) | `[PENDING]` |
+| **ISSUE-009** | `@praxisui/rich-content` | Visual / Telemetria | Suporte nativo a kind `'telemetry'` (radar, pulse, wave, signal) e Lottie em `RichCardMedia` | `[DONE]` |
+| **ISSUE-010** | `@praxisui/rich-content` | Funcional / KPIs | Indicador de progresso integrado (`variant: 'bar' \| 'ring'`) em `RichStatItem` | `[DONE]` |
+| **ISSUE-011** | `@praxisui/core` | Navegação / SPA | Handler nativo e autônomo para navegação de rotas SPA (`praxis:router.navigate`, `navigation.navigate`) | `[DONE]` |
+| **ISSUE-012** | `@praxisui/page-builder` | Design / Shell | Presets canônicos Glassmorphism (`glass-dark`, `glass-light`) e `backdropFilter` em `WidgetShell` | `[DONE]` |
 
 ---
 
@@ -174,7 +178,7 @@
 ### ISSUE-004: Suporte a Nós Canônicos de Layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode` ou `compose` com `layout: 'grid'`)
 * **Biblioteca:** `@praxisui/rich-content` / `@praxisui/core`
 * **Status:** `[PENDING]`
-* **Gravidade:** Alta (Impacto direto no alinhamento visual de conjuntos de cards e formulários)
+* **Gravidade:** Alta (Impacto direto no alinhamento visual, responsividade e previsibilidade de cards, formulários e blocos ricos)
 * **Diagnóstico Técnico & Evidência Real:**
   Na tela do Dashboard Executivo (*Centros de Comando & Especialidades* com 6 `actionCard`), foi observado um desalinhamento grave: 3 cards na primeira linha, 2 cards na segunda linha com um buraco vazio à direita, e 1 card isolado na terceira linha.
   
@@ -202,21 +206,93 @@
      ```
   4. Quando o desenvolvedor tenta transformar o bloco em grid adicionando `className: 'hub-action-cards-grid'` com `display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr))`, o CSS Grid é aplicado ao wrapper `<div class="prx-rich-node">`, que contém **apenas um único filho** (`<div class="prx-rich-compose">`).
   5. A `div.prx-rich-compose` interna permanece como um `display: flex; flex-wrap: wrap;`. Em Flexbox puro com wrap, cada card assume largura intrínseca pelo volume de texto de sua descrição. Como os cards 4 e 5 possuem textos descritivos ligeiramente maiores, o card 6 não coube na segunda linha e foi forçado para a terceira linha, gerando a distribuição assimétrica 3 + 2 + 1.
-* **Proposta Canônica de Evolução:**
-  1. Adicionar suporte nativo a `layout: 'grid'` no nó `RichComposeNode`:
-     ```typescript
-     export interface RichComposeNode extends RichBlockBaseNode {
-       type: 'compose';
-       layout?: 'flex' | 'grid'; // Padrão 'flex'
-       columns?: number | 'auto-fit' | 'auto-fill';
-       minColumnWidth?: string; // ex: '300px'
-       direction?: 'row' | 'column';
-       gap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-       wrap?: boolean;
+
+---
+
+#### Problemas Sistêmicos Decorrentes Desta Falha de Plataforma
+
+1. **Quebra Assimétrica e Itens Órfãos (*Ragged Layout / Orphan Elements*):**
+   - Variações naturais no conteúdo (ex.: descrições dinâmicas vindas de API, números maiores ou textos traduzidos via i18n com maior volume de caracteres) alteram a largura intrínseca de cada card.
+   - Isso faz com que a quebra de linha aconteça de forma não determinística e visualmente desagradável (ex.: 3 cards na linha 1, 2 cards na linha 2 com buraco vazio à direita, e 1 card isolado na linha 3), transmitindo sensação de interface inacabada ou com bug de carregamento.
+2. **Desalinhamento Vertical de Alturas e de Botões de Ação (*Unequal Heights & Misaligned CTAs*):**
+   - No Flexbox puro, cada linha de flex calcula sua altura independentemente. Se um card da linha 1 tem 4 linhas de texto descritivo e os da linha 2 têm apenas 1 linha, a linha 1 fica significativamente mais alta que a linha 2, destruindo o ritmo vertical da interface.
+   - Pior ainda: o botão de ação (CTA) de cada card fica posicionado logo abaixo do texto descritivo, fazendo com que os botões de cards adjacentes fiquem em alturas diferentes ("efeito escada"), a menos que exista um `height: 100%` com `justify-content: space-between` governado pela plataforma.
+3. **Obstrução de Seletores CSS e Falha Silenciosa de Estilização no Consumidor (*Wrapper Obstruction*):**
+   - Como a biblioteca insere um wrapper `<div class="prx-rich-node [className]">` envolvendo `<div class="prx-rich-compose">`, qualquer consumidor que tente aplicar classes utilitárias modernas (como Tailwind `grid grid-cols-3` ou CSS Grid customizado) falha silenciosamente, pois o grid é aplicado ao wrapper que contém apenas 1 filho (o compose). Isso gera enorme frustração e força o uso de seletores complexos via `::ng-deep`.
+4. **Impossibilidade Declarativa de Layouts Proporcionais (*Master-Detail / Painel Lateral*):**
+   - É comum em dashboards ricos ter layouts compostos como: Coluna de Conteúdo Principal (70%) + Painel de Ações Rápidas/Timeline (30%). Com o contrato atual de `compose`, é impossível expressar essa proporcionalidade via JSON de forma limpa sem recorrer a hacks de CSS no app consumidor.
+
+---
+
+#### Proposta Canônica de Evolução da Plataforma
+
+1. **Evolução do Contrato `RichComposeNode` em `@praxisui/core`:**
+   Adicionar suporte explícito a `layout: 'grid'` e parâmetros de dimensionamento:
+   ```typescript
+   export interface RichComposeNode extends RichBlockBaseNode {
+     type: 'compose';
+     layout?: 'flex' | 'grid'; // Default: 'flex' (para compatibilidade retroativa)
+     direction?: 'row' | 'column'; // Utilizado quando layout === 'flex'
+     wrap?: boolean; // Utilizado quando layout === 'flex'
+     columns?: number | 'auto-fit' | 'auto-fill'; // Utilizado quando layout === 'grid' (ex: 3, 'auto-fit')
+     minColumnWidth?: string; // Utilizado em auto-fit (ex: '300px', '320px')
+     gap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+     alignItems?: 'stretch' | 'start' | 'center' | 'end'; // Default no grid: 'stretch'
+   }
+   ```
+2. **Atualização do Template e CSS em `praxis-rich-content.ts`:**
+   - No template, quando `node.layout === 'grid'`, aplicar classe `.prx-rich-compose--grid`:
+     ```html
+     @case ('compose') {
+       <div
+         class="prx-rich-compose"
+         [class.prx-rich-compose--grid]="node.layout === 'grid'"
+         [class.direction-column]="node.layout !== 'grid' && node.direction === 'column'"
+         [class.wrap]="node.layout !== 'grid' && node.wrap === true"
+         [style.gap]="resolveComposeGap(node)"
+         [style.--prx-compose-columns]="resolveGridColumns(node)"
+       >
+         <ng-container *ngTemplateOutlet="renderNodes; context: { $implicit: node.items }"></ng-container>
+       </div>
      }
      ```
-  2. No template de `praxis-rich-content.ts`, quando `node.layout === 'grid'`, renderizar com classe `.prx-rich-compose--grid` aplicando CSS Grid diretamente no container dos itens com `align-items: stretch`.
-  3. Ou alternativamente introduzir o nó canônico de primeira classe `RichGridNode` / `RichColumnsNode`.
+   - No CSS nativo de `praxis-rich-content`:
+     ```css
+     .prx-rich-compose--grid {
+       display: grid;
+       grid-template-columns: var(--prx-compose-columns, repeat(auto-fit, minmax(280px, 1fr)));
+       align-items: stretch;
+       width: 100%;
+     }
+     .prx-rich-compose--grid > .prx-rich-node {
+       display: flex;
+       width: 100%;
+       min-width: 0;
+     }
+     .prx-rich-compose--grid > .prx-rich-node > * {
+       width: 100%;
+       height: 100%;
+       display: flex;
+       flex-direction: column;
+       justify-content: space-between;
+     }
+     ```
+
+---
+
+#### Matriz de Casos de Teste para o Agente da Plataforma
+
+O agente responsável pela evolução da plataforma deve validar sua implementação contra esta matriz de cenários:
+
+| ID do Teste | Cenário | Configuração do Nó no JSON | Critério de Aceite / Asserção |
+| :--- | :--- | :--- | :--- |
+| **TC-004-1** | **Grade Simétrica 3x2 (Caso Hero HQ)** | `{ type: 'compose', layout: 'grid', columns: 3, items: [ 6 actionCards com textos de tamanhos variados ] }` | - Exatamente 2 linhas com 3 colunas de largura idêntica.<br>- Nenhum card isolado na 3ª linha.<br>- Cards 4, 5 e 6 preenchem a linha 2 perfeitamente sem buracos à direita. |
+| **TC-004-2** | **Alinhamento e Estiramento Vertical (`stretch`)** | `{ type: 'compose', layout: 'grid', columns: 3, items: [ Card com 1 linha de texto, Card com 5 linhas, Card com 2 linhas ] }` | - Todos os 3 cards na mesma linha possuem **exatamente a mesma altura total** (a altura do card com 5 linhas).<br>- Os botões inferiores (`actions`/CTA) ficam perfeitamente alinhados na mesma linha de base horizontal no fundo do card. |
+| **TC-004-3** | **Responsividade com `columns: 'auto-fit'` e `minColumnWidth`** | `{ type: 'compose', layout: 'grid', columns: 'auto-fit', minColumnWidth: '320px', items: [ 6 cards ] }` | - Em tela larga (1440px): 3 colunas (2x3).<br>- Em tela média (800px): reorganiza automaticamente para 2 colunas (3x2), sem overflow.<br>- Em tela mobile (400px): reorganiza para 1 coluna (6x1). |
+| **TC-004-4** | **Compatibilidade com Layout Flex Legado** | `{ type: 'compose', direction: 'row', wrap: true, items: [ badges / pills ] }` | - Nós `compose` sem a propriedade `layout` continuam operando em modo Flexbox tradicional sem regressão visual em botões e pílulas inline. |
+
+---
+
 * **Workaround Atual no Consumidor:**
   Sobrescrever via CSS direcionando explicitamente para a `div.prx-rich-compose` interna:
   ```scss
@@ -291,3 +367,179 @@
   ```typescript
   export { PraxisRichContent, PraxisRichContent as PraxisRichContentComponent };
   ```
+
+---
+
+### ISSUE-009: Suporte a Telemetria e Animações Vetoriais em `RichCardMedia`
+* **Biblioteca:** `@praxisui/rich-content` & `@praxisui/core`
+* **Status:** `[DONE]`
+* **Gravidade:** Média (Permite dashboards de comando, monitoramento e centros táticos governados por schema sem CSS ad-hoc)
+* **Diagnóstico Técnico & Limitação Prévia:**
+  O contrato `RichCardMedia` suportava exclusivamente `kind: 'image' | 'video' | 'icon' | 'avatar'`. Aplicações de comando e monitoramento (como o radar do Hero HQ) exibiam scanners táticos via pseudo-elementos e classes CSS proprietárias externas (`.radar-sweep`).
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - `RichCardMediaKind` expandido com `'telemetry' | 'lottie'`.
+     - Criada interface canônica `RichCardMediaTelemetry`:
+       ```typescript
+       export interface RichCardMediaTelemetry {
+         variant?: 'radar' | 'pulse' | 'wave' | 'signal';
+         speed?: 'slow' | 'normal' | 'fast';
+         color?: string;
+         interactive?: boolean;
+       }
+       ```
+     - Adicionados campos `telemetry?: RichCardMediaTelemetry;` e `animationSrc?: string;` em `RichCardMedia`.
+  2. **Renderizador e Animações (`@praxisui/rich-content`):**
+     - Renderizador vetorial nativo no template de card com 4 variantes:
+       * `radar`: Anéis concêntricos vetoriais e varredura rotativa contínua (`.prx-rich-card__telemetry-sweep`).
+       * `pulse`: Emissão de pulso por ondas concêntricas expansivas.
+       * `wave`: Ondulação oscilatória com delays harmônicos escalonados.
+       * `signal`: Barras verticais dinâmicas simulando medidor de espectro/sinal.
+     - Ícone central opcional (`media.icon`) sobreposto ao indicador de telemetria com profundidade visual.
+     - **Acessibilidade & Motion Guard:** `@media (prefers-reduced-motion: reduce)` integrado estritamente, parando rotações contínuas para usuários com sensibilidade vestibular.
+     - Validação completa no schema de autoria (`RichContentDocumentValidator`), manifesto de IA e no editor visual de configuração (`PraxisRichContentConfigEditor`).
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - O workaround com classe `.radar-sweep` customizada em CSS externo pode ser **removido**.
+  - No JSON do Banner Tático:
+    ```json
+    "media": {
+      "kind": "telemetry",
+      "icon": "radar",
+      "position": "end",
+      "telemetry": {
+        "variant": "radar",
+        "speed": "normal"
+      }
+    }
+    ```
+* **Perguntas / Alinhamento para o Agente do Hero HQ:**
+  - Deseja que o radar emita eventos ao clicar quando `interactive: true` for definido, ou apenas represente feedback visual de monitoramento operacional?
+
+---
+
+### ISSUE-010: Ausência de Indicador de Progresso Integrado em `RichStatItem` (`statGroup`)
+* **Biblioteca:** `@praxisui/rich-content` & `@praxisui/core`
+* **Status:** `[DONE]`
+* **Gravidade:** Média (Permite KPIs executivos e cards de meta unificados em um único nó declarativo)
+* **Diagnóstico Técnico & Limitação Prévia:**
+  O nó `statGroup` aceitava em seus itens apenas `{ id, label, value, caption, icon, tone }`. Para exibir uma barra ou anel de progresso percentual, o desenvolvedor era forçado a quebrar o agrupamento em múltiplos cards individuais usando `RichProgressNode` avulso dentro de `card.content`, destruindo a coesão do grid de métricas.
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Criada interface canônica `RichStatItemProgress`:
+       ```typescript
+       export interface RichStatItemProgress {
+         value: number;
+         valueExpr?: string;
+         max?: number;
+         showPercent?: boolean;
+         variant?: 'bar' | 'ring';
+         tone?: RichStatTone;
+       }
+       ```
+     - Adicionado campo opcional `progress?: RichStatItemProgress;` em `RichStatItem`.
+  2. **Renderizador e Estilos (`@praxisui/rich-content`):**
+     - Renderizador dual de progresso em `.prx-rich-stat-group__item-content`:
+       * `variant: 'bar'` (padrão): Barra nativa `<progress>` com estilização harmonizada e tokens de tom (`[attr.data-tone]`).
+       * `variant: 'ring'`: Anel circular vetorial SVG com `stroke-dasharray` e `stroke-dashoffset` calculados reativamente com base em `value` e `max` (padrão 100), com clamp seguro para evitar quebras em valores anômalos.
+     - Suporte a rótulo percentual opcional (`showPercent: true`).
+     - Suporte a expressão dinâmica `valueExpr` avaliada pelo motor de expressões da página.
+     - Validação completa no schema de documento, manifesto de IA e controles no editor visual de configuração.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - KPIs com metas ou barras de progresso (ex: "Capacidade Operacional: 82%", "Índice de Prontidão: 94%") agora podem ser declarados diretamente no array `items` de um único nó `statGroup`:
+    ```json
+    {
+      "id": "operational-capacity",
+      "label": "Capacidade Operacional",
+      "value": "82%",
+      "progress": {
+        "value": 82,
+        "max": 100,
+        "variant": "bar",
+        "tone": "primary"
+      }
+    }
+    ```
+* **Perguntas / Alinhamento para o Agente do Hero HQ:**
+  - Há necessidade no Hero HQ de múltiplos indicadores de progresso por stat item (ex: barra secundária de meta planejada vs realizada) ou a estrutura atual de progresso único por item atende integralmente todos os KPIs?
+
+---
+
+### ISSUE-011: Ação Canônica de Navegação SPA para Botões do `praxis-rich-content`
+* **Biblioteca:** `@praxisui/core` & `@praxisui/rich-content`
+* **Status:** `[DONE]`
+* **Gravidade:** Alta (Desacoplamento e eliminação de boilerplate de navegação nos hosts consumidores)
+* **Diagnóstico Técnico & Limitação Prévia:**
+  Quando botões de ação (`RichActionButtonNode`) disparavam `navigation.navigate` ou `praxis:router.navigate`, o botão não navegava a menos que a aplicação hospedeira implementasse manualmente um listener ou fornecesse `hostCapabilities.dispatchAction`. Sem isso, o botão exigia recarregamento tradicional via `href`, quebrando a transição de SPA.
+* **Implementação Realizada na Plataforma:**
+  1. **Motor de Ações Canônico (`@praxisui/core` / `GlobalActionService`):**
+     - Função `buildNavigationUrl` expandida para aceitar tanto `NavigationOpenRoutePayload` completo quanto `string` direta (ex: `"/operations/alerts"`). Extrai automaticamente path, query params (`?`) e fragment (`#`).
+     - Registrados aliases canônicos: `navigation.navigate` e `praxis:router.navigate` mapeados diretamente para a infraestrutura de `navigation.openRoute`.
+     - Suporte completo a navegação via Angular Router se provido no injector, com fallback graceful para browser history/location.
+  2. **Fallback Autônomo (`@praxisui/rich-content` / `PraxisRichContent`):**
+     - `PraxisRichContent` agora injeta opcionalmente `GlobalActionService`. Se o componente host não passar `hostCapabilities.dispatchAction` (ou se o host não interceptar a ação), o componente executa a navegação autonomamente através do `GlobalActionService`.
+     - Método `isActionButtonDisabled` atualizado para verificar a prontidão da ação no `GlobalActionService`, garantindo que o botão fique habilitado e navegável out-of-the-box.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Os botões em cards e banners agora podem usar diretamente qualquer uma das assinaturas canônicas sem necessidade de listeners manuais no host:
+    ```json
+    "action": {
+      "actionId": "praxis:router.navigate",
+      "payload": "/hero/patrol"
+    }
+    ```
+    Ou com objeto detalhado:
+    ```json
+    "action": {
+      "actionId": "navigation.openRoute",
+      "payload": {
+        "route": "/hero/missions",
+        "queryParams": { "filter": "active" }
+      }
+    }
+    ```
+* **Perguntas / Alinhamento para o Agente do Hero HQ:**
+  - Existem fluxos que necessitam de confirmação prévia (ex: `confirmDialog: true` antes de navegar) ou guards condicionais de navegação no documento declarativo?
+
+---
+
+### ISSUE-012: Falta de Estilo 'glass' Nativo nos Presets de `WidgetShell`
+* **Biblioteca:** `@praxisui/core` & `@praxisui/page-builder`
+* **Status:** `[DONE]`
+* **Gravidade:** Média (Permite interfaces modernas e executivas com transparência e blur governados por tokens corporativos)
+* **Diagnóstico Técnico & Limitação Prévia:**
+  Os presets de `WidgetShellComponent` eram limitados a estilos opacos do Material Design (`dashboard-card`, `panel`, `tile`, `naked`). Para aplicar a estética de Glassmorphism (fundos translúcidos com desfoque e bordas reflexivas com OKLCH), os desenvolvedores eram obrigados a usar `shell.kind: 'naked'` e injetar CSS global com `!important` para sobrescrever as cascas dos widgets.
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core` / `WidgetShellConfig`):**
+     - Adicionado campo opcional `backdropFilter?: string` em `appearance.card`.
+     - Adicionados presets canônicos em `BUILTIN_SHELL_PRESETS`:
+       * `'glass-dark'`: Fundo com `color-mix(in srgb, var(--md-sys-color-surface, #0f172a) 60%, transparent)`, borda sutil com `color-mix`, `backdropFilter: 'blur(12px)'`, sombras difusas e cabeçalho integrado.
+       * `'glass-light'`: Fundo com `color-mix(in srgb, var(--md-sys-color-surface, #ffffff) 65%, transparent)`, borda sutil com `color-mix`, `backdropFilter: 'blur(12px)'`.
+  2. **Renderizador de Casca (`@praxisui/core` / `WidgetShellComponent`):**
+     - Mapeamento dinâmico da CSS variable `--pdx-shell-card-backdrop-filter`.
+     - Inclusão de `backdrop-filter` e `-webkit-backdrop-filter` com fallback nativo em `.pdx-shell.dashboard`.
+  3. **Editor Visual (`@praxisui/page-builder` / `WidgetShellEditorComponent`):**
+     - Inclusão dos presets `glass-dark` e `glass-light` na lista de seleção.
+     - Adicionado controle de formulário reativo para `cardBackdropFilter` com validação segura de sintaxe CSS (`cssDeclarationValidator('backdrop-filter')`).
+     - Pré-visualização ao vivo com reflexo imediato no preview canvas.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Remover qualquer regra de CSS global que tente forçar `backdrop-filter` e background translúcido sobre o widget shell.
+  - No `WidgetPageDefinition` ou na configuração do widget no Page Builder:
+    ```json
+    "shell": {
+      "kind": "dashboard-card",
+      "preset": "glass-dark"
+    }
+    ```
+    Ou customizado diretamente:
+    ```json
+    "shell": {
+      "appearance": {
+        "card": {
+          "background": "rgba(15, 23, 42, 0.65)",
+          "backdropFilter": "blur(16px)"
+        }
+      }
+    }
+    ```
+* **Perguntas / Alinhamento para o Agente do Hero HQ:**
+  - Além de `blur()`, há necessidade de suportar outros filtros combinados nos presets (como `saturate(180%)`) ou o desfoque gaussiano de 12px a 16px atende com fidelidade a identidade visual do projeto?
+
