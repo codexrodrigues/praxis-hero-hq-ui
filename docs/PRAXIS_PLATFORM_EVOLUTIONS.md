@@ -28,8 +28,8 @@
 | **ISSUE-012** | `@praxisui/page-builder` | Design / Shell | Presets canônicos Glassmorphism (`glass-dark`, `glass-light`) e `backdropFilter` em `WidgetShell` | `[DONE]` |
 | **ISSUE-013** | `@praxisui/rich-content` | Design / Interatividade | Layout Vertical, Espaçamento de Rodapé (`margin-top: auto`) e Microinterações de `:hover`/`:focus-visible` em `RichActionCardNode` | `[DONE]` |
 | **ISSUE-014** | `@praxisui/core` | Arquitetural / DX | Governança Canônica de Temas: Ausência de SCSS Starter/Mixin e Mapeamento Obrigatório de Tokens Material 3 | `[PENDING]` |
-| **ISSUE-015** | `@praxisui/core` | Design / UX & Layout | Fundo Translúcido em Widgets Sobrepostos e Omissão do Modo de Inspeção de Janela ('expand') na Toolbar de WidgetShell | `[PENDING]` |
-| **ISSUE-016** | `@praxisui/core` | Arquitetural / Temas | Ausência de Tokens Canônicos de Superfície Invertida e Tooltip no Theme Bridge (`--mat-sys-inverse-surface` e `--mat-tooltip-*`) | `[PENDING]` |
+| **ISSUE-015** | `@praxisui/core` | Design / UX & Layout | Fundo Translúcido em Widgets Sobrepostos e Omissão do Modo de Inspeção de Janela ('expand') na Toolbar de WidgetShell | `[DONE]` |
+| **ISSUE-016** | `@praxisui/core` | Arquitetural / Temas | Ausência de Tokens Canônicos de Superfície Invertida e Tooltip no Theme Bridge (`--mat-sys-inverse-surface` e `--mat-tooltip-*`) | `[DONE]` |
 
 
 ---
@@ -939,7 +939,7 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-015: Fundo Translúcido em Widgets Sobrepostos e Omissão do Modo de Inspeção de Janela ('expand') na Toolbar de WidgetShell
 * **Biblioteca:** `@praxisui/core` (`WidgetShellComponent`, `widget-shell.model.ts`)
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Interferência visual crítica por vazamento de tela de fundo e confusão semântica de UX entre Tela Cheia Edge-to-Edge vs. Modal Flutuante de Inspeção)
 * **Diagnóstico Técnico & Evidência Real:**
   Na investigação aprofundada do código-fonte compilado em `@praxisui/core@9.0.5-rc.10` e no monorepo, foram identificadas duas falhas estruturais independentes que originaram o problema visual relatado:
@@ -971,74 +971,80 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
          box-shadow: var(--mat-elevation-level8);
        }
        ```
-     - **Onde está a falha de plataforma?**
-       * O contrato `WidgetShellWindowActions` em `widget-shell.model.ts` contém apenas `collapsible?: boolean` e `fullscreen?: boolean`. **A propriedade `expandable?: boolean` foi omitida!**
-       * O método `buildWindowActions()` em `widget-shell.component.ts` **não constrói o botão da ação `expand`** (apenas `collapse` e `fullscreen`).
-       * Consequentemente, o usuário é obrigado a clicar no botão `fullscreen`, que o projeta em um `inset: 0` forçado sem respiro.
+     - **Onde estava a falha de plataforma?**
+       * O contrato `WidgetShellWindowActions` em `widget-shell.model.ts` continha apenas `collapsible?: boolean` e `fullscreen?: boolean`. **A propriedade `expandable?: boolean` havia sido omitida.**
+       * O método `buildWindowActions()` em `widget-shell.component.ts` **não construía o botão da ação `expand`** (apenas `collapse` e `fullscreen`).
+       * Consequentemente, o usuário era obrigado a clicar no botão `fullscreen`, que o projetava em um `inset: 0` forçado sem respiro.
        * Transformar o `fullscreen` canônico para ter `inset: 24px` seria um erro conceitual de plataforma, pois destruiria o suporte a telões de monitoramento (NOC). A solução correta é expor e governar os dois modos na API!
 
-* **Proposta Canônica de Evolução da Plataforma:**
-  1. **Superfície Sólida Nativamente em `widget-shell.component.ts`:**
-     Eliminar a div auxiliar `.pdx-shell-overlay-surface` e atribuir a superfície sólida diretamente aos seletores sobrepostos:
-     ```css
-     .pdx-shell.fullscreen,
-     .pdx-shell.expanded {
-       background: var(--pdx-shell-overlay-bg, var(--md-sys-color-surface, #ffffff));
-       color: var(--md-sys-color-on-surface);
-     }
-     ```
-  2. **Padding Interno de Respiro no Fullscreen Edge-to-Edge:**
-     Garantir que no modo `fullscreen`, o corpo do widget não cole nos cantos físicos da tela:
-     ```css
-     .pdx-shell.fullscreen > .pdx-shell-body {
-       padding: var(--pdx-shell-fullscreen-body-padding, 24px);
-     }
-     ```
-  3. **Evolução de Contrato em `WidgetShellWindowActions` (`widget-shell.model.ts`):**
-     ```typescript
-     export interface WidgetShellWindowActions {
-       /** Exibe controle de recolher/expandir corpo do widget. */
-       collapsible?: boolean;
-       /** Exibe botão de expansão em Janela Flutuante com respiro (modal centralizado). */
-       expandable?: boolean;
-       /** Exibe botão de tela cheia absoluta (edge-to-edge). */
-       fullscreen?: boolean;
-       /** Define a ação de ampliação quando um único botão for exposto ('expand' | 'fullscreen', padrão: 'expand'). */
-       maximizeMode?: 'expand' | 'fullscreen';
-     }
-     ```
-  4. **Construção Automática da Ação `expand` em `buildWindowActions()`:**
-     No método `buildWindowActions()`, suportar a criação da ação `expand`:
-     ```typescript
-     if (allowExpand && !reserved.has('expand')) {
-       actions.push({
-         id: 'expand',
-         placement: 'window',
-         icon: this.expanded ? 'ms:collapse_content' : 'ms:open_in_new',
-         tooltip: this.expanded
-           ? this.t('controls.collapseWindow', 'Restaurar janela')
-           : this.t('controls.expandWindow', 'Expandir em janela'),
-         variant: 'icon',
-       });
-     }
-     ```
+* **Implementação Realizada na Plataforma (PR #544 / Commit `8b1279d`):**
+  1. **Contrato Canônico (`@praxisui/core` / `widget-shell.model.ts`):**
+     - Interface `WidgetShellWindowActions` expandida:
+       ```typescript
+       export interface WidgetShellWindowActions {
+         /** Show collapse/expand control in the header. */
+         collapsible?: boolean;
+         /** Show expand/restore-in-window inspection mode in the header. */
+         expandable?: boolean;
+         /** Show fullscreen toggle in the header. */
+         fullscreen?: boolean;
+         /** Preferred maximization mode when activating expand/fullscreen controls ('expand' or 'fullscreen'). Defaults to 'fullscreen'. */
+         maximizeMode?: 'expand' | 'fullscreen';
+       }
+       ```
+  2. **Internacionalização (`@praxisui/core` / `widget-shell.i18n.ts`):**
+     - Adicionadas chaves para alternância de janela em `pt-BR` e `en-US`:
+       * `pt-BR`: `'controls.expandWindow': 'Expandir em janela'`, `'controls.collapseWindow': 'Restaurar janela'`
+       * `en-US`: `'controls.expandWindow': 'Expand window'`, `'controls.collapseWindow': 'Restore window'`
+  3. **Construção e Renderização da Ação `expand` (`@praxisui/core` / `WidgetShellComponent`):**
+     - No método `buildWindowActions()`:
+       * Suporte completo à ação `expand` com ícones `ms:open_in_new` (abrir) e `ms:collapse_content` (restaurar janela).
+       * Coordenação com `maximizeMode`: quando `maximizeMode: 'expand'`, ativa `expandable` e suprime `fullscreen` a menos que explicitamente `fullscreen: true`.
+       * Quando ambos `expandable: true` e `fullscreen: true` estão ativos, ambos os botões aparecem com estados perfeitamente coordenados.
+  4. **Superfície 100% Opaca e Respiro Interno no Fullscreen (`widget-shell.component.ts`):**
+     - Adicionado estilo canônico para classes sobrepostas:
+       ```css
+       .pdx-shell.expanded,
+       .pdx-shell.fullscreen {
+         background: var(--pdx-shell-overlay-bg, var(--md-sys-color-surface, #ffffff));
+         color: var(--md-sys-color-on-surface);
+       }
+       .pdx-shell.fullscreen > .pdx-shell-body {
+         padding: var(--pdx-shell-fullscreen-body-padding, 24px);
+       }
+       ```
+     - Garante que mesmo widgets com presets translúcidos (`glass-dark`, `glass-light`), fundos semitransparentes ou `kind="none"` possuam superfície sólida governada ao serem maximizados ou inspecionados em janela, sem vazamento do dashboard subjacente.
+     - Respiro interno de 24px em tela cheia garante que eixos e tooltips de gráficos não colidam com as bordas físicas da tela.
 
-* **Workaround Atual no Host Consumidor (`praxis-hero-hq-ui`):**
-  Como a biblioteca `@praxisui/core@9.0.5-rc.10` só expõe o botão `fullscreen`:
-  - No [`src/styles/theme-praxis.scss`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/src/styles/theme-praxis.scss), forçamos:
-    1. Superfície 100% sólida: `.pdx-shell.fullscreen, .pdx-shell.expanded { background: var(--card) !important; }`
-    2. Respiro perimetral no fullscreen: `.pdx-shell.fullscreen { inset: 24px !important; border-radius: 20px !important; }` (adaptando o botão único de tela cheia para se comportar visualmente como a janela modal de inspeção que o usuário espera no dashboard executivo).
-
-* **Casos de Teste para o Agente de Plataforma:**
-  1. *Test Case 1 (Opaque Surface on Overlay)*: Renderizar um widget com `shell.preset: 'glass-dark'` ou fundo translúcido sobre elementos com texto e cores vivas. Acionar `expand` e `fullscreen`. Aferir via Playwright/computedStyle que a opacidade efetiva de fundo da `.pdx-shell` é 1.0 e que nenhum texto do elemento pai é visível através da área do gráfico.
-  2. *Test Case 2 (Dual Window Action Affordances)*: Configurar widget com `windowActions: { expandable: true, fullscreen: true }`. Aferir que o cabeçalho renderiza ambos os botões (`expand` e `fullscreen`), e que ao clicar em `expand`, o widget recebe a classe `.expanded` (com dimensões `min(920px, 92vw)`), enquanto ao clicar em `fullscreen`, recebe `.fullscreen` com `inset: 0`.
-  3. *Test Case 3 (Responsive Fullscreen Body Padding)*: Em tela cheia, aferir que o `.pdx-shell-body` possui padding >= 20px, prevenindo que tooltips ou eixos de `praxis-chart` colidam com as bordas da viewport.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - O workaround em `src/styles/theme-praxis.scss` que forçava `.pdx-shell.fullscreen { inset: 24px !important; border-radius: 20px !important; }` e `.pdx-shell.fullscreen, .pdx-shell.expanded { background: var(--card) !important; }` pode ser **completamente removido**.
+  - No `WidgetPageDefinition` ou nos inputs de `WidgetShell`:
+    * Para exibir o modo de inspeção em janela (modal centralizado com respiro):
+      ```json
+      "windowActions": {
+        "expandable": true,
+        "fullscreen": false
+      }
+      ```
+    * Ou usando `maximizeMode`:
+      ```json
+      "windowActions": {
+        "maximizeMode": "expand"
+      }
+      ```
+    * Para oferecer ambos os controles ao usuário (inspecionar em janela OU tela cheia NOC):
+      ```json
+      "windowActions": {
+        "expandable": true,
+        "fullscreen": true
+      }
+      ```
 
 ---
 
 ### ISSUE-016: Ausência de Tokens Canônicos de Superfície Invertida e Tooltip no Theme Bridge (`--mat-sys-inverse-surface` e `--mat-tooltip-*`)
 * **Biblioteca:** `@praxisui/core` (`theme-bridge.css`, `@praxisui/core/theming`)
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Quebra de visualização de acessibilidade e renderização de tooltips com fundo transparente em toda a plataforma)
 * **Diagnóstico Técnico & Evidência Real:**
   Na captura de tela fornecida e na inspeção minuciosa dos estilos compilados em `@angular/material/tooltip` (v21 / M3 tokens), foi constatado que o elemento `.mat-mdc-tooltip-surface` é estilizado estritamente da seguinte forma:
@@ -1061,54 +1067,56 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
   4. Da mesma forma, `color` herda a cor do elemento pai (o `body`), que é preto/cinza escuro no tema claro.
   5. O raio de borda cai em 0 e o tamanho da fonte herda do `body` (16px), gerando o efeito visual aberrante de letras pretas soltas flutuando no vácuo sem balão, sem contraste e sem legibilidade.
   
-  **Onde está a omissão da plataforma Praxis:**
+  **Onde estava a omissão da plataforma Praxis:**
   - Os componentes de `@praxisui/core`, `@praxisui/page-builder`, `@praxisui/rich-content` e `@praxisui/dynamic-form` utilizam amplamente a diretiva `matTooltip` (ex: botões de ação do widget shell, controles da barra do Page Builder, botões de ação rápida).
   - O arquivo canônico `theme-bridge.css` em `@praxisui/core`:
-    * Mapeia apenas uma ponte unilateral para cores de superfície normal (`--md-sys-color-surface: var(--mat-sys-surface)`).
-    * **OMITE COMPLETAMENTE** os tokens de superfícies invertidas (`--md-sys-color-inverse-surface`, `--md-sys-color-inverse-on-surface`, `--mat-sys-inverse-surface`, `--mat-sys-inverse-on-surface`).
-    * **OMITE COMPLETAMENTE** os tokens específicos de componentes CDK Overlay (`--mat-tooltip-container-color`, `--mat-tooltip-supporting-text-color`, `--mat-tooltip-container-shape`, etc.).
-  - Como a plataforma ainda não disponibiliza o `@mixin define-praxis-theme` (apontado na `ISSUE-014`), qualquer aplicação moderna que utilize seus próprios tokens de design (como OKLCH, Tailwind ou tokens de marca do cliente) sem importar o CSS pré-fabricado legado do Angular Material sofre com a quebra completa de todos os tooltips.
+    * Mapeava apenas uma ponte unilateral para cores de superfície normal (`--md-sys-color-surface: var(--mat-sys-surface)`).
+    * **OMITIA** os tokens de superfícies invertidas (`--md-sys-color-inverse-surface`, `--md-sys-color-inverse-on-surface`, `--mat-sys-inverse-surface`, `--mat-sys-inverse-on-surface`).
+    * **OMITIA** os tokens específicos de componentes CDK Overlay (`--mat-tooltip-container-color`, `--mat-tooltip-supporting-text-color`, `--mat-tooltip-container-shape`, etc.).
+  - Qualquer aplicação moderna que utilizasse seus próprios tokens de design sem importar o CSS pré-fabricado legado do Angular Material sofria com a quebra de contraste de todos os tooltips.
 
-* **Proposta Canônica de Evolução da Plataforma:**
-  1. **Atualizar `theme-bridge.css` em `@praxisui/core`:**
-     Incluir a ponte canônica e os fallbacks seguros para superfícies invertidas e tooltips:
-     ```css
-     :root {
-       /* Material 3 Inverse Surface System Tokens */
-       --md-sys-color-inverse-surface: var(--mat-sys-inverse-surface, #313033);
-       --md-sys-color-inverse-on-surface: var(--mat-sys-inverse-on-surface, #f4f0f4);
+* **Implementação Realizada na Plataforma (PR #544 / Commit `8b1279d`):**
+  1. **Atualização do `theme-bridge.css` em `@praxisui/core`:**
+     - Adicionada a ponte canônica e os fallbacks seguros para superfícies invertidas e tooltips:
+       ```css
+       :root {
+         /* Material 3 Inverse Surface System Tokens */
+         --md-sys-color-inverse-surface: var(--mat-sys-inverse-surface, #313033);
+         --md-sys-color-inverse-on-surface: var(--mat-sys-inverse-on-surface, #f4f0f4);
 
-       /* Bidirectional Bridge to Angular Material M3 Tokens */
-       --mat-sys-inverse-surface: var(--md-sys-color-inverse-surface, #313033);
-       --mat-sys-inverse-on-surface: var(--md-sys-color-inverse-on-surface, #f4f0f4);
-       --mat-sys-corner-extra-small: var(--radius-sm, 6px);
-       --mat-sys-body-small-font: var(--md-sys-typescale-body-small-font, inherit);
-       --mat-sys-body-small-size: 12px;
-       --mat-sys-body-small-weight: 500;
-       --mat-sys-body-small-line-height: 16px;
+         /* Bidirectional Bridge to Angular Material M3 Tokens */
+         --mat-sys-inverse-surface: var(--md-sys-color-inverse-surface, #313033);
+         --mat-sys-inverse-on-surface: var(--md-sys-color-inverse-on-surface, #f4f0f4);
+         --mat-sys-corner-extra-small: var(--radius-sm, 6px);
+         --mat-sys-body-small-font: var(--md-sys-typescale-body-small-font, inherit);
+         --mat-sys-body-small-size: 12px;
+         --mat-sys-body-small-weight: 500;
+         --mat-sys-body-small-line-height: 16px;
 
-       /* Angular Material Tooltip Component Tokens */
-       --mat-tooltip-container-color: var(--mat-sys-inverse-surface);
-       --mat-tooltip-supporting-text-color: var(--mat-sys-inverse-on-surface);
-       --mat-tooltip-container-shape: var(--mat-sys-corner-extra-small);
-       --mat-tooltip-supporting-text-font: var(--mat-sys-body-small-font);
-       --mat-tooltip-supporting-text-size: var(--mat-sys-body-small-size);
-       --mat-tooltip-supporting-text-weight: var(--mat-sys-body-small-weight);
-       --mat-tooltip-supporting-text-line-height: var(--mat-sys-body-small-line-height);
-     }
-     ```
-  2. **Incorporar no Mixin de Temas (`ISSUE-014`):**
-     Garantir que a função geradora de temas do `@praxisui/core/theming` derive automaticamente `inverse-surface` e `inverse-on-surface` para temas claros e escuros, garantindo tooltips com alto contraste nativo.
+         /* Angular Material Tooltip Component Tokens */
+         --mat-tooltip-container-color: var(--mat-sys-inverse-surface);
+         --mat-tooltip-supporting-text-color: var(--mat-sys-inverse-on-surface);
+         --mat-tooltip-container-shape: var(--mat-sys-corner-extra-small);
+         --mat-tooltip-supporting-text-font: var(--mat-sys-body-small-font);
+         --mat-tooltip-supporting-text-size: var(--mat-sys-body-small-size);
+         --mat-tooltip-supporting-text-weight: var(--mat-sys-body-small-weight);
+         --mat-tooltip-supporting-text-line-height: var(--mat-sys-body-small-line-height);
+       }
+       ```
+     - Regras de overlay atualizadas para cobrir tanto o seletor clássico quanto o novo seletor Angular Material M3:
+       ```css
+       .cdk-overlay-container .mat-mdc-tooltip .mdc-tooltip__surface,
+       .cdk-overlay-container .mat-mdc-tooltip-surface {
+         background: var(--mat-tooltip-container-color, var(--md-sys-color-inverse-surface, #313033));
+         color: var(--mat-tooltip-supporting-text-color, var(--md-sys-color-inverse-on-surface, #f4f0f4));
+       }
+       ```
+  2. **Validação:**
+     - Testes unitários em `projects/praxis-core/src/lib/tokens/theme-bridge.spec.ts` validando presença de cores não-transparentes e herança de tokens customizados.
 
-* **Solução Canônica Aplicada no Host Consumidor (`praxis-hero-hq-ui`):**
-  No arquivo [`src/styles/theme-praxis.scss`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/src/styles/theme-praxis.scss), foram mapeados:
-  - Tokens de sistema M3: `--md-sys-color-inverse-surface` (`oklch(0.24 0.03 260)` no light / `oklch(0.24 0.035 260)` no dark) e `--md-sys-color-inverse-on-surface`.
-  - Ponte bidirecional Angular Material M3: `--mat-sys-inverse-surface`, `--mat-tooltip-container-color`, `--mat-tooltip-supporting-text-color`, shape e tipografia de 12px.
-  - Refinamento visual empresarial: `.mat-mdc-tooltip-surface` com padding de 6px 12px, border sutil, elevação suave e backdrop-blur de 8px.
-
-* **Casos de Teste para o Agente de Plataforma:**
-  1. *Test Case 1 (Tooltip Contrast & Visibility)*: Montar teste Playwright disparando mouseenter sobre um elemento com `matTooltip`. Aferir que `.mat-mdc-tooltip-surface` possui `background-color` computado com canal alfa = 1.0 (ou > 0.9) e que o contraste de cor entre `background-color` e `color` atende aos critérios WCAG AA (>= 4.5:1).
-  2. *Test Case 2 (No Prebuilt Material Theme Required)*: Em aplicação de teste sem `@angular/material/prebuilt-themes/*.css` importado, aferir que os tokens `--mat-tooltip-container-color` e `--mat-tooltip-supporting-text-color` são devidamente populados por `@praxisui/core/theme-bridge.css`.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Aplicações que importam `@praxisui/core/theme-bridge.css` recebem imediatamente tooltips opacos, legíveis e com alto contraste, sem necessidade de hacks locais.
+  - O workaround em `src/styles/theme-praxis.scss` que forçava classes manuais sobre `.mat-mdc-tooltip-surface` pode ser simplificado, mantendo apenas eventuais customizações estéticas finas de borda/blur se desejado pelo design do app.
 
 
 
