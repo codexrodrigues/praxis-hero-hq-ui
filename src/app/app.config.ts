@@ -1,10 +1,12 @@
 import {
   ApplicationConfig,
+  importProvidersFrom,
   inject,
   provideBrowserGlobalErrorListeners,
   provideEnvironmentInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
+import { MatDialogModule } from '@angular/material/dialog';
 import {
   HttpInterceptorFn,
   provideHttpClient,
@@ -26,6 +28,7 @@ import {
   API_URL,
   type ApiUrlConfig,
   GenericCrudService,
+  GlobalActionService,
   LoadingContext,
   LoadingOrchestrator,
   PRAXIS_LOADING_CTX,
@@ -36,8 +39,15 @@ import {
   withPraxisHttpLoading,
 } from '@praxisui/core';
 import { providePraxisDynamicFieldsCore } from '@praxisui/dynamic-fields';
-import { providePraxisCharts, providePraxisChartsI18n } from '@praxisui/charts';
+import {
+  providePraxisCharts,
+  providePraxisChartsI18n,
+  providePraxisChartsMetadata,
+} from '@praxisui/charts';
 import { providePraxisDynamicFormMetadata } from '@praxisui/dynamic-form';
+import { providePraxisPageBuilderMetadata } from '@praxisui/page-builder';
+import { providePraxisRichContentMetadata } from '@praxisui/rich-content';
+import { providePraxisSettingsPanelBridge } from '@praxisui/settings-panel';
 import { providePraxisTableMetadata } from '@praxisui/table';
 import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
@@ -106,11 +116,17 @@ export const appConfig: ApplicationConfig = {
     ...providePraxisDynamicFieldsCore(),
     providePraxisDynamicFormMetadata(),
     providePraxisTableMetadata(),
+    providePraxisRichContentMetadata(),
+    providePraxisChartsMetadata(),
+    providePraxisPageBuilderMetadata(),
     ...providePraxisCharts(),
     ...providePraxisChartsI18n({ locale: 'pt-BR', fallbackLocale: 'pt-BR' }),
+    ...providePraxisSettingsPanelBridge(),
     ...providePraxisLoadingDefaults(),
+    importProvidersFrom(MatDialogModule),
     { provide: API_URL, useValue: API_URL_VALUE },
     GenericCrudService,
+    GlobalActionService,
     provideGlobalConfig(GLOBAL_CONFIG_SEED),
     provideGlobalConfigSeed(GLOBAL_CONFIG_SEED),
     provideGlobalConfigReady(),

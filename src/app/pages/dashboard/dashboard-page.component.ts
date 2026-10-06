@@ -1,697 +1,387 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { PraxisChartComponent, type PraxisChartConfig } from '@praxisui/charts';
-
-export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
-  id: 'hero-payroll-trend-chart',
-  type: 'line',
-  title: 'Evolução da Folha Salarial & Benefícios',
-  subtitle: 'Execução orçamentária dos últimos ciclos de pagamento tático',
-  sizing: { mode: 'fixed', height: 320 },
-  dataSource: {
-    kind: 'local',
-    items: [
-      { competencia: 'Mai/2026', totalLiquido: 3820000, encargos: 840000 },
-      { competencia: 'Jun/2026', totalLiquido: 3950000, encargos: 860000 },
-      { competencia: 'Jul/2026', totalLiquido: 4120000, encargos: 910000 },
-      { competencia: 'Ago/2026', totalLiquido: 4400000, encargos: 970000 },
-      { competencia: 'Set/2026', totalLiquido: 4680000, encargos: 1020000 },
-      { competencia: 'Out/2026', totalLiquido: 4850000, encargos: 1080000 },
-    ],
-  },
-  axes: {
-    x: { field: 'competencia', type: 'category', label: 'Competência' },
-    y: {
-      type: 'value',
-      label: 'Volume (R$)',
-      labels: { format: 'BRL|symbol|0|compact' },
-    },
-  },
-  series: [
-    {
-      id: 'totalLiquido',
-      name: 'Salário Líquido',
-      type: 'line',
-      metric: { field: 'totalLiquido', aggregation: 'sum' },
-      color: '#38bdf8',
-      smooth: true,
-    },
-    {
-      id: 'encargos',
-      name: 'Encargos & Suporte',
-      type: 'line',
-      metric: { field: 'encargos', aggregation: 'sum' },
-      color: '#a855f7',
-      smooth: true,
-    },
-  ],
-  theme: {
-    tooltip: { enabled: true, trigger: 'axis' },
-    palette: ['#38bdf8', '#a855f7', '#22c55e'],
-  },
-};
-
-export const REPUTATION_RANKING_CHART_CONFIG: PraxisChartConfig = {
-  id: 'hero-reputation-ranking-chart',
-  type: 'bar',
-  title: 'Ranking Reputacional da Força',
-  subtitle: 'Aprovação pública vs. respaldo regulatório por herói',
-  sizing: { mode: 'fixed', height: 320 },
-  dataSource: {
-    kind: 'local',
-    items: [
-      { heroi: 'Tony Stark', scorePublico: 96, scoreGoverno: 88 },
-      { heroi: 'Steve Rogers', scorePublico: 98, scoreGoverno: 95 },
-      { heroi: 'Thor Odinson', scorePublico: 92, scoreGoverno: 82 },
-      { heroi: 'Bruce Banner', scorePublico: 78, scoreGoverno: 91 },
-      { heroi: 'Natasha R.', scorePublico: 89, scoreGoverno: 96 },
-      { heroi: 'Peter Parker', scorePublico: 99, scoreGoverno: 84 },
-    ],
-  },
-  axes: {
-    x: { field: 'heroi', type: 'category', label: 'Herói' },
-    y: { type: 'value', min: 0, max: 100, label: 'Score' },
-  },
-  series: [
-    {
-      id: 'scorePublico',
-      name: 'Aprovação Pública',
-      type: 'bar',
-      metric: { field: 'scorePublico', aggregation: 'avg' },
-      color: '#06b6d4',
-    },
-    {
-      id: 'scoreGoverno',
-      name: 'Confiança Governamental',
-      type: 'bar',
-      metric: { field: 'scoreGoverno', aggregation: 'avg' },
-      color: '#10b981',
-    },
-  ],
-  theme: {
-    tooltip: { enabled: true, trigger: 'axis' },
-    palette: ['#06b6d4', '#10b981'],
-  },
-};
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
+import { Router } from '@angular/router';
+import {
+  GlobalActionService,
+  type WidgetEventEnvelope,
+  type WidgetPageDefinition,
+} from '@praxisui/core';
+import { DynamicPageBuilderComponent } from '@praxisui/page-builder';
+import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, PraxisChartComponent],
+  imports: [CommonModule, DynamicPageBuilderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dashboard-container">
-      <!-- Executive Banner -->
-      <section class="glass-panel hero-banner bg-grid">
-        <div class="banner-content">
-          <div class="badge-row">
-            <span class="status-pill ready-pill">
-              <span class="dot"></span>
-              Sistemas Táticos Ativos
+    <div class="dashboard-page-wrapper">
+      <!-- Toolbar de Governança do Dashboard -->
+      <header class="dashboard-toolbar">
+        <div class="toolbar-brand">
+          <div class="status-indicator">
+            <span class="dot-pulse"></span>
+            <span class="status-label">HQ TACTICAL OPERATIONAL MATRIX</span>
+          </div>
+          <span class="governance-badge">
+            <span class="material-symbols-outlined">dashboard_customize</span>
+            Praxis Page Builder 9.0 · Canvas Governed
+          </span>
+        </div>
+
+        <div class="toolbar-actions">
+          <button
+            type="button"
+            class="customize-toggle-btn"
+            [class.active]="isCustomizing()"
+            (click)="toggleCustomization()"
+            title="Alternar modo de customização de layout e widgets"
+          >
+            <span class="material-symbols-outlined">
+              {{ isCustomizing() ? 'visibility' : 'dashboard_customize' }}
             </span>
-            <span class="status-pill cobalt-pill">
-              <span class="material-symbols-outlined">shield</span>
-              Praxis Platform 9.0 · Metadata-Driven
-            </span>
-          </div>
-
-          <h1 class="title-gradient hero-title">Centro de Comando & Prontidão</h1>
-          <p class="hero-description">
-            Visão unificada das operações de heróis, distribuição de equipes, folha salarial e monitoramento contínuo de ameaças globais.
-          </p>
-
-          <div class="banner-actions">
-            <a routerLink="/rh/funcionarios" class="action-btn primary-gradient">
-              <span class="material-symbols-outlined">group</span>
-              Gerenciar Heróis & RH
-            </a>
-            <a routerLink="/operacoes/missoes" class="action-btn outline-btn">
-              <span class="material-symbols-outlined">military_tech</span>
-              Centro de Missões
-            </a>
-          </div>
+            <span>{{ isCustomizing() ? 'Concluir Edição' : 'Customizar Layout' }}</span>
+          </button>
         </div>
+      </header>
 
-        <div class="hero-radar-preview">
-          <div class="radar-circle circle-3"></div>
-          <div class="radar-circle circle-2"></div>
-          <div class="radar-circle circle-1"></div>
-          <div class="radar-sweep"></div>
-          <div class="radar-center">
-            <span class="material-symbols-outlined">radar</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- KPI Bento Grid -->
-      <section class="bento-grid">
-        <!-- Card 1: Prontidão -->
-        <article class="glass-panel bento-card">
-          <div class="card-header">
-            <div class="card-icon tone-ready">
-              <span class="material-symbols-outlined">verified_user</span>
-            </div>
-            <span class="tag-status ready-tag">Operacional</span>
-          </div>
-          <p class="card-label">Prontidão da Força</p>
-          <p class="card-value">98,4%</p>
-          <div class="progress-bar">
-            <div class="progress-fill fill-ready" style="width: 98.4%"></div>
-          </div>
-          <p class="card-footnote">21 heróis em escala ativa imediata</p>
-        </article>
-
-        <!-- Card 2: Missões -->
-        <article class="glass-panel bento-card">
-          <div class="card-header">
-            <div class="card-icon tone-operations">
-              <span class="material-symbols-outlined">military_tech</span>
-            </div>
-            <span class="tag-status operations-tag">07 Em Curso</span>
-          </div>
-          <p class="card-label">Missões Ativas em Campo</p>
-          <p class="card-value">14 Agendadas</p>
-          <div class="progress-bar">
-            <div class="progress-fill fill-operations" style="width: 65%"></div>
-          </div>
-          <p class="card-footnote">Taxa de sucesso operacional de 96,2%</p>
-        </article>
-
-        <!-- Card 3: Folha & Recursos -->
-        <article class="glass-panel bento-card">
-          <div class="card-header">
-            <div class="card-icon tone-rh">
-              <span class="material-symbols-outlined">payments</span>
-            </div>
-            <span class="tag-status rh-tag">Outubro / 2026</span>
-          </div>
-          <p class="card-label">Execução Orçamentária</p>
-          <p class="card-value">R$ 4,85 M</p>
-          <div class="progress-bar">
-            <div class="progress-fill fill-rh" style="width: 80.8%"></div>
-          </div>
-          <p class="card-footnote">Folha programada e benefícios especiais</p>
-        </article>
-
-        <!-- Card 4: Alertas e Riscos -->
-        <article class="glass-panel bento-card">
-          <div class="card-header">
-            <div class="card-icon tone-risk">
-              <span class="material-symbols-outlined">emergency</span>
-            </div>
-            <span class="tag-status risk-tag">Defcon 5</span>
-          </div>
-          <p class="card-label">Incidentes Críticos</p>
-          <p class="card-value">02 Em Análise</p>
-          <div class="progress-bar">
-            <div class="progress-fill fill-risk" style="width: 25%"></div>
-          </div>
-          <p class="card-footnote">Danos colaterais e indenizações contidas</p>
-        </article>
-      </section>
-
-      <!-- Tactical Analytics Charts Section -->
-      <section class="charts-section">
-        <article class="glass-panel chart-card">
-          <header class="chart-header">
-            <div class="chart-title-wrap">
-              <span class="material-symbols-outlined chart-icon tone-rh">payments</span>
-              <div>
-                <h3>Orçamento & Folha Salarial</h3>
-                <p>Evolução de despesas com heróis, benefícios e suporte técnico</p>
-              </div>
-            </div>
-          </header>
-          <div class="chart-wrapper">
-            <praxis-chart [config]="payrollTrendConfig" />
-          </div>
-        </article>
-
-        <article class="glass-panel chart-card">
-          <header class="chart-header">
-            <div class="chart-title-wrap">
-              <span class="material-symbols-outlined chart-icon tone-operations">monitoring</span>
-              <div>
-                <h3>Índices de Reputação & Confiança</h3>
-                <p>Métricas comparativas entre percepção civil e aprovação governamental</p>
-              </div>
-            </div>
-          </header>
-          <div class="chart-wrapper">
-            <praxis-chart [config]="reputationRankingConfig" />
-          </div>
-        </article>
-      </section>
-
-      <!-- Domain Navigation Hub -->
-      <section class="hub-section">
-        <h2 class="title-gradient hub-title">Centros de Comando & Especialidades</h2>
-        <div class="hub-grid">
-          <a routerLink="/rh/funcionarios" class="glass-panel hub-card">
-            <div class="hub-icon tone-rh"><span class="material-symbols-outlined">group</span></div>
-            <div class="hub-info">
-              <h3>Heróis & Colaboradores</h3>
-              <p>Cadastros completos, identidades civis, remunerações e histórico funcional.</p>
-            </div>
-            <span class="material-symbols-outlined arrow">arrow_forward</span>
-          </a>
-
-          <a routerLink="/operacoes/missoes" class="glass-panel hub-card">
-            <div class="hub-icon tone-operations"><span class="material-symbols-outlined">military_tech</span></div>
-            <div class="hub-info">
-              <h3>Centro de Missões</h3>
-              <p>Despacho tático, formação de squads, diário de bordo e desfechos operacionais.</p>
-            </div>
-            <span class="material-symbols-outlined arrow">arrow_forward</span>
-          </a>
-
-          <a routerLink="/ativos/equipamentos" class="glass-panel hub-card">
-            <div class="hub-icon tone-assets"><span class="material-symbols-outlined">inventory_2</span></div>
-            <div class="hub-info">
-              <h3>Ativos & Armaduras</h3>
-              <p>Controle de custódia, manutenção preventiva de trajes e gestão da frota aérea/terrestre.</p>
-            </div>
-            <span class="material-symbols-outlined arrow">arrow_forward</span>
-          </a>
-
-          <a routerLink="/suprimentos/contratos" class="glass-panel hub-card">
-            <div class="hub-icon tone-supplies"><span class="material-symbols-outlined">contract</span></div>
-            <div class="hub-info">
-              <h3>Suprimentos & Contratos</h3>
-              <p>Fornecedores homologados, requisições de compra e tecnologia bélica avançada.</p>
-            </div>
-            <span class="material-symbols-outlined arrow">arrow_forward</span>
-          </a>
-
-          <a routerLink="/risco/ameacas" class="glass-panel hub-card">
-            <div class="hub-icon tone-risk"><span class="material-symbols-outlined">radar</span></div>
-            <div class="hub-info">
-              <h3>Inteligência & Ameaças</h3>
-              <p>Monitoramento geoespacial de vilões, acordos regulatórios e indenizações públicas.</p>
-            </div>
-            <span class="material-symbols-outlined arrow">arrow_forward</span>
-          </a>
-
-          <a routerLink="/rh/reputacao" class="glass-panel hub-card">
-            <div class="hub-icon tone-operations"><span class="material-symbols-outlined">monitoring</span></div>
-            <div class="hub-info">
-              <h3>Ranking Reputacional</h3>
-              <p>Índices consolidados de aprovação popular, respaldo governamental e governança.</p>
-            </div>
-            <span class="material-symbols-outlined arrow">arrow_forward</span>
-          </a>
-        </div>
-      </section>
+      <!-- Canvas Oficial Page Builder -->
+      <main class="dashboard-canvas-container">
+        <praxis-dynamic-page-builder
+          [page]="pageDefinition"
+          [enableCustomization]="isCustomizing()"
+          [showSettingsButton]="isCustomizing()"
+          (pageChange)="onPageChange($event)"
+          (widgetEvent)="handleWidgetEvent($event)"
+        />
+      </main>
     </div>
   `,
   styles: [`
-    .dashboard-container {
+    :host {
+      display: block;
+      width: 100%;
+    }
+
+    .dashboard-page-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 16px;
       max-width: 1540px;
       margin: 0 auto;
     }
 
-    /* Hero Banner */
-    .hero-banner {
-      border-radius: 24px;
-      padding: 36px 42px;
+    /* Dashboard Header / Toolbar */
+    .dashboard-toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 32px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .banner-content {
-      max-width: 760px;
-      z-index: 2;
-    }
-
-    .badge-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-
-      span { font-size: 14px; }
-    }
-
-    .ready-pill {
-      background: color-mix(in oklab, var(--ready) 15%, transparent);
-      color: var(--ready);
-      border: 1px solid color-mix(in oklab, var(--ready) 30%, transparent);
-
-      .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background-color: var(--ready);
-      }
-    }
-
-    .cobalt-pill {
-      background: color-mix(in oklab, var(--cobalt) 15%, transparent);
-      color: var(--cobalt);
-      border: 1px solid color-mix(in oklab, var(--cobalt) 30%, transparent);
-    }
-
-    .hero-title {
-      margin: 0 0 12px;
-      font-family: var(--font-display);
-      font-size: 2.6rem;
-      font-weight: 700;
-      line-height: 1.1;
-    }
-
-    .hero-description {
-      margin: 0 0 24px;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: var(--muted-foreground);
-    }
-
-    .banner-actions {
-      display: flex;
-      gap: 14px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      background: color-mix(in oklab, var(--card) 60%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      gap: 16px;
       flex-wrap: wrap;
     }
 
-    .action-btn {
+    .toolbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-indicator {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      height: 44px;
-      padding: 0 20px;
-      border-radius: 12px;
-      font-size: 0.85rem;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      background: color-mix(in oklab, var(--ready) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--ready) 28%, transparent);
+      color: var(--ready);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .dot-pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--ready);
+      box-shadow: 0 0 8px var(--ready);
+      animation: pulse-glow 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .governance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      color: var(--muted-foreground);
       font-weight: 600;
-      text-decoration: none;
-      transition: transform 0.15s ease, opacity 0.2s ease;
+
+      span { font-size: 15px; color: var(--cobalt); }
+    }
+
+    .customize-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 80%, transparent);
+      color: var(--foreground);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
       &:hover {
-        transform: translateY(-2px);
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+      }
+
+      &.active {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        border-color: var(--primary);
+        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 40%, transparent);
       }
 
       span { font-size: 18px; }
     }
 
-    .outline-btn {
-      background: color-mix(in oklab, var(--card) 60%, transparent);
-      border: 1px solid var(--border);
-      color: var(--foreground);
-
-      &:hover {
-        border-color: var(--primary);
-      }
-    }
-
-    /* Radar Graphic */
-    .hero-radar-preview {
-      position: relative;
-      width: 220px;
-      height: 220px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .radar-circle {
-      position: absolute;
-      border-radius: 50%;
-      border: 1px dashed color-mix(in oklab, var(--primary) 35%, transparent);
-    }
-
-    .circle-1 { width: 70px; height: 70px; }
-    .circle-2 { width: 140px; height: 140px; }
-    .circle-3 { width: 210px; height: 210px; }
-
-    .radar-center {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: color-mix(in oklab, var(--primary) 20%, transparent);
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-
-      span { font-size: 24px; }
-    }
-
-    /* Bento Grid */
-    .bento-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-    }
-
-    .bento-card {
-      padding: 22px;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .card-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      span { font-size: 22px; }
-    }
-
-    .tag-status {
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 9999px;
-    }
-
-    .ready-tag { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-    .operations-tag { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
-    .rh-tag { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
-    .risk-tag { color: var(--risk); background: color-mix(in oklab, var(--risk) 12%, transparent); }
-
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-    .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 14%, transparent); }
-    .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
-    .tone-assets { color: var(--assets); background: color-mix(in oklab, var(--assets) 14%, transparent); }
-    .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 14%, transparent); }
-
-    .card-label {
-      margin: 0;
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
-
-    .card-value {
-      margin: 6px 0 12px;
-      font-family: var(--font-display);
-      font-size: 2rem;
-      font-weight: 700;
-    }
-
-    .progress-bar {
-      height: 6px;
-      background-color: var(--muted);
-      border-radius: 9999px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      border-radius: 9999px;
-    }
-
-    .fill-ready { background-color: var(--ready); }
-    .fill-operations { background-color: var(--operations); }
-    .fill-rh { background-color: var(--rh); }
-    .fill-risk { background-color: var(--risk); }
-
-    .card-footnote {
-      margin: 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
-
-    /* Charts Section */
-    .charts-section {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
-      gap: 20px;
-    }
-
-    .chart-card {
-      padding: 24px;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .chart-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      h3 {
-        margin: 0 0 2px;
-        font-family: var(--font-display);
-        font-size: 1.1rem;
-        font-weight: 700;
-      }
-
-      p {
-        margin: 0;
-        font-size: 0.75rem;
-        color: var(--muted-foreground);
-      }
-    }
-
-    .chart-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-
-    .chart-wrapper {
-      min-height: 320px;
+    .dashboard-canvas-container {
       width: 100%;
     }
 
-    /* Hub Section */
-    .hub-section {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    /* Rich Content & Widget Shell Enhancements */
+    ::ng-deep {
+      /* Hero Executive Banner */
+      .hero-executive-banner {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px !important;
+        padding: 32px 38px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
 
-    .hub-title {
-      margin: 0;
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
+      .hero-executive-banner .pdx-rich-card__title,
+      .hero-executive-banner .prx-rich-card__title {
+        font-family: var(--font-display) !important;
+        font-size: 2.4rem !important;
+        font-weight: 700 !important;
+        line-height: 1.15 !important;
+        background: linear-gradient(135deg, var(--foreground) 0%, color-mix(in oklab, var(--foreground) 70%, var(--primary)) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-    .hub-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-    }
+      .hero-executive-banner .pdx-rich-card__subtitle,
+      .hero-executive-banner .prx-rich-card__subtitle {
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+        color: var(--muted-foreground) !important;
+        max-width: 760px;
+      }
 
-    .hub-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      text-decoration: none;
-      color: var(--foreground);
-      transition: all 0.2s ease;
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
 
-      &:hover {
-        transform: translateY(-2px);
-        border-color: var(--primary);
+      .ready-pill {
+        background: color-mix(in oklab, var(--ready) 15%, transparent);
+        color: var(--ready);
+        border: 1px solid color-mix(in oklab, var(--ready) 30%, transparent);
+      }
 
-        .arrow {
-          transform: translateX(4px);
-          color: var(--primary);
+      .cobalt-pill {
+        background: color-mix(in oklab, var(--cobalt) 15%, transparent);
+        color: var(--cobalt);
+        border: 1px solid color-mix(in oklab, var(--cobalt) 30%, transparent);
+      }
+
+      /* Bento KPI Cards */
+      .bento-kpi-card {
+        border-radius: 20px !important;
+        padding: 22px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
         }
       }
-    }
 
-    .hub-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      span { font-size: 24px; }
-    }
+      .bento-kpi-card .prx-rich-card__title,
+      .bento-kpi-card .pdx-rich-card__title {
+        font-family: var(--font-display) !important;
+        font-size: 1.9rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 6px 0 10px !important;
+      }
 
-    .hub-info {
-      flex: 1;
-      min-width: 0;
+      .bento-kpi-card .prx-rich-card__subtitle,
+      .bento-kpi-card .pdx-rich-card__subtitle {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
 
-      h3 {
-        margin: 0 0 4px;
-        font-family: var(--font-display);
-        font-size: 1rem;
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .tag-status {
+        font-size: 0.65rem;
         font-weight: 700;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 9999px;
       }
 
-      p {
-        margin: 0;
-        font-size: 0.75rem;
+      .ready-tag { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
+      .operations-tag { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
+      .rh-tag { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
+      .risk-tag { color: var(--risk); background: color-mix(in oklab, var(--risk) 12%, transparent); }
+
+      .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
+      .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
+      .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 14%, transparent); }
+      .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
+      .tone-assets { color: var(--assets); background: color-mix(in oklab, var(--assets) 14%, transparent); }
+      .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 14%, transparent); }
+
+      .fill-ready progress, .fill-ready .pdx-progress-bar-fill, .fill-ready .mat-mdc-progress-bar-fill {
+        background-color: var(--ready) !important;
+      }
+      .fill-operations progress, .fill-operations .pdx-progress-bar-fill {
+        background-color: var(--operations) !important;
+      }
+      .fill-rh progress, .fill-rh .pdx-progress-bar-fill {
+        background-color: var(--rh) !important;
+      }
+      .fill-risk progress, .fill-risk .pdx-progress-bar-fill {
+        background-color: var(--risk) !important;
+      }
+
+      .card-footnote {
+        font-size: 0.72rem;
         color: var(--muted-foreground);
-        line-height: 1.35;
+        margin-top: 6px;
       }
-    }
 
-    .arrow {
-      color: var(--muted-foreground);
-      transition: transform 0.2s ease, color 0.2s ease;
-    }
+      /* Hub Action Cards Grid */
+      .hub-action-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
 
-    @media (max-width: 768px) {
-      .hero-banner {
-        flex-direction: column;
-        padding: 24px;
+      .hub-card-action {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          border-color: var(--primary) !important;
+        }
       }
-      .hero-radar-preview {
-        display: none;
+
+      .hub-card-action .prx-rich-action-card__title,
+      .hub-card-action .pdx-rich-action-card__title {
+        font-family: var(--font-display) !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
       }
-      .charts-section {
-        grid-template-columns: 1fr;
+
+      .hub-card-action .prx-rich-action-card__subtitle,
+      .hub-card-action .pdx-rich-action-card__subtitle {
+        font-size: 0.75rem !important;
+        color: var(--muted-foreground) !important;
+        line-height: 1.35 !important;
       }
     }
   `],
 })
 export class DashboardPageComponent {
-  protected readonly payrollTrendConfig = PAYROLL_TREND_CHART_CONFIG;
-  protected readonly reputationRankingConfig = REPUTATION_RANKING_CHART_CONFIG;
+  private readonly router = inject(Router);
+  private readonly globalAction = inject(GlobalActionService, { optional: true });
+
+  protected pageDefinition: WidgetPageDefinition = DASHBOARD_PAGE_DEFINITION;
+  protected readonly isCustomizing = signal<boolean>(false);
+
+  protected toggleCustomization(): void {
+    this.isCustomizing.update((v) => !v);
+  }
+
+  protected onPageChange(updated: WidgetPageDefinition): void {
+    this.pageDefinition = updated;
+  }
+
+  protected handleWidgetEvent(event: WidgetEventEnvelope): void {
+    const payload = event.payload as any;
+    if (payload?.path) {
+      this.router.navigateByUrl(payload.path);
+      return;
+    }
+
+    if (payload?.actionId) {
+      if (this.globalAction) {
+        this.globalAction.execute(payload.actionId, payload.payload);
+      }
+      return;
+    }
+
+    if (payload?.url) {
+      window.open(payload.url, '_blank', 'noopener,noreferrer');
+    }
+  }
 }
