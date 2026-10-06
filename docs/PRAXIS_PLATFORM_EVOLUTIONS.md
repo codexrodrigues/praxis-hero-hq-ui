@@ -17,7 +17,7 @@
 | **ISSUE-001** | `@praxisui/rich-content` | Design / Visual | "Caixa dentro de Caixas": Renderização duplicada de container em `card` e `actionCard` | `[DONE]` |
 | **ISSUE-002** | `@praxisui/rich-content` | Design / Funcional | Badges/Chips com estilos fixos Material 3 acoplados e `icon` ignorado no template | `[DONE]` |
 | **ISSUE-003** | `@praxisui/rich-content` | Funcional / DX | `RichProgressNode`: `valueExpr` não aceita literais numéricos e falta `value: number` | `[DONE]` |
-| **ISSUE-004** | `@praxisui/rich-content` | Estrutural / Layout | Suporte a nós canônicos de layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode`) | `[PENDING]` |
+| **ISSUE-004** | `@praxisui/rich-content` | Estrutural / Layout | Suporte a nós canônicos de layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode`) | `[DONE]` |
 | **ISSUE-005** | `@praxisui/core` | Arquitetural / Tipos | Harmonização de tokens semânticos de cores entre nós (`statGroup`, `timeline`, `badge`) | `[PENDING]` |
 | **ISSUE-006** | `@praxisui/rich-content` | Interatividade / DX | Callbacks de ação e eventos interativos nativos em itens de `statGroup` e `timeline` | `[PENDING]` |
 | **ISSUE-007** | `@praxisui/page-builder` | Reatividade / Estado | Binding reativo granular para atualização de widgets sem rerender do canvas | `[PENDING]` |
@@ -26,7 +26,7 @@
 | **ISSUE-010** | `@praxisui/rich-content` | Funcional / KPIs | Indicador de progresso integrado (`variant: 'bar' \| 'ring'`) em `RichStatItem` | `[DONE]` |
 | **ISSUE-011** | `@praxisui/core` | Navegação / SPA | Handler nativo e autônomo para navegação de rotas SPA (`praxis:router.navigate`, `navigation.navigate`) | `[DONE]` |
 | **ISSUE-012** | `@praxisui/page-builder` | Design / Shell | Presets canônicos Glassmorphism (`glass-dark`, `glass-light`) e `backdropFilter` em `WidgetShell` | `[DONE]` |
-| **ISSUE-013** | `@praxisui/rich-content` | Design / Interatividade | Layout Vertical, Espaçamento de Rodapé (`margin-top: auto`) e Microinterações de `:hover`/`:focus-visible` em `RichActionCardNode` | `[PENDING]` |
+| **ISSUE-013** | `@praxisui/rich-content` | Design / Interatividade | Layout Vertical, Espaçamento de Rodapé (`margin-top: auto`) e Microinterações de `:hover`/`:focus-visible` em `RichActionCardNode` | `[DONE]` |
 | **ISSUE-014** | `@praxisui/core` | Arquitetural / DX | Governança Canônica de Temas: Ausência de SCSS Starter/Mixin e Mapeamento Obrigatório de Tokens Material 3 | `[PENDING]` |
 | **ISSUE-015** | `@praxisui/core` | Design / UX & Layout | Fundo Translúcido em Widgets Sobrepostos e Omissão do Modo de Inspeção de Janela ('expand') na Toolbar de WidgetShell | `[PENDING]` |
 | **ISSUE-016** | `@praxisui/core` | Arquitetural / Temas | Ausência de Tokens Canônicos de Superfície Invertida e Tooltip no Theme Bridge (`--mat-sys-inverse-surface` e `--mat-tooltip-*`) | `[PENDING]` |
@@ -231,7 +231,7 @@
 
 ### ISSUE-004: Suporte a Nós Canônicos de Layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode` ou `compose` com `layout: 'grid'`)
 * **Biblioteca:** `@praxisui/rich-content` / `@praxisui/core`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Impacto direto no alinhamento visual, responsividade e previsibilidade de cards, formulários e blocos ricos)
 * **Diagnóstico Técnico & Evidência Real:**
   Na tela do Dashboard Executivo (*Centros de Comando & Especialidades* com 6 `actionCard`), foi observado um desalinhamento grave: 3 cards na primeira linha, 2 cards na segunda linha com um buraco vazio à direita, e 1 card isolado na terceira linha.
@@ -347,25 +347,69 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ---
 
-* **Workaround Atual no Consumidor:**
-  Sobrescrever via CSS direcionando explicitamente para a `div.prx-rich-compose` interna:
-  ```scss
-  .hub-action-cards-grid .prx-rich-compose {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
-    gap: 16px !important;
-    width: 100% !important;
-    align-items: stretch !important;
-  }
-  .hub-action-cards-grid .prx-rich-compose > .prx-rich-node {
-    width: 100% !important;
-    display: flex !important;
-  }
-  .hub-card-action {
-    width: 100% !important;
-    height: 100% !important;
-  }
-  ```
+* **Implementação Realizada na Plataforma (PR #543 / Commit `836445390`):**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Novos tipos públicos `RichComposeLayout` (`'flex' | 'grid'`) e `RichComposeAlignItems` (`'stretch' | 'start' | 'center' | 'end'`).
+     - Interface `RichComposeNode` expandida com:
+       * `layout?: RichComposeLayout;` (default `'flex'`, garantindo 100% de compatibilidade retroativa)
+       * `columns?: number | 'auto-fit' | 'auto-fill';` (colunas fixas ex: `3`, ou responsivas `'auto-fit'`/`'auto-fill'`)
+       * `minColumnWidth?: string;` (largura mínima das colunas em auto-fit/auto-fill, default `'280px'`)
+       * `alignItems?: RichComposeAlignItems;` (alinhamento dos filhos, padrão `'stretch'` no grid)
+       * `items: RichBlockNode[];` (capacidade canônica de receber qualquer bloco rico como filho, incluindo `actionCard`, `card`, `statGroup`, etc.)
+  2. **Runtime e CSS (`@praxisui/rich-content`):**
+     - Template enriquecido com binding `.prx-rich-compose--grid`, variável CSS `--prx-compose-columns` computada com `repeat(...)`, atributo `data-layout` e `style.align-items`.
+     - CSS nativo `.prx-rich-compose--grid`:
+       ```css
+       .prx-rich-compose--grid {
+         display: grid;
+         grid-template-columns: var(--prx-compose-columns, repeat(auto-fit, minmax(280px, 1fr)));
+         align-items: stretch;
+         width: 100%;
+       }
+       .prx-rich-compose--grid > .prx-rich-node {
+         display: flex;
+         width: 100%;
+         min-width: 0;
+         height: 100%;
+       }
+       .prx-rich-compose--grid > .prx-rich-node > * {
+         width: 100%;
+         height: 100%;
+       }
+       ```
+  3. **Validação e Manifestos de IA:**
+     - `RichContentDocumentValidator` valida `layout`, `columns` (inteiro positivo ou `'auto-fit'`/`'auto-fill'`), `minColumnWidth` e `alignItems`.
+     - `RICH_CONTENT_AI_CAPABILITIES` e `PRAXIS_RICH_CONTENT_AUTHORING_MANIFEST` atualizados para authoring declarativo assistido por IA.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - O workaround de aplicar `className: 'hub-action-cards-grid'` e forçar `display: grid !important` na `div.prx-rich-compose` interna pode ser **completamente removido** de `src/styles/theme-praxis.scss` e dos componentes host.
+  - Para obter a grade simétrica 3x2 sem itens órfãos (Caso Centros de Comando & Especialidades):
+    ```json
+    {
+      "type": "compose",
+      "layout": "grid",
+      "columns": 3,
+      "gap": "md",
+      "items": [
+        { "type": "actionCard", "title": "Operações Táticas", ... },
+        { "type": "actionCard", "title": "Inteligência Estratégica", ... },
+        { "type": "actionCard", "title": "Logística Global", ... },
+        { "type": "actionCard", "title": "Comunicações Seguras", ... },
+        { "type": "actionCard", "title": "Recursos Humanos", ... },
+        { "type": "actionCard", "title": "Segurança da Informação", ... }
+      ]
+    }
+    ```
+  - Para grade auto-responsiva adaptável de mobile a widescreen:
+    ```json
+    {
+      "type": "compose",
+      "layout": "grid",
+      "columns": "auto-fit",
+      "minColumnWidth": "320px",
+      "gap": "md",
+      "items": [ ... ]
+    }
+    ```
 
 ---
 
@@ -614,7 +658,7 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-013: Layout Vertical, Espaçamento de Rodapé (`margin-top: auto`) e Microinterações de `:hover`/`:focus-visible` Nativos em `RichActionCardNode`
 * **Biblioteca:** `@praxisui/rich-content` / `@praxisui/core`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Degradação de usabilidade, quebra de ritmo vertical e ausência de feedback interativo na principal CTA de navegação)
 * **Diagnóstico Técnico & Evidência Real:**
   No template de `RichActionCardNode` em `praxis-rich-content.ts` (linhas 1123–1160):
@@ -741,10 +785,110 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
        color?: 'primary' | 'accent' | 'warn';
      }
      ```
-* **Casos de Teste para o Agente de Plataforma:**
-  1. *Test Case 1 (Alinhamento de CTA na Base)*: Renderizar um grid com 3 `actionCard`. O Card 1 possui 1 linha de texto; o Card 2 possui 4 linhas de texto. O teste Playwright deve aferir que `bottom` bounding box de `.prx-rich-action-card__actions` em todos os cards está alinhado à base do container.
-  2. *Test Case 2 (Hover Feedback no Botão)*: Fazer hover no elemento `.prx-rich-action-button`. Aferir via computed style que `background-color` e `color` mudam para o token de destaque primário e que `box-shadow` é ativado.
-  3. *Test Case 3 (Navegação por Teclado e Foco Acessível)*: Focar o botão via `Tab`. Aferir que `:focus-visible` produz `outline` visível com espessura mínima de 2px.
+* **Implementação Realizada na Plataforma (PR #543 / Commit `836445390`):**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Novos tipos públicos `RichActionCardCtaPlacement` (`'bottom' | 'inline' | 'trailing'`) e `RichActionCardCtaVariant` (`'elevated' | 'stroked' | 'flat' | 'tonal' | 'raised'`).
+     - Interface `RichActionCardNode` expandida com as propriedades `ctaPlacement` e `ctaVariant`.
+  2. **Layout Vertical e Alinhamento de Rodapé (`@praxisui/rich-content`):**
+     - Folha de estilos completa para `.prx-rich-action-card`:
+       ```css
+       .prx-rich-action-card {
+         display: flex;
+         flex-direction: column;
+         justify-content: space-between;
+         height: 100%;
+         min-height: 140px;
+         box-sizing: border-box;
+         border: 1px solid var(--md-sys-color-outline-variant, #cac4d0);
+         border-radius: 16px;
+         padding: 16px;
+         background: var(--md-sys-color-surface, #fff);
+         color: var(--md-sys-color-on-surface, #1d1b20);
+       }
+       .prx-rich-action-card__copy {
+         display: flex;
+         flex-direction: column;
+         flex: 1 1 auto;
+         margin-bottom: 16px;
+       }
+       .prx-rich-action-card__actions {
+         margin-top: auto;
+         padding-top: 12px;
+         display: flex;
+         align-items: center;
+         gap: 8px;
+         justify-content: flex-start;
+         flex-wrap: wrap;
+       }
+       .prx-rich-action-card__actions[data-placement='trailing'] {
+         justify-content: flex-end;
+       }
+       .prx-rich-action-card__actions[data-placement='inline'] {
+         margin-top: 8px;
+         padding-top: 0;
+       }
+       ```
+     - O container agora se expande uniformemente para preencher 100% da altura da célula da grade e o rodapé (`.prx-rich-action-card__actions`) com `margin-top: auto` garante que todos os botões de ação permaneçam perfeitamente alinhados na mesma linha de base horizontal, eliminando de forma definitiva o "efeito escada".
+  3. **Microinterações e Acessibilidade em `.prx-rich-action-button`:**
+     - Adicionada transição suave de cores, borda, sombra e elevação:
+       ```css
+       .prx-rich-action-button {
+         display: inline-flex;
+         align-items: center;
+         gap: 6px;
+         transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+       }
+       .prx-rich-action-button:hover:not(:disabled) {
+         background: var(--md-sys-color-primary, #6750a4);
+         color: var(--md-sys-color-on-primary, #fff);
+         border-color: var(--md-sys-color-primary, #6750a4);
+         box-shadow: var(--md-sys-elevation-level1, 0 1px 3px 1px rgba(0, 0, 0, 0.15));
+         transform: translateY(-1px);
+       }
+       .prx-rich-action-button:focus-visible {
+         outline: 2px solid var(--md-sys-color-primary, #6750a4);
+         outline-offset: 2px;
+       }
+       .prx-rich-action-button:active:not(:disabled) {
+         transform: translateY(0);
+       }
+       ```
+     - Suporte completo às variantes visuais Material 3: `--raised`, `--stroked`, `--flat`, `--tonal` (secondary container), e `--elevated` (surface container com elevação).
+     - Proteção para usuários com sensibilidade a movimento via `@media (prefers-reduced-motion: reduce)` desabilitando transições e transformações.
+  4. **Validação:**
+     - `RichContentDocumentValidator` valida `ctaPlacement` e `ctaVariant` contra seus respectivos tipos canônicos.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - O workaround de aplicar classes de host (como `.hub-card-action`) para forçar `height: 100%`, empurrar botões para a base com `margin-top: auto` ou sobrescrever `:hover` via `::ng-deep` pode ser **completamente removido**.
+  - Declarar nós `actionCard` com a nova API expressiva:
+    ```json
+    {
+      "type": "actionCard",
+      "title": "Centro de Inteligência",
+      "subtitle": "Operações táticas e análise estratégica",
+      "icon": "shield",
+      "ctaLabel": "Acessar Terminal",
+      "ctaPlacement": "bottom",
+      "ctaVariant": "tonal",
+      "action": {
+        "actionId": "praxis:router.navigate",
+        "payload": "/intel"
+      }
+    }
+    ```
+    Ou para botão alinhado à direita com variante elevada:
+    ```json
+    {
+      "type": "actionCard",
+      "title": "Arsenal",
+      "ctaLabel": "Ver Inventário",
+      "ctaPlacement": "trailing",
+      "ctaVariant": "elevated",
+      "action": {
+        "actionId": "praxis:router.navigate",
+        "payload": "/armory"
+      }
+    }
+    ```
 
 ---
 
