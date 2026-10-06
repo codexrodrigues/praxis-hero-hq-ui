@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 
 export const BASES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -19,42 +21,43 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       },
       {
         field: 'nome',
-        header: 'Nome da Base / Complexo',
+        header: 'Nome da Base',
         width: '260px',
         sortable: true,
       },
       {
-        field: 'tipo',
-        header: 'Ambiente / Tipo',
-        width: '160px',
-        align: 'center',
+        field: 'localizacao',
+        header: 'Coordenadas / Localização',
+        width: '240px',
         sortable: true,
       },
       {
-        field: 'sigilo',
-        header: 'Classificação de Sigilo',
+        field: 'tipo',
+        header: 'Tipo de Instalação',
         width: '180px',
         align: 'center',
         sortable: true,
       },
       {
-        field: 'planeta',
-        header: 'Setor Planetário',
-        width: '150px',
+        field: 'capacidadeEquipes',
+        header: 'Capacidade (Squads)',
+        type: 'number',
+        width: '160px',
+        align: 'center',
         sortable: true,
       },
       {
-        field: 'latitude',
-        header: 'Latitude',
-        width: '130px',
-        align: 'right',
+        field: 'nivelSigilo',
+        header: 'Nível de Sigilo',
+        width: '160px',
+        align: 'center',
         sortable: true,
       },
       {
-        field: 'longitude',
-        header: 'Longitude',
-        width: '130px',
-        align: 'right',
+        field: 'status',
+        header: 'Status Operacional',
+        width: '160px',
+        align: 'center',
         sortable: true,
       },
     ],
@@ -70,7 +73,7 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
     },
     {
       id: 'create',
-      label: 'Comissionar Base',
+      label: 'Registrar Nova Base',
       action: 'create',
       openMode: 'modal',
       formId: 'bases-create',
@@ -78,14 +81,60 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
   ],
   defaults: {
     openMode: 'modal',
-    modal: { width: '840px', maxWidth: '95vw' },
+    modal: { width: '880px', maxWidth: '95vw' },
   },
+};
+
+export const BASES_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'bases-kpi-grid',
+      items: [
+        {
+          id: 'instalacoes',
+          label: 'Instalações Globais',
+          value: '7 Complexos',
+          caption: 'Terrestres, móveis, subterrâneas e orbitais',
+          icon: 'apartment',
+          tone: 'info',
+        },
+        {
+          id: 'orbital',
+          label: 'Plataforma Orbital',
+          value: 'Enterprise NCC-1701',
+          caption: 'Vigilância subespacial contínua',
+          icon: 'satellite_alt',
+          tone: 'success',
+        },
+        {
+          id: 'sigilo',
+          label: 'Nível Máximo de Sigilo',
+          value: 'Wakanda Citadel',
+          caption: 'Acesso restrito: Ultra Secreta',
+          icon: 'lock',
+          tone: 'warning',
+        },
+        {
+          id: 'blindagem',
+          label: 'Blindagem Perimetral',
+          value: '100% Prontidão',
+          caption: 'Escudos defletores ativados',
+          icon: 'security',
+          tone: 'neutral',
+        },
+      ],
+    },
+  ],
 };
 
 @Component({
   selector: 'app-bases-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -102,43 +151,9 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
         </div>
       </header>
 
-      <!-- Bento Grid de KPIs -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-operations">
-            <span class="material-symbols-outlined">apartment</span>
-          </div>
-          <p class="kpi-label">Instalações Globais</p>
-          <p class="kpi-value">7 Complexos</p>
-          <p class="kpi-detail">Terrestres, móveis, subterrâneas e orbitais</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-ready">
-            <span class="material-symbols-outlined">satellite_alt</span>
-          </div>
-          <p class="kpi-label">Plataforma Orbital</p>
-          <p class="kpi-value">Enterprise NCC-1701</p>
-          <p class="kpi-detail text-ready">Vigilância subespacial contínua</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-warning">
-            <span class="material-symbols-outlined">lock</span>
-          </div>
-          <p class="kpi-label">Nível Máximo de Sigilo</p>
-          <p class="kpi-value">Wakanda Citadel</p>
-          <p class="kpi-detail text-warning">Acesso restrito: Ultra Secreta</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-rh">
-            <span class="material-symbols-outlined">security</span>
-          </div>
-          <p class="kpi-label">Blindagem Perimetral</p>
-          <p class="kpi-value">100% Prontidão</p>
-          <p class="kpi-detail">Escudos defletores ativados</p>
-        </div>
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Tabela CRUD Governança Canônica -->
@@ -177,6 +192,7 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+
       span { font-size: 14px; }
     }
 
@@ -201,59 +217,64 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       max-width: 720px;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon-wrap {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      span { font-size: 22px; }
-    }
-
     .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
     .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
     .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
+    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
 
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
+    /* KPI Bento Grid Styling */
+    ::ng-deep {
+      .bases-kpi-grid .prx-rich-stat-group__items,
+      .bases-kpi-grid .pdx-rich-stat-group__items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
+
+      .bases-kpi-grid .prx-rich-stat-group__item,
+      .bases-kpi-grid .pdx-rich-stat-group__item {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
+
+      .bases-kpi-grid .prx-rich-stat-group__value,
+      .bases-kpi-grid .pdx-rich-stat-group__value {
+        font-family: var(--font-display) !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 4px 0 0 !important;
+      }
+
+      .bases-kpi-grid .prx-rich-stat-group__label,
+      .bases-kpi-grid .pdx-rich-stat-group__label {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .bases-kpi-grid .prx-rich-stat-group__caption,
+      .bases-kpi-grid .pdx-rich-stat-group__caption {
+        font-size: 0.72rem !important;
+        color: var(--muted-foreground) !important;
+        margin-top: 4px !important;
+      }
     }
-
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
-
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
 
     .crud-surface {
       border-radius: 18px;
@@ -264,4 +285,5 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
 })
 export class BasesPageComponent {
   protected readonly crudMetadata = BASES_CRUD_METADATA;
+  protected readonly kpiDocument = BASES_KPI_DOCUMENT;
 }
