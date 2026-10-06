@@ -62,6 +62,20 @@
 
   --shadow-panel: 0 1px 2px oklch(0.2 0.03 240 / 4%), 0 8px 24px oklch(0.2 0.03 240 / 5%);
   --shadow-command: 0 24px 70px oklch(0.1 0.03 240 / 28%);
+
+  /* Praxis Platform Loading Canonical Tokens */
+  --pdx-loading-overlay-bg: color-mix(in oklab, var(--card) 60%, transparent);
+  --pdx-loading-text: var(--foreground);
+  --pdx-loading-text-shadow: none;
+  --pdx-loading-spinner-track: color-mix(in oklab, var(--primary) 20%, transparent);
+  --pdx-loading-spinner-accent: var(--primary);
+  --pdx-loading-topbar-gradient: linear-gradient(90deg, transparent, var(--primary), var(--cobalt), transparent);
+  --pdx-loading-topbar-height: 3px;
+  --pdx-loading-topbar-text: var(--muted-foreground);
+  --pdx-loading-inline-bg: var(--card);
+  --pdx-loading-inline-border: 1px solid var(--border);
+  --praxis-layer-loading-blocking: 99999;
+  --praxis-layer-loading-inline: 120;
 }
 
 .dark {
@@ -111,6 +125,16 @@
 
   --shadow-panel: 0 1px 0 oklch(0.85 0.06 210 / 5%), 0 18px 40px oklch(0.05 0.02 250 / 20%);
   --shadow-command: 0 25px 80px oklch(0.04 0.02 250 / 55%);
+
+  /* Praxis Platform Loading Tokens (Dark Mode) */
+  --pdx-loading-overlay-bg: oklch(0.06 0.02 250 / 65%);
+  --pdx-loading-text: var(--foreground);
+  --pdx-loading-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  --pdx-loading-spinner-track: oklch(1 0 0 / 12%);
+  --pdx-loading-spinner-accent: var(--primary);
+  --pdx-loading-topbar-gradient: linear-gradient(90deg, transparent, var(--primary), var(--cobalt), transparent);
+  --pdx-loading-inline-bg: oklch(0.14 0.03 260 / 90%);
+  --pdx-loading-inline-border: 1px solid var(--border);
 }
 
 *, *::before, *::after {
@@ -192,4 +216,23 @@ praxis-crud, praxis-table, praxis-dynamic-form {
   --praxis-color-text: var(--foreground);
   --praxis-color-border: var(--border);
   font-family: var(--font-sans);
+}
+
+/* Praxis Loading Integration Enhancements */
+.pfx-loading-card {
+  border-radius: var(--radius-lg) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  padding: 18px 28px !important;
+  box-shadow: var(--shadow-command) !important;
+  border: 1px solid var(--border) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.pfx-loading-inline-text {
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
 }

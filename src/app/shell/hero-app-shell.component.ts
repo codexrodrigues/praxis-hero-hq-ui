@@ -1,7 +1,25 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
+import { LoadingContext, LoadingOrchestrator } from '@praxisui/core';
+import { map } from 'rxjs';
 import { ALL_NAV_ITEMS, HERO_NAVIGATION, NavGroup, NavItem } from '../core/navigation.model';
 import { ThemeService } from '../core/theme.service';
 
@@ -12,6 +30,13 @@ import { ThemeService } from '../core/theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell-container" [class.dark]="isDark()">
+      <!-- Tactical Top-Bar Neon Shimmer Loading -->
+      @if (isAnyLoading()) {
+        <div class="hud-top-progress" role="progressbar" aria-label="Sincronizando sistemas táticos">
+          <div class="hud-progress-laser"></div>
+        </div>
+      }
+
       <!-- Mobile Backdrop -->
       @if (mobileOpen()) {
         <div class="mobile-backdrop" (click)="mobileOpen.set(false)"></div>
@@ -100,7 +125,15 @@ import { ThemeService } from '../core/theme.service';
 
           <div class="current-section">
             <span class="section-group">{{ activeGroup().label }}</span>
-            <span class="section-title">{{ activeItem().label }}</span>
+            <div class="title-with-sync">
+              <span class="section-title">{{ activeItem().label }}</span>
+              @if (isAnyLoading()) {
+                <div class="hud-sync-badge" title="Sincronizando com barramento de metadados da Plataforma Praxis">
+                  <span class="sync-pulse"></span>
+                  <span class="sync-text">Sincronizando</span>
+                </div>
+              }
+            </div>
           </div>
 
           <div class="hud-actions">
@@ -151,7 +184,7 @@ import { ThemeService } from '../core/theme.service';
         </header>
 
         <!-- Dynamic Content Routed from Modules -->
-        <main class="content-body">
+        <main class="content-body" [class.route-transitioning]="isRouteLoading()">
           <router-outlet></router-outlet>
         </main>
       </div>
@@ -746,6 +779,100 @@ import { ThemeService } from '../core/theme.service';
       }
     }
 
+    /* Tactical Top-Bar Laser Loading */
+    .hud-top-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      z-index: 99999;
+      background: color-mix(in oklab, var(--primary) 12%, transparent);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .hud-progress-laser {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 45%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--primary),
+        color-mix(in oklab, var(--primary) 85%, white),
+        var(--cobalt),
+        transparent
+      );
+      box-shadow: 0 0 12px var(--primary);
+      animation: laserBeam 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes laserBeam {
+      0% {
+        transform: translateX(-100%);
+      }
+      50% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(300%);
+      }
+    }
+
+    .title-with-sync {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hud-sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--primary) 15%, transparent);
+      border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .sync-pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+      animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    .sync-text {
+      line-height: 1;
+    }
+
+    .content-body.route-transitioning {
+      opacity: 0.65;
+      transition: opacity 0.15s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-2px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @media (max-width: 1024px) {
       .tactical-sidebar {
         transform: translateX(-100%);
@@ -768,6 +895,7 @@ import { ThemeService } from '../core/theme.service';
 export class HeroAppShellComponent {
   protected readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
+  private readonly loadingOrchestrator = inject(LoadingOrchestrator);
 
   protected readonly navigation = HERO_NAVIGATION;
   protected readonly quickLinks = ALL_NAV_ITEMS.slice(0, 8);
@@ -778,6 +906,17 @@ export class HeroAppShellComponent {
   protected readonly currentUrl = signal<string>(this.router.url);
 
   protected readonly isDark = this.themeService.isDark;
+
+  // Reatividade de Carregamento & Orquestração da Plataforma Praxis
+  protected readonly isRouteLoading = signal<boolean>(false);
+  private readonly praxisLoadingCount = toSignal(
+    this.loadingOrchestrator.watch().pipe(map((items) => items.length)),
+    { initialValue: 0 },
+  );
+  protected readonly isAnyLoading = computed(
+    () => this.isRouteLoading() || (this.praxisLoadingCount() ?? 0) > 0,
+  );
+  private currentRouteCtx: LoadingContext | null = null;
 
   protected readonly activeItem = computed(() => {
     const url = this.currentUrl();
@@ -790,11 +929,38 @@ export class HeroAppShellComponent {
   });
 
   constructor() {
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.currentUrl.set(event.urlAfterRedirects || event.url);
-      });
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.isRouteLoading.set(true);
+        this.currentRouteCtx = {
+          scope: {
+            componentType: 'Router',
+            componentId: 'hero-app-shell',
+            routeKey: event.url,
+          },
+          phase: 'mount',
+          label: 'Sincronizando Módulo Tático...',
+          blocking: false,
+        };
+        this.loadingOrchestrator.begin(this.currentRouteCtx);
+        return;
+      }
+
+      if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError
+      ) {
+        this.isRouteLoading.set(false);
+        if (this.currentRouteCtx) {
+          this.loadingOrchestrator.end(this.currentRouteCtx);
+          this.currentRouteCtx = null;
+        }
+        if (event instanceof NavigationEnd) {
+          this.currentUrl.set(event.urlAfterRedirects || event.url);
+        }
+      }
+    });
   }
 
   @HostListener('window:keydown', ['$event'])

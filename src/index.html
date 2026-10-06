@@ -26,6 +26,138 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
   </head>
   <body>
-    <app-root></app-root>
+    <app-root>
+      <div id="preboot-splash" style="
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #080c14;
+        background-image: radial-gradient(circle at 50% 40%, rgba(6, 182, 212, 0.12) 0%, transparent 60%);
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #f1f5f9;
+        user-select: none;
+      ">
+        <style>
+          @keyframes shieldPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.45)); }
+            50% { transform: scale(1.04); filter: drop-shadow(0 0 28px rgba(6, 182, 212, 0.75)); }
+          }
+          @keyframes tacticalScan {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(20%); }
+            100% { transform: translateX(200%); }
+          }
+          @keyframes ringRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes statusBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+          }
+        </style>
+
+        <!-- Tactical Center Hub -->
+        <div style="position: relative; width: 88px; height: 88px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center;">
+          <!-- Outer Rotating Radar Ring -->
+          <div style="
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 1px dashed rgba(6, 182, 212, 0.35);
+            animation: ringRotate 12s linear infinite;
+          "></div>
+          
+          <!-- Shield Badge -->
+          <div style="
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #06b6d4, #2563eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: shieldPulse 2.5s ease-in-out infinite;
+            box-shadow: 0 12px 32px rgba(6, 182, 212, 0.3);
+          ">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="
+            margin: 0 0 6px 0;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff, #67e8f9, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Space Grotesk', sans-serif;
+          ">Praxis Hero HQ</h1>
+          <p style="
+            margin: 0;
+            font-size: 11px;
+            font-weight: 500;
+            color: #94a3b8;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+          ">Comando Tático & Gestão de Recursos</p>
+        </div>
+
+        <!-- Quantum Progress Beam -->
+        <div style="
+          width: 240px;
+          height: 3px;
+          background: rgba(255, 255, 255, 0.08);
+          border-radius: 999px;
+          overflow: hidden;
+          position: relative;
+          margin-bottom: 16px;
+        ">
+          <div style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 45%;
+            background: linear-gradient(90deg, transparent, #06b6d4, #3b82f6, transparent);
+            border-radius: 999px;
+            animation: tacticalScan 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          "></div>
+        </div>
+
+        <!-- Telemetry Status Line -->
+        <div style="
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: #64748b;
+          letter-spacing: 0.08em;
+        ">
+          <span style="
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: statusBlink 1.2s infinite;
+          "></span>
+          <span>DEFCON 5 · INICIALIZANDO METADADOS PRAXIS...</span>
+        </div>
+      </div>
+    </app-root>
   </body>
 </html>
