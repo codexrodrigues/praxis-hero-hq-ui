@@ -14,14 +14,14 @@
 
 | ID | Biblioteca / Escopo | Gravidade / Tipo | Título Resumido | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **ISSUE-001** | `@praxisui/rich-content` | Design / Visual | "Caixa dentro de Caixas": Renderização duplicada de container em `card` e `actionCard` | `[PENDING]` |
-| **ISSUE-002** | `@praxisui/rich-content` | Design / Funcional | Badges/Chips com estilos fixos Material 3 acoplados e `icon` ignorado no template | `[PENDING]` |
-| **ISSUE-003** | `@praxisui/rich-content` | Funcional / DX | `RichProgressNode`: `valueExpr` não aceita literais numéricos e falta `value: number` | `[PENDING]` |
+| **ISSUE-001** | `@praxisui/rich-content` | Design / Visual | "Caixa dentro de Caixas": Renderização duplicada de container em `card` e `actionCard` | `[DONE]` |
+| **ISSUE-002** | `@praxisui/rich-content` | Design / Funcional | Badges/Chips com estilos fixos Material 3 acoplados e `icon` ignorado no template | `[DONE]` |
+| **ISSUE-003** | `@praxisui/rich-content` | Funcional / DX | `RichProgressNode`: `valueExpr` não aceita literais numéricos e falta `value: number` | `[DONE]` |
 | **ISSUE-004** | `@praxisui/rich-content` | Estrutural / Layout | Suporte a nós canônicos de layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode`) | `[PENDING]` |
 | **ISSUE-005** | `@praxisui/core` | Arquitetural / Tipos | Harmonização de tokens semânticos de cores entre nós (`statGroup`, `timeline`, `badge`) | `[PENDING]` |
 | **ISSUE-006** | `@praxisui/rich-content` | Interatividade / DX | Callbacks de ação e eventos interativos nativos em itens de `statGroup` e `timeline` | `[PENDING]` |
 | **ISSUE-007** | `@praxisui/page-builder` | Reatividade / Estado | Binding reativo granular para atualização de widgets sem rerender do canvas | `[PENDING]` |
-| **ISSUE-008** | `@praxisui/rich-content` | Consistência / API | Exportação pública padronizada (`PraxisRichContent` vs `PraxisRichContentComponent`) | `[PENDING]` |
+| **ISSUE-008** | `@praxisui/rich-content` | Consistência / API | Exportação pública padronizada (`PraxisRichContent` vs `PraxisRichContentComponent`) | `[DONE]` |
 | **ISSUE-009** | `@praxisui/rich-content` | Visual / Telemetria | Suporte nativo a kind `'telemetry'` (radar, pulse, wave, signal) e Lottie em `RichCardMedia` | `[DONE]` |
 | **ISSUE-010** | `@praxisui/rich-content` | Funcional / KPIs | Indicador de progresso integrado (`variant: 'bar' \| 'ring'`) em `RichStatItem` | `[DONE]` |
 | **ISSUE-011** | `@praxisui/core` | Navegação / SPA | Handler nativo e autônomo para navegação de rotas SPA (`praxis:router.navigate`, `navigation.navigate`) | `[DONE]` |
@@ -36,7 +36,7 @@
 
 ### ISSUE-001: "Caixa dentro de Caixas" — Renderização Duplicada de Container em `RichCardNode` e `RichActionCardNode`
 * **Biblioteca:** `@praxisui/rich-content`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Impacto visual e inconsistência de design em cards customizados)
 * **Diagnóstico Técnico:**
   No arquivo `praxis-rich-content.ts`, todo nó é envolvido por um container genérico:
@@ -49,7 +49,7 @@
     }
   </div>
   ```
-  Quando o desenvolvedor adiciona classes de estilo ou tokens de superfície via `node.className` (como `.glass-panel`, `.hero-executive-banner`, `.bento-kpi-card`), essas classes são aplicadas na `div.prx-rich-node` externa (com borda, background, padding e raio). Porém, a `<section class="prx-rich-card">` interna possui estilos fixos próprios incondicionais:
+  Quando o desenvolvedor adiciona classes de estilo ou tokens de superfície via `node.className` (como `.glass-panel`, `.hero-executive-banner`, `.bento-kpi-card`), essas classes são aplicadas na `div.prx-rich-node` externa (com borda, background, padding e raio). Porém, a `<section class="prx-rich-card">` interna possuía estilos fixos próprios incondicionais:
   ```css
   .prx-rich-card {
     border: 1px solid var(--md-sys-color-outline-variant, #cac4d0);
@@ -58,132 +58,172 @@
     padding: 16px;
   }
   ```
-  Mesmo com `variant: 'transparent'`, a classe `.prx-rich-card[data-variant='transparent']` ainda mantém borda e fundo ativo. Isso faz com que todo card com classe customizada gere uma "caixa dentro de outra caixa" (dupla borda, duplo padding e caixa branca dentro de caixa estilizada).
-* **Proposta Canônica de Evolução:**
-  1. Adicionar `'unstyled'` ou `'none'` à união `RichCardVariant` em `@praxisui/core`:
-     ```typescript
-     export type RichCardVariant = 'plain' | 'outlined' | 'elevated' | 'filled' | 'transparent' | 'unstyled';
-     ```
-  2. Em `praxis-rich-content.ts`, quando `node.variant === 'unstyled'`, resetar bordas, background, sombras e padding de `.prx-rich-card`.
-  3. Alternativamente, aplicar `node.className` diretamente à tag `<section class="prx-rich-card">` quando o nó for um card.
-* **Workaround Atual no Consumidor:**
-  Resetar explicitamente no host via CSS:
-  ```scss
-  .hero-executive-banner .prx-rich-card,
-  .bento-kpi-card .prx-rich-card,
-  .hub-card-action .prx-rich-action-card {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-  }
-  ```
-* **Atualização Pós-Introdução da Governança de Temas (`theme-praxis.scss`):**
-  Com o mapeamento de tokens via ponte de tema, o fundo interno `--prx-rich-card-tone-bg` e a borda `--md-sys-color-outline-variant` agora assumem os valores semânticos da aplicação em vez do fallback estático branco `#fff` e cinza `#cac4d0`. 
-  No entanto, **o problema estrutural da casca duplicada no DOM (`prx-rich-node` + `prx-rich-card`) permanece inalterado**: os cards continuam com duplo padding e dupla borda concêntrica quando o consumidor adiciona classes de estilo (`.glass-panel`, `.bento-kpi-card`) ao nó. A necessidade da variante `'unstyled'` ou repasse de `node.className` para a `<section>` interna continua 100% prioritária.
+  Mesmo com `variant: 'transparent'`, a classe `.prx-rich-card[data-variant='transparent']` ainda mantinha borda e fundo ativo. Isso fazia com que todo card com classe customizada gerasse uma "caixa dentro de outra caixa" (dupla borda, duplo padding e caixa branca dentro de caixa estilizada).
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Adicionado `'unstyled'` à união `RichCardVariant`:
+       `export type RichCardVariant = 'plain' | 'outlined' | 'elevated' | 'filled' | 'transparent' | 'unstyled';`
+     - Adicionado `'unstyled'` à união de variantes de `RichActionCardNode`:
+       `variant?: 'basic' | 'raised' | 'stroked' | 'flat' | 'unstyled';`
+  2. **Renderizador e Estilos (`@praxisui/rich-content`):**
+     - No template de `actionCard`, adicionado binding explícito `[attr.data-variant]="node.variant || null"`.
+     - No bloco de estilos CSS de `praxis-rich-content.ts`, adicionadas regras de reset completas:
+       ```css
+       .prx-rich-card[data-variant='unstyled'],
+       .prx-rich-action-card[data-variant='unstyled'] {
+         border: none !important;
+         background: transparent !important;
+         box-shadow: none !important;
+         padding: 0 !important;
+         border-radius: 0 !important;
+       }
+       ```
+  3. **Validação, IA & Editor:**
+     - `RichContentDocumentValidator` atualizado para validar `'unstyled'` em nós `card` e `actionCard`.
+     - Manifesto de IA de autoria atualizado com `'unstyled'`.
+     - Editor de configuração visual (`PraxisRichContentConfigEditor`) e i18n (`en-US`, `pt-BR`) atualizados com opção 'unstyled'.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - O workaround CSS com `!important` para resetar `.prx-rich-card` e `.prx-rich-action-card` pode ser **removido**.
+  - No JSON de qualquer card encapsulado em container customizado (`.hero-executive-banner`, `.bento-kpi-card`, `.hub-card-action`), declare diretamente:
+    ```json
+    {
+      "type": "card",
+      "variant": "unstyled",
+      "className": "bento-kpi-card",
+      ...
+    }
+    ```
+    Ou para card de ação:
+    ```json
+    {
+      "type": "actionCard",
+      "variant": "unstyled",
+      "className": "hub-card-action",
+      ...
+    }
+    ```
 
 ---
 
 ### ISSUE-002: Badges/Chips com Estilos Fixos Material 3 e `icon` Ignorado no Template
 * **Biblioteca:** `@praxisui/rich-content`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Inconsistência visual e regressão de propriedades de contrato)
 * **Diagnóstico Técnico:**
-  1. **Aninhamento Indevido de Caixas de Cor:** O nó `badge` renderiza `<div class="prx-rich-node [node.className]"><span class="prx-rich-badge">{{ label }}</span></div>`. O `<span>` interno possui estilos fixos acoplados ao tema roxo Material 3:
-     ```css
-     .prx-rich-badge {
-       background: var(--md-sys-color-primary-container, #e8def8);
-       color: var(--md-sys-color-on-primary-container, #21005d);
-       padding: 2px 10px;
-       border-radius: 999px;
-     }
-     ```
-     Quando o consumidor define uma pílula verde (ex.: `.status-pill.ready-pill`), a cor verde vai para a `div` externa, enquanto o `span` interno renderiza um fundo roxo `#e8def8`. Resultado: "texto roxo dentro de caixa verde".
-  2. **Ícone Ignorado:** A interface `RichBadgeNode` define explicitamente:
-     ```typescript
-     export interface RichBadgeNode extends RichBlockBaseNode {
-       type: 'badge';
-       label?: string;
-       icon?: string; // Definido na interface!
-     }
-     ```
-     Entretanto, o template em `praxis-rich-content.ts` (linhas 123-127) ignora `node.icon`:
-     ```html
-     @case ('badge') {
-       <span class="prx-rich-badge">{{ resolveBadgeLabel(node) }}</span>
-     }
-     ```
-     O ícone nunca é renderizado.
-* **Proposta Canônica de Evolução:**
-  1. Suportar propriedade `tone` em `RichBadgeNode` (`tone?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'neutral'`).
-  2. No template, renderizar o ícone se presente:
-     ```html
-     @case ('badge') {
-       <span class="prx-rich-badge" [attr.data-tone]="node.tone">
-         @if (node.icon) {
-           <span class="material-symbols-outlined prx-rich-badge__icon">{{ node.icon }}</span>
-         }
-         <span class="prx-rich-badge__label">{{ resolveBadgeLabel(node) }}</span>
-       </span>
-     }
-     ```
-  3. Fazer com que `.prx-rich-badge` respeite herança de background quando encapsulado por classes customizadas.
-* **Workaround Atual no Consumidor:**
-  - Resetar `.status-pill .prx-rich-badge { background: transparent !important; color: inherit !important; padding: 0 !important; }`.
-  - Usar nó `compose` com `direction: 'row'` agrupando `{ type: 'icon' }` e `{ type: 'badge' }`.
-* **Atualização Pós-Introdução da Governança de Temas (`theme-praxis.scss`):**
-  Com a ponte de tema, o token `--md-sys-color-primary-container` agora é alimentado pela cor primária da aplicação, eliminando a exibição acidental do roxo Material 3 (`#e8def8`) por padrão.
-  Contudo, **as três deficiências centrais permanecem abertas**:
-  1. `RichBadgeNode` não possui propriedade semântica `tone?: 'ready' | 'operations' | 'success' | 'warning' | ...`, impedindo a coloração declarativa contextual por tipo de status.
-  2. A tag interna `<span class="prx-rich-badge">` continua desenhando uma caixa própria com background ativo que conflita e sobrepõe classes customizadas do consumidor aplicadas em `div.prx-rich-node`.
-  3. A propriedade `icon?: string` declarada no contrato de TypeScript continua sendo **completamente ignorada** pelo template de `praxis-rich-content.ts`.
+  1. **Aninhamento Indevido de Caixas de Cor:** O nó `badge` renderizava `<div class="prx-rich-node [node.className]"><span class="prx-rich-badge">{{ label }}</span></div>`. O `<span>` interno possuía estilos fixos acoplados ao tema roxo Material 3 sem suporte a variantes semânticas nativas.
+  2. **Ícone Ignorado:** A interface `RichBadgeNode` definia `icon?: string`, mas o template em `praxis-rich-content.ts` ignorava o campo e não renderizava nenhum ícone.
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Criado tipo união semântico `RichBadgeTone`:
+       ```typescript
+       export type RichBadgeTone =
+         | 'primary'
+         | 'secondary'
+         | 'neutral'
+         | 'info'
+         | 'success'
+         | 'warning'
+         | 'danger';
+       ```
+     - Adicionado campo opcional `tone?: RichBadgeTone;` na interface `RichBadgeNode`.
+  2. **Renderizador e Estilos (`@praxisui/rich-content`):**
+     - Template de `badge` atualizado para renderizar ícone Material Symbols quando fornecido:
+       ```html
+       @case ('badge') {
+         <span
+           class="prx-rich-badge"
+           [attr.data-tone]="node.tone || null"
+         >
+           @if (node.icon) {
+             <span
+               class="material-symbols-outlined prx-rich-badge__icon"
+               aria-hidden="true"
+             >{{ node.icon }}</span>
+           }
+           <span class="prx-rich-badge__label">{{ resolveBadgeLabel(node) }}</span>
+         </span>
+       }
+       ```
+     - Adicionado espaçamento `gap: 4px` e dimensão adequada para `.prx-rich-badge__icon` (14px).
+     - Adicionados estilos completos para todos os tons semânticos:
+       * `[data-tone='primary']`: container primário
+       * `[data-tone='secondary']`: container secundário
+       * `[data-tone='neutral']`: tom neutro de superfície
+       * `[data-tone='info']`: azul de informação governado
+       * `[data-tone='success']`: verde de prontidão / sucesso governado
+       * `[data-tone='warning']`: amarelo / âmbar de atenção
+       * `[data-tone='danger']`: vermelho de erro / perigo
+  3. **Validação:**
+     - `RichContentDocumentValidator` valida a propriedade `tone` contra o conjunto canônico `RichBadgeTone`.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - O workaround de criar nós `compose` (`row`) agrupando `{ type: 'icon' }` e `{ type: 'badge' }` pode ser **removido**.
+  - O workaround de resetar `.status-pill .prx-rich-badge` no CSS do host pode ser **removido**.
+  - Declare badges diretamente com ícone e tom semântico:
+    ```json
+    {
+      "type": "badge",
+      "label": "Operacional",
+      "icon": "verified",
+      "tone": "success"
+    }
+    ```
+    Ou para alerta de missão:
+    ```json
+    {
+      "type": "badge",
+      "label": "Risco Alto",
+      "icon": "warning",
+      "tone": "danger"
+    }
+    ```
 
 ---
 
 ### ISSUE-003: `RichProgressNode` Não Aceita Literais Numéricos e Falta `value: number`
 * **Biblioteca:** `@praxisui/rich-content` / `@praxisui/core`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Média (Dificuldade de configuração e falha silenciosa para valores estáticos)
 * **Diagnóstico Técnico:**
-  A interface `RichProgressNode` só possui `valueExpr: string`:
-  ```typescript
-  export interface RichProgressNode extends RichBlockBaseNode {
-    type: 'progress';
-    valueExpr: string;
-    max?: number;
-    showPercent?: boolean;
-  }
-  ```
-  Na implementação de `resolveProgressValue`:
-  ```typescript
-  resolveProgressValue(node): number {
-    const value = this.resolveValue(node.valueExpr);
-    return typeof value === 'number' ? value : Number(value ?? 0);
-  }
-  ```
-  Por sua vez, `resolveValue(node.valueExpr)` chama `resolveStructuredValue(expression)`, que executa `this.getByPath(this.buildEvaluationContext(), path)`.
-  Se o desenvolvedor passar um valor literal como `valueExpr: '98.4'`, o motor busca a chave `'98.4'` dentro do objeto de contexto de dados. Como essa propriedade não existe, retorna `null` -> `Number(null ?? 0) = 0`.
-  A barra de progresso renderiza com `<progress value="0" max="100">`, exibindo uma linha cinza inativa e vazia.
-* **Proposta Canônica de Evolução:**
-  1. Adicionar `value?: number` diretamente na interface `RichProgressNode`:
-     ```typescript
-     export interface RichProgressNode extends RichBlockBaseNode {
-       type: 'progress';
-       value?: number;
-       valueExpr?: string;
-       max?: number;
-       showPercent?: boolean;
-     }
-     ```
-  2. Em `resolveProgressValue`, avaliar primeiro `node.value`. Caso utilize `node.valueExpr`, verificar se o valor já é uma constante numérica finita antes de consultar o contexto:
-     ```typescript
-     if (typeof node.value === 'number') return node.value;
-     if (node.valueExpr && !Number.isNaN(Number(node.valueExpr.trim()))) {
-       return Number(node.valueExpr.trim());
-     }
-     ```
-* **Workaround Atual no Consumidor:**
-  Injetar o valor dentro do objeto `context` do componente (`inputs: { context: { progressVal: 98.4 } }`) e apontar `valueExpr: 'progressVal'`.
+  A interface `RichProgressNode` só possuía `valueExpr: string`. Quando o desenvolvedor passava um valor literal como `valueExpr: '98.4'`, o motor de expressões buscava a chave `'98.4'` dentro do objeto de contexto de dados, retornando `null` -> `Number(null ?? 0) = 0`, renderizando uma barra vazia e inativa.
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Interface `RichProgressNode` expandida com propriedade numérica direta e expressão opcional:
+       ```typescript
+       export interface RichProgressNode extends RichBlockBaseNode {
+         type: 'progress';
+         value?: number;
+         valueExpr?: string;
+         max?: number;
+         label?: string;
+         labelExpr?: string;
+         showPercent?: boolean;
+       }
+       ```
+  2. **Runtime (`@praxisui/rich-content`):**
+     - Em `resolveProgressValue`, prioridade para leitura de `node.value` (quando numérico e finito).
+     - Quando `node.valueExpr` for fornecido, se a string for um literal numérico finito (ex: `'98.4'`), faz parse direto com `Number(trimmed)` antes de consultar o contexto.
+  3. **Validação:**
+     - `RichContentDocumentValidator` valida `value` como número opcional, `valueExpr` como caminho de expressão opcional, e emite issue se nenhum dos dois estiver presente.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - O workaround de injetar o valor dentro do contexto (`context: { progressVal: 98.4 }`) pode ser **removido**.
+  - Nós `progress` agora podem ser declarados diretamente com `value`:
+    ```json
+    {
+      "type": "progress",
+      "value": 98.4,
+      "max": 100,
+      "showPercent": true,
+      "label": "Eficiência Global"
+    }
+    ```
+    Ou via expressão literal:
+    ```json
+    {
+      "type": "progress",
+      "valueExpr": "98.4",
+      "max": 100
+    }
+    ```
 
 ---
 
@@ -372,15 +412,26 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-008: Exportação Pública Padronizada (`PraxisRichContent` vs `PraxisRichContentComponent`)
 * **Biblioteca:** `@praxisui/rich-content`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Baixa / Consistência
 * **Diagnóstico Técnico:**
-  Enquanto todas as outras bibliotecas da plataforma exportam seus componentes com sufixo `Component` (`PraxisCrudComponent`, `PraxisChartComponent`, `DynamicPageBuilderComponent`), a biblioteca `@praxisui/rich-content` exporta apenas como `PraxisRichContent`.
-* **Proposta Canônica de Evolução:**
-  Adicionar alias no `public-api.ts`:
-  ```typescript
-  export { PraxisRichContent, PraxisRichContent as PraxisRichContentComponent };
-  ```
+  Enquanto todas as outras bibliotecas da plataforma exportavam seus componentes com sufixo `Component` (`PraxisCrudComponent`, `PraxisChartComponent`, `DynamicPageBuilderComponent`), a biblioteca `@praxisui/rich-content` exportava apenas como `PraxisRichContent`, gerando dúvidas sobre a convenção de nomenclatura.
+* **Implementação Realizada na Plataforma:**
+  1. **Exportação Canônica (`@praxisui/rich-content`):**
+     - Em `projects/praxis-rich-content/src/public-api.ts` e no módulo de runtime `praxis-rich-content.ts`, exportado explicitamente:
+       ```typescript
+       export { PraxisRichContent, PraxisRichContent as PraxisRichContentComponent };
+       ```
+     - Validado com teste unitário garantindo identidade estrita de tipo (`expect(PraxisRichContentComponent).toBe(PraxisRichContent)`).
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Aplicações consumidoras podem importar o componente usando qualquer um dos nomes canônicos:
+    ```typescript
+    import { PraxisRichContentComponent } from '@praxisui/rich-content';
+    ```
+    Ou:
+    ```typescript
+    import { PraxisRichContent } from '@praxisui/rich-content';
+    ```
 
 ---
 
