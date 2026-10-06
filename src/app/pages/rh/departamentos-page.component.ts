@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 
 export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -18,22 +20,31 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
       {
-        field: 'codigo',
-        header: 'Código / Sigla',
+        field: 'nome',
+        header: 'Nome da Divisão',
+        width: '260px',
+        sortable: true,
+      },
+      {
+        field: 'sigla',
+        header: 'Sigla / Código',
         width: '140px',
         align: 'center',
         sortable: true,
       },
       {
-        field: 'nome',
-        header: 'Nome do Departamento / Divisão',
-        width: '320px',
+        field: 'responsavelNome',
+        header: 'Diretor / Líder Responsável',
+        width: '240px',
         sortable: true,
       },
       {
-        field: 'responsavelNome',
-        header: 'Diretor / Líder Responsável',
-        width: '260px',
+        field: 'orcamentoAnual',
+        header: 'Orçamento Tático (R$)',
+        type: 'currency',
+        format: 'BRL',
+        width: '180px',
+        align: 'right',
         sortable: true,
       },
     ],
@@ -57,14 +68,60 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
   ],
   defaults: {
     openMode: 'modal',
-    modal: { width: '820px', maxWidth: '95vw' },
+    modal: { width: '840px', maxWidth: '95vw' },
   },
+};
+
+export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'departamentos-kpi-grid',
+      items: [
+        {
+          id: 'divisoes',
+          label: 'Divisões Ativas',
+          value: '28 Departamentos',
+          caption: 'P&D, Tático, Suprimentos e Risco',
+          icon: 'corporate_fare',
+          tone: 'info',
+        },
+        {
+          id: 'liderancas',
+          label: 'Lideranças Nomeadas',
+          value: '100% Cobertura',
+          caption: 'Supervisores e diretores alocados',
+          icon: 'military_tech',
+          tone: 'success',
+        },
+        {
+          id: 'principal',
+          label: 'Divisão Principal',
+          value: 'Stark Industries P&D',
+          caption: 'Maior orçamento tecnológico',
+          icon: 'science',
+          tone: 'neutral',
+        },
+        {
+          id: 'cargos',
+          label: 'Cargos Mapeados',
+          value: '46 Especialidades',
+          caption: 'Do suporte civil à liderança ômega',
+          icon: 'account_tree',
+          tone: 'warning',
+        },
+      ],
+    },
+  ],
 };
 
 @Component({
   selector: 'app-departamentos-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -81,43 +138,9 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
         </div>
       </header>
 
-      <!-- Bento Grid de KPIs -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-rh">
-            <span class="material-symbols-outlined">corporate_fare</span>
-          </div>
-          <p class="kpi-label">Divisões Ativas</p>
-          <p class="kpi-value">28 Departamentos</p>
-          <p class="kpi-detail">P&D, Tático, Suprimentos e Risco</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-ready">
-            <span class="material-symbols-outlined">military_tech</span>
-          </div>
-          <p class="kpi-label">Lideranças Nomeadas</p>
-          <p class="kpi-value">100% Cobertura</p>
-          <p class="kpi-detail text-ready">Supervisores e diretores alocados</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-operations">
-            <span class="material-symbols-outlined">science</span>
-          </div>
-          <p class="kpi-label">Divisão Principal</p>
-          <p class="kpi-value">Stark Industries P&D</p>
-          <p class="kpi-detail">Maior orçamento tecnológico</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon-wrap tone-warning">
-            <span class="material-symbols-outlined">account_tree</span>
-          </div>
-          <p class="kpi-label">Cargos Mapeados</p>
-          <p class="kpi-value">46 Especialidades</p>
-          <p class="kpi-detail text-warning">Do suporte civil à liderança ômega</p>
-        </div>
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Tabela CRUD Governança Canônica -->
@@ -156,6 +179,7 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+
       span { font-size: 14px; }
     }
 
@@ -180,59 +204,64 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
       max-width: 720px;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon-wrap {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      span { font-size: 22px; }
-    }
-
     .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
+    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
+    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
+    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
 
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
+    /* KPI Bento Grid Styling */
+    ::ng-deep {
+      .departamentos-kpi-grid .prx-rich-stat-group__items,
+      .departamentos-kpi-grid .pdx-rich-stat-group__items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
+
+      .departamentos-kpi-grid .prx-rich-stat-group__item,
+      .departamentos-kpi-grid .pdx-rich-stat-group__item {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
+
+      .departamentos-kpi-grid .prx-rich-stat-group__value,
+      .departamentos-kpi-grid .pdx-rich-stat-group__value {
+        font-family: var(--font-display) !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 4px 0 0 !important;
+      }
+
+      .departamentos-kpi-grid .prx-rich-stat-group__label,
+      .departamentos-kpi-grid .pdx-rich-stat-group__label {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .departamentos-kpi-grid .prx-rich-stat-group__caption,
+      .departamentos-kpi-grid .pdx-rich-stat-group__caption {
+        font-size: 0.72rem !important;
+        color: var(--muted-foreground) !important;
+        margin-top: 4px !important;
+      }
     }
-
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
-
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
 
     .crud-surface {
       border-radius: 18px;
@@ -243,4 +272,5 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
 })
 export class DepartamentosPageComponent {
   protected readonly crudMetadata = DEPARTAMENTOS_CRUD_METADATA;
+  protected readonly kpiDocument = DEPARTAMENTOS_KPI_DOCUMENT;
 }
