@@ -18,8 +18,8 @@
 | **ISSUE-002** | `@praxisui/rich-content` | Design / Funcional | Badges/Chips com estilos fixos Material 3 acoplados e `icon` ignorado no template | `[DONE]` |
 | **ISSUE-003** | `@praxisui/rich-content` | Funcional / DX | `RichProgressNode`: `valueExpr` não aceita literais numéricos e falta `value: number` | `[DONE]` |
 | **ISSUE-004** | `@praxisui/rich-content` | Estrutural / Layout | Suporte a nós canônicos de layout em Grid / Colunas (`RichGridNode` / `RichColumnsNode`) | `[DONE]` |
-| **ISSUE-005** | `@praxisui/core` | Arquitetural / Tipos | Harmonização de tokens semânticos de cores entre nós (`statGroup`, `timeline`, `badge`) | `[PENDING]` |
-| **ISSUE-006** | `@praxisui/rich-content` | Interatividade / DX | Callbacks de ação e eventos interativos nativos em itens de `statGroup` e `timeline` | `[PENDING]` |
+| **ISSUE-005** | `@praxisui/core` | Arquitetural / Tipos | Harmonização de tokens semânticos de cores entre nós (`statGroup`, `timeline`, `badge`) | `[DONE]` |
+| **ISSUE-006** | `@praxisui/rich-content` | Interatividade / DX | Callbacks de ação e eventos interativos nativos em itens de `statGroup` e `timeline` | `[DONE]` |
 | **ISSUE-007** | `@praxisui/page-builder` | Reatividade / Estado | Binding reativo granular para atualização de widgets sem rerender do canvas | `[PENDING]` |
 | **ISSUE-008** | `@praxisui/rich-content` | Consistência / API | Exportação pública padronizada (`PraxisRichContent` vs `PraxisRichContentComponent`) | `[DONE]` |
 | **ISSUE-009** | `@praxisui/rich-content` | Visual / Telemetria | Suporte nativo a kind `'telemetry'` (radar, pulse, wave, signal) e Lottie em `RichCardMedia` | `[DONE]` |
@@ -414,34 +414,115 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 ---
 
 ### ISSUE-005: Harmonização de Tokens Semânticos de Cores Entre Nós (`statGroup` vs `timeline` vs `badge`)
-* **Biblioteca:** `@praxisui/core`
-* **Status:** `[PENDING]`
+* **Biblioteca:** `@praxisui/core` & `@praxisui/rich-content`
+* **Status:** `[DONE]`
 * **Gravidade:** Baixa / DX (Assimetria de tipagem)
 * **Diagnóstico Técnico:**
-  Há discrepâncias entre as uniões de cores dos diferentes nós:
+  Havia discrepâncias entre as uniões de cores dos diferentes nós:
   - `RichStatItem.tone`: `'neutral' | 'info' | 'success' | 'warning' | 'danger'`
   - `RichTimelineItem.markerColor`: `'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'error' | 'info' | 'neutral'`
-  O termo `'danger'` vs `'error'` e a ausência dos tons institucionais `'primary'`/`'secondary'` no `statGroup` exigem transformações de contrato na borda do frontend.
-* **Proposta Canônica de Evolução:**
-  Unificar um tipo canônico em `@praxisui/core`:
-  ```typescript
-  export type RichSemanticTone = 'primary' | 'secondary' | 'tertiary' | 'info' | 'success' | 'warning' | 'danger' | 'error' | 'neutral';
-  ```
-  Com mapeamento interno tolerante onde `'danger'` e `'error'` sejam sinônimos.
-* **Atualização Pós-Introdução da Governança de Temas (`theme-praxis.scss`):**
-  Com a consolidação de tokens de tema no projeto (que definem variáveis semânticas como `--ready`, `--operations`, `--warning`, `--alert`, `--risk`), a discrepância de contratos em TypeScript entre `RichStatItem.tone` (que aceita `'danger'` mas não `'error'`) e `RichTimelineItem.markerColor` (que aceita `'error'` mas não `'danger'`) torna o mapeamento de classes e variáveis de CSS mais complexo e frágil. A criação de `RichSemanticTone` em `@praxisui/core` se torna um pré-requisito para que a plataforma forneça classes utilitárias e mixins de cores semânticas unificadas.
+  O termo `'danger'` vs `'error'` e a ausência dos tons institucionais `'primary'`/`'secondary'` no `statGroup` exigiam transformações de contrato na borda do frontend.
+* **Implementação Realizada na Plataforma (PR #545):**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Criado o tipo semântico unificado canônico em `rich-content.model.ts`:
+       ```typescript
+       export type RichSemanticTone =
+         | 'primary'
+         | 'secondary'
+         | 'tertiary'
+         | 'info'
+         | 'success'
+         | 'warning'
+         | 'danger'
+         | 'error'
+         | 'neutral';
+       ```
+     - `RichBadgeTone`, `RichStatTone` e `RichTimelineColor` foram redefinidos como aliases canônicos de `RichSemanticTone`.
+     - Todos os nós que suportam tons e cores semânticas (`RichBadgeNode.tone`, `RichStatItem.tone`, `RichTimelineNode.connectorColor`, `RichTimelineNode.markerColor`, `RichTimelineItem.markerColor`, `RichTimelineItem.connectorColor`) agora aceitam os mesmos 9 valores semânticos de forma 100% harmonizada e fortemente tipada.
+  2. **Renderizador e Estilos (`@praxisui/rich-content`):**
+     - Normalização inteligente: `resolveTimelineColor` aceita os 9 tons e normaliza `'danger'` para `'error'`, enquanto o CSS de timeline suporta seletores para ambas as convenções (`--marker-color-error` e `--marker-color-danger`, `--connector-color-error` e `--connector-color-danger`).
+     - `statGroup` agora renderiza nativamente os tons institucionais `primary`, `secondary`, `tertiary` e `neutral`, além de aceitar tanto `danger` quanto `error` para estados críticos.
+     - `badge` e `progress` (em stat items) expandidos com suporte a `primary`, `secondary`, `tertiary`, `danger` e `error`.
+  3. **Validação, i18n e Manifestos de IA:**
+     - `RichContentDocumentValidator` valida todos os 9 tons semânticos em `badge`, `statGroup`, `progress` e `timeline`.
+     - `PRAXIS_RICH_CONTENT_AUTHORING_MANIFEST` atualizado com `'danger'` para authoring declarativo assistido por IA.
+     - Editor visual de configuração (`praxis-rich-content-config-editor.ts`) atualizado com todos os seletores e chaves de i18n correspondentes em `en-US` e `pt-BR`.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Não é mais necessário fazer mapeamentos manuais entre `'danger'` e `'error'` nem contornar tipagens na borda do frontend.
+  - Pode-se utilizar livremente qualquer um dos 9 tons semânticos (`primary`, `secondary`, `tertiary`, `info`, `success`, `warning`, `danger`, `error`, `neutral`) em itens de `statGroup`, nós de `timeline` e nós de `badge`.
 
 ---
 
 ### ISSUE-006: Interatividade e Callbacks de Ação Nativos em Itens de `statGroup` e `timeline`
-* **Biblioteca:** `@praxisui/rich-content`
-* **Status:** `[PENDING]`
+* **Biblioteca:** `@praxisui/rich-content` & `@praxisui/core`
+* **Status:** `[DONE]`
 * **Gravidade:** Média (Permite dashboards dinâmicos orientados a drilldown)
 * **Diagnóstico Técnico:**
-  Os cartões de estatísticas (`statGroup.items`) e eventos de linha do tempo (`timeline.items`) são somente leitura. Não possuem propriedade `action?: RichActionRef` para disparar eventos ao host quando clicados pelo usuário.
-* **Proposta Canônica de Evolução:**
-  1. Suportar `action?: RichActionRef` em `RichStatItem` e `RichTimelineItem`.
-  2. Adicionar `@Output() nodeAction = new EventEmitter<RichActionRef>();` em `PraxisRichContent`.
+  Os cartões de estatísticas (`statGroup.items`) e eventos de linha do tempo (`timeline.items`) eram puramente estáticos e somente leitura, sem suporte a `action?: RichActionRef` nem emissão de eventos interativos para drilldown no host.
+* **Implementação Realizada na Plataforma (PR #545):**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Adicionado campo opcional `action?: RichActionRef;` às interfaces `RichStatItem` e `RichTimelineItem`.
+  2. **Componente e Emissão de Eventos (`@praxisui/rich-content`):**
+     - Adicionado output público `@Output() nodeAction = new EventEmitter<RichActionRef>();` em `PraxisRichContent`.
+     - `dispatchRichAction(action: RichActionRef)` dispara centralizadamente `this.nodeAction.emit(action)`, permitindo que o consumidor capture interações de qualquer nó (`statGroup`, `timeline`, `actionCard`, `card`, etc.) via `(nodeAction)="onNodeAction($event)"`.
+     - `statGroup`: Quando `item.action` está presente, o elemento recebe:
+       * Classe `.prx-rich-stat-group__item--actionable`
+       * Acessibilidade completa: `role="button"`, `tabindex="0"` (ou `tabindex="-1"` se desabilitado), `aria-disabled="false"` (ou `"true"`)
+       * Suporte a teclado: `(keydown.enter)` e `(keydown.space)` disparam a ação de forma nativa.
+       * Microinterações de `:hover`, `:focus-visible` e `:active` com elevação sutil e transições suaves (`prefers-reduced-motion` respeitado).
+     - `timeline`: Quando `item.action` está presente, o corpo do evento (`.prx-rich-timeline__item-body`) recebe:
+       * Classe `.prx-rich-timeline__item-body--actionable`
+       * Acessibilidade completa: `role="button"`, `tabindex="0"` (ou `tabindex="-1"` se desabilitado), `aria-disabled="false"` (ou `"true"`)
+       * Suporte a teclado: `(keydown.enter)` e `(keydown.space)` disparam a ação.
+       * Microinterações de `:hover`, `:focus-visible` e `:active` no corpo do evento.
+     - Respeito à governança de permissões / capabilities: se a ação estiver desabilitada pelo host via `hostCapabilities`, a interação é bloqueada, `aria-disabled="true"` e a classe `--disabled` são aplicadas.
+  3. **Validação e Manifestos de IA:**
+     - `RichContentDocumentValidator` valida a estrutura de `action` em itens de `statGroup` e `timeline`.
+     - Manifestos de IA e editor visual suportam a propriedade `action` em itens de timeline e métricas.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - No template Angular do host, ouça o output `nodeAction`:
+    ```html
+    <prx-rich-content
+      [document]="doc"
+      (nodeAction)="handleRichAction($event)"
+    ></prx-rich-content>
+    ```
+  - Nos documentos JSON de `statGroup`, adicione `action` diretamente nos itens para criar cards de KPI clicáveis:
+    ```json
+    {
+      "type": "statGroup",
+      "title": "Métricas da Liga",
+      "items": [
+        {
+          "label": "Heróis Ativos",
+          "value": "12",
+          "tone": "primary",
+          "action": {
+            "actionId": "heroes.filter",
+            "payload": { "status": "active" }
+          }
+        }
+      ]
+    }
+    ```
+  - Em `timeline`, adicione `action` em qualquer item para permitir drilldown no histórico de eventos ou missões:
+    ```json
+    {
+      "type": "timeline",
+      "title": "Histórico de Missões",
+      "items": [
+        {
+          "id": "op-dawn",
+          "title": "Operação Portão do Alvorecer",
+          "markerColor": "primary",
+          "action": {
+            "actionId": "mission.details",
+            "payload": { "missionId": "op-dawn" }
+          }
+        }
+      ]
+    }
+    ```
 
 ---
 
