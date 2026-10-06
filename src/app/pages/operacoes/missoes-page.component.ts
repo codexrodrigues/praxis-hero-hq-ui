@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 import {
   MissionBriefingDrawerComponent,
   type MissionProfile,
@@ -79,10 +81,61 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
   },
 };
 
+export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'missions-kpi-grid',
+      items: [
+        {
+          id: 'ativas',
+          label: 'Missões Ativas em Campo',
+          value: '07 Incursões',
+          caption: 'Todas em comunicação segura',
+          icon: 'flight_takeoff',
+          tone: 'info',
+        },
+        {
+          id: 'sucesso',
+          label: 'Taxa de Sucesso Histórica',
+          value: '96,2%',
+          caption: 'Últimos 12 meses consolidados',
+          icon: 'task_alt',
+          tone: 'success',
+        },
+        {
+          id: 'planejamento',
+          label: 'Em Planejamento / Briefing',
+          value: '05 Missões',
+          caption: 'Aguardando aprovação de compliance',
+          icon: 'schedule',
+          tone: 'warning',
+        },
+        {
+          id: 'omega',
+          label: 'Prioridade Ômega / Crítica',
+          value: '01 Alerta',
+          caption: 'Protocolo de resposta imediata ativo',
+          icon: 'crisis_alert',
+          tone: 'danger',
+        },
+      ],
+    },
+  ],
+};
+
 @Component({
   selector: 'app-missoes-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, MissionBriefingDrawerComponent],
+  imports: [
+    CommonModule,
+    PraxisCrudComponent,
+    PraxisRichContent,
+    MissionBriefingDrawerComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -99,35 +152,9 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         </div>
       </header>
 
-      <!-- KPI Bento Grid -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-operations"><span class="material-symbols-outlined">flight_takeoff</span></div>
-          <p class="kpi-label">Missões Ativas em Campo</p>
-          <p class="kpi-value">07 Incursões</p>
-          <p class="kpi-detail text-ready">Todas em comunicação segura</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-ready"><span class="material-symbols-outlined">task_alt</span></div>
-          <p class="kpi-label">Taxa de Sucesso Histórica</p>
-          <p class="kpi-value">96,2%</p>
-          <p class="kpi-detail">Últimos 12 meses consolidados</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-warning"><span class="material-symbols-outlined">schedule</span></div>
-          <p class="kpi-label">Em Planejamento / Briefing</p>
-          <p class="kpi-value">05 Missões</p>
-          <p class="kpi-detail text-warning">Aguardando aprovação de compliance</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-risk"><span class="material-symbols-outlined">crisis_alert</span></div>
-          <p class="kpi-label">Prioridade Ômega / Crítica</p>
-          <p class="kpi-value">01 Alerta</p>
-          <p class="kpi-detail text-risk">Protocolo de resposta imediata ativo</p>
-        </div>
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Metadata-Driven CRUD Runtime -->
@@ -191,60 +218,64 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
       max-width: 720px;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      span { font-size: 22px; }
-    }
-
     .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
     .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
     .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
     .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
 
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
+    /* KPI Bento Grid Styling */
+    ::ng-deep {
+      .missions-kpi-grid .prx-rich-stat-group__items,
+      .missions-kpi-grid .pdx-rich-stat-group__items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
 
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
+      .missions-kpi-grid .prx-rich-stat-group__item,
+      .missions-kpi-grid .pdx-rich-stat-group__item {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
 
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
 
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
-    .text-risk { color: var(--risk) !important; }
+      .missions-kpi-grid .prx-rich-stat-group__value,
+      .missions-kpi-grid .pdx-rich-stat-group__value {
+        font-family: var(--font-display) !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 4px 0 0 !important;
+      }
+
+      .missions-kpi-grid .prx-rich-stat-group__label,
+      .missions-kpi-grid .pdx-rich-stat-group__label {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .missions-kpi-grid .prx-rich-stat-group__caption,
+      .missions-kpi-grid .pdx-rich-stat-group__caption {
+        font-size: 0.72rem !important;
+        color: var(--muted-foreground) !important;
+        margin-top: 4px !important;
+      }
+    }
 
     .crud-surface {
       border-radius: 18px;
@@ -255,6 +286,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
 })
 export class MissoesPageComponent {
   protected readonly crudMetadata = MISSOES_CRUD_METADATA;
+  protected readonly kpiDocument = MISSIONS_KPI_DOCUMENT;
   protected readonly selectedMission = signal<MissionProfile | null>(null);
 
   protected onMissionRowClicked(event: unknown): void {
