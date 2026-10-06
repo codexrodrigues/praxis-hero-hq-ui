@@ -8,6 +8,7 @@ import {
 import { Router } from '@angular/router';
 import {
   GlobalActionService,
+  type RichBlockHostCapabilities,
   type WidgetEventEnvelope,
   type WidgetPageDefinition,
 } from '@praxisui/core';
@@ -205,6 +206,55 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
         max-width: 760px;
       }
 
+      /* Radar Telemetry Graphic inside Card Media */
+      .hero-executive-banner .prx-rich-card-media[data-kind="icon"],
+      .hero-executive-banner .pdx-rich-card-media[data-kind="icon"] {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        min-width: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: color-mix(in oklab, var(--primary) 8%, transparent);
+        border: 1px dashed color-mix(in oklab, var(--primary) 35%, transparent);
+        margin-left: auto;
+      }
+
+      .hero-executive-banner .prx-rich-card-media[data-kind="icon"]::before,
+      .hero-executive-banner .pdx-rich-card-media[data-kind="icon"]::before {
+        content: '';
+        position: absolute;
+        inset: 18px;
+        border-radius: 50%;
+        border: 1px dashed color-mix(in oklab, var(--primary) 25%, transparent);
+        pointer-events: none;
+      }
+
+      .hero-executive-banner .prx-rich-card-media[data-kind="icon"]::after,
+      .hero-executive-banner .pdx-rich-card-media[data-kind="icon"]::after {
+        content: '';
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        border: 1px solid color-mix(in oklab, var(--primary) 15%, transparent);
+        pointer-events: none;
+        animation: radar-sweep-glow 3s infinite ease-in-out;
+      }
+
+      @keyframes radar-sweep-glow {
+        0%, 100% { transform: scale(1); opacity: 0.6; }
+        50% { transform: scale(1.08); opacity: 0.2; }
+      }
+
+      .hero-executive-banner .prx-rich-card-media__icon,
+      .hero-executive-banner .pdx-rich-card-media__icon {
+        font-size: 32px !important;
+        color: var(--primary) !important;
+        z-index: 2;
+      }
+
       .status-pill {
         display: inline-flex;
         align-items: center;
@@ -292,18 +342,47 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
       .tone-assets { color: var(--assets); background: color-mix(in oklab, var(--assets) 14%, transparent); }
       .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 14%, transparent); }
 
-      .fill-ready progress, .fill-ready .pdx-progress-bar-fill, .fill-ready .mat-mdc-progress-bar-fill {
-        background-color: var(--ready) !important;
+      /* Cross-Browser Styled Native Progress Bars */
+      .prx-rich-progress progress,
+      .pdx-rich-progress progress {
+        appearance: none;
+        -webkit-appearance: none;
+        display: block;
+        width: 100%;
+        height: 6px;
+        border-radius: 9999px;
+        border: none;
+        background: color-mix(in oklab, var(--muted) 50%, transparent);
+        overflow: hidden;
       }
-      .fill-operations progress, .fill-operations .pdx-progress-bar-fill {
-        background-color: var(--operations) !important;
+
+      .prx-rich-progress progress::-webkit-progress-bar,
+      .pdx-rich-progress progress::-webkit-progress-bar {
+        background: color-mix(in oklab, var(--muted) 50%, transparent);
+        border-radius: 9999px;
       }
-      .fill-rh progress, .fill-rh .pdx-progress-bar-fill {
-        background-color: var(--rh) !important;
+
+      .fill-ready progress::-webkit-progress-value {
+        background: var(--ready) !important;
+        border-radius: 9999px;
       }
-      .fill-risk progress, .fill-risk .pdx-progress-bar-fill {
-        background-color: var(--risk) !important;
+      .fill-operations progress::-webkit-progress-value {
+        background: var(--operations) !important;
+        border-radius: 9999px;
       }
+      .fill-rh progress::-webkit-progress-value {
+        background: var(--rh) !important;
+        border-radius: 9999px;
+      }
+      .fill-risk progress::-webkit-progress-value {
+        background: var(--risk) !important;
+        border-radius: 9999px;
+      }
+
+      .fill-ready progress::-moz-progress-bar { background: var(--ready) !important; }
+      .fill-operations progress::-moz-progress-bar { background: var(--operations) !important; }
+      .fill-rh progress::-moz-progress-bar { background: var(--rh) !important; }
+      .fill-risk progress::-moz-progress-bar { background: var(--risk) !important; }
 
       .card-footnote {
         font-size: 0.72rem;
@@ -355,8 +434,46 @@ export class DashboardPageComponent {
   private readonly router = inject(Router);
   private readonly globalAction = inject(GlobalActionService, { optional: true });
 
-  protected pageDefinition: WidgetPageDefinition = DASHBOARD_PAGE_DEFINITION;
+  private readonly hostCapabilities: RichBlockHostCapabilities = {
+    dispatchAction: (actionId: string, payload: unknown) => {
+      const p = payload as any;
+      if (actionId === 'navigation.openRoute' || actionId === 'navigation.navigate') {
+        const path = p?.path || p;
+        if (typeof path === 'string') {
+          this.router.navigateByUrl(path);
+          return;
+        }
+      }
+      if (this.globalAction) {
+        this.globalAction.execute(actionId, payload);
+      }
+    },
+    isActionAvailable: () => true,
+  };
+
+  protected pageDefinition: WidgetPageDefinition = this.injectHostCapabilities(DASHBOARD_PAGE_DEFINITION);
   protected readonly isCustomizing = signal<boolean>(false);
+
+  private injectHostCapabilities(def: WidgetPageDefinition): WidgetPageDefinition {
+    return {
+      ...def,
+      widgets: (def.widgets || []).map((w) => {
+        if (w.definition?.id === 'praxis-rich-content') {
+          return {
+            ...w,
+            definition: {
+              ...w.definition,
+              inputs: {
+                ...(w.definition.inputs || {}),
+                hostCapabilities: this.hostCapabilities,
+              },
+            },
+          };
+        }
+        return w;
+      }),
+    };
+  }
 
   protected toggleCustomization(): void {
     this.isCustomizing.update((v) => !v);
