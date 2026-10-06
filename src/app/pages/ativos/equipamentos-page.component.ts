@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisRichContent } from '@praxisui/rich-content';
 
 export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -66,10 +68,56 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
+export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      className: 'equipamentos-kpi-grid',
+      items: [
+        {
+          id: 'total',
+          label: 'Total de Itens Táticos',
+          value: '48 Ativos',
+          caption: 'Trajes, armas e exoesqueletos',
+          icon: 'shield',
+          tone: 'info',
+        },
+        {
+          id: 'custodia',
+          label: 'Em Custódia / Uso Ativo',
+          value: '36 Itens',
+          caption: 'Alocados a heróis em missão',
+          icon: 'check_circle',
+          tone: 'success',
+        },
+        {
+          id: 'manutencao',
+          label: 'Em Manutenção / Laboratório',
+          value: '08 Itens',
+          caption: 'Recarga de reator e nanotecnologia',
+          icon: 'build',
+          tone: 'warning',
+        },
+        {
+          id: 'integridade',
+          label: 'Integridade Média da Força',
+          value: '94,8%',
+          caption: 'Dentro dos limites de prontidão',
+          icon: 'verified',
+          tone: 'neutral',
+        },
+      ],
+    },
+  ],
+};
+
 @Component({
   selector: 'app-equipamentos-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -86,35 +134,9 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
         </div>
       </header>
 
-      <!-- KPI Bento Grid -->
-      <section class="kpi-grid">
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-assets"><span class="material-symbols-outlined">shield</span></div>
-          <p class="kpi-label">Total de Itens Táticos</p>
-          <p class="kpi-value">48 Ativos</p>
-          <p class="kpi-detail">Trajes, armas e exoesqueletos</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-ready"><span class="material-symbols-outlined">check_circle</span></div>
-          <p class="kpi-label">Em Custódia / Uso Ativo</p>
-          <p class="kpi-value">36 Itens</p>
-          <p class="kpi-detail text-ready">Alocados a heróis em missão</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-warning"><span class="material-symbols-outlined">build</span></div>
-          <p class="kpi-label">Em Manutenção / Laboratório</p>
-          <p class="kpi-value">08 Itens</p>
-          <p class="kpi-detail text-warning">Recarga de reator e nanotecnologia</p>
-        </div>
-
-        <div class="glass-panel kpi-card">
-          <div class="kpi-icon tone-operations"><span class="material-symbols-outlined">verified</span></div>
-          <p class="kpi-label">Integridade Média da Força</p>
-          <p class="kpi-value">94,8%</p>
-          <p class="kpi-detail">Dentro dos limites de prontidão</p>
-        </div>
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument" />
       </section>
 
       <!-- Metadata-Driven CRUD Runtime -->
@@ -171,59 +193,64 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
       max-width: 720px;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
-    .kpi-card {
-      padding: 18px;
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kpi-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      span { font-size: 22px; }
-    }
-
     .tone-assets { color: var(--assets); background: color-mix(in oklab, var(--assets) 14%, transparent); }
     .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
     .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
     .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
 
-    .kpi-label {
-      margin: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted-foreground);
-    }
+    /* KPI Bento Grid Styling */
+    ::ng-deep {
+      .equipamentos-kpi-grid .prx-rich-stat-group__items,
+      .equipamentos-kpi-grid .pdx-rich-stat-group__items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
 
-    .kpi-value {
-      margin: 4px 0 0;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
+      .equipamentos-kpi-grid .prx-rich-stat-group__item,
+      .equipamentos-kpi-grid .pdx-rich-stat-group__item {
+        border-radius: 16px !important;
+        padding: 18px !important;
+        border: 1px solid var(--border) !important;
+        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
 
-    .kpi-detail {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
-      color: var(--muted-foreground);
-    }
+        &:hover {
+          transform: translateY(-2px);
+          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        }
+      }
 
-    .text-ready { color: var(--ready) !important; }
-    .text-warning { color: var(--warning) !important; }
+      .equipamentos-kpi-grid .prx-rich-stat-group__value,
+      .equipamentos-kpi-grid .pdx-rich-stat-group__value {
+        font-family: var(--font-display) !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        color: var(--foreground) !important;
+        margin: 4px 0 0 !important;
+      }
+
+      .equipamentos-kpi-grid .prx-rich-stat-group__label,
+      .equipamentos-kpi-grid .pdx-rich-stat-group__label {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        color: var(--muted-foreground) !important;
+      }
+
+      .equipamentos-kpi-grid .prx-rich-stat-group__caption,
+      .equipamentos-kpi-grid .pdx-rich-stat-group__caption {
+        font-size: 0.72rem !important;
+        color: var(--muted-foreground) !important;
+        margin-top: 4px !important;
+      }
+    }
 
     .crud-surface {
       border-radius: 18px;
@@ -234,4 +261,5 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
 })
 export class EquipamentosPageComponent {
   protected readonly crudMetadata = EQUIPAMENTOS_CRUD_METADATA;
+  protected readonly kpiDocument = EQUIPAMENTOS_KPI_DOCUMENT;
 }
