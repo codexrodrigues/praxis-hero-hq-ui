@@ -16,11 +16,14 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#2**](#-issue-2-destruição-de-estado-e-recarregamento-de-schemas-em-shells-com-abas) | Destruição de Estado e Recarregamento de Schemas em Shells com Abas | `@praxisui/dynamic-form`<br>`DynamicFormService` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#3**](#-issue-3-barramento-canônico-de-eventos-entre-widgets-praxiswidgeteventbus) | Barramento Canônico de Eventos entre Widgets (`PraxisWidgetEventBus`) | `@praxisui/page-builder`<br>`@praxisui/rich-content`<br>`@praxisui/charts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#4**](#-issue-4-governança-declarativa-de-filtros-rápidos-e-filtros-avançados-na-tabela) | Governança Declarativa de Filtros Rápidos e Filtros Avançados na Tabela | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
-| [**#5**](#-issue-5-suporte-declarativo-a-ícones-e-cores-condicionais-em-apresentações-booleanas-e-enums) | Suporte Declarativo a Ícones e Cores Condicionais em Apresentações Booleanas e Enums | `@praxisui/dynamic-form`<br>`@praxisui/dynamic-fields`<br>`@UISchema` (Java) | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#5**](#-issue-5-suporte-declarativo-a-ícones-e-cores-condicionais-em-apresentações-booleanas-e-enums) | Suporte Declarativo a Ícones e Cores Condicionais em Apresentações Booleanas e Enums | `@praxisui/dynamic-form`<br>`@praxisui/dynamic-fields`<br>`@UISchema` (Java) | 🟡 Média | `[x] Resolvida` | PR #563 (Frontend: `60aed6867`)<br>PR #241 (Backend: `484e488c47`) | 2026-10-07 | Validado (override CSS removido, build OK) |
 | [**#6**](#-issue-6-descoberta-e-ativação-automática-de-filtros-inline-inteligentes-no-praxisicrud) | Descoberta e Ativação Automática de Filtros Inline Inteligentes no `@praxisui/crud` | `@praxisui/crud`<br>`@praxisui/table`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#7**](#-issue-7-normalização-robusta-de-parâmetros-de-path-em-schemasfiltered) | Normalização Robusta de Parâmetros de Path em `/schemas/filtered` | `praxis-metadata-starter`<br>`ApiDocsController` | 🟢 Baixa | `[x] Resolvida` | PR #240 (`d59641bf9e`) | 2026-10-07 | Validado (testes unitários) |
 | [**#8**](#-issue-8-hierarquia-visual-de-seções-e-densidade-de-enquadramento-em-dossiêsdrawers-caixa-dentro-de-caixa-vs-seções-plaindivider) | Hierarquia Visual de Seções e Densidade de Enquadramento em Dossiês/Drawers ("Caixa Dentro de Caixa" vs Seções Plain/Divider) | `@praxisui/dynamic-form`<br>`Design System`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#9**](#-issue-9-governança-canônica-e-descoberta-de-serviços-de-métricas-e-dashboards-statscapabilities-e-praxischarts) | Governança Canônica e Descoberta de Serviços de Métricas e Dashboards (`/stats/capabilities` e `@praxisui/charts`) | `praxis-metadata-starter`<br>`@praxisui/charts`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#10**](#-issue-10-refinamento-visual-do-pdx-inline-toggle-e-seletor-tri-state-para-filtros-booleanos) | Refinamento Visual do `pdx-inline-toggle` e Seletor Tri-State para Filtros Booleanos | `@praxisui/dynamic-fields`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#11**](#-issue-11-suporte-a-filtros-desacoplados-e-teleporte-via-cdk-portal-praxisfilterportal) | Suporte a Filtros Desacoplados e Teleporte via CDK Portal (`PraxisFilterPortal`) | `@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 
 ---
 
@@ -240,15 +243,15 @@ Entretanto, essa estrutura não é automaticamente preenchida ou sugerida pelos 
 - **Módulos Afetados:** `@praxisui/dynamic-form`, `@praxisui/dynamic-fields`, `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (Inconsistência semântica e visual crítica em dossiês e visualizações de perfil)
 - **Tipo:** Metadados OpenAPI / UX
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Frontend: PR #563 / commit `60aed6867`; Backend: PR #241 / commit `484e488c47`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 No `<praxis-dynamic-form>` em modo de apresentação (`mode="view"`, `presentationModeGlobal="true"` ou `presentationPreset="corporate-dossier"`):
 - O componente `PraxisPresentation` renderiza o ícone configurado estaticamente no `@UISchema` ou o padrão do componente (ex.: `toggle_on` com tom esmeralda/sucesso).
 - Quando o registro possui valor `ativo: false`:
   - O texto renderizado é `"Não"`.
-  - O ícone permanece `toggle_on` em verde brilhante!
-- Isso induz o usuário a um erro grave de interpretação: o operador vê o ícone de ligado/ativo e presume que o colaborador está em prontidão ativa, quando na realidade ele está inativo.
+  - O ícone permanecia `toggle_on` em verde brilhante!
+- Isso induzia o usuário a um erro grave de interpretação: o operador vê o ícone de ligado/ativo e presume que o colaborador está em prontidão ativa, quando na realidade ele está inativo.
 
 ### Cenários Correlatos & Investigação Abrangente de Plataforma
 1. **Outros Campos Booleanos do Domínio:** O mesmo erro ocorre em qualquer campo booleano: `bloqueado`, `verificado`, `aprovado`, `emMissao`, `requerAtencao`.
@@ -269,24 +272,15 @@ No `<praxis-dynamic-form>` em modo de apresentação (`mode="view"`, `presentati
    )
    private Boolean ativo;
    ```
-2. **No Frontend (`@praxisui/dynamic-fields` / `PraxisPresentationComponent`):**
+2. **No Frontend (`@praxisui/dynamic-fields` / `PraxisPresentationComponent` / `FieldShellComponent`):**
    - No renderer booleano, se `value === false`, selecionar automaticamente `iconFalse` (ou `toggle_off`) e tom `muted` / `neutral`, alterando classes e ligatures de forma reativa sem exigir CSS ad-hoc no consumidor.
 
-### Mitigação Temporária Aplicada no Hero HQ
-- Foi inserido CSS com targeting em classes no [`hero-dossier-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/rh/hero-dossier-drawer.component.ts#L650-L670):
-  ```css
-  .praxis-presentation--boolean-false .praxis-presentation__icon--prefix {
-    font-variation-settings: 'FILL' 0;
-    color: var(--muted-foreground) !important;
-  }
-  .praxis-presentation--boolean-false .praxis-presentation__icon--prefix::before {
-    content: 'toggle_off';
-  }
-  ```
+### Mitigação Temporária Aplicada no Hero HQ (Removida)
+- O override por CSS ad-hoc inserido no [`hero-dossier-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/rh/hero-dossier-drawer.component.ts) foi totalmente removido após a publicação da solução canônica na plataforma.
 
 ### Critérios de Aceite para Resolução
-- [ ] Qualquer campo booleano renderizado com valor `false` no dynamic form de apresentação exibe ícone `toggle_off` com tom neutro por padrão.
-- [ ] O backend Java aceita parametrização de ícones e cores para ambos os estados booleanos no `@UISchema`.
+- [x] Qualquer campo booleano renderizado com valor `false` no dynamic form de apresentação exibe ícone `toggle_off` com tom neutro por padrão.
+- [x] O backend Java aceita parametrização de ícones e cores para ambos os estados booleanos no `@UISchema`.
 
 ---
 
@@ -484,6 +478,168 @@ Contudo, muitos desenvolvedores de aplicações consumidoras desconhecem essa in
 - [ ] Dashboards e widgets de KPI conseguem obter agregações e contagens em uma única requisição a `stats/group-by`, eliminando chamadas repetidas a `/filter`.
 - [ ] O componente `@praxisui/charts` aceita `resourceKey` diretamente em sua configuração, sem exigir caminhos de URL hardcoded no consumidor.
 - [ ] Recursos com anotações `@UiAnalytics` expõem o link HATEOAS canônico `"stats"` nas coleções.
+
+---
+
+## 📌 Issue #10: Refinamento Visual do `pdx-inline-toggle` e Seletor Tri-State para Filtros Booleanos
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/dynamic-fields`, `@praxisui/table`, Design System da Plataforma
+- **Severidade:** 🟡 Média (Impacto estético crítico na toolbar, quebra forçada de linha e atrito de UX com controles binários para filtros)
+- **Tipo:** Componente Visual / Design Tokens MDC / UX de Filtragem
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+No componente de filtros da tabela (`PraxisFilterComponent`), campos booleanos (como `ativo` em Heróis e Colaboradores) apresentam uma experiência visual truncada e um comportamento de layout engessado:
+
+1. **O "Quadrado dentro do Retângulo" (CSS MDC Switch):**
+   - O `@praxisui/dynamic-fields` (`projects/praxis-dynamic-fields/src/lib/components/inline-toggle/inline-toggle.component.ts`) implementa o `InlineToggleComponent` (`pdx-inline-toggle`).
+   - Ele cria uma pílula externa arredondada estilo pill (`.pdx-inline-toggle-pill`, com `border-radius: 999px` e `border: 1px solid var(--md-sys-color-outline-variant)`).
+   - Dentro dessa pílula, ele embute um `<mat-slide-toggle>` nativo do Angular Material 18/19 baseado na especificação MDC (*Material Design Components*).
+   - Em `inline-toggle.component.ts:296-361`, existem overrides de CSS detalhados exclusivamente para a classe `.pdx-inline-toggle-pill.is-true .mdc-switch`.
+   - Quando o filtro está em estado **neutro** (`value: null` — estado inicial onde nenhum filtro de status foi aplicado pelo usuário), o MDC switch não recebe variáveis de tema customizadas.
+   - O resultado é que o trilho e a maçaneta do MDC switch colapsam para o estilo de fallback inerte do Material Design: uma maçaneta de arraste cinza, opaca e quadrada, emoldurada pela pílula externa, criando o efeito visual bizarro de **um bloco quadrado cinza dentro de um retângulo arredondado**.
+
+2. **A Quebra Forçada de Linha para `.query-auxiliary`:**
+   - Em `projects/praxis-table/src/lib/praxis-table.ts:2217`, colunas booleanas são classificadas pelo método `resolveLocalFilterControlType` como `FieldControlType.TOGGLE`.
+   - Em `projects/praxis-table/src/lib/components/praxis-filter/praxis-filter.component.ts:3355-3368`, qualquer controle identificado como toggle é extraído da lista de campos compactos normais (`compactAlwaysVisibleMetas`) e atribuído a `toggleMetas`.
+   - No template (`praxis-filter.component.html:180-205`), `toggleMetas` é renderizado dentro de `<div class="query-auxiliary">`, que é o mesmo container onde reside o botão "Gerenciar campos".
+   - No arquivo de estilos (`praxis-filter.component.scss:365-372`):
+     ```scss
+     .praxis-filter-bar.has-compact .query-auxiliary {
+       grid-column: 1;
+       grid-row: auto; // <--- Força OBRIGATORIAMENTE uma segunda linha!
+       justify-self: start;
+       width: 100%;
+     }
+     ```
+   - Como consequência, o filtro booleano é compulsoriamente jogado para a segunda linha, mesmo em monitores de alta resolução (1920px+) com espaço horizontal de sobra na primeira linha ao lado de `Nome Civil` e `Departamento`.
+
+3. **Inadequação Conceitual de UX de um Switch Binário em Filtros:**
+   - Um slide-toggle é um controle estritamente **binário** (*Ligado / Desligado*; `true` / `false`).
+   - A filtragem de tabelas corporativas é necessariamente **tri-estado (*tri-state*)**:
+     - **Neutro (`null`):** Traz todos os registros (ativos e inativos combinados);
+     - **Verdadeiro (`true`):** Traz apenas ativos;
+     - **Falso (`false`):** Traz apenas inativos.
+   - Quando o operador vê a alavanca na posição "desligada", é impossível discernir se o filtro está inativo (exibindo todo o universo) ou se está filtrando apenas quem é inativo. Para limpar a seleção, o operador depende de um mini-botão de `X` que só aparece condicionalmente.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Campos Booleanos em Tabelas Gerais:** Qualquer tabela corporativa no monorepo que possua colunas booleanas (`ativo`, `bloqueado`, `verificado`, `urgente`) e utilize filtros fixos sofre da mesma quebra de linha rígida e da distorção visual da maçaneta quadrada.
+2. **Contraste em Tema Escuro vs Tema Claro:** No tema escuro, a falta de estilização do track do MDC gera um contraste agressivo de cinzas sem harmonia com a paleta Oklab da Praxis. No tema claro, parece um botão inerte ou quebrado.
+3. **Acessibilidade e Leitores de Tela:** O leitor de tela anuncia um componente `switch` com valores restritos a `checked / unchecked`, impedindo o usuário assistivo de entender como restaurar a busca para o estado neutro "Todos".
+
+### Solução Canônica Recomendada de Plataforma
+1. **Novo Controle Canônico `pdx-inline-tristate` no `@praxisui/dynamic-fields`:**
+   - Para contexto de filtragem de tabelas, criar ou promover um componente de seleção tri-estado compacto:
+     - Formato de pílula integrada com dropdown ou botões segmentados: *Todos | Sim (Ativo) | Não (Inativo)*.
+     - Suporte a badges com contadores dinâmicos de cada estado.
+2. **Correção do Fallback de CSS do `pdx-inline-toggle`:**
+   - Nos casos onde o toggle for intencionalmente mantido, escrever regras completas para o estado neutro/desmarcado do MDC switch, garantindo que o handle seja perfeitamente circular, com trilho suave e transições condizentes com os tokens da plataforma.
+3. **Revisão do Grid de Layout no `praxis-filter`:**
+   - Permitir que controles booleanos e toggles compactos residam na linha de `.compact-fields`, eliminando a expulsão arbitrária para a segunda linha em `.query-auxiliary`.
+
+### Critérios de Aceite para Resolução
+- [ ] O filtro de status na toolbar da tabela exibe visual harmonioso integrado ao Design System, sem maçanetas quadradas ou blocos cinzas fora de padrão.
+- [ ] O operador consegue alternar claramente entre os estados *Todos*, *Ativo* e *Inativo* sem ambiguidade semântica.
+- [ ] Controles inline booleanos convivem na primeira linha com inputs e selects compactos quando houver largura de viewport disponível.
+
+---
+
+## 📌 Issue #11: Suporte a Filtros Desacoplados e Teleporte via CDK Portal (`PraxisFilterPortal`)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`
+- **Severidade:** 🟡 Média (Limitação arquitetural crítica para layouts corporativos modernos, bento grids, sidebars e cards de comando)
+- **Tipo:** Arquitetura de Componentes / Projeção de Conteúdo / Desacoplamento Headless
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+Atualmente, a plataforma Praxis impõe uma arquitetura **monolítica e rígida na camada de apresentação da tabela**:
+
+1. **Acoplamento Físico de Template:** Em `projects/praxis-table/src/lib/praxis-table.html:164, 306, 2578`, o `<praxis-filter>` está estruturalmente soldado dentro do template do `<praxis-table>`.
+2. **Encapsulamento Rígido no CRUD:** Em `projects/praxis-crud/src/lib/praxis-crud.component.ts:202-224`, o `<praxis-crud>` instancia o `<praxis-table>` internamente sem expor pontos de projeção de conteúdo (`<ng-content>`) e sem expor diretivas de portal para os filtros.
+3. **Ausência de Reatividade Externa no CRUD:** O `<praxis-crud>` **não possui `@Input() filterCriteria`**. Ele apenas lê o `filterCriteria` inicial do objeto `metadata` durante a primeira inicialização (`resolveFilterCriteria`).
+4. **Impacto Prático:** Se o designer ou arquiteto de software desejar posicionar a barra de filtros inteligente em um **card tático superior destacado**, em uma **sidebar retrátil lateral** ou integrá-la a um **Bento Grid**, a plataforma bloqueia essa composição. Para fazer isso hoje, a aplicação consumidora é forçada a desligar os filtros nativos da tabela (`filtering.enabled = false`) e reconstruir manualmente inputs, selects, debounces e requisições HTTP — destruindo o valor do ecossistema *metadata-driven*.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Sidebars de Busca Avançada (Search Drawers Externos):** Telas corporativas com dezenas de parâmetros de pesquisa exigem filtros em uma gaveta lateral desacoplada da tabela.
+2. **Sincronização Reativa Bidirecional:** A alteração de um filtro em um container externo deve invocar `praxisTable.applyAdvancedFilterCriteria()` mantendo debounce, ordenação e cursor de paginação, sem recriar o `TableConfig` e sem disparar a rajada dupla de requisições resolvida na Issue #1.
+3. **Coordenação Master-Detail / Múltiplas Tabelas:** Capacidade de um único painel de filtros desacoplado alimentar simultaneamente duas tabelas sincronizadas na mesma tela.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Diretiva de Teleporte CDK Portal (`*praxisFilterOutlet` ou `<praxis-filter-portal>`):**
+   - Permitir que os filtros governados da tabela sejam projetados em qualquer container da página:
+     ```html
+     <!-- Card Tático Superior -->
+     <div class="tactical-scope-card glass-panel">
+       <ng-container *praxisFilterOutlet="heroesCrud" />
+     </div>
+
+     <!-- Tabela Focada Abaixo -->
+     <praxis-crud #heroesCrud [metadata]="metadata" ... />
+     ```
+2. **Binding Reativo `@Input() filterCriteria` no `PraxisCrudComponent`:**
+   - Expor `@Input() filterCriteria: Record<string, unknown>`.
+   - Quando o binding for atualizado pelo host, repassar a mutação diretamente ao `PraxisTable.applyAdvancedFilterCriteria()`, sem destruir o estado do CRUD nem reatribuir o objeto de configuração completo.
+3. **Token / Serviço de Ponte de Filtros (`TableFilterBridgeService`):**
+   - Fornecer uma ponte reativa para que componentes standalone consigam ler o schema de filtros e despachar critérios de busca para a tabela associada via Signals / Observables.
+
+### Critérios de Aceite para Resolução
+- [ ] É possível projetar e renderizar os filtros inline governados por metadados em qualquer card ou container HTML fora do corpo da tabela.
+- [ ] O componente `<praxis-crud>` aceita `@Input() filterCriteria` reativo e reflete mutações imediatamente na consulta `POST /filter` sem piscar a tela e sem duplo carregamento.
+- [ ] Debounce, tags salvas e chips de filtros continuam sincronizados perfeitamente no container desacoplado.
+
+---
+
+## 📌 Issue #12: Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/rich-content`, `praxis-metadata-starter`
+- **Severidade:** 🟡 Média (Padronização do Design System, eliminação de código ad-hoc e unificação de navegação tática)
+- **Tipo:** Design System / Metadados OpenAPI / Componente Canônico
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+A segmentação rápida por escopos táticos (ex.: *Todos, Em Prontidão, Em Reserva, Em Licença*) é um padrão onipresente em sistemas corporativos modernos:
+
+1. **A Solução Ad-Hoc no Hero HQ:**
+   - Diante da falta de um componente canônico desacoplado na plataforma, o Hero HQ criou uma barra tática manual em HTML/CSS (`funcionarios-page.component.ts`).
+   - Isso gerou dois problemas graves de produto:
+     - **O Vazio Visual:** O container utiliza `display: flex; justify-content: space-between;` com apenas o rótulo à esquerda e os chips à direita, abrindo um vão vazio de 800px a 1200px no meio da tela em resoluções padrão.
+     - **Desconexão Funcional:** Como o CRUD não aceita filtros reativos de fora, o clique nesses chips apenas atualizava um signal e exibia um toast, sem filtrar os registros da tabela.
+2. **Limitação do `quickFilters` Interno da Tabela:**
+   - O `@praxisui/table` já possui a propriedade `toolbar.filters.quickFilters` no `TableConfig`.
+   - Contudo, ele é renderizado como botões de aba simples embutidos na toolbar da tabela, sem estética de card de comando tático, sem badges numéricos dinâmicos vinculados a endpoints de agregação (`/stats/group-by`) e sem suporte a anotações declarativas no backend Java.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Badges Dinâmicos com Auto-Refresh:** Contadores numéricos em cada chip (ex.: *Todos [101]*, *Em Prontidão [53]*, *Em Reserva [48]*) que são carregados em uma única requisição a `/stats/group-by` e se atualizam automaticamente após mutações (`create`, `delete`, transições de workflow).
+2. **Integração com Busca Global Omnibox:** O lado esquerdo da barra deve abrigar uma busca global rápida de texto com debounce (ex.: *Buscar por codinome, nome civil, CPF...*), eliminando completamente o vazio visual e unificando a intenção de busca.
+3. **Acessibilidade e Navegação por Teclado:** Suporte a setas direcionais (ARIA `radiogroup` / `tabs`) para alternar rapidamente entre escopos táticos sem depender exclusivamente do mouse.
+
+### Solução Canônica Recomendada de Plataforma
+1. **No `praxis-metadata-starter` (Java):**
+   - Criar a anotação canônica `@ScopeFilter` / `@ScopeBar`:
+     ```java
+     @ApiResource(
+         resourceKey = "human-resources/funcionarios",
+         scopeBar = {
+             @ScopeItem(id = "all", label = "Todos os Heróis", isDefault = true),
+             @ScopeItem(id = "ativos", label = "Em Prontidão", filter = "ativo=true", icon = "verified_user", tone = "success"),
+             @ScopeItem(id = "inativos", label = "Reserva / Licença", filter = "ativo=false", icon = "person_off", tone = "warning")
+         }
+     )
+     ```
+   - O gerador de OpenAPI deve publicar essa configuração em `x-ui.table.scopeBar` ou `x-ui.scopeBar`.
+2. **No `@praxisui/table` ou `@praxisui/rich-content` (Angular):**
+   - Criar o componente canônico `<praxis-scope-bar>`:
+     - **Lado Esquerdo:** Campo de busca omnibox instantânea ou filtros inline desacoplados;
+     - **Centro / Direita:** Segmentos de escopo com contadores assíncronos dinâmicos (`stats`);
+     - **Conexão Declarativa:** Vinculação automática com a tabela alvo via `forTable="tableId"`.
+
+### Critérios de Aceite para Resolução
+- [ ] O componente `<praxis-scope-bar>` renderiza layout equilibrado e esteticamente refinado sem vazios desproporcionais, com busca integrada na esquerda e chips na direita.
+- [ ] Os contadores numéricos de cada escopo são obtidos em uma única chamada agregada a `/stats/group-by`, sem emitir rajadas de consultas à API.
+- [ ] A seleção de qualquer escopo reflete imediatamente na filtragem da tabela conectada.
 
 ---
 

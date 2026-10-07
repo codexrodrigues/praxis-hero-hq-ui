@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
-import type { RichContentDocument } from '@praxisui/core';
+import type { RichBlockHostCapabilities, RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
@@ -21,70 +21,22 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
     idField: 'id',
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'ID',
-        width: '80px',
-        align: 'center',
-        sortable: true,
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'orderDate', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
+      order: ['id', 'orderDate', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
+      overrides: {
+        id: { width: '80px', align: 'center' },
+        orderDate: { width: '140px', align: 'center', format: 'dd/MM/yyyy' },
+        quantity: { width: '120px', align: 'center' },
+        currency: { width: '100px', align: 'center' },
+        status: { width: '150px', align: 'center' },
+        approvedAt: { width: '140px', align: 'center', format: 'dd/MM/yyyy' },
+        receivedAt: { width: '140px', align: 'center', format: 'dd/MM/yyyy' },
+        disabledReason: { width: '220px' },
       },
-      {
-        field: 'orderDate',
-        header: 'Data do Pedido',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '140px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'quantity',
-        header: 'Qtd. de Itens',
-        type: 'number',
-        width: '120px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'currency',
-        header: 'Moeda',
-        width: '100px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'status',
-        header: 'Status da Ordem',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'approvedAt',
-        header: 'Aprovado Em',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '140px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'receivedAt',
-        header: 'Recebido Em',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '140px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'disabledReason',
-        header: 'Observações / Motivo',
-        width: '220px',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,
@@ -140,6 +92,7 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
           caption: 'Ciclo de suprimento em andamento',
           icon: 'local_shipping',
           tone: 'info',
+          action: { actionId: 'scope.filter', payload: 'all' },
         },
         {
           id: 'aprovadas',
@@ -148,6 +101,7 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
           caption: 'Itens em expedição ou já recebidos',
           icon: 'inventory',
           tone: 'success',
+          action: { actionId: 'scope.filter', payload: 'aprovadas' },
         },
         {
           id: 'analise',
@@ -156,6 +110,7 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
           caption: 'Compliance de compras e finanças',
           icon: 'pending_actions',
           tone: 'warning',
+          action: { actionId: 'scope.filter', payload: 'analise' },
         },
         {
           id: 'canceladas',
@@ -164,6 +119,7 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
           caption: 'Ordens reavaliadas pelo comando',
           icon: 'cancel',
           tone: 'neutral',
+          action: { actionId: 'scope.filter', payload: 'canceladas' },
         },
       ],
     },
@@ -190,9 +146,9 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
         </div>
       </header>
 
-      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
-      <section class="kpi-surface" (click)="onKpiCardClick($event)">
-        <praxis-rich-content [document]="kpiDocument()" />
+      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content com Barramento Declarativo -->
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument()" [hostCapabilities]="kpiHostCapabilities" />
       </section>
 
       <!-- Barra Tática de Escopo e Filtros Rápidos -->
@@ -478,30 +434,22 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
     this.kpiSub?.unsubscribe();
   }
 
+  protected readonly kpiHostCapabilities: RichBlockHostCapabilities = {
+    dispatchAction: (actionId: string, payload: unknown) => {
+      if (actionId === 'scope.filter' && typeof payload === 'string') {
+        this.setFilter(payload);
+      }
+    },
+    isActionAvailable: () => true,
+  };
+
   protected setFilter(filterId: string): void {
     this.activeFilterId.set(filterId);
   }
 
-  protected onKpiCardClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement | null;
-    const cardEl = target?.closest('.prx-stat-group__item, [data-stat-id], .prx-rich-card');
-    if (!cardEl) return;
-
-    const text = cardEl.textContent?.toLowerCase() ?? '';
-    if (text.includes('aprovadas') || text.includes('entregues')) {
-      this.setFilter('aprovadas');
-    } else if (text.includes('análise') || text.includes('aprovação')) {
-      this.setFilter('analise');
-    } else if (text.includes('canceladas') || text.includes('revogadas')) {
-      this.setFilter('canceladas');
-    } else if (text.includes('ordens') || text.includes('compra')) {
-      this.setFilter('all');
-    }
-  }
-
   private loadKpis(): void {
     this.kpiSub?.unsubscribe();
-    this.kpiSub = this.dashboardStats.getPedidosTacticalKpis().subscribe((kpis) => {
+    this.dashboardStats.getPedidosTacticalKpis().subscribe((kpis) => {
       this.totalPedidos.set(kpis.totalPedidos);
       this.approvedOrReceived.set(kpis.approvedOrReceived);
       this.draft.set(kpis.draft);
@@ -525,6 +473,7 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
                 caption: 'Ciclo de suprimento em andamento',
                 icon: 'local_shipping',
                 tone: 'info',
+                action: { actionId: 'scope.filter', payload: 'all' },
               },
               {
                 id: 'aprovadas',
@@ -533,6 +482,7 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
                 caption: 'Itens em expedição ou já recebidos',
                 icon: 'inventory',
                 tone: 'success',
+                action: { actionId: 'scope.filter', payload: 'aprovadas' },
               },
               {
                 id: 'analise',
@@ -541,6 +491,7 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
                 caption: 'Compliance de compras e finanças',
                 icon: 'pending_actions',
                 tone: 'warning',
+                action: { actionId: 'scope.filter', payload: 'analise' },
               },
               {
                 id: 'canceladas',
@@ -549,6 +500,7 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
                 caption: 'Ordens reavaliadas pelo comando',
                 icon: 'cancel',
                 tone: 'neutral',
+                action: { actionId: 'scope.filter', payload: 'canceladas' },
               },
             ],
           },

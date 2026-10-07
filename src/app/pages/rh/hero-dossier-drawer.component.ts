@@ -1005,28 +1005,12 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
           color: var(--foreground) !important;
         }
 
-        /* Resolução Semântica Reativa para Campos Booleanos (ISSUE-022) */
+        /* Resolução Semântica Canônica da Plataforma para Apresentações Booleanas (Issue #5) */
         .praxis-presentation--boolean-false {
           .praxis-presentation__value {
             background: color-mix(in oklab, var(--muted) 70%, transparent) !important;
             color: var(--muted-foreground) !important;
             border: 1px solid color-mix(in oklab, var(--border) 80%, transparent) !important;
-          }
-
-          .praxis-presentation__icon--prefix {
-            color: var(--muted-foreground) !important;
-            font-size: 0 !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-
-            &::before {
-              content: 'toggle_off';
-              font-family: 'Material Symbols Outlined', 'Material Icons', sans-serif !important;
-              font-size: 19px !important;
-              line-height: 1;
-              color: var(--muted-foreground) !important;
-            }
           }
         }
 
@@ -1035,22 +1019,6 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
             background: color-mix(in oklab, #10b981 14%, transparent) !important;
             color: #059669 !important;
             border: 1px solid color-mix(in oklab, #10b981 30%, transparent) !important;
-          }
-
-          .praxis-presentation__icon--prefix {
-            color: #10b981 !important;
-            font-size: 0 !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-
-            &::before {
-              content: 'toggle_on';
-              font-family: 'Material Symbols Outlined', 'Material Icons', sans-serif !important;
-              font-size: 19px !important;
-              line-height: 1;
-              color: #10b981 !important;
-            }
           }
         }
       }
