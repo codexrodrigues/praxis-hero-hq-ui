@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
@@ -8,7 +9,9 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { take } from 'rxjs';
 import {
+  ASYNC_CONFIG_STORAGE,
   CONFIG_STORAGE,
   GlobalActionService,
   type WidgetEventEnvelope,
@@ -289,7 +292,9 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly globalAction = inject(GlobalActionService, { optional: true });
   private readonly statsService = inject(DashboardStatsService);
+  private readonly asyncConfigStorage = inject(ASYNC_CONFIG_STORAGE, { optional: true });
   private readonly configStorage = inject(CONFIG_STORAGE);
+  private readonly cdr = inject(ChangeDetectorRef);
   protected readonly authService = inject(AuthSimulationService);
 
   private readonly storageKey = 'dynamic-page:hq-dashboard';
@@ -311,22 +316,44 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
 
     if (typeof window !== 'undefined') {
       window.addEventListener('praxis:identity-switch', this.onIdentitySwitch);
+      (window as any).PAX_SAVE_DASHBOARD_LAYOUT = (def: WidgetPageDefinition) => this.onPageChange(def);
+      (window as any).PAX_RELOAD_DASHBOARD_LAYOUT = () => this.loadEffectiveLayout();
     }
   }
 
   ngOnDestroy(): void {
     if (typeof window !== 'undefined') {
       window.removeEventListener('praxis:identity-switch', this.onIdentitySwitch);
+      delete (window as any).PAX_SAVE_DASHBOARD_LAYOUT;
+      delete (window as any).PAX_RELOAD_DASHBOARD_LAYOUT;
     }
   }
 
   private readonly onIdentitySwitch = (): void => {
-    // Ao alternar a persona tática, recarrega o layout persistido da nova persona
+    // Ao alternar a persona tática, reseta o estado visual imediato para o padrão de governança
+    // e dispara a carga remota da nova persona para isolamento total
+    this.isLayoutCustomized.set(false);
+    this.pageDefinition.set(
+      this.currentKpis
+        ? projectTacticalKpis(DASHBOARD_PAGE_DEFINITION, this.currentKpis)
+        : DASHBOARD_PAGE_DEFINITION,
+    );
     this.loadEffectiveLayout();
   };
 
   private loadEffectiveLayout(): void {
-    const stored = this.configStorage.loadConfig<WidgetPageDefinition>(this.storageKey);
+    const currentUserId = this.authService.currentPersona().id;
+    const localScopedKey = `${this.storageKey}:${currentUserId}`;
+
+    // 1. Renderiza imediatamente do cache local da persona (sem flash)
+    let stored: WidgetPageDefinition | null = null;
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(localScopedKey);
+        if (raw) stored = JSON.parse(raw);
+      } catch {}
+    }
+
     if (stored && stored.widgets && stored.widgets.length > 0) {
       this.isLayoutCustomized.set(true);
       const effective = this.currentKpis
@@ -340,24 +367,95 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
         : DASHBOARD_PAGE_DEFINITION;
       this.pageDefinition.set(effective);
     }
+
+    // 2. Sincroniza com a persistência canônica remota no backend (praxis-config-starter)
+    if (this.asyncConfigStorage) {
+      this.asyncConfigStorage
+        .loadConfig<WidgetPageDefinition>(this.storageKey)
+        .pipe(take(1))
+        .subscribe({
+          next: (remote) => {
+            if (this.authService.currentPersona().id !== currentUserId) {
+              return;
+            }
+            if (remote && remote.widgets && remote.widgets.length > 0) {
+              this.isLayoutCustomized.set(true);
+              const effective = this.currentKpis
+                ? projectTacticalKpis(remote, this.currentKpis)
+                : remote;
+              this.pageDefinition.set(effective);
+              if (typeof localStorage !== 'undefined') {
+                try {
+                  localStorage.setItem(localScopedKey, JSON.stringify(remote));
+                } catch {}
+              }
+            } else {
+              this.isLayoutCustomized.set(false);
+              const effective = this.currentKpis
+                ? projectTacticalKpis(DASHBOARD_PAGE_DEFINITION, this.currentKpis)
+                : DASHBOARD_PAGE_DEFINITION;
+              this.pageDefinition.set(effective);
+              if (typeof localStorage !== 'undefined') {
+                try {
+                  localStorage.removeItem(localScopedKey);
+                } catch {}
+              }
+            }
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            console.warn('[DashboardPageComponent] Não foi possível carregar config remota:', err);
+          },
+        });
+    }
+    this.cdr.markForCheck();
   }
 
   protected toggleCustomization(): void {
     this.isCustomizing.update((v) => !v);
+    this.cdr.markForCheck();
   }
 
   protected onPageChange(updated: WidgetPageDefinition): void {
+    const currentUserId = this.authService.currentPersona().id;
+    const localScopedKey = `${this.storageKey}:${currentUserId}`;
+
     this.pageDefinition.set(updated);
-    this.configStorage.saveConfig(this.storageKey, updated);
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(localScopedKey, JSON.stringify(updated));
+      } catch {}
+    }
+
+    if (this.asyncConfigStorage) {
+      this.asyncConfigStorage.saveConfig(this.storageKey, updated).pipe(take(1)).subscribe();
+    }
     this.isLayoutCustomized.set(true);
     this.lastSavedAt.set(new Date().toLocaleTimeString('pt-BR'));
+    this.cdr.markForCheck();
   }
 
   protected resetToFactoryLayout(): void {
-    this.configStorage.clearConfig(this.storageKey);
+    const currentUserId = this.authService.currentPersona().id;
+    const localScopedKey = `${this.storageKey}:${currentUserId}`;
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem(localScopedKey);
+      } catch {}
+    }
+
+    if (this.asyncConfigStorage) {
+      this.asyncConfigStorage.clearConfig(this.storageKey).pipe(take(1)).subscribe();
+    }
     this.isLayoutCustomized.set(false);
     this.lastSavedAt.set(null);
-    this.loadEffectiveLayout();
+    this.pageDefinition.set(
+      this.currentKpis
+        ? projectTacticalKpis(DASHBOARD_PAGE_DEFINITION, this.currentKpis)
+        : DASHBOARD_PAGE_DEFINITION,
+    );
+    this.cdr.markForCheck();
   }
 
   protected handleWidgetEvent(event: WidgetEventEnvelope): void {

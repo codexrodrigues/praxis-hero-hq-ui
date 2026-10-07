@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
@@ -8,11 +9,17 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
-import type { RichBlockHostCapabilities, RichContentDocument } from '@praxisui/core';
+import { Subscription, take } from 'rxjs';
+import {
+  ASYNC_CONFIG_STORAGE,
+  type RichBlockHostCapabilities,
+  type RichContentDocument,
+  type TableConfig,
+} from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
+import { AuthSimulationService } from '../../core/auth-simulation.service';
 
 export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -146,6 +153,42 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
         </div>
 
         <div class="header-actions">
+          @if (isTableCustomized()) {
+            <div
+              class="table-persistence-badge customized"
+              data-testid="pedidos-table-status"
+              title="Configuração de tabela customizada persistida para esta persona"
+            >
+              <span class="pulse-indicator-amber"></span>
+              <span>Tabela Customizada (Persistida)</span>
+              @if (lastSavedAt(); as saved) {
+                <span class="saved-time">· salvo às {{ saved }}</span>
+              }
+            </div>
+          } @else {
+            <div
+              class="table-persistence-badge governed"
+              data-testid="pedidos-table-status"
+              title="Configuração padrão governada de fábrica"
+            >
+              <span class="pulse-indicator-cyan"></span>
+              <span>Tabela de Fábrica (Governança)</span>
+            </div>
+          }
+
+          @if (isCustomizing() && isTableCustomized()) {
+            <button
+              type="button"
+              class="reset-layout-btn"
+              data-testid="reset-table-btn"
+              (click)="resetToFactoryTableConfig()"
+              title="Reverter para configuração de fábrica e descartar customizações desta persona"
+            >
+              <span class="material-symbols-outlined">restart_alt</span>
+              <span>Restaurar Fábrica</span>
+            </button>
+          }
+
           <button
             type="button"
             class="customize-toggle-btn"
@@ -230,11 +273,14 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
-        <praxis-crud
-          crudId="heroes-hq-pedidos-crud"
-          [metadata]="activeCrudMetadata()"
-          [enableCustomization]="isCustomizing()"
-        />
+        @if (crudRenderKey() >= 0) {
+          <praxis-crud
+            crudId="heroes-hq-pedidos-crud"
+            [metadata]="activeCrudMetadata()"
+            [enableCustomization]="isCustomizing()"
+            (tableRuntimeConfigChange)="onTableConfigChange($event)"
+          />
+        }
       </section>
     </div>
   `,
@@ -412,6 +458,82 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       overflow: hidden;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .table-persistence-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+
+      &.customized {
+        background: color-mix(in oklab, var(--warning) 15%, transparent);
+        border: 1px solid color-mix(in oklab, var(--warning) 35%, transparent);
+        color: var(--warning);
+      }
+
+      &.governed {
+        background: color-mix(in oklab, var(--cobalt) 12%, transparent);
+        border: 1px solid color-mix(in oklab, var(--cobalt) 30%, transparent);
+        color: var(--cobalt);
+      }
+
+      .saved-time {
+        font-size: 0.65rem;
+        opacity: 0.8;
+      }
+    }
+
+    .pulse-indicator-amber {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--warning);
+      box-shadow: 0 0 6px var(--warning);
+    }
+
+    .pulse-indicator-cyan {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--cobalt);
+      box-shadow: 0 0 6px var(--cobalt);
+    }
+
+    .reset-layout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid color-mix(in oklab, var(--destructive) 35%, transparent);
+      background: color-mix(in oklab, var(--destructive) 10%, transparent);
+      color: var(--destructive);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &:hover {
+        background: var(--destructive);
+        color: #fff;
+        border-color: var(--destructive);
+        transform: translateY(-1px);
+      }
+
+      span { font-size: 16px; }
+    }
+
     .customize-toggle-btn {
       display: inline-flex;
       align-items: center;
@@ -445,18 +567,32 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class PedidosPageComponent implements OnInit, OnDestroy {
+  private readonly storageKey = 'table-config:heroes-hq-pedidos-crud';
+
   protected readonly isCustomizing = signal<boolean>(false);
+  protected readonly isTableCustomized = signal<boolean>(false);
+  protected readonly lastSavedAt = signal<string | null>(null);
+  protected readonly crudRenderKey = signal<number>(0);
+
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalPedidos = signal<number>(10);
   protected readonly approvedOrReceived = signal<number>(5);
   protected readonly draft = signal<number>(3);
   protected readonly cancelled = signal<number>(2);
 
+  private readonly dashboardStats = inject(DashboardStatsService);
+  protected readonly authService = inject(AuthSimulationService);
+  private readonly asyncConfigStorage = inject(ASYNC_CONFIG_STORAGE, { optional: true });
+  private readonly cdr = inject(ChangeDetectorRef);
+  private kpiSub: Subscription | null = null;
+
   protected toggleCustomization(): void {
     this.isCustomizing.update((v) => !v);
   }
 
   protected readonly kpiDocument = signal<RichContentDocument>(PEDIDOS_KPI_DOCUMENT);
+
+  protected readonly persistedTableConfig = signal<TableConfig | null>(null);
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -470,22 +606,157 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
       filterCriteria = { status: 'CANCELLED' };
     }
 
+    const customTable = this.persistedTableConfig();
     return {
       ...PEDIDOS_CRUD_METADATA,
       filterCriteria,
+      table: customTable ? (customTable as unknown as CrudMetadata['table']) : PEDIDOS_CRUD_METADATA.table,
     };
   });
 
-  private readonly dashboardStats = inject(DashboardStatsService);
-  private kpiSub: Subscription | null = null;
-
   ngOnInit(): void {
     this.loadKpis();
+    this.loadEffectiveTableConfig();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('praxis:identity-switch', this.onIdentitySwitch);
+      (window as any).PAX_SAVE_PEDIDOS_TABLE_CONFIG = (cfg: TableConfig) => this.saveTableConfig(cfg);
+      (window as any).PAX_RELOAD_PEDIDOS_TABLE_CONFIG = () => this.loadEffectiveTableConfig();
+      (window as any).PAX_RESET_PEDIDOS_TABLE_CONFIG = () => this.resetToFactoryTableConfig();
+    }
   }
 
   ngOnDestroy(): void {
     this.kpiSub?.unsubscribe();
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('praxis:identity-switch', this.onIdentitySwitch);
+      delete (window as any).PAX_SAVE_PEDIDOS_TABLE_CONFIG;
+      delete (window as any).PAX_RELOAD_PEDIDOS_TABLE_CONFIG;
+      delete (window as any).PAX_RESET_PEDIDOS_TABLE_CONFIG;
+    }
   }
+
+  private readonly onIdentitySwitch = (): void => {
+    this.persistedTableConfig.set(null);
+    this.isTableCustomized.set(false);
+    this.lastSavedAt.set(null);
+    this.crudRenderKey.update((k) => k + 1);
+    this.loadEffectiveTableConfig();
+  };
+
+  private loadEffectiveTableConfig(): void {
+    const currentUserId = this.authService.currentPersona().id;
+    const localScopedKey = `${this.storageKey}:${currentUserId}`;
+
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem(localScopedKey);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          this.persistedTableConfig.set(parsed);
+          this.isTableCustomized.set(true);
+        } catch {
+          this.persistedTableConfig.set(null);
+          this.isTableCustomized.set(false);
+          this.lastSavedAt.set(null);
+        }
+      } else {
+        this.persistedTableConfig.set(null);
+        this.isTableCustomized.set(false);
+        this.lastSavedAt.set(null);
+      }
+    } else {
+      this.persistedTableConfig.set(null);
+      this.isTableCustomized.set(false);
+      this.lastSavedAt.set(null);
+    }
+
+    if (this.asyncConfigStorage) {
+      this.asyncConfigStorage
+        .loadConfig<TableConfig>(this.storageKey)
+        .pipe(take(1))
+        .subscribe({
+          next: (remote) => {
+            if (this.authService.currentPersona().id !== currentUserId) {
+              return;
+            }
+            if (remote && remote.columns && remote.columns.length > 0) {
+              this.persistedTableConfig.set(remote);
+              this.isTableCustomized.set(true);
+              if (typeof localStorage !== 'undefined') {
+                try {
+                  localStorage.setItem(localScopedKey, JSON.stringify(remote));
+                } catch {}
+              }
+            } else {
+              this.persistedTableConfig.set(null);
+              this.isTableCustomized.set(false);
+              this.lastSavedAt.set(null);
+              if (typeof localStorage !== 'undefined') {
+                try {
+                  localStorage.removeItem(localScopedKey);
+                } catch {}
+              }
+            }
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.persistedTableConfig.set(null);
+            this.isTableCustomized.set(false);
+            this.lastSavedAt.set(null);
+            this.cdr.markForCheck();
+          },
+        });
+    }
+    this.cdr.markForCheck();
+  }
+
+  protected saveTableConfig(config: TableConfig): void {
+    const currentUserId = this.authService.currentPersona().id;
+    const localScopedKey = `${this.storageKey}:${currentUserId}`;
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(localScopedKey, JSON.stringify(config));
+      } catch {}
+    }
+
+    if (this.asyncConfigStorage) {
+      this.asyncConfigStorage.saveConfig(this.storageKey, config).pipe(take(1)).subscribe();
+    }
+    this.persistedTableConfig.set(config);
+    this.isTableCustomized.set(true);
+    this.lastSavedAt.set(new Date().toLocaleTimeString('pt-BR'));
+    this.crudRenderKey.update((k) => k + 1);
+    this.cdr.markForCheck();
+  }
+
+  protected resetToFactoryTableConfig(): void {
+    const currentUserId = this.authService.currentPersona().id;
+    const localScopedKey = `${this.storageKey}:${currentUserId}`;
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem(localScopedKey);
+      } catch {}
+    }
+
+    if (this.asyncConfigStorage) {
+      this.asyncConfigStorage.clearConfig(this.storageKey).pipe(take(1)).subscribe();
+    }
+    this.persistedTableConfig.set(null);
+    this.isTableCustomized.set(false);
+    this.lastSavedAt.set(null);
+    this.crudRenderKey.update((k) => k + 1);
+    this.cdr.markForCheck();
+  }
+
+  protected onTableConfigChange(config: TableConfig): void {
+    if (this.isCustomizing()) {
+      this.saveTableConfig(config);
+    }
+  }
+
 
   protected readonly kpiHostCapabilities: RichBlockHostCapabilities = {
     dispatchAction: (actionId: string, payload: unknown) => {

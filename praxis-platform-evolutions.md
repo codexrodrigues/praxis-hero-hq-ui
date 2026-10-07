@@ -15,9 +15,9 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#1**](#-issue-1-duplo-carregamento-redundante-no-praxiscuitable-via-praxisicrud) | Duplo Carregamento Redundante no `@praxisui/table` via `@praxisui/crud` | `@praxisui/crud`<br>`@praxisui/table` | 🔴 Alta | `[x] Resolvida` | PR #562 (`327fd7786`) | 2026-10-07 | Validado (interceptor removido) |
 | [**#2**](#-issue-2-destruição-de-estado-e-recarregamento-de-schemas-em-shells-com-abas) | Destruição de Estado e Recarregamento de Schemas em Shells com Abas | `@praxisui/dynamic-form`<br>`DynamicFormService` | 🟡 Média | `[x] Resolvida` | PR #564 (`ae62e5c33`) | 2026-10-07 | Validado (L1 compiled schema cache, SelectOptionRegistry e *praxisKeepAliveTab) |
 | [**#3**](#-issue-3-barramento-canônico-de-eventos-entre-widgets-praxiswidgeteventbus) | Barramento Canônico de Eventos entre Widgets (`PraxisWidgetEventBus`) | `@praxisui/page-builder`<br>`@praxisui/rich-content`<br>`@praxisui/charts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#4**](#-issue-4-governança-declarativa-de-filtros-rápidos-e-filtros-avançados-na-tabela) | Governança Declarativa de Filtros Rápidos e Filtros Avançados na Tabela | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
+| [**#4**](#-issue-4-governança-declarativa-de-filtros-rápidos-e-filtros-avançados-na-tabela) | Governança Declarativa de Filtros Rápidos e Filtros Avançados na Tabela | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟢 Baixa | `[x] Resolvida` | Backend: `praxis-metadata-starter` (`@QuickFilter`, resolver)<br>Frontend: `@praxisui/table`, `@praxisui/core` | 2026-10-07 | Validado no `funcionarios-page` |
 | [**#5**](#-issue-5-suporte-declarativo-a-ícones-e-cores-condicionais-em-apresentações-booleanas-e-enums) | Suporte Declarativo a Ícones e Cores Condicionais em Apresentações Booleanas e Enums | `@praxisui/dynamic-form`<br>`@praxisui/dynamic-fields`<br>`@UISchema` (Java) | 🟡 Média | `[x] Resolvida` | PR #563 (Frontend: `60aed6867`)<br>PR #241 (Backend: `484e488c47`) | 2026-10-07 | Validado (override CSS removido, build OK) |
-| [**#6**](#-issue-6-descoberta-e-ativação-automática-de-filtros-inline-inteligentes-no-praxisicrud) | Descoberta e Ativação Automática de Filtros Inline Inteligentes no `@praxisui/crud` | `@praxisui/crud`<br>`@praxisui/table`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#6**](#-issue-6-descoberta-e-ativação-automática-de-filtros-inline-inteligentes-no-praxisicrud) | Descoberta e Ativação Automática de Filtros Inline Inteligentes no `@praxisui/crud` | `@praxisui/crud`<br>`@praxisui/table`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `@praxisui/crud` (`CrudFilterBarConfig`, auto-discovery) | 2026-10-07 | Validado no `funcionarios-page` |
 | [**#7**](#-issue-7-normalização-robusta-de-parâmetros-de-path-em-schemasfiltered) | Normalização Robusta de Parâmetros de Path em `/schemas/filtered` | `praxis-metadata-starter`<br>`ApiDocsController` | 🟢 Baixa | `[x] Resolvida` | PR #240 (`d59641bf9e`) | 2026-10-07 | Validado (testes unitários) |
 | [**#8**](#-issue-8-hierarquia-visual-de-seções-e-densidade-de-enquadramento-em-dossiêsdrawers-caixa-dentro-de-caixa-vs-seções-plaindivider) | Hierarquia Visual de Seções e Densidade de Enquadramento em Dossiês/Drawers ("Caixa Dentro de Caixa" vs Seções Plain/Divider) | `@praxisui/dynamic-form`<br>`Design System`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#9**](#-issue-9-governança-canônica-e-descoberta-de-serviços-de-métricas-e-dashboards-statscapabilities-e-praxischarts) | Governança Canônica e Descoberta de Serviços de Métricas e Dashboards (`/stats/capabilities` e `@praxisui/charts`) | `praxis-metadata-starter`<br>`@praxisui/charts`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
@@ -26,8 +26,8 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#16**](#-issue-16-ux-e-animação-de-troca-de-widgets-swap-collision-policy-no-page-builder-live-shift-e-affordance-visual) | UX e Animação de Troca de Widgets (`swap` Collision Policy) no Page Builder: Live Shift e Affordance Visual | `@praxisui/page-builder`<br>`@praxisui/core`<br>`DynamicWidgetPageComponent` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-a-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte a `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[ ] Aberta` | — | — | Pendente |
+| [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[ ] Aberta` | — | — | Pendente |
+| [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 
 ---
 
@@ -210,7 +210,7 @@ O agente executor deve considerar que essa comunicação precisa ser bidireciona
 - **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`, `praxis-metadata-starter`
 - **Severidade:** 🟢 Baixa (Evolução de Contrato e Configuração Declarativa)
 - **Tipo:** Contrato OpenAPI `x-ui` / Configuração Declarativa
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Backend: `praxis-metadata-starter` `@QuickFilter`, `ApiResourceQuickFilterResolver`; Frontend: `@praxisui/core`, `@praxisui/table`)
 
 ### Diagnóstico Detalhado
 O componente `PraxisTable` já possui uma infraestrutura rica para filtragem:
@@ -220,29 +220,23 @@ O componente `PraxisTable` já possui uma infraestrutura rica para filtragem:
 - `behavior.filtering.columnFilters.enabled`: filtros contextuais por coluna.
 - `behavior.filtering.advancedFilters.settings.alwaysVisibleFields`: campos fixos na barra como inputs inline inteligentes.
 
-Entretanto, essa estrutura não é automaticamente preenchida ou sugerida pelos geradores de metadados do backend Java (`praxis-metadata-starter`), exigindo que cada aplicação consumidora monte o JSON do `CrudMetadata` manualmente.
+Entretanto, essa estrutura não era automaticamente preenchida ou sugerida pelos geradores de metadados do backend Java (`praxis-metadata-starter`), exigindo que cada aplicação consumidora montasse o JSON do `CrudMetadata` manualmente.
 
 ### Cenários Correlatos & Investigação Abrangente de Plataforma
 1. **Comportamento em Telas Estreitas (Responsividade):** Quando múltiplos campos são colocados em `alwaysVisibleFields`, a barra de ferramentas pode estourar a largura em viewports menores que 1200px. O `PraxisTable` precisa implementar um mecanismo de overflow (colapsar campos excedentes automaticamente para um menu "Mais Filtros").
 2. **Conflito entre QuickFilter e AdvancedFilter:** Se o usuário seleciona um chip rápido (ex.: "Ativos") e em seguida abre o filtro avançado e escolhe "Inativos", qual filtro tem precedência? É necessário padronizar a política de merge ou sobrescrita canônica no `PraxisTable`.
 3. **Persistência de Filtros na URL:** Os filtros rápidos e avançados devem poder sincronizar com os query parameters da URL de forma opcional (`syncUrl: true`), permitindo que links filtrados sejam favoritados ou compartilhados entre operadores.
 
-### Solução Canônica Recomendada de Plataforma
-- Estender as anotações Java de governança para que o starter infira os quick filters automaticamente:
-  ```java
-  @ApiResource(
-      resourceKey = "human-resources/funcionarios",
-      quickFilters = {
-          @QuickFilter(id = "active", label = "Em Prontidão", filter = "ativo=true", icon = "verified_user"),
-          @QuickFilter(id = "inactive", label = "Reserva", filter = "ativo=false", icon = "person_off")
-      }
-  )
-  ```
-- O gerador de OpenAPI deve publicar essas definições sob `x-ui.table.toolbar.filters.quickFilters`.
+### Solução Canônica Implementada na Plataforma
+- Criada anotação canônica `@QuickFilter` e estendida `@ApiResource(quickFilters = {...})` no `praxis-metadata-starter`.
+- Criado `ApiResourceQuickFilterResolver` e publicado automaticamente sob `x-ui.resource.quickFilters` em `/schemas/filtered`.
+- No `@praxisui/core`, `GenericCrudService` captura `resource.quickFilters` e disponibiliza para o runtime.
+- No `@praxisui/table`, adicionado suporte flexível a expressões string (`"chave=valor"` e `&`) e JSON, além de auto-discovery de quick filters canônicos no `loadSchema()`.
 
 ### Critérios de Aceite para Resolução
-- [ ] Recursos com `@QuickFilter` geram automaticamente os chips na toolbar da tabela sem configuração manual no frontend.
-- [ ] Em telas com viewport estreito (< 1024px), campos inline excedentes colapsam para dropdown de overflow.
+- [x] Recursos com `@QuickFilter` geram automaticamente os chips na toolbar da tabela sem configuração manual no frontend.
+- [x] Suporte robusto a expressões de filtro em string (`"chave=valor"` e `&`) e JSON em `@QuickFilter` e na toolbar.
+- [x] Resolução automática e tolerante a falhas integrada ao `/schemas/filtered` sob `x-ui.resource.quickFilters`.
 
 ---
 
@@ -299,7 +293,7 @@ No `<praxis-dynamic-form>` em modo de apresentação (`mode="view"`, `presentati
 - **Módulos Afetados:** `@praxisui/crud`, `@praxisui/table`, `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (Evolução de Produtividade e Experiência Out-of-the-Box)
 - **Tipo:** Auto-configuração Metadata-Driven
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (`@praxisui/crud` `CrudFilterBarConfig`, `buildEffectiveTableConfig`, auto-discovery)
 
 ### Diagnóstico Detalhado
 O componente `PraxisFilter` embutido no `@praxisui/table` é extremamente poderoso:
@@ -308,23 +302,29 @@ O componente `PraxisFilter` embutido no `@praxisui/table` é extremamente podero
 - Suporta seletores de intervalo de data (`useInlineDateVariant`).
 - Conecta-se diretamente ao schema do endpoint de filtro via `/schemas/filtered?path=/api/{resource}/filter&operation=post&schemaType=request`.
 
-Contudo, para que esse componente apareça, o desenvolvedor precisa montar uma estrutura aninhada complexa de propriedades (`behavior.filtering.advancedFilters.settings.*`) em cada página. Como o backend já conhece todos os campos anotados com `@Filterable`, o runtime da plataforma deveria habilitar e sugerir esses filtros automaticamente.
+Contudo, para que esse componente aparecesse, o desenvolvedor precisava montar uma estrutura aninhada complexa de propriedades (`behavior.filtering.advancedFilters.settings.*`) em cada página. Como o backend já conhece todos os campos anotados com `@Filterable`, o runtime da plataforma deveria habilitar e sugerir esses filtros automaticamente.
 
 ### Cenários Correlatos & Investigação Abrangente de Plataforma
 1. **Hierarquia de Operação no `/schemas/filtered`:** O endpoint de schema filtra por `operation` (default: `"get"`). Para filtros, a operação é `"post"` e o schemaType é `"request"`. Se o cliente chamar sem especificar esses parâmetros, o endpoint retorna erro 404/400. A plataforma deve documentar e padronizar helpers de consulta para schemas de requisição de busca.
 2. **Dependência de Campos (Cascade nos Filtros Inline):** Se o usuário filtra por "Departamento", o campo inline de "Cargo" deve atualizar sua lista de opções automaticamente. O `PraxisFilter` já possui suporte a `dependencyFilterMap`, mas essa orquestração precisa ser testada e homologada na linha inline fixa.
 
-### Solução Canônica Recomendada de Plataforma
+### Solução Canônica Implementada na Plataforma
 1. No `PraxisCrudComponent`:
-   - Ao inspecionar as capabilities do recurso, se `capabilities.filter` for verdadeiro e existirem propriedades `@Filterable` no schema, gerar automaticamente uma configuração padrão de `advancedFilters` com os campos relevantes em `alwaysVisibleFields`.
-2. Adicionar uma propriedade simplificada no `CrudMetadata`:
-   ```typescript
-   filterBar: {
-     inlineFields: ['nomeCompleto', 'departamentoId', 'ativo'],
-     quickFilters: true
-   }
-   ```
-   que é expandida internamente para a configuração canônica completa do `PraxisTable`.
+   - Adicionada a interface canônica `CrudFilterBarConfig` no `CrudMetadata.filterBar`:
+     ```typescript
+     filterBar: {
+       inlineFields: ['nomeCompleto', 'departamentoNome', 'ativo'],
+       quickFilters: [ ... ], // ou true para auto-discovery
+       showAdvanced: true
+     }
+     ```
+   - O método `buildEffectiveTableConfig` expande automaticamente `filterBar` para `toolbar.filters` e `behavior.filtering.advancedFilters.settings.alwaysVisibleFields`.
+   - Adicionado auto-discovery inteligente da capability `filter`: quando nenhuma configuração de filtro foi fornecida e o recurso expõe a capability `filter`, o botão de filtros é ativado automaticamente.
+
+### Critérios de Aceite para Resolução
+- [x] Suporte simplificado a `filterBar` no `CrudMetadata` (`inlineFields`, `quickFilters`, `showAdvanced`), eliminando a necessidade de boilerplate aninhado em `behavior.filtering.advancedFilters`.
+- [x] Descoberta e ativação automática do botão de filtros na toolbar quando a capability `filter` é exposta pelo recurso.
+- [x] Suíte de testes unitários 100% verde no `@praxisui/crud` e validação downstream no Hero HQ.
 
 ---
 
@@ -1322,6 +1322,133 @@ export interface RichComposeNode extends RichBlockBaseNode {
 - [ ] A seleção de ícones conta com um seletor visual (`PraxisIconPicker`) com busca textual, categorias e pré-visualização instantânea.
 - [ ] Campos técnicos ("Classe raiz", "Contexto do documento") ficam isolados em "Configurações Avançadas", e o seletor de tipo de bloco não destrói conteúdos filhos acidentalmente.
 - [ ] O editor suporta modo Split-View (Edição + Live Preview lado a lado), refletindo alterações de digitação em tempo real.
+
+---
+
+## 📌 Issue #18: Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/charts`, `praxis-chart-widget-config-editor.ts`, `chart-canonical-contract-mapper.service.ts`, `praxis-chart.component.ts`
+- **Severidade:** 🟡 Média (impede a configuração e customização visual de widgets de gráficos declarados via runtime `config` no Page Builder)
+- **Tipo:** Gap de Conversão de Contrato / Authoring Bridge / UX do Settings Panel
+- **Status:** `[ ] Aberta`
+
+---
+
+### Diagnóstico Detalhado da Causa Raiz
+
+Ao clicar no ícone de "Configurar componente" (`tune`) em qualquer um dos dois widgets de gráficos do Dashboard (**"Evolução da Folha Salarial & Benefícios"** e **"Ranking Reputacional da Força"**), o painel de configurações lateral (`SettingsPanel`) abre exibindo apenas uma mensagem de aviso estéril em inglês e uma caixa de texto de `Query context`:
+
+> *"This widget does not have a canonical chart document yet. Runtime inputs are preserved until a canonical chartDocument is provided by the host."*
+
+Os controles visuais completos de edição de gráficos (`praxis-chart-config-editor`, com seleção interativa de tipo de gráfico, eixos, métricas, agregações, paletas de cores, títulos e dimensões) **não são habilitados**.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                           DESALINHAMENTO DE CONTRATOS DE CHARTS NA PLATAFORMA PRAXIS                            │
+├──────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┤
+│ CAMINHO 1: RUNTIME OPERACIONAL (`PraxisChartConfig`) │ CAMINHO 2: LOW-CODE AUTHORING (`PraxisXUiChartContract`) │
+│ - Usado em código TypeScript e Dashboard             │ - Usado pelo Editor Visual e Manifestos AI               │
+│ - Declaração: `inputs: { config: ... }`              │ - Declaração: `inputs: { chartDocument: ... }`           │
+│ - Endpoints: `praxis.stats` (timeseries, group-by)   │ - Documento canônico `x-ui.chart`                        │
+│                                                      │                                                          │
+│ ❌ FALHA NA PLATAFORMA:                              │ ❌ FALHA NO EDITOR:                                      │
+│ - Mapper é UNIDIRECIONAL: só converte                │ - O editor avalia estritamente `@if (chartDocument)`.    │
+│   `chartDocument -> config`, mas NÃO                 │ - Se receber apenas `config`, ele NÃO sintetiza o        │
+│   converte `config -> chartDocument`!                │   documento e DESABILITA todos os formulários visuais!   │
+└──────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘
+```
+
+#### 1. A Dualidade de Contratos na Plataforma Praxis
+O módulo `@praxisui/charts` suporta duas superfícies públicas para alimentar o componente `<praxis-chart>`:
+1. **Superfície Operacional de Runtime (`PraxisChartConfig`):** Utilizada por desenvolvedores em código TypeScript e templates. Define diretamente `type`, `axes`, `series`, `theme` e `dataSource` (inclusive com queries remotas canônicas em `praxis.stats` como `timeseries` e `group-by`). Foi esse o modelo adotado no `dashboard-page.definition.ts`.
+2. **Superfície Canônica de Autoria (`PraxisXUiChartContract`):** Contrato estruturado governado (`x-ui.chart`, versão `0.1.0`) consumido pelo motor de autoria visual, paleta de componentes e copilotos de inteligência artificial.
+
+#### 2. Rigidez Unidirecional no Editor de Configuração (`PraxisChartWidgetConfigEditor`)
+No arquivo `projects/praxis-charts/src/lib/config-editor/praxis-chart-widget-config-editor.ts` (linhas 68-80):
+```html
+@if (chartDocument) {
+  <praxis-chart-config-editor
+    #chartEditor
+    [document]="chartDocument"
+    [availableResources]="availableResources"
+    [availableFields]="availableFields"
+    [availableTargets]="availableTargets"
+  />
+} @else {
+  <section class="chart-widget-config-editor__notice" data-testid="chart-widget-missing-document">
+    {{ t('praxis.charts.widget.missingDocument', 'This widget does not have a canonical chart document yet. Runtime inputs are preserved until a canonical chartDocument is provided by the host.') }}
+  </section>
+}
+```
+- A propriedade `chartDocument` é lida diretamente de `inputs?.chartDocument` (linha 218).
+- Quando o widget no Page Builder foi instanciado com `inputs: { config: PAYROLL_TREND_CHART_CONFIG }`, a propriedade `chartDocument` é `undefined`.
+- O editor **não possui fallback** e não tenta derivar um `chartDocument` a partir do `config` existente. Ele simplesmente exibe o aviso de ausência e bloqueia o editor visual.
+
+#### 3. Mapper Canônico Unidirecional (`PraxisChartCanonicalContractMapperService`)
+No arquivo `projects/praxis-charts/src/lib/services/chart-canonical-contract-mapper.service.ts`:
+- O serviço possui o método:
+  ```typescript
+  toPraxisChartConfig(contract: PraxisXUiChartContract): PraxisChartConfig
+  ```
+- **Não existe o método inverso:** `toPraxisXUiChartContract(config: PraxisChartConfig): PraxisXUiChartContract`.
+- Por não haver um conversor bidirecional, a plataforma não consegue promover um gráfico declarado em runtime para o formato canônico de autoria sem intervenção manual de código.
+
+#### 4. Omissão do Botão Flutuante de Configuração no Próprio Gráfico
+No componente `PraxisChartComponent` (linhas 1158-1160):
+```typescript
+canOpenConfigEditor(): boolean {
+  return this.enableCustomization() && !!this.settingsPanel && !!this.runtimeChartDocument();
+}
+```
+Como `runtimeChartDocument` é derivado estritamente do `@Input() chartDocument`, gráficos instanciados via `[config]` **também não exibem o botão flutuante de edição (`tune`) sobre o gráfico**, ficando dependentes exclusivamente do botão no shell do widget.
+
+---
+
+### Solução Canônica Recomendada de Plataforma
+
+#### 1. Implementação do Mapeador Reverso em `PraxisChartCanonicalContractMapperService`
+Desenvolver o método inverso para promover configurações de runtime em documentos canônicos `x-ui.chart`:
+```typescript
+toPraxisXUiChartContract(config: PraxisChartConfig): PraxisXUiChartContract {
+  return {
+    version: PRAXIS_X_UI_CHART_AUTHORABLE_VERSION,
+    chartId: config.id,
+    kind: config.type,
+    title: config.title,
+    subtitle: config.subtitle,
+    source: this.extractCanonicalSource(config.dataSource),
+    dimensions: this.extractCanonicalDimensions(config.axes, config.series),
+    metrics: this.extractCanonicalMetrics(config.series, config.axes),
+    legend: { enabled: true },
+    tooltip: { enabled: true },
+    motion: { enabled: true, preset: 'standard' },
+  };
+}
+```
+
+#### 2. Fallback Inteligente no `PraxisChartWidgetConfigEditor`
+No `praxis-chart-widget-config-editor.ts`:
+- Se `this.inputs?.chartDocument` for nulo, mas `this.inputs?.config` estiver presente:
+  - Invocar `canonicalMapper.toPraxisXUiChartContract(this.inputs.config)`;
+  - Atribuir o documento resultante a `this.chartDocument` em memória;
+  - Habilitar o `<praxis-chart-config-editor>` imediatamente;
+  - Ao salvar (`onSave()`), emitir tanto o `chartDocument` atualizado quanto o `config` mapeado correspondente para não quebrar consumidores existentes.
+
+#### 3. Derivação Automática de `runtimeChartDocument` no `PraxisChartComponent`
+No `praxis-chart.component.ts`:
+- Quando `[config]` for fornecido e `[chartDocument]` for nulo, converter `config` em `runtimeChartDocument` internamente. Isso habilitará o botão flutuante de configurações (`praxisIconButton="tune"`) também para gráficos instanciados via `config`.
+
+#### 4. Ajuste Canônico no Hero HQ (`dashboard-page.definition.ts`)
+- Atualizar a declaração dos dois widgets de charts para fornecer o `chartDocument` canônico junto ao `config` (ou como fonte primária), garantindo compatibilidade imediata com o ecossistema de low-code e copilotos AI da plataforma.
+
+---
+
+### Critérios de Aceite para Resolução
+- [ ] O `PraxisChartCanonicalContractMapperService` possui o método `toPraxisXUiChartContract(config)` que converte `PraxisChartConfig` em `PraxisXUiChartContract`, suportando fontes remotas de `praxis.stats` (`timeseries`, `group-by`).
+- [ ] O `PraxisChartWidgetConfigEditor` detecta quando um widget possui apenas `inputs.config` e habilita o editor visual de gráficos normalmente, sem exibir mensagem de aviso de documento ausente.
+- [ ] Ao salvar alterações no editor de configuração, tanto o `chartDocument` quanto o `config` de runtime são atualizados de forma sincronizada.
+- [ ] O botão de configurações flutuante (`praxisIconButton="tune"`) sobre o `<praxis-chart>` é exibido em modo de customização mesmo quando o gráfico é instanciado apenas com `[config]`.
 
 ---
 
