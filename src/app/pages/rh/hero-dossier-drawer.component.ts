@@ -946,29 +946,10 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
         }
       }
 
-      /* Dynamic Form Presentation Customization (Clean Enterprise Editorial Layout) */
+      /* Dynamic Form Presentation (Clean Enterprise Corporate Dossier - Issue #8) */
       .dossier-dynamic-form {
-        .section-drop-wrapper {
-          margin-bottom: 20px !important;
-
-          &:last-of-type {
-            margin-bottom: 0 !important;
-          }
-        }
-
-        .form-section {
-          background: transparent !important;
-          border: none !important;
-          border-radius: 0 !important;
-          padding: 0 0 16px 0 !important;
-          margin-bottom: 0 !important;
-          border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
-
-          &:last-child {
-            border-bottom: none !important;
-            padding-bottom: 0 !important;
-          }
-        }
+        /* Enquadramento plain, ausência de "caixa dentro de caixa" e divisores sutis
+           são providos nativamente pelo @praxisui/dynamic-form via presentationPreset="corporate-dossier" */
 
         .section-title {
           font-size: 0.82rem !important;

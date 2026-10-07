@@ -18,7 +18,6 @@ export const INCIDENT_SEVERITY_DONUT_CONFIG: PraxisChartConfig = {
         field: 'severidade',
         metric: {
           operation: 'COUNT',
-          field: 'severidade',
           alias: 'total',
         },
       },
@@ -894,11 +893,11 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                     visualization: {
                       kind: 'bullet',
                       surface: 'table-cell',
-                      valueExpr: 'row.contencaoAtual',
-                      targetExpr: 'row.contencaoMeta',
-                      toneExpr: 'row.contencaoTone',
-                      fallbackTextExpr: 'row.contencaoFallback',
+                      value: 78,
+                      target: 85,
                       total: 100,
+                      tone: 'warning',
+                      fallbackText: 'Contenção Tática: 78%',
                     },
                   },
                 },
@@ -926,31 +925,78 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                   toggleOnRowClick: false,
                 },
                 limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
-                detail: {
-                  source: {
-                    mode: 'inline',
-                    inlineSchema: {
-                      layout: 'stack',
-                      items: [
-                        {
-                          type: 'card',
-                          title: 'Relatório Tático de Campo & Análise de Risco',
-                          subtitle: 'Protocolo de resposta rápida sob governança do Centro de Comando',
-                          items: [
-                            {
-                              type: 'value',
-                              label: 'Resumo Operacional',
-                              value: 'Perímetro evacuado com sucesso. Esquadrões de apoio em solo coordenando perícia técnica e blindagem de contenção.',
-                            },
-                            {
-                              type: 'value',
-                              label: 'Diretiva de Engajamento',
-                              value: 'Nível de força proporcional autorizado. Monitoramento satelital contínuo com telemetria quântica.',
-                            },
-                          ],
-                        },
-                      ],
-                    },
+              },
+              detail: {
+                schemaContract: {
+                  kind: 'praxis.detail.schema',
+                  version: '1.0.0',
+                  compat: 'semver',
+                  allowedNodes: [
+                    'card',
+                    'value',
+                    'stack',
+                    'text',
+                    'icon',
+                    'badge',
+                    'timeline',
+                    'list',
+                    'tabs',
+                    'tab',
+                    'mediaBlock',
+                    'cardGrid',
+                  ],
+                  sanitization: 'strict',
+                },
+                rendering: {
+                  strategy: 'registry',
+                  registryId: 'praxis.detail.default',
+                  rendererVersion: '1.0.0',
+                  fallbackNodePolicy: 'failClosed',
+                },
+                source: {
+                  mode: 'inline',
+                  inlineSchema: {
+                    layout: 'stack',
+                    items: [
+                      {
+                        type: 'card',
+                        title: 'Relatório Tático de Campo & Análise Forense',
+                        subtitle: 'Protocolo de resposta rápida sob governança do Centro de Comando Tático',
+                        content: [
+                          {
+                            type: 'stack',
+                            items: [
+                              {
+                                type: 'value',
+                                label: 'Teatro Operacional',
+                                valueField: 'local',
+                              },
+                              {
+                                type: 'value',
+                                label: 'Severidade Tática',
+                                valueField: 'severidade',
+                              },
+                              {
+                                type: 'value',
+                                label: 'Danos Civis Estimados',
+                                valueField: 'danosCivis',
+                              },
+                              {
+                                type: 'value',
+                                label: 'Status de Contenção',
+                                valueField: 'status',
+                              },
+                              {
+                                type: 'value',
+                                label: 'Diretiva de Operação',
+                                value:
+                                  'Perímetro isolado com sucesso pela força tática. Esquadrões de perícia coordenando blindagem quântica e monitoramento contínuo.',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
                   },
                 },
               },

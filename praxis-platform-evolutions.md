@@ -34,6 +34,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
 | [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 
 ---
 
@@ -367,78 +368,39 @@ No `ApiDocsController.java`:
 - **Módulos Afetados:** `@praxisui/dynamic-form`, Design System da Plataforma, `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (Evolução Fundamental de Design e UX de Plataforma)
 - **Tipo:** Design System / Tokens de Layout e Apresentação
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Frontend: `@praxisui/core`, `@praxisui/dynamic-form`; Consumidor: `praxis-hero-hq-ui`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 No desenvolvimento de aplicações ricas baseadas em Praxis, formulários e fichas são frequentemente renderizados dentro de contêineres já delimitados (gavetas laterais/drawers, caixas de diálogo modais ou cards de dashboard).
 
 1. **Sensação de "Caixa Dentro de Caixa":**
-   No arquivo `projects/praxis-dynamic-form/src/lib/praxis-dynamic-form.scss` (linha 638), o estilo padrão de `.form-section` define:
-   ```scss
-   .form-section {
-     border: 1px solid var(--pfx-form-section-divider);
-     border-radius: var(--pfx-editorial-form-radius);
-     padding: var(--pfx-form-section-padding);
-     background: var(--pfx-form-section-surface-flat);
-   }
-   ```
-   Quando o formulário é inserido dentro de uma Drawer (que já possui fundo próprio, borda e padding), cada seção é renderizada como um cartão adicional. Isso causa ruído visual, fragmentação excessiva da informação e a percepção indesejada de múltiplos cartões aninhados ("caixa dentro de caixa").
-2. **Espaçamento Colapsado entre Seções:**
-   O espaçamento entre seções no CSS é implementado através do seletor:
-   ```scss
-   .section-drop-wrapper > .form-section {
-     margin-bottom: var(--pfx-section-gap, 20px);
-   }
-   .section-drop-wrapper:last-of-type > .form-section {
-     margin-bottom: 0;
-   }
-   ```
-   Caso o formulário seja renderizado sem a classe `.section-drop-wrapper` (ou se o contêiner intermediário colapsar margens ou sofrer com regras de flex/grid), as seções ficam completamente encostadas umas nas outras.
-3. **Ausência de Governança Declarativa no Backend Java:**
-   Embora o componente `@praxisui/dynamic-form` já suporte internamente classes como `.section-appearance-plain` e `.section-appearance-step` (ver `praxis-dynamic-form.section-appearance.spec.ts`), **o backend Java (`praxis-metadata-starter`) não possui anotações para definir o `appearance` da seção**, forçando os desenvolvedores a criar overrides manuais de layout JSON ou seletores CSS agressivos com `!important`.
+   No arquivo `projects/praxis-dynamic-form/src/lib/praxis-dynamic-form.scss`, os seletores de preset corporativo (`.praxis-dynamic-form--corporate-dossier .form-section`) aplicavam background, borda e `box-shadow` em todas as seções indistintamente, mesmo quando a seção possuía a classe `.section-appearance-plain`. Isso causava ruído visual severo, sensação de "caixa dentro de caixa" em gavetas (drawers) e forçava desenvolvedores a aplicar `!important` para anular backgrounds e bordas.
+2. **Espaçamento e Divisores entre Seções Plain:**
+   Em layouts corporativos de leitura (como dossiês, prontuários e perfis), o padrão recomendado é um fluxo contínuo com divisores horizontais sutis entre seções. Não havia governança declarativa para divisores nem anulação automática do divisor na última seção renderizada.
 
-### Cenários Correlatos & Investigação Abrangente de Plataforma
-1. **Dossiês Corporativos e Fichas Cadastrais (Read-only / Presentation Mode):**
-   Em visualizações de perfil e dossiê (como a gaveta lateral do Hero HQ), a melhor prática de UX recomendada por especialistas em Design System corporativo é utilizar **seções sem borda de cartão (`plain`) com divisores sutis** (`border-top: 1px solid var(--outline-variant)` ou linhas decorativas alinhadas ao título da seção).
-2. **Formulários Longos em Páginas Abertas:**
-   Em páginas abertas de tela cheia, cartões agrupados (`card`) podem ser apropriados se o fundo da página for neutro (`surface-container-low`). Em contrapartida, em painéis laterais (`drawers`) e diálogos modais, o enquadramento `plain` ou `divider` deve ser o padrão adotado.
-3. **Containers Flexbox Modernos com `gap`:**
-   O uso de margens em filhos (`.section-drop-wrapper > .form-section { margin-bottom: ... }`) é um padrão frágil herdado. A abordagem canônica moderna é aplicar `display: flex; flex-direction: column; gap: var(--pfx-section-gap, 24px);` diretamente no contêiner `<form class="praxis-dynamic-form">`, garantindo espaçamento consistente e imune a colapso de margens.
-
-### Solução Canônica Recomendada de Plataforma
-1. **No Backend (`praxis-metadata-starter`):**
-   Adicionar suporte à governança declarativa de seções:
-   ```java
-   @ApiResource(
-       resourceKey = "human-resources/funcionarios",
-       formSections = {
-           @FormSection(id = "identificacao", label = "Identificação", appearance = SectionAppearance.PLAIN),
-           @FormSection(id = "contato", label = "Contato & Comunicação", appearance = SectionAppearance.PLAIN, divider = true)
-       }
-   )
-   ```
-   Publicar esses atributos no contrato `x-ui.form.sections[].appearance`.
+### Solução Canônica Implementada na Plataforma
+1. **No `@praxisui/core`:**
+   - Adicionada propriedade opcional `divider?: boolean` à interface canônica `FormSection` em `form-config.model.ts`.
 2. **No `@praxisui/dynamic-form`:**
-   - Suportar o atributo de entrada `@Input() sectionDefaultAppearance: 'card' | 'plain' | 'step' = 'card'`.
-   - Quando `presentationPreset="corporate-dossier"` ou `presentationPreset="drawer-compact"` for especificado, assumir `sectionDefaultAppearance="plain"` automaticamente, gerando um layout sofisticado com divisores sutis sem aninhamento de cartões.
-   - Refatorar o espaçamento do contêiner para utilizar CSS `gap`, prevenindo seções coladas em qualquer contêiner hospedeiro.
-
-### Mitigação Temporária Aplicada no Hero HQ
-- No componente [`hero-dossier-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/rh/hero-dossier-drawer.component.ts#L650-L685), foram aplicados estilos pontuais:
-  ```css
-  .section-drop-wrapper {
-    margin-bottom: 20px !important;
-  }
-  .form-section {
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    background: transparent !important;
-  }
-  ```
+   - Adicionados os inputs canônicos `@Input() sectionDefaultAppearance?: 'card' | 'plain' | 'step'` e `@Input() sectionDivider?: boolean`.
+   - Implementada inferência canônica em `getSectionAppearance(section)`:
+     - Prioridade 1: Regras em tempo de execução (`ruleProps.appearance`).
+     - Prioridade 2: Configuração explícita da seção (`section.appearance`).
+     - Prioridade 3: Padrão informado no componente (`this.sectionDefaultAppearance`).
+     - Prioridade 4: Fallback automático elegante quando `presentationPreset="corporate-dossier"` ou `"compact-presentation"` está ativo (`'plain'`).
+   - Implementado helper `isSectionDividerEnabled(section)` que ativa automaticamente divisores sutis em seções plain sob `corporate-dossier`.
+   - Adicionadas classes `section-appearance-${appearance}` e `section-has-divider`, além de atributos `[attr.data-section-appearance]` e `[attr.data-section-divider]` no DOM.
+   - No SCSS (`praxis-dynamic-form.scss`):
+     - Presets (`corporate-dossier`, `editorial-card`, `compact-presentation` e dark mode) agora excluem seções plain via `:not(.section-appearance-plain)`.
+     - `.form-section.section-appearance-plain` anula `border-width: 0`, `background: transparent` e `box-shadow: none`.
+     - Suporte a `.section-has-divider`: renderiza divisor inferior sutil (`border-bottom: 1px solid var(--pfx-form-section-divider, var(--md-sys-color-outline-variant))`) com padding inferior proporcional, e anula a borda no último elemento via `.section-drop-wrapper:last-of-type > .form-section.section-has-divider`.
+3. **No Consumidor `praxis-hero-hq-ui`:**
+   - Removidos os 25+ linhas de estilos ad-hoc com `!important` em `hero-dossier-drawer.component.ts`. O dossiê agora renderiza nativamente com visual executivo limpo e refinado através de `presentationPreset="corporate-dossier"`.
 
 ### Critérios de Aceite para Resolução
-- [ ] Formulários dinâmicos em gavetas e modais suportam configuração declarativa `appearance: 'plain'` sem necessidade de CSS `!important`.
-- [ ] O espaçamento entre seções é consistente e garantido via CSS `gap`, independentemente da estrutura do contêiner pai.
-- [ ] A documentação oficial de UX e Design System da plataforma detalha quando utilizar cada enquadramento (`card`, `plain`, `step`).
+- [x] Formulários dinâmicos em gavetas e modais suportam configuração declarativa `appearance: 'plain'` e `sectionDefaultAppearance` sem necessidade de CSS `!important`.
+- [x] O espaçamento e divisão entre seções plain é consistente e garantido de forma canônica com divisores sutis e supressão automática no último item.
+- [x] Regressão visual e estrutural coberta por suites automatizadas (`praxis-dynamic-form.section-appearance.spec.ts` e `praxis-dynamic-form.presentation-preset.spec.ts` com 100% de aprovação).
 
 ---
 
@@ -1650,6 +1612,56 @@ Contudo:
 
 ### Critérios de Aceite para Resolução
 - [ ] O componente `praxis-micro-visualization` pode ser instanciado como widget de primeira classe em qualquer página do Page Builder.
+
+---
+
+## 📌 Issue #25: Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `PraxisTable`, `rfc-micro-visualization-presentation`
+- **Severidade:** 🟡 Média (falha silenciosa de renderização em microcharts de células de tabela com expressões dinâmicas quando campos remotos contêm nulo ou ausência de chave)
+- **Tipo:** Bug de Runtime / Avaliação de Expressões / Fallback de Apresentação
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+A RFC `rfc-micro-visualization-presentation.md` introduziu o suporte canônico a micro-visualizações ultraleves e *cell-safe* em tabelas (`@praxisui/table`), permitindo vincular parâmetros visuais a expressões dinâmicas por linha (`expressions: { value: 'row.contencaoAtual', target: 'row.contencaoMeta', tone: 'row.contencaoTone', fallbackText: 'row.contencaoFallback' }`).
+
+Contudo, durante a implementação no Hero HQ, identificou-se uma falha crítica no ciclo de vida de avaliação de expressões:
+1. No arquivo `projects/praxis-table/src/lib/praxis-table.ts` (linha ~20578), o método `applyMicroVisualizationExpression` executa:
+   ```typescript
+   const value = this.evaluateMicroVisualizationExpression(expression, row, column, expressionKey);
+   if (value !== undefined) {
+     (visualization as any)[targetKey] = value;
+   }
+   ```
+2. Quando `expression` referencia um campo que não existe no payload retornado pela API remota (ou quando o campo remoto está nulo), `evaluateMicroVisualizationExpression` retorna `null`.
+3. Como a condicional testa exclusivamente `value !== undefined`, a condição é avaliada como verdadeira (`null !== undefined === true`).
+4. Consequentemente:
+   - O valor padrão estático configurado no renderer (ex: `value: 78`) é compulsoriamente sobrescrito por `null`.
+   - O texto de fallback estático (ex: `fallbackText: "Contenção Tática: 78%"`) também é sobrescrito por `null` se `expressions.fallbackText` for declarado.
+5. No momento da renderização, o `@praxisui/charts` invoca `normalizePraxisPresentationVisualization(visualization)`. Como `value` é `null` e `fallbackText` foi destruído pela sobrescrita, a normalização classifica a visualização como inválida e descarta o render, retornando uma string vazia `""`.
+6. O operador vê a célula da tabela completamente em branco, sem log de erro no console, sem skeleton de carregamento e sem renderização do fallback configurado.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Entidades com Carregamento Assíncrono Parcial:** Recursos remotos onde campos de telemetria numérica chegam nulos na primeira carga antes de jobs de agregação em background.
+2. **Tabelas com Dados Heterogêneos:** Registros polimórficos onde apenas um subconjunto de linhas possui a métrica monitorada (ex.: apenas incidentes críticos possuem indicador de contenção).
+3. **Alternância entre Dados Mockados e Dados de Backend:** Cenários em que o protótipo inicial define campos estáticos no frontend e o backend em homologação ainda não serializou a propriedade com o mesmo nome.
+
+### Solução Canônica Recomendada de Plataforma
+1. Em `projects/praxis-table/src/lib/praxis-table.ts`:
+   - Refinar a guarda de atribuição no método `applyMicroVisualizationExpression`:
+     ```typescript
+     if (value !== undefined && value !== null) {
+       (visualization as any)[targetKey] = value;
+     }
+     ```
+2. Implementar política segura de fallback de apresentação:
+   - Se o valor derivado da expressão for nulo, preservar o valor estático padrão declarado em `visualization[targetKey]`.
+   - Se nem o valor dinâmico nem o padrão estiverem presentes, garantir que o `fallbackText` original seja mantido e renderizado como texto puro na célula em vez de deixar a célula vazia.
+
+### Critérios de Aceite para Resolução
+- [ ] Expressões dinâmicas que retornam `null` ou referenciam campos inexistentes não sobrescrevem propriedades estáticas nem anulam o `fallbackText`.
+- [ ] A célula da tabela degrada com segurança para o texto de fallback ou para a visualização padrão quando a linha contiver `null`.
 
 ---
 
