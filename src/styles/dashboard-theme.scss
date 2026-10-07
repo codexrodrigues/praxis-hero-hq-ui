@@ -15,6 +15,8 @@
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
 }
 
 /* 2. Clean and unified badge pills: eliminate nested purple badge container */
@@ -198,6 +200,10 @@
 
 /* 5. Bento KPI Cards */
 .bento-kpi-card {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
   border-radius: 20px !important;
   padding: 22px !important;
   border: 1px solid var(--border) !important;
@@ -212,21 +218,36 @@
   }
 }
 
-.bento-kpi-card .prx-rich-card__title,
-.bento-kpi-card .pdx-rich-card__title {
-  font-family: var(--font-display) !important;
-  font-size: 1.9rem !important;
-  font-weight: 700 !important;
-  color: var(--foreground) !important;
-  margin: 6px 0 10px !important;
+.bento-kpi-card .prx-rich-card,
+.bento-kpi-card .pdx-rich-card {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
-.bento-kpi-card .prx-rich-card__subtitle,
-.bento-kpi-card .pdx-rich-card__subtitle {
-  font-size: 0.72rem !important;
+.bento-kpi-card .prx-rich-card-body,
+.bento-kpi-card .pdx-rich-card-body {
+  margin-top: auto !important;
+}
+
+.bento-kpi-card .prx-rich-card-title,
+.bento-kpi-card .prx-rich-card__title,
+.bento-kpi-card .pdx-rich-card-title,
+.bento-kpi-card .pdx-rich-card__title {
+  font-family: var(--font-display) !important;
+  font-size: 1.35rem !important;
   font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.08em !important;
+  color: var(--foreground) !important;
+  margin: 6px 0 4px !important;
+  white-space: nowrap !important;
+}
+
+.bento-kpi-card .prx-rich-card-subtitle,
+.bento-kpi-card .prx-rich-card__subtitle,
+.bento-kpi-card .pdx-rich-card-subtitle,
+.bento-kpi-card .pdx-rich-card__subtitle {
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
   color: var(--muted-foreground) !important;
 }
 
@@ -344,6 +365,7 @@
 
 .card-footnote {
   font-size: 0.72rem;
+  line-height: 1.45;
   color: var(--muted-foreground);
   margin-top: 6px;
 }
