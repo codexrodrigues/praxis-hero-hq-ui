@@ -34,7 +34,7 @@
 | **ISSUE-018** | `@praxisui/rich-content` | Design / Contraste & Layout | `RichTabsNode[appearance='pills']` possui `#fff` hardcoded no fundo da aba ativa e força `flex-wrap: wrap` quebrando o layout | `[DONE]` |
 | **ISSUE-019** | `@praxisui/dynamic-form` | Design / Acabamento | Presets Visuais Ricos Nativos para Modo Apresentação (`presentationPreset: 'corporate-dossier' \| 'editorial-card'`) eliminando CSS customizado no host | `[DONE]` |
 | **ISSUE-020** | `@praxisui/dynamic-form` & `@praxisui/core` | Arquitetural / Layout | Suporte Nativo a Layout por Abas (Tabs) e Acordeão no `FormConfig` para Organização Multisseção Governada | `[DONE]` |
-| **ISSUE-021** | `@praxisui/rich-content` & `@praxisui/core` | Arquitetural / Composição | Suporte a `schemaRef`/`resourcePath` dinâmico em `RichPropertySheetNode` ou nó nativo de formulário dinâmico em `RichContent` | `[PENDING]` |
+| **ISSUE-021** | `@praxisui/rich-content` & `@praxisui/core` | Arquitetural / Composição | Suporte a `schemaRef`/`resourcePath` dinâmico em `RichPropertySheetNode` ou nó nativo de formulário dinâmico em `RichContent` | `[DONE]` |
 | **ISSUE-022** | `@praxisui/dynamic-fields` & `@praxisui/core` | Semântica / Reatividade | Reatividade Semântica de Ícone, Tom e Estado em Campos Booleanos no Modo Apresentação (`FieldShellComponent`) | `[DONE]` |
 | **ISSUE-023** | `@praxisui/rich-content` & `@praxisui/core` | Design / Layout | Espaçamento Canônico de Cabeçalho e Diagramação Interna Balanceada em Nós de Métricas (`statGroup` / `RichStatGroupNode`) | `[DONE]` |
 
@@ -1515,53 +1515,46 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-021: Suporte a `schemaRef`/`resourcePath` Dinâmico em `RichPropertySheetNode` ou Nó Nativo de Formulário Dinâmico em `RichContent`
 * **Biblioteca:** `@praxisui/rich-content` & `@praxisui/core`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
+* **Pull Request:** [#559](https://github.com/codexrodrigues/praxis-ui-angular/pull/559)
 * **Gravidade:** Alta (Arquitetural / Integração de Metadados / Eliminação de Código Estático)
 * **Diagnóstico Técnico:**
   O `RichContent` foi desenhado para orquestrar telas mistas e documentos ricos (banners, KPIs, tabelas, blocos de texto).
-  Para exibir fichas de propriedades (pares chave/valor), o `RichContent` oferece o nó `propertySheet`:
-  ```typescript
-  export interface RichPropertySheetNode {
-    type: 'propertySheet';
-    title?: string;
-    columns?: number;
-    items: RichPropertySheetItem[]; // OBRIGATÓRIO: array estático de itens
-  }
-  ```
-  Isso gera um problema arquitetural severo:
-  1. **Obrigatoriedade de itens estáticos:** O desenvolvedor é forçado a escrever no código do app um array fixo de itens (`{ id: 'cargo', label: '...', value: '...' }`).
-  2. **Falta de interoperabilidade com OpenAPI e `/schemas/filtered`:** O nó não sabe consultar os metadados do backend nem extrair os campos de um grupo (`group = "Identificação"`). Se um novo campo for adicionado no DTO pelo backend, o `propertySheet` nunca o exibirá a menos que alguém altere o código da aplicação consumidora.
-  3. **Sem Governança por Perfil:** Como os itens estão fixos no código da aplicação consumidora, o mecanismo de personalização por usuário/perfil da plataforma não consegue agir sobre a ficha.
-* **Implementação Recomendada para a Plataforma:**
-  1. **Opção A: Suporte Declarativo a Schema em `RichPropertySheetNode`:**
-     ```typescript
-     export interface RichPropertySheetNode {
-       type: 'propertySheet';
-       title?: string;
-       columns?: number;
-       // Suporte a resolução automática via metadados
-       resourcePath?: string;      // Ex: 'human-resources/funcionarios'
-       schemaRef?: string;         // Ex: '#/components/schemas/FuncionarioDTO'
-       group?: string;             // Ex: 'Identificação' ou 'Profissional'
-       dataContextPath?: string;   // Ex: 'hero' ou dados vinculados
-       items?: RichPropertySheetItem[]; // Opcional, para override pontual ou fallback
-     }
-     ```
-  2. **Opção B: Nó Nativo de Formulário Dinâmico em `RichContent` (`RichDynamicFormNode`):**
-     Permitir embutir um formulário governado diretamente como nó de um documento Rich Content:
-     ```typescript
-     export interface RichDynamicFormNode {
-       type: 'dynamicForm';
-       resourcePath: string;
-       mode?: 'view' | 'edit';
-       presentationMode?: boolean;
-       groupFilter?: string[];
-       dataBinding?: string; // Caminho para os dados no contexto do documento
-     }
-     ```
+  Para exibir fichas de propriedades (pares chave/valor), o `RichContent` anteriormente oferecia o nó `propertySheet` com obrigatoriedade de array estático de itens (`items: RichPropertySheetItem[]`). Isso gerava código estático redundante, falta de interoperabilidade com OpenAPI e `/schemas/filtered`, e ausência de governança de metadados.
+* **Solução Canônica Implementada na Plataforma:**
+  A plataforma implementou **ambas as abordagens canônicas** de forma integrada no PR [#559](https://github.com/codexrodrigues/praxis-ui-angular/pull/559):
+  1. **Suporte Declarativo a Schema em `RichPropertySheetNode`:**
+     - Adicionados `resourcePath`, `schemaRef`, `group` e `dataContextPath` opcionais em `RichPropertySheetNode`.
+     - `items` agora é 100% opcional quando houver fonte dinâmica declarada.
+     - Resolução automática e sob demanda via metadados `/schemas/filtered` ou contexto de avaliação (`_schemas`).
+     - Formatação semântica automática para tipos canônicos (booleanos com ícones/tons, moedas BRL, números e objetos).
+     - Capacidade de override pontual via `items` quando se deseja customizar rótulo ou tom de propriedades específicas do schema.
+  2. **Nó Nativo de Formulário Dinâmico em `RichContent` (`RichDynamicFormNode`):**
+     - Adicionado o novo nó nativo `RichDynamicFormNode` em `@praxisui/core` e suportado nativamente pelo validador, editor visual, manifestos de IA e runtime de `@praxisui/rich-content`.
+     - Permite embutir fichas orientadas a formulário (`mode: 'view'`, `presentationMode: true`, `groupFilter`, `dataBinding`) diretamente na árvore de blocos do documento Rich Content sem acoplamento circular de bibliotecas.
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
-  - Evitar replicar DTOs inteiros dentro de `propertySheet.items`.
-  - Usar `<praxis-dynamic-form mode="view" [presentationModeGlobal]="true" ...>` para exibir fichas cadastrais completas orientadas a schema, delegando ao runtime a criação dos campos.
+  - Em documentos Rich Content com fichas cadastrais, utilize a sintaxe dinâmica declarativa sem repetir campos estáticos:
+    ```typescript
+    {
+      type: 'propertySheet',
+      title: 'Identificação do Herói',
+      resourcePath: 'human-resources/funcionarios',
+      group: 'Identificação',
+      dataContextPath: 'selectedHero',
+      columns: 2
+    }
+    ```
+  - Ou use o nó nativo `dynamicForm`:
+    ```typescript
+    {
+      type: 'dynamicForm',
+      resourcePath: 'human-resources/funcionarios',
+      mode: 'view',
+      presentationMode: true,
+      groupFilter: ['Identificação', 'Profissional'],
+      dataBinding: 'selectedHero'
+    }
+    ```
 
 ---
 

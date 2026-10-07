@@ -44,7 +44,11 @@ export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
     },
   },
   axes: {
-    x: { field: 'competencia', type: 'category', label: 'Competência' },
+    x: {
+      field: 'competencia',
+      type: 'category',
+      labels: { format: 'MMM/yy' },
+    },
     y: {
       type: 'value',
       label: 'Volume (R$)',
@@ -87,7 +91,7 @@ export const REPUTATION_RANKING_CHART_CONFIG: PraxisChartConfig = {
       statsOperation: 'group-by',
       statsPath: 'human-resources/vw-ranking-reputacao/stats/group-by',
       statsRequest: {
-        filter: {},
+        filter: { equipe: '%' },
         field: 'equipe',
         metric: {
           operation: 'AVG',
@@ -115,7 +119,12 @@ export const REPUTATION_RANKING_CHART_CONFIG: PraxisChartConfig = {
     },
   },
   axes: {
-    x: { field: 'equipe', type: 'category', label: 'Equipe' },
+    x: {
+      field: 'equipe',
+      type: 'category',
+      label: 'Equipe',
+      labels: { rotate: 15 },
+    },
     y: { type: 'value', min: 0, max: 100, label: 'Score Médio' },
   },
   series: [

@@ -1,11 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import { type RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { HeroDossierDrawerComponent, type HeroProfile } from './hero-dossier-drawer.component';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const HEROES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -200,7 +209,7 @@ const SAMPLE_HERO: HeroProfile = {
 
       <!-- KPI Bento Grid Declarativo (praxis-rich-content) -->
       <section class="kpi-section">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
       <!-- Canonical Metadata-Driven CRUD Runtime -->
@@ -383,14 +392,88 @@ const SAMPLE_HERO: HeroProfile = {
     }
   `],
 })
-export class FuncionariosPageComponent {
+export class FuncionariosPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = HEROES_CRUD_METADATA;
-  protected readonly kpiDocument = HEROES_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(HEROES_KPI_DOCUMENT);
   protected readonly selectedHero = signal<HeroProfile | null>(null);
   protected readonly isTransitioning = signal(false);
   protected readonly notice = signal<string | null>(null);
 
   private readonly http = inject(HttpClient);
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpisSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpisSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpisSub?.unsubscribe();
+    this.kpisSub = this.dashboardStats.getTacticalKpis().subscribe({
+      next: (kpis) => {
+        const formattedRep = kpis.averageReputationScore.toLocaleString('pt-BR', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        });
+        const rateFormatted = kpis.readinessRate.toLocaleString('pt-BR', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        });
+
+        this.kpiDocument.set({
+          kind: 'praxis.rich-content',
+          version: '1.0.0',
+          nodes: [
+            {
+              type: 'statGroup',
+              layout: 'grid',
+              tileLayout: 'tile',
+              headerSpacing: 'normal',
+              className: 'heroes-kpi-grid',
+              items: [
+                {
+                  id: 'total',
+                  label: 'Efetivo Total',
+                  value: `${kpis.totalHeroes} Cadastrados`,
+                  caption: 'Quadro ativo e reserva tática',
+                  icon: 'group',
+                  tone: 'info',
+                },
+                {
+                  id: 'ativos',
+                  label: 'Em Prontidão Ativa',
+                  value: `${kpis.activeHeroes} Ativos`,
+                  caption: `${rateFormatted}% da força operacional`,
+                  icon: 'verified_user',
+                  tone: 'success',
+                },
+                {
+                  id: 'inativos',
+                  label: 'Em Reserva / Licença',
+                  value: `${kpis.inactiveHeroes < 10 ? '0' : ''}${kpis.inactiveHeroes} Inativos`,
+                  caption: 'Reserva tática ou licença civil',
+                  icon: 'person_off',
+                  tone: 'warning',
+                },
+                {
+                  id: 'reputacao',
+                  label: 'Score Reputacional Médio',
+                  value: `${formattedRep} / 100`,
+                  caption: 'Índice combinado público-governo',
+                  icon: 'auto_awesome',
+                  tone: 'neutral',
+                },
+              ],
+            },
+          ],
+        });
+      },
+    });
+  }
 
   protected openSampleDossier(): void {
     this.selectedHero.set(SAMPLE_HERO);
@@ -450,6 +533,7 @@ export class FuncionariosPageComponent {
           this.isTransitioning.set(false);
           const updated: HeroProfile = { ...hero, ativo: !hero.ativo };
           this.selectedHero.set(updated);
+          this.loadKpis();
           this.showNotice(
             updated.ativo
               ? `Colaborador ${hero.nomeCompleto} reativado na força ativa com sucesso!`
@@ -460,6 +544,7 @@ export class FuncionariosPageComponent {
           this.isTransitioning.set(false);
           const updated: HeroProfile = { ...hero, ativo: !hero.ativo };
           this.selectedHero.set(updated);
+          this.loadKpis();
           this.showNotice(
             updated.ativo
               ? `Colaborador ${hero.nomeCompleto} reativado na força ativa (local)!`

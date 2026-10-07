@@ -536,6 +536,7 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
                       [presentationModeGlobal]="true"
                       [enableCustomization]="false"
                       [showAiAssistant]="false"
+                      presentationPreset="corporate-dossier"
                       class="presentation-mode pres-compact pres-label-left dossier-dynamic-form"
                     />
                   </div>
@@ -710,14 +711,14 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
     .dossier-tabs-nav {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       overflow-x: auto;
-      padding: 4px;
+      padding: 6px;
       border-radius: 12px;
-      background: color-mix(in oklab, var(--muted) 45%, var(--card));
+      background: color-mix(in oklab, var(--muted) 60%, var(--card));
       border: 1px solid var(--border);
       scrollbar-width: none;
-      min-height: 44px;
+      min-height: 46px;
       box-sizing: border-box;
       flex-shrink: 0;
       &::-webkit-scrollbar { display: none; }
@@ -726,27 +727,29 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
     .tab-btn {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 7px 14px;
-      border-radius: 8px;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 9px;
       border: 1px solid transparent;
       outline: none;
       background: transparent;
       color: var(--muted-foreground);
-      font-size: 0.82rem;
+      font-size: 0.84rem;
       font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
-      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
       span.material-symbols-outlined {
-        font-size: 18px;
+        font-size: 19px;
+        opacity: 0.85;
       }
 
-      &:hover {
-        background: color-mix(in oklab, var(--card) 60%, transparent);
+      &:hover:not(.is-active) {
+        background: color-mix(in oklab, var(--primary) 10%, var(--card));
         color: var(--foreground);
+        border-color: color-mix(in oklab, var(--primary) 20%, transparent);
       }
 
       &:focus-visible {
@@ -756,18 +759,22 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
 
       &.is-active {
         background: var(--card);
-        border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+        border: 1px solid color-mix(in oklab, var(--primary) 40%, var(--border));
         color: var(--primary);
-        font-weight: 600;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+        font-weight: 700;
+        box-shadow: 0 2px 8px color-mix(in oklab, var(--primary) 15%, transparent), 0 1px 3px rgba(0, 0, 0, 0.08);
+
+        span.material-symbols-outlined {
+          opacity: 1;
+        }
       }
     }
 
     :host-context(.dark) .tab-btn.is-active {
-      background: color-mix(in oklab, var(--primary) 16%, var(--card));
-      border-color: color-mix(in oklab, var(--primary) 35%, transparent);
+      background: color-mix(in oklab, var(--primary) 20%, var(--card));
+      border-color: color-mix(in oklab, var(--primary) 50%, transparent);
       color: var(--primary);
-      box-shadow: 0 1px 4px color-mix(in oklab, var(--primary) 20%, transparent);
+      box-shadow: 0 2px 10px color-mix(in oklab, var(--primary) 28%, transparent);
     }
 
     .tab-count-chip {

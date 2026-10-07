@@ -7,7 +7,9 @@ import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 export interface DashboardTacticalKpis {
   activeHeroes: number;
   totalHeroes: number;
+  inactiveHeroes: number;
   readinessRate: number;
+  averageReputationScore: number;
   plannedMissions: number;
   inProgressMissions: number;
   totalMissions: number;
@@ -118,19 +120,51 @@ export class DashboardStatsService {
         catchError(() => of({ critical: 18, high: 19, total: 74 })),
       );
 
+    const reputationStats$ = this.http
+      .post<any>(`${PRAXIS_API_BASE_URL}/human-resources/vw-ranking-reputacao/stats/group-by`, {
+        filter: { equipe: '%' },
+        field: 'equipe',
+        metrics: [
+          { operation: 'AVG', field: 'scorePublico', alias: 'scorePublico' },
+          { operation: 'AVG', field: 'scoreGovernamental', alias: 'scoreGovernamental' },
+        ],
+      })
+      .pipe(
+        map((res) => {
+          const buckets: any[] = res?.data?.buckets ?? [];
+          let totalScore = 0;
+          let totalCount = 0;
+          for (const b of buckets) {
+            const count = Number(b.count ?? 1);
+            const pub = Number(b.values?.scorePublico ?? b.value ?? 80);
+            const gov = Number(b.values?.scoreGovernamental ?? b.value ?? 80);
+            const combined = (pub + gov) / 2;
+            totalScore += combined * count;
+            totalCount += count;
+          }
+          const avg = totalCount > 0 ? totalScore / totalCount : 79.5;
+          return Math.round(avg * 10) / 10;
+        }),
+        catchError(() => of(79.5)),
+      );
+
     return forkJoin({
       active: activeHeroes$,
       totalHeroes: totalHeroes$,
       missions: missionsStats$,
       payroll: payrollStats$,
       incidents: incidentsStats$,
+      reputation: reputationStats$,
     }).pipe(
-      map(({ active, totalHeroes, missions, payroll, incidents }) => {
-        const rate = totalHeroes > 0 ? Math.round((active / totalHeroes) * 1000) / 10 : 98.4;
+      map(({ active, totalHeroes, missions, payroll, incidents, reputation }) => {
+        const inativos = Math.max(0, totalHeroes - active);
+        const rate = totalHeroes > 0 ? Math.round((active / totalHeroes) * 1000) / 10 : 52.5;
         return {
           activeHeroes: active,
           totalHeroes: totalHeroes,
+          inactiveHeroes: inativos,
           readinessRate: rate,
+          averageReputationScore: reputation,
           plannedMissions: missions.planned,
           inProgressMissions: missions.inProgress,
           totalMissions: missions.total,
