@@ -18,7 +18,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#4**](#-issue-4-governança-declarativa-de-filtros-rápidos-e-filtros-avançados-na-tabela) | Governança Declarativa de Filtros Rápidos e Filtros Avançados na Tabela | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
 | [**#5**](#-issue-5-suporte-declarativo-a-ícones-e-cores-condicionais-em-apresentações-booleanas-e-enums) | Suporte Declarativo a Ícones e Cores Condicionais em Apresentações Booleanas e Enums | `@praxisui/dynamic-form`<br>`@praxisui/dynamic-fields`<br>`@UISchema` (Java) | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#6**](#-issue-6-descoberta-e-ativação-automática-de-filtros-inline-inteligentes-no-praxisicrud) | Descoberta e Ativação Automática de Filtros Inline Inteligentes no `@praxisui/crud` | `@praxisui/crud`<br>`@praxisui/table`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#7**](#-issue-7-normalização-robusta-de-parâmetros-de-path-em-schemasfiltered) | Normalização Robusta de Parâmetros de Path em `/schemas/filtered` | `praxis-metadata-starter`<br>`ApiDocsController` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
+| [**#7**](#-issue-7-normalização-robusta-de-parâmetros-de-path-em-schemasfiltered) | Normalização Robusta de Parâmetros de Path em `/schemas/filtered` | `praxis-metadata-starter`<br>`ApiDocsController` | 🟢 Baixa | `[x] Resolvida` | PR #240 (`d59641bf9e`) | 2026-10-07 | Validado (testes unitários) |
 | [**#8**](#-issue-8-hierarquia-visual-de-seções-e-densidade-de-enquadramento-em-dossiêsdrawers-caixa-dentro-de-caixa-vs-seções-plaindivider) | Hierarquia Visual de Seções e Densidade de Enquadramento em Dossiês/Drawers ("Caixa Dentro de Caixa" vs Seções Plain/Divider) | `@praxisui/dynamic-form`<br>`Design System`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#9**](#-issue-9-governança-canônica-e-descoberta-de-serviços-de-métricas-e-dashboards-statscapabilities-e-praxischarts) | Governança Canônica e Descoberta de Serviços de Métricas e Dashboards (`/stats/capabilities` e `@praxisui/charts`) | `praxis-metadata-starter`<br>`@praxisui/charts`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 
@@ -331,7 +331,7 @@ Contudo, para que esse componente apareça, o desenvolvedor precisa montar uma e
 - **Módulos Afetados:** `praxis-metadata-starter`, `ApiDocsController`
 - **Severidade:** 🟢 Baixa (Robustez de API / Tolerância a Formatos)
 - **Tipo:** Contrato de Endpoint / Tratamento de Requisições
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (PR #240 / commit `d59641bf9e`)
 
 ### Diagnóstico Detalhado
 No `ApiDocsController.java` de `praxis-metadata-starter`:
@@ -348,7 +348,7 @@ No `ApiDocsController.java`:
   3. Aceitar alias `@RequestParam(name = "resourcePath", required = false)` para compatibilidade com clientes que utilizam essa convenção.
 
 ### Critérios de Aceite para Resolução
-- [ ] Chamar `/schemas/filtered?path=human-resources/funcionarios/filter&operation=post&schemaType=request` retorna o schema com sucesso, mesmo sem `/api/` explícito na URL.
+- [x] Chamar `/schemas/filtered?path=human-resources/funcionarios/filter&operation=post&schemaType=request` retorna o schema com sucesso, mesmo sem `/api/` explícito na URL.
 
 ---
 
