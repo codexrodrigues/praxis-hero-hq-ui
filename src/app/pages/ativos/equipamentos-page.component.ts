@@ -1,8 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -13,6 +22,13 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
   table: {
     columns: [
       {
+        field: 'id',
+        header: 'ID',
+        width: '80px',
+        align: 'center',
+        sortable: true,
+      },
+      {
         field: 'nome',
         header: 'Equipamento / Traje',
         width: '260px',
@@ -21,14 +37,16 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
       {
         field: 'tipo',
         header: 'Categoria Tática',
-        width: '180px',
+        width: '160px',
+        align: 'center',
         sortable: true,
       },
       {
         field: 'resistencia',
         header: 'Resistência / Blindagem',
         type: 'number',
-        width: '180px',
+        width: '160px',
+        align: 'center',
         sortable: true,
       },
       {
@@ -41,30 +59,13 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
         field: 'status',
         header: 'Status de Custódia',
         width: '160px',
+        align: 'center',
         sortable: true,
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [
-    {
-      id: 'edit',
-      label: 'Auditar Custódia',
-      action: 'edit',
-      openMode: 'modal',
-      formId: 'equipamentos-edit',
-      params: [{ from: 'id', to: 'input', name: 'id' }],
-    },
-    {
-      id: 'create',
-      label: 'Novo Equipamento',
-      action: 'create',
-      openMode: 'modal',
-      formId: 'equipamentos-create',
-    },
-  ],
   defaults: {
-    openMode: 'modal',
-    modal: { width: '880px', maxWidth: '95vw' },
+    openMode: 'drawer',
   },
 };
 
@@ -75,12 +76,14 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'equipamentos-kpi-grid',
       items: [
         {
           id: 'total',
           label: 'Total de Itens Táticos',
-          value: '48 Ativos',
+          value: '62 Ativos',
           caption: 'Trajes, armas e exoesqueletos',
           icon: 'shield',
           tone: 'info',
@@ -88,25 +91,25 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
         {
           id: 'custodia',
           label: 'Em Custódia / Uso Ativo',
-          value: '36 Itens',
+          value: '56 Itens',
           caption: 'Alocados a heróis em missão',
-          icon: 'check_circle',
+          icon: 'verified_user',
           tone: 'success',
         },
         {
           id: 'manutencao',
-          label: 'Em Manutenção / Laboratório',
-          value: '08 Itens',
+          label: 'Em Manutenção',
+          value: '2 Itens',
           caption: 'Recarga de reator e nanotecnologia',
           icon: 'build',
           tone: 'warning',
         },
         {
-          id: 'integridade',
-          label: 'Integridade Média da Força',
-          value: '94,8%',
-          caption: 'Dentro dos limites de prontidão',
-          icon: 'verified',
+          id: 'estoque',
+          label: 'Em Reserva de Arsenal',
+          value: '2 Itens',
+          caption: 'Disponíveis no cofre central',
+          icon: 'inventory_2',
           tone: 'neutral',
         },
       ],
@@ -136,7 +139,7 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
       <!-- Metadata-Driven CRUD Runtime -->
@@ -176,6 +179,7 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+
       span { font-size: 14px; }
     }
 
@@ -193,65 +197,6 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-assets { color: var(--assets); background: color-mix(in oklab, var(--assets) 14%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .equipamentos-kpi-grid .prx-rich-stat-group__items,
-      .equipamentos-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .equipamentos-kpi-grid .prx-rich-stat-group__item,
-      .equipamentos-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .equipamentos-kpi-grid .prx-rich-stat-group__value,
-      .equipamentos-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .equipamentos-kpi-grid .prx-rich-stat-group__label,
-      .equipamentos-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .equipamentos-kpi-grid .prx-rich-stat-group__caption,
-      .equipamentos-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -259,7 +204,71 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class EquipamentosPageComponent {
+export class EquipamentosPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = EQUIPAMENTOS_CRUD_METADATA;
-  protected readonly kpiDocument = EQUIPAMENTOS_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(EQUIPAMENTOS_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getEquipamentosTacticalKpis().subscribe((kpis) => {
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'equipamentos-kpi-grid',
+            items: [
+              {
+                id: 'total',
+                label: 'Total de Itens Táticos',
+                value: `${kpis.totalEquipamentos} Ativos`,
+                caption: 'Trajes, armas e exoesqueletos',
+                icon: 'shield',
+                tone: 'info',
+              },
+              {
+                id: 'custodia',
+                label: 'Em Custódia / Uso Ativo',
+                value: `${kpis.inUse} Itens`,
+                caption: 'Alocados a heróis em missão',
+                icon: 'verified_user',
+                tone: 'success',
+              },
+              {
+                id: 'manutencao',
+                label: 'Em Manutenção',
+                value: `${kpis.inMaintenance} Itens`,
+                caption: 'Recarga de reator e nanotecnologia',
+                icon: 'build',
+                tone: 'warning',
+              },
+              {
+                id: 'estoque',
+                label: 'Em Reserva de Arsenal',
+                value: `${kpis.inStock} Itens`,
+                caption: 'Disponíveis no cofre central',
+                icon: 'inventory_2',
+                tone: 'neutral',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }
