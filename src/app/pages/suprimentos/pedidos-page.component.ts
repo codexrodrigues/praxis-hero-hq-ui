@@ -1,13 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'supply-chain/pedidos',
+    path: 'procurement/purchase-orders',
     idField: 'id',
   },
   table: {
@@ -20,68 +29,64 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
       {
-        field: 'numeroPedido',
-        header: 'Ordem de Compra',
-        width: '180px',
+        field: 'orderDate',
+        header: 'Data do Pedido',
+        type: 'date',
+        format: 'dd/MM/yyyy',
+        width: '140px',
+        align: 'center',
         sortable: true,
       },
       {
-        field: 'fornecedorNome',
-        header: 'Fornecedor Parceiro',
-        width: '260px',
-        sortable: true,
-      },
-      {
-        field: 'insumo',
-        header: 'Material / Insumo Tático',
-        width: '240px',
-        sortable: true,
-      },
-      {
-        field: 'quantidade',
-        header: 'Qtd.',
+        field: 'quantity',
+        header: 'Qtd. de Itens',
         type: 'number',
         width: '120px',
         align: 'center',
         sortable: true,
       },
       {
-        field: 'valorTotal',
-        header: 'Montante (R$)',
-        type: 'currency',
-        format: 'BRL',
-        width: '160px',
+        field: 'currency',
+        header: 'Moeda',
+        width: '100px',
+        align: 'center',
         sortable: true,
       },
       {
         field: 'status',
-        header: 'Status de Expedição',
-        width: '160px',
+        header: 'Status da Ordem',
+        width: '150px',
         align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'approvedAt',
+        header: 'Aprovado Em',
+        type: 'date',
+        format: 'dd/MM/yyyy',
+        width: '140px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'receivedAt',
+        header: 'Recebido Em',
+        type: 'date',
+        format: 'dd/MM/yyyy',
+        width: '140px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'disabledReason',
+        header: 'Observações / Motivo',
+        width: '220px',
         sortable: true,
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [
-    {
-      id: 'edit',
-      label: 'Revisar Ordem',
-      action: 'edit',
-      openMode: 'modal',
-      formId: 'pedidos-edit',
-      params: [{ from: 'id', to: 'input', name: 'id' }],
-    },
-    {
-      id: 'create',
-      label: 'Novo Pedido de Compra',
-      action: 'create',
-      openMode: 'modal',
-      formId: 'pedidos-create',
-    },
-  ],
   defaults: {
-    openMode: 'modal',
-    modal: { width: '840px', maxWidth: '95vw' },
+    openMode: 'drawer',
   },
 };
 
@@ -92,6 +97,8 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'pedidos-kpi-grid',
       items: [
         {
@@ -103,27 +110,27 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
           tone: 'info',
         },
         {
-          id: 'aprovacao',
+          id: 'aprovadas',
+          label: 'Aprovadas / Entregues',
+          value: '5 Ordens',
+          caption: 'Itens em expedição ou já recebidos',
+          icon: 'inventory',
+          tone: 'success',
+        },
+        {
+          id: 'analise',
           label: 'Aguardando Aprovação',
-          value: '4 Ordens Draft',
+          value: '3 em Análise',
           caption: 'Compliance de compras e finanças',
           icon: 'pending_actions',
           tone: 'warning',
         },
         {
-          id: 'insumos',
-          label: 'Insumos Críticos',
-          value: 'Vibranium & Grafeno',
-          caption: 'Fornecedores certificados pelo HQ',
-          icon: 'inventory',
-          tone: 'success',
-        },
-        {
-          id: 'leadTime',
-          label: 'Lead Time de Entrega',
-          value: '< 48 Horas',
-          caption: 'Prioridade tática em campo',
-          icon: 'schedule',
+          id: 'canceladas',
+          label: 'Canceladas / Revogadas',
+          value: '2 Pedidos',
+          caption: 'Ordens reavaliadas pelo comando',
+          icon: 'cancel',
           tone: 'neutral',
         },
       ],
@@ -139,8 +146,8 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
   template: `
     <div class="page-container">
       <header class="section-header">
-        <div class="header-intro">
-          <div class="domain-tag tone-supplies-bg">
+        <div>
+          <div class="domain-tag tone-supplies">
             <span class="material-symbols-outlined">shopping_cart</span>
             Suprimentos & Aquisições Táticas
           </div>
@@ -153,10 +160,10 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Tabela CRUD Governança Canônica -->
+      <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-pedidos-crud"
@@ -178,8 +185,6 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      gap: 20px;
-      flex-wrap: wrap;
     }
 
     .domain-tag {
@@ -188,6 +193,9 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       gap: 6px;
       padding: 4px 10px;
       border-radius: 9999px;
+      background: color-mix(in oklab, var(--supplies) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--supplies) 30%, transparent);
+      color: var(--supplies);
       font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
@@ -196,18 +204,11 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       span { font-size: 14px; }
     }
 
-    .tone-supplies-bg {
-      background: color-mix(in oklab, var(--supplies) 12%, transparent);
-      border: 1px solid color-mix(in oklab, var(--supplies) 30%, transparent);
-      color: var(--supplies);
-    }
-
     .page-title {
       margin: 10px 0 0;
       font-family: var(--font-display);
       font-size: 2.2rem;
       font-weight: 700;
-      line-height: 1.15;
     }
 
     .page-subtitle {
@@ -217,65 +218,6 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 14%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .pedidos-kpi-grid .prx-rich-stat-group__items,
-      .pedidos-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .pedidos-kpi-grid .prx-rich-stat-group__item,
-      .pedidos-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .pedidos-kpi-grid .prx-rich-stat-group__value,
-      .pedidos-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .pedidos-kpi-grid .prx-rich-stat-group__label,
-      .pedidos-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .pedidos-kpi-grid .prx-rich-stat-group__caption,
-      .pedidos-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -283,7 +225,71 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class PedidosPageComponent {
+export class PedidosPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = PEDIDOS_CRUD_METADATA;
-  protected readonly kpiDocument = PEDIDOS_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(PEDIDOS_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getPedidosTacticalKpis().subscribe((kpis) => {
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'pedidos-kpi-grid',
+            items: [
+              {
+                id: 'ordens',
+                label: 'Ordens de Compra',
+                value: `${kpis.totalPedidos} Pedidos`,
+                caption: 'Ciclo de suprimento em andamento',
+                icon: 'local_shipping',
+                tone: 'info',
+              },
+              {
+                id: 'aprovadas',
+                label: 'Aprovadas / Entregues',
+                value: `${kpis.approvedOrReceived} Ordens`,
+                caption: 'Itens em expedição ou já recebidos',
+                icon: 'inventory',
+                tone: 'success',
+              },
+              {
+                id: 'analise',
+                label: 'Aguardando Aprovação',
+                value: `${kpis.draft} em Análise`,
+                caption: 'Compliance de compras e finanças',
+                icon: 'pending_actions',
+                tone: 'warning',
+              },
+              {
+                id: 'canceladas',
+                label: 'Canceladas / Revogadas',
+                value: `${kpis.cancelled} Pedidos`,
+                caption: 'Ordens reavaliadas pelo comando',
+                icon: 'cancel',
+                tone: 'neutral',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }

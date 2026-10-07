@@ -1,71 +1,80 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'risk-management/ameacas',
+    path: 'risk-intelligence/ameacas',
     idField: 'id',
   },
   table: {
     columns: [
       {
+        field: 'id',
+        header: 'ID',
+        width: '80px',
+        align: 'center',
+        sortable: true,
+      },
+      {
         field: 'nome',
-        header: 'Designação do Alvo',
-        width: '240px',
-        sortable: true,
-      },
-      {
-        field: 'nivelAmeaca',
-        header: 'Classificação de Risco',
-        width: '180px',
-        sortable: true,
-      },
-      {
-        field: 'localizacao',
-        header: 'Último Vetor Detectado',
+        header: 'Designação da Ameaça',
         width: '220px',
         sortable: true,
       },
       {
-        field: 'recompensa',
-        header: 'Recompensa Ativa (R$)',
-        type: 'currency',
-        format: 'BRL',
-        width: '180px',
+        field: 'classe',
+        header: 'Classe Tática',
+        width: '150px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'planeta',
+        header: 'Origem Planetária',
+        width: '160px',
+        sortable: true,
+      },
+      {
+        field: 'nivel',
+        header: 'Nível de Perigo',
+        type: 'number',
+        width: '130px',
+        align: 'center',
         sortable: true,
       },
       {
         field: 'status',
         header: 'Status de Contenção',
         width: '160px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'recompensa',
+        header: 'Recompensa Fixada',
+        type: 'currency',
+        format: 'BRL',
+        width: '180px',
+        align: 'right',
         sortable: true,
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [
-    {
-      id: 'edit',
-      label: 'Atualizar Inteligência',
-      action: 'edit',
-      openMode: 'modal',
-      formId: 'ameacas-edit',
-      params: [{ from: 'id', to: 'input', name: 'id' }],
-    },
-    {
-      id: 'create',
-      label: 'Catalogar Nova Ameaça',
-      action: 'create',
-      openMode: 'modal',
-      formId: 'ameacas-create',
-    },
-  ],
   defaults: {
-    openMode: 'modal',
-    modal: { width: '880px', maxWidth: '95vw' },
+    openMode: 'drawer',
   },
 };
 
@@ -76,6 +85,8 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'ameacas-kpi-grid',
       items: [
         {
@@ -87,25 +98,25 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
           tone: 'danger',
         },
         {
-          id: 'omega',
-          label: 'Prioridade Ômega Ativa',
-          value: '02 Críticas',
-          caption: 'Thanos · Doutor Destino',
+          id: 'confronto',
+          label: 'Em Confronto Ativo',
+          value: '6 em Combate',
+          caption: 'Esquadrões mobilizados em solo',
           icon: 'crisis_alert',
           tone: 'warning',
         },
         {
           id: 'contidos',
-          label: 'Contidos / Quarentena',
-          value: '09 Neutralizados',
-          caption: 'Custodiados na Prisão Raft',
+          label: 'Contidos / Prisão Raft',
+          value: '3 Neutralizados',
+          caption: 'Custodiados em estase de força',
           icon: 'lock',
           tone: 'success',
         },
         {
           id: 'recompensas',
           label: 'Fundo Total de Recompensas',
-          value: 'R$ 18,5 M',
+          value: 'R$ 12,1 M',
           caption: 'Garantido pelo Acordo de Sokovia',
           icon: 'payments',
           tone: 'info',
@@ -137,7 +148,7 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
       <!-- Metadata-Driven CRUD Runtime -->
@@ -177,6 +188,7 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+
       span { font-size: 14px; }
     }
 
@@ -194,65 +206,6 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .ameacas-kpi-grid .prx-rich-stat-group__items,
-      .ameacas-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .ameacas-kpi-grid .prx-rich-stat-group__item,
-      .ameacas-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .ameacas-kpi-grid .prx-rich-stat-group__value,
-      .ameacas-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .ameacas-kpi-grid .prx-rich-stat-group__label,
-      .ameacas-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .ameacas-kpi-grid .prx-rich-stat-group__caption,
-      .ameacas-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -260,7 +213,71 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class AmeacasPageComponent {
+export class AmeacasPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = AMEACAS_CRUD_METADATA;
-  protected readonly kpiDocument = AMEACAS_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(AMEACAS_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getAmeacasTacticalKpis().subscribe((kpis) => {
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'ameacas-kpi-grid',
+            items: [
+              {
+                id: 'ameacas',
+                label: 'Ameaças Monitoradas',
+                value: `${kpis.totalAmeacas} Alvos`,
+                caption: 'Radar contínuo em frequência quântica',
+                icon: 'warning',
+                tone: 'danger',
+              },
+              {
+                id: 'confronto',
+                label: 'Em Confronto Ativo',
+                value: `${kpis.confrontation} em Combate`,
+                caption: 'Esquadrões mobilizados em solo',
+                icon: 'crisis_alert',
+                tone: 'warning',
+              },
+              {
+                id: 'contidos',
+                label: 'Contidos / Prisão Raft',
+                value: `${kpis.contained} Neutralizados`,
+                caption: 'Custodiados em estase de força',
+                icon: 'lock',
+                tone: 'success',
+              },
+              {
+                id: 'recompensas',
+                label: 'Fundo Total de Recompensas',
+                value: `R$ ${kpis.totalBountyMillion} M`,
+                caption: 'Garantido pelo Acordo de Sokovia',
+                icon: 'payments',
+                tone: 'info',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }

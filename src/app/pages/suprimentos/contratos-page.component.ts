@@ -1,79 +1,71 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'supply-chain/contratos',
+    path: 'procurement/contracts',
     idField: 'id',
   },
   table: {
     columns: [
       {
-        field: 'numeroContrato',
+        field: 'number',
         header: 'Nº do Contrato',
-        width: '180px',
+        width: '160px',
         sortable: true,
       },
       {
-        field: 'fornecedorNome',
+        field: 'supplierName',
         header: 'Fornecedor / Fabricante',
         width: '260px',
         sortable: true,
       },
       {
-        field: 'objeto',
-        header: 'Objeto / Escopo de Fornecimento',
-        width: '320px',
+        field: 'currency',
+        header: 'Moeda',
+        width: '100px',
+        align: 'center',
         sortable: true,
       },
       {
-        field: 'valorTotal',
-        header: 'Valor Global (R$)',
-        type: 'currency',
-        format: 'BRL',
-        width: '180px',
+        field: 'validUntil',
+        header: 'Vigência Até',
+        type: 'date',
+        format: 'dd/MM/yyyy',
+        width: '150px',
+        align: 'center',
         sortable: true,
       },
       {
         field: 'status',
         header: 'Status Contratual',
-        width: '160px',
+        width: '150px',
+        align: 'center',
         sortable: true,
       },
       {
-        field: 'dataFim',
-        header: 'Vigência Até',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '160px',
+        field: 'disabledReason',
+        header: 'Observações / Motivo',
+        width: '260px',
         sortable: true,
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [
-    {
-      id: 'edit',
-      label: 'Auditar Acordo',
-      action: 'edit',
-      openMode: 'modal',
-      formId: 'contratos-edit',
-      params: [{ from: 'id', to: 'input', name: 'id' }],
-    },
-    {
-      id: 'create',
-      label: 'Novo Contrato',
-      action: 'create',
-      openMode: 'modal',
-      formId: 'contratos-create',
-    },
-  ],
   defaults: {
-    openMode: 'modal',
-    modal: { width: '920px', maxWidth: '95vw' },
+    openMode: 'drawer',
   },
 };
 
@@ -84,38 +76,40 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'contratos-kpi-grid',
       items: [
         {
           id: 'vigentes',
           label: 'Contratos Vigentes',
-          value: '12 Ativos',
-          caption: 'Indústrias Stark, Pym Tech e Oscorp',
+          value: '11 Ativos',
+          caption: 'Acordos ativos e assinados com a base',
           icon: 'description',
           tone: 'info',
         },
         {
-          id: 'compliance',
-          label: 'Compliance & SLAs',
-          value: '99,1%',
-          caption: 'Entregas dentro do prazo tático',
+          id: 'total',
+          label: 'Total de Contratos',
+          value: '17 Cadastrados',
+          caption: 'Volume total de acordos catalogados',
           icon: 'verified',
           tone: 'success',
         },
         {
-          id: 'renovacao',
-          label: 'Em Renovação Trimestral',
-          value: '03 Contratos',
-          caption: 'Aditivos de fornecimento de vibranium',
-          icon: 'event_repeat',
+          id: 'expirados',
+          label: 'Contratos Expirados',
+          value: '3 Requerem Ação',
+          caption: 'Demandam aditivo ou substituição',
+          icon: 'event_busy',
           tone: 'warning',
         },
         {
-          id: 'volume',
-          label: 'Volume Anual Contratado',
-          value: 'R$ 42,0 M',
-          caption: 'Orçamento aprovado para 2026',
-          icon: 'attach_money',
+          id: 'draft',
+          label: 'Em Minuta / Draft',
+          value: '1 em Aprovação',
+          caption: 'Aguardando validação jurídica e financeira',
+          icon: 'edit_note',
           tone: 'neutral',
         },
       ],
@@ -145,7 +139,7 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
       <!-- Metadata-Driven CRUD Runtime -->
@@ -185,6 +179,7 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+
       span { font-size: 14px; }
     }
 
@@ -202,65 +197,6 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-supplies { color: var(--supplies); background: color-mix(in oklab, var(--supplies) 14%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .contratos-kpi-grid .prx-rich-stat-group__items,
-      .contratos-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .contratos-kpi-grid .prx-rich-stat-group__item,
-      .contratos-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .contratos-kpi-grid .prx-rich-stat-group__value,
-      .contratos-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .contratos-kpi-grid .prx-rich-stat-group__label,
-      .contratos-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .contratos-kpi-grid .prx-rich-stat-group__caption,
-      .contratos-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -268,7 +204,71 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class ContratosPageComponent {
+export class ContratosPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = CONTRATOS_CRUD_METADATA;
-  protected readonly kpiDocument = CONTRATOS_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(CONTRATOS_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getContratosTacticalKpis().subscribe((kpis) => {
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'contratos-kpi-grid',
+            items: [
+              {
+                id: 'vigentes',
+                label: 'Contratos Vigentes',
+                value: `${kpis.activeAndSigned} Ativos`,
+                caption: 'Acordos ativos e assinados com a base',
+                icon: 'description',
+                tone: 'info',
+              },
+              {
+                id: 'total',
+                label: 'Total de Contratos',
+                value: `${kpis.totalContratos} Cadastrados`,
+                caption: 'Volume total de acordos catalogados',
+                icon: 'verified',
+                tone: 'success',
+              },
+              {
+                id: 'expirados',
+                label: 'Contratos Expirados',
+                value: `${kpis.expired} Requerem Ação`,
+                caption: 'Demandam aditivo ou substituição',
+                icon: 'event_busy',
+                tone: 'warning',
+              },
+              {
+                id: 'draft',
+                label: 'Em Minuta / Draft',
+                value: `${kpis.draft} em Aprovação`,
+                caption: 'Aguardando validação jurídica e financeira',
+                icon: 'edit_note',
+                tone: 'neutral',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }

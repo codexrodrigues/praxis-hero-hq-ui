@@ -1,46 +1,55 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'risk-management/sinistros',
-    idField: 'id',
+    path: 'risk-intelligence/vw-indicadores-incidentes',
+    idField: 'incidenteId',
   },
   table: {
     columns: [
       {
-        field: 'id',
+        field: 'incidenteId',
         header: 'Registro',
         width: '100px',
         align: 'center',
         sortable: true,
       },
       {
-        field: 'missaoTitulo',
+        field: 'missao',
         header: 'Missão de Origem',
-        width: '240px',
+        width: '220px',
         sortable: true,
       },
       {
         field: 'descricao',
-        header: 'Incidente / Dano Patrimonial',
-        width: '320px',
+        header: 'Incidente / Dano Apurado',
+        width: '280px',
         sortable: true,
       },
       {
         field: 'local',
         header: 'Local do Dano',
-        width: '180px',
+        width: '160px',
         sortable: true,
       },
       {
         field: 'severidade',
         header: 'Severidade',
-        width: '140px',
+        width: '130px',
         align: 'center',
         sortable: true,
       },
@@ -54,8 +63,26 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
       {
-        field: 'valorAcordo',
-        header: 'Compensação Aprovada',
+        field: 'totalIndenizacoes',
+        header: 'Indenizações Totais',
+        type: 'currency',
+        format: 'BRL',
+        width: '180px',
+        align: 'right',
+        sortable: true,
+      },
+      {
+        field: 'totalPago',
+        header: 'Total Indenizado',
+        type: 'currency',
+        format: 'BRL',
+        width: '160px',
+        align: 'right',
+        sortable: true,
+      },
+      {
+        field: 'totalPendente',
+        header: 'Saldo Pendente',
         type: 'currency',
         format: 'BRL',
         width: '160px',
@@ -64,7 +91,9 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [],
+  defaults: {
+    openMode: 'drawer',
+  },
 };
 
 export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
@@ -74,37 +103,39 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'indicadores-kpi-grid',
       items: [
         {
           id: 'passivo',
           label: 'Sinistros com Passivo',
           value: '74 Casos',
-          caption: 'Histórico de acordos regulados',
+          caption: 'Histórico de acordos regulados pelo HQ',
           icon: 'gavel',
           tone: 'danger',
         },
         {
           id: 'total',
-          label: 'Volume Total de Indenizações',
-          value: 'R$ 82,4M',
+          label: 'Volume de Indenizações',
+          value: 'R$ 99,5 M',
           caption: 'Compensações acordadas com o judiciário',
           icon: 'payments',
           tone: 'warning',
         },
         {
-          id: 'liquidadas',
-          label: 'Compensações Liquidadas',
-          value: 'R$ 44,1M',
-          caption: '53,5% dos valores já quitados',
-          icon: 'price_check',
-          tone: 'success',
+          id: 'danos',
+          label: 'Danos Civis Apurados',
+          value: 'R$ 154,4 M',
+          caption: 'Prejuízo material total auditado',
+          icon: 'broken_image',
+          tone: 'info',
         },
         {
           id: 'saldo',
           label: 'Saldo em Conciliação',
-          value: 'R$ 38,3M',
-          caption: 'Em análise de perícia e seguros',
+          value: 'R$ 72,8 M',
+          caption: 'Em análise de perícia e fundos de seguro',
           icon: 'hourglass_top',
           tone: 'neutral',
         },
@@ -121,8 +152,8 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
   template: `
     <div class="page-container">
       <header class="section-header">
-        <div class="header-intro">
-          <div class="domain-tag tone-risk-bg">
+        <div>
+          <div class="domain-tag tone-risk">
             <span class="material-symbols-outlined">balance</span>
             Risco & Compensações Civis
           </div>
@@ -135,10 +166,10 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Tabela CRUD Governança Canônica -->
+      <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-indicadores-crud"
@@ -160,8 +191,6 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      gap: 20px;
-      flex-wrap: wrap;
     }
 
     .domain-tag {
@@ -170,6 +199,9 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
       gap: 6px;
       padding: 4px 10px;
       border-radius: 9999px;
+      background: color-mix(in oklab, var(--risk) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--risk) 30%, transparent);
+      color: var(--risk);
       font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
@@ -178,18 +210,11 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
       span { font-size: 14px; }
     }
 
-    .tone-risk-bg {
-      background: color-mix(in oklab, var(--risk) 12%, transparent);
-      border: 1px solid color-mix(in oklab, var(--risk) 30%, transparent);
-      color: var(--risk);
-    }
-
     .page-title {
       margin: 10px 0 0;
       font-family: var(--font-display);
       font-size: 2.2rem;
       font-weight: 700;
-      line-height: 1.15;
     }
 
     .page-subtitle {
@@ -199,65 +224,6 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .indicadores-kpi-grid .prx-rich-stat-group__items,
-      .indicadores-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .indicadores-kpi-grid .prx-rich-stat-group__item,
-      .indicadores-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .indicadores-kpi-grid .prx-rich-stat-group__value,
-      .indicadores-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .indicadores-kpi-grid .prx-rich-stat-group__label,
-      .indicadores-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .indicadores-kpi-grid .prx-rich-stat-group__caption,
-      .indicadores-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -265,7 +231,71 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class IndicadoresPageComponent {
+export class IndicadoresPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = INDICADORES_CRUD_METADATA;
-  protected readonly kpiDocument = INDICADORES_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(INDICADORES_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getIndicadoresRiscoTacticalKpis().subscribe((kpis) => {
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'indicadores-kpi-grid',
+            items: [
+              {
+                id: 'passivo',
+                label: 'Sinistros com Passivo',
+                value: `${kpis.totalIncidentes} Casos`,
+                caption: 'Histórico de acordos regulados pelo HQ',
+                icon: 'gavel',
+                tone: 'danger',
+              },
+              {
+                id: 'total',
+                label: 'Volume de Indenizações',
+                value: `R$ ${kpis.totalIndenizacoesMillion} M`,
+                caption: `Compensações acordadas (${kpis.liquidationRate}% liquidado)`,
+                icon: 'payments',
+                tone: 'warning',
+              },
+              {
+                id: 'danos',
+                label: 'Danos Civis Apurados',
+                value: `R$ ${kpis.totalDanosMillion} M`,
+                caption: 'Prejuízo material total auditado',
+                icon: 'broken_image',
+                tone: 'info',
+              },
+              {
+                id: 'saldo',
+                label: 'Saldo em Conciliação',
+                value: `R$ ${kpis.totalPendenteMillion} M`,
+                caption: 'Em análise de perícia e fundos de seguro',
+                icon: 'hourglass_top',
+                tone: 'neutral',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }
