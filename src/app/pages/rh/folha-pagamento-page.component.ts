@@ -7,7 +7,7 @@ import { PraxisRichContent } from '@praxisui/rich-content';
 export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
-    path: 'human-resources/folha-pagamento',
+    path: 'human-resources/folhas-pagamento',
     idField: 'id',
   },
   table: {
