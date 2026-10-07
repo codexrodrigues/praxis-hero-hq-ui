@@ -24,8 +24,10 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#10**](#-issue-10-refinamento-visual-do-pdx-inline-toggle-e-seletor-tri-state-para-filtros-booleanos) | Refinamento Visual do `pdx-inline-toggle` e Seletor Tri-State para Filtros Booleanos | `@praxisui/dynamic-fields`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#11**](#-issue-11-suporte-a-filtros-desacoplados-e-teleporte-via-cdk-portal-praxisfilterportal) | Suporte a Filtros Desacoplados e Teleporte via CDK Portal (`PraxisFilterPortal`) | `@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#13**](#-issue-13-tokens-canônicos-de-menu-e-estilização-de-state-layer-de-hover-em-overlays-praxis-menu-styles) | Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#16**](#-issue-16-ux-e-animação-de-troca-de-widgets-swap-collision-policy-no-page-builder-live-shift-e-affordance-visual) | UX e Animação de Troca de Widgets (`swap` Collision Policy) no Page Builder: Live Shift e Affordance Visual | `@praxisui/page-builder`<br>`@praxisui/core`<br>`DynamicWidgetPageComponent` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-a-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte a `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[ ] Aberta` | — | — | Pendente |
 
 ---
 
@@ -948,6 +950,378 @@ Enquanto a biblioteca `@praxisui/charts` não recebe a atualização canônica, 
 - [ ] As colunas numéricas de valores utilizam alinhamento à direita e numerais tabulares (`tabular-nums`).
 - [ ] O estado de seleção ou clique no botão de categoria mantém total acessibilidade por teclado (`Enter`/`Space`) e leitor de tela (`aria-pressed`).
 - [ ] O design do container respeita as margens internas do widget shell sem vazar barras de rolagem para os limites externos do card.
+
+---
+
+## 📌 Issue #15: Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`, `@praxisui/core` (Theming)
+- **Severidade:** 🟡 Média (poluição visual em recursos consultivos, quebra de acessibilidade por perda de contraste e efeito de hover desalinhado/vazando do botão)
+- **Tipo:** Refinamento de Componente / Governança de Capabilities / Integração M3
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+
+#### 1. Síntese Compulsória de Ação Desabilitada em Recursos Read-Only
+No arquivo `projects/praxis-table/src/lib/praxis-table.ts` (linhas 3548–3568 e 3751):
+- A tabela possui um mecanismo de descoberta automática de ações de coleção (`resolveCollectionCreateRuntime`).
+- Quando o recurso subjacente é estritamente consultivo (ex.: views analíticas de banco como `vw-ranking-reputacao`, onde `capabilities.create.supported === false`), em vez de omitir a ação, a tabela cria compulsoriamente um botão com:
+  - `action: 'create'`
+  - `disabled: true`
+  - `appearance: 'filled'`
+  - `tooltip: 'Criação indisponível no contexto atual'` (linha 3751 de `praxis-table.ts`)
+- Na toolbar (`praxis-table-toolbar.ts:3473–3476`), o método `getActionTooltip` adiciona a razão padrão da tabela (`'Ação indisponível no contexto atual.'`), concatenando:
+  ```typescript
+  return configured ? `${reason} ${configured}` : reason;
+  ```
+  Resultando na mensagem redundante: `"Ação indisponível no contexto atual. Criação indisponível no contexto atual"`.
+
+#### 2. Omissão de `[attr.aria-disabled]` e Perda de Contraste Tipográfico
+No arquivo `projects/praxis-table/src/lib/praxis-table-toolbar.ts` (linhas 562–580):
+- O botão preenchido utiliza `[disabledInteractive]="true"`. Quando ativo, o Angular Material **não** insere o atributo HTML `disabled` para permitir que o elemento capture eventos de hover e exiba o tooltip.
+- O CSS de estado desabilitado (linhas 2094–2125) depende do seletor `.action-btn[aria-disabled='true']`. No entanto, o template do botão preenchido **não possui** `[attr.aria-disabled]`.
+- Como resultado, as variáveis de cor e contraste da plataforma não são aplicadas. O botão cai nas cores nativas do Material Design 3 (`--mdc-filled-button-disabled-container-color` e `--mdc-filled-button-disabled-label-text-color`), onde texto e ícone perdem todo o contraste contra o fundo cinza, parecendo um retângulo sólido vazio.
+
+#### 3. Desalinhamento da State-Layer de Hover (Vazamento de Dimensão)
+No arquivo `praxis-table-toolbar.ts` (linhas 1990–2006):
+- A plataforma restringe a altura dos botões de toolbar para `36px` (`--p-table-toolbar-action-size: 36px; border-radius: 8px`).
+- O Angular Material injeta internamente o container de ripple `.mat-mdc-button-persistent-ripple` com altura padrão de 40px/48px e raio de curvatura de pílula (20px).
+- Sem `overflow: hidden` no botão e sem propagação de `border-radius: inherit` para as camadas filhas, ao passar o mouse, a camada translúcida de hover vaza para fora do botão, criando uma mancha cinza de proporções incompatíveis com a geometria da ação.
+
+### Arquitetura de Solução Proposta
+1. **No `@praxisui/table` (`praxis-table.ts`):**
+   - Alterar a política padrão para que ações de coleção não suportadas (`supported === false`) sejam **omitidas por padrão**, em vez de sintetizadas como desabilitadas.
+   - Fornecer opção declarativa na configuração de toolbar (`toolbar.actions.preserveUnsupported: boolean`) caso o usuário deseje explicitamente exibir botões desabilitados como dica instrutiva.
+2. **No `@praxisui/table` (`praxis-table-toolbar.ts`):**
+   - Inserir `[attr.aria-disabled]="getActionAriaDisabled(action)"` no botão filled (linha 569).
+   - Adicionar no CSS de `.action-btn.mat-mdc-button-base`:
+     ```css
+     overflow: hidden !important;
+     border-radius: var(--p-table-toolbar-action-radius, 8px) !important;
+     ```
+   - Normalizar a state-layer interna para herdar o mesmo raio e altura.
+
+### Critérios de Aceite para Resolução
+- [ ] Em recursos estritamente consultivos (views/read-only), o botão de criação não é renderizado na toolbar por padrão.
+- [ ] Se uma ação for renderizada em estado desabilitado, o ícone e o rótulo de texto permanecem perfeitamente legíveis com contraste adequado conforme WCAG AA.
+- [ ] A camada de hover (state-layer) respeita rigorosamente o contorno e o raio de curvatura do botão (36px com 8px de radius), sem vazamentos.
+
+---
+
+## 📌 Issue #16: UX e Animação de Troca de Widgets (`swap` Collision Policy) no Page Builder: Live Shift, Colisões Assimétricas e Redesenho do Snap Preview Inválido
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/page-builder`, `@praxisui/core` (`DynamicWidgetPageComponent`)
+- **Severidade:** 🟡 Média (experiência de personalização do dashboard confusa, artefato visual estranho de "chapa vermelha" cortando componentes e falha em trocas entre widgets de dimensões assimétricas)
+- **Tipo:** Refinamento de UX / Motor de Layout de Grade / Animações de Interação
+- **Status:** `[ ] Aberta`
+
+### Contexto & Descoberta
+Durante os testes de manipulação de layout no Dashboard em modo de authoring, observou-se dois comportamentos distintos:
+1. **Swap Simétrico ($6 \times 6$ com $6 \times 6$):** Ao configurar `collisionPolicy: 'swap'`, a troca entre os dois gráficos funcionou matematicamente, mas sem animação fluida (*live shift*) e sem feedback visual positivo de intenção de troca.
+2. **Swap Assimétrico ($6 \times 6$ sobre $12 \times 6$):** Ao tentar arrastar um dos gráficos (largura 6) sobre a tabela de incidentes (largura total 12), o sistema gerou uma **"chapa vermelha translúcida"** cortando a tabela ao meio, sobrepondo dados e invadindo o card inferior, sem permitir a troca e transmitindo a sensação de bug gráfico.
+
+---
+
+### Diagnóstico Detalhado da Causa Raiz
+
+#### 1. A Anomalia Visual da "Chapa Vermelha" (`.pdx-canvas-snap-preview--invalid`)
+No arquivo `projects/praxis-core/src/lib/widgets/dynamic-widget-page.component.ts`:
+- No template (linhas 431–438):
+  ```html
+  @if (canvasPreviewItem() && !hasResizeFeedback()) {
+    <div
+      class="pdx-canvas-snap-preview"
+      [class.pdx-canvas-snap-preview--invalid]="canvasPreviewInvalid()"
+      [style.gridColumn]="canvasPreviewGridColumn()"
+      [style.gridRow]="canvasPreviewGridRow()"
+    ></div>
+  }
+  ```
+- E no CSS (linhas 948–963):
+  ```css
+  .pdx-canvas-snap-preview--invalid {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--md-sys-color-error) 18%, transparent),
+      color-mix(in srgb, var(--md-sys-color-error-container) 22%, transparent)
+    );
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--md-sys-color-error) 58%, transparent),
+      inset 0 0 0 2px color-mix(in srgb, var(--md-sys-color-surface) 40%, transparent);
+  }
+  ```
+**Por que isso gera uma experiência ruim?**
+- O elemento é uma `<div>` vazia renderizada dentro do CSS Grid sobre os mesmos trilhos de colunas e linhas ocupados pelo widget de destino.
+- Ele fica renderizado **em cima dos dados da tabela**, cobrindo o cabeçalho e cortando os textos das células de forma abrupta.
+- Não possui texto, ícone explicativo ou tooltip contextual informando **por que** a área está bloqueada (se é incompatibilidade dimensional, colisão com terceiros ou constraint de tamanho mínimo). Para o usuário final, parece uma falha de layout da página ou um artefato visual de renderização corrompida.
+
+#### 2. A Falha do Algoritmo em Trocas Assimétricas ($6 \times 6$ vs. $12 \times 6$)
+No arquivo `dynamic-widget-page.component.ts` (linhas 6405–6442):
+- O método `buildCanvasSwapItem` implementa um modelo estrito de troca direta 1:1:
+  ```typescript
+  const intendedSwapItem: WidgetPageCanvasItem = {
+    ...targetItem,
+    col: sourceItem.col,
+    row: sourceItem.row,
+    colSpan: sourceItem.colSpan, // <--- Força a tabela de 12 colunas a virar 6 colunas!
+    rowSpan: sourceItem.rowSpan,
+  };
+  ```
+- No cenário do dashboard:
+  - O gráfico arrastado (`payrollChart`) tem `colSpan: 6, rowSpan: 6` na `row: 8`. Ao lado dele, na `col: 7, row: 8`, está o `reputationChart` (outro bloco de 6 colunas).
+  - A tabela (`recentIncidents`) ocupa a linha inteira (`col: 1, row: 14, colSpan: 12`).
+  - Ao arrastar o gráfico para a linha 14, o algoritmo tenta encaixar a tabela de 12 colunas no slot original do gráfico (`col: 1, row: 8, colSpan: 6`).
+  - Porém, ao checar colisões na linha 6430 (`collides`), a tabela redimensionada ou deslocada esbarra no segundo gráfico vizinho (`reputationChart`).
+  - Como a colisão não é estritamente 1:1 ou viola o espaço dos demais itens, `buildCanvasSwapItem` retorna `null`, gerando `blocked = true` e projetando a chapa vermelha de snap preview inválido.
+
+---
+
+### Benchmark de Mercado: Como Ferramentas de Ponta Tratam Drag de Blocos Assimétricos
+
+| Ferramenta / Plataforma | Comportamento ao Arrastar Bloco Menor ($6$) sobre Bloco Maior ($12$) | Feedback Visual |
+|---|---|---|
+| **Grafana / Datadog (Gridstack.js)** | **Push Down / Cascade Displace:** Em vez de tentar "trocar" um bloco de 6 por um de 12, o bloco largo desce para a linha inferior (`row: row + sourceHeight`), abrindo a linha para o novo bloco. | Linhas azuis indicando o novo patamar e animação fluida de empurrar (*gravity compacting*). |
+| **Notion (Bento Boards)** | **Half-Slot Insertion:** Se solto na metade esquerda, divide a linha em duas colunas de 6 (redimensiona ambos). Se solto na borda superior/inferior, insere uma nova linha completa. | Barra azul horizontal ou vertical bem delineada indicando a intenção de divisão. |
+| **Apple iOS (Home Screen / Widgets)** | **Refusal Gesture (Shake):** Se dois widgets não têm o mesmo formato (ex.: um widget retangular 2x4 sobre um quadrado 2x2), eles **não trocam**. O widget passivo treme a cabeça em negação (*head shake*) e desvia sem chapa vermelha. | Microinteração cinemática sem mensagem textual nem cores agressivas. |
+| **Retool / Webflow Canvas** | **Drop Zone Indicator:** O container de destino destaca bordas de drop e exibe um chip flutuante com a ação: `[Inserir acima]` ou `[Dividir coluna]`. | Outline primário pontilhado com tooltip de ação clara. |
+
+---
+
+### Arquitetura de Solução Proposta para a Plataforma Praxis
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Page Builder Canvas: Três Níveis de Evolução de Layout         │
+│                                                                │
+│ 1. POLÍTICA DE DESLOCAMENTO VERTICAL (Push Down Mode)          │
+│    Ao arrastar Bloco A (6 col) sobre Tabela B (12 col):        │
+│    ┌──────────────┐                                            │
+│    │ Bloco A (6)  │  ░░ Slot Vazio (6) ░░                      │
+│    └──────────────┘                                            │
+│    ▼ (Empurra a tabela inteira para baixo suavemente)          │
+│    ┌──────────────────────────────────────────┐                │
+│    │ Tabela B (12) [Deslocamento animado]     │                │
+│    └──────────────────────────────────────────┘                │
+│                                                                │
+│ 2. REDESENHO DO SNAP PREVIEW INVÁLIDO (Adeus "Chapa Vermelha") │
+│    - Eliminar o gradiente vermelho opaco sobre o conteúdo.    │
+│    - Usar contorno pontilhado neutro/sutil (1px dashed).       │
+│    - Exibir badge contextual:                                  │
+│      [ ⚠️ Tamanho incompatível para troca direta ]              │
+│                                                                │
+│ 3. LIVE SHIFT & GHOST DE TROCA (Para itens de mesmo tamanho)   │
+│    - Transição CSS FLIP (transform: translate3d) 200ms ease.   │
+│    - Chip flutuante no cursor: [ ⇄ Trocar Posição ].           │
+└────────────────────────────────────────────────────────────────┘
+```
+
+#### 1. Suporte a Modo `push-down` (ou `cascade`) em `WidgetPageCanvasCollisionPolicy`
+Evoluir o tipo canônico em `projects/praxis-core/src/lib/widgets/widget-page.model.ts`:
+```typescript
+export type WidgetPageCanvasCollisionPolicy = 'block' | 'swap' | 'push-down';
+```
+- No modo `'push-down'`: se o item arrastado colidir com um widget que não pode ser trocado simetricamente, o widget atingido (e todos os abaixo dele) têm sua propriedade `row` incrementada de acordo com o `rowSpan` do item móvel, abrindo espaço perfeitamente.
+
+#### 2. Humanização do Feedback de Bloqueio (Substituição da Chapa Vermelha)
+- Alterar o CSS de `.pdx-canvas-snap-preview--invalid`:
+  - Remover o fundo opaco com gradiente vermelho que oculta o texto da tabela.
+  - Utilizar borda pontilhada suave com `pointer-events: none;`.
+  - Inserir um micro-badge flutuante centralizado (`.pdx-canvas-snap-preview__badge`):
+    ```html
+    <div class="pdx-canvas-snap-preview__badge">
+      <mat-icon>block</mat-icon>
+      <span>Espaço insuficiente para troca direta</span>
+    </div>
+    ```
+
+#### 3. Configuração Declarativa no `DynamicPageConfigEditorComponent`
+- Adicionar no editor de configurações da página um campo de rádio/select:
+  - **Estratégia de Colisão do Canvas:**
+    - `Bloquear (Strict Block)`: Mantém a grade imóvel;
+    - `Trocar Posições (Swap)`: Inverte itens simétricos;
+    - `Empurrar Abaixo (Push Down / Cascade)`: Abre espaço dinâmico deslocando linhas inferiores.
+
+---
+
+### Critérios de Aceite para Resolução
+- [ ] Ao arrastar um widget sobre uma área incompatível para troca direta, a plataforma não exibe uma mancha vermelha sólida cortando o componente subjacente.
+- [ ] O feedback de colisão inválida apresenta um contorno limpo e uma mensagem clara (badge/tooltip) explicando a razão da restrição.
+- [ ] A plataforma suporta deslocamento vertical automático (`push-down`), permitindo inserir widgets menores acima de tabelas ou blocos largos de 12 colunas sem exigir reestruturação manual da grade.
+- [ ] Itens simétricos realizam troca com animação visual contínua e badge de confirmação de swap.
+
+---
+
+## 📌 Issue #17: Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/rich-content`, `@praxisui/core` (`rich-content.model.ts`), `praxis-rich-content-config-editor.ts`, `rich-content-authoring.ts`
+- **Severidade:** 🔴 Alta (bloqueio total da autoria visual de bento grids, hubs de atalhos departamentais e cartões compostos, gerando tela em branco e forçando edição em JSON cru)
+- **Tipo:** Arquitetura de Modelos Canônicos / UX de Authoring / Integridade de Componentes
+- **Status:** `[ ] Aberta`
+
+---
+
+### Diagnóstico Aprofundado da Causa Raiz
+
+A auditoria ergonômica, de código e de ciclo de vida do componente `PraxisRichContentConfigEditor` (`projects/praxis-rich-content/src/lib/praxis-rich-content-config-editor.ts`, ~7.200 linhas) comparada à execução real no widget **"Centros de Comando & Especialidades"** revelou um conjunto de falhas em cadeia que vão desde o modelo de dados em `@praxisui/core` até a camada de apresentação do editor:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                ESTADO ATUAL DO EDITOR DE RICH CONTENT (ÁRIDO & INOPERANTE)                      │
+├──────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┤
+│ ESTRUTURA DO DOCUMENTO (Árvore Rasa de 1º Nível)    │ PAINEL DE PROPRIEDADES (Compose: Itens Aninhados)        │
+│ ┌──────────────────────────────────────────────────┐ │ ┌──────────────────────────────────────────────────────┐ │
+│ │ [BLOCO 1] Compose                                │ │ │ Compose ▸ Itens do compose          [+ Adicionar Item]│ │
+│ │ (Apenas 1 nó visível! Os 6 cards sumiram daqui!) │ │ │                                                      │ │
+│ └──────────────────────────────────────────────────┘ │ │ Item 1                                     [Remover] │ │
+│                                                      │ │ Tipo de bloco: [                    ▼] (EM BRANCO!)   │ │
+│ ⚠️ VIOLAÇÕES DE GESTALT & VAZAMENTO TÉCNICO:        │ │ (NENHUM CAMPO EXIBIDO! actionCard NÃO É SUPORTADO!)   │ │
+│ - Botão "+ Adicionar bloco" solto na direita        │ │                                                      │ │
+│ - Campos "Classe raiz" e "Contexto" no topo nobre   │ │ Item 2                                     [Remover] │ │
+│ - Jargões: "Affordances visuais", "Gates"           │ │ Tipo de bloco: [                    ▼] (EM BRANCO!)   │ │
+│ - Select de "Tipo de bloco" no topo é DESTRUTIVO!   │ │                                                      │ │
+│                                                      │ │ ⚠️ ZERO BOTÕES DE REORDENAÇÃO (Nem Mover p/ Cima/Baixo)│ │
+│                                                      │ │ ⚠️ ZERO DRAG & DROP (Sem handles de arrasto)           │ │
+│                                                      │ │ ⚠️ ZERO ICON PICKER (Inputs secos de string)           │ │
+│                                                      │ └──────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┘
+```
+
+#### 1. Tipagem Estrita em `@praxisui/core` e Supressão de `actionCard` no Editor
+- **No Modelo Canônico (`projects/praxis-core/src/lib/models/rich-content/rich-content.model.ts:134-140`):**
+  ```typescript
+  export interface RichComposeNode extends RichBlockBaseNode {
+    type: 'compose';
+    direction?: 'row' | 'column';
+    gap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    wrap?: boolean;
+    items: RichPresenterNode[]; // <--- ERRO CANÔNICO: Aceita apenas nós atômicos!
+  }
+  ```
+  `RichPresenterNode` é restrito a nós atômicos (`RichTextNode`, `RichBadgeNode`, `RichIconNode`, `RichAvatarNode`, `RichImageNode`, `RichLinkNode`, `RichMetricNode`, `RichProgressNode`, `RichActionButtonNode`). Cartões compostos como `RichActionCardNode`, `RichCardNode` e `RichCalloutNode` foram excluídos da união!
+- **No Editor (`praxis-rich-content-config-editor.ts:1340`):**
+  O editor itera sobre `presenterNodeTypes` para popular as opções dos itens do compose. Ao carregar um `actionCard`, o `<select>` não encontra a opção e **fica vazio**. O `#presenterFields` não possui branch `@case ('actionCard')`, gerando um item oco ("Item 1", "Item 2") sem nenhum input de texto, título, descrição, botão ou rota.
+
+#### 2. Ausência de Suporte Nativo a Grid no Modelo e no Editor
+- No Hero HQ, o widget define:
+  ```typescript
+  layout: 'grid', columns: 'auto-fit', minColumnWidth: '320px', gap: 'md'
+  ```
+- O modelo canônico de `RichComposeNode` e o editor visual suportam apenas `direction: 'row' | 'column'`. O grid só funcionou na aplicação porque uma classe externa arbitrária (`hub-action-cards-grid`) foi inserida via CSS.
+- **Solução Canônica:** `RichComposeNode` deve suportar nativamente `layout?: 'flex' | 'grid'`, `columns?: 'auto-fit' | 'auto-fill' | number`, e `minColumnWidth?: string`. O editor visual deve oferecer controles dedicados para alternar entre "Grade Responsiva (Grid)" e "Linha/Coluna (Flex)".
+
+#### 3. Árvore Estrutural Rasa e Ocultação de Filhos (Falta de Recursão)
+- O painel lateral `.prx-rich-editor__structure-list` itera exclusivamente sobre `parsedDocument.nodes` (nível 1).
+- Um container `compose` com 6 cartões é renderizado na árvore como um bloco cinza único: `BLOCO 1 Compose`.
+- Os cartões reais não possuem identidade na árvore. Não há expansão hierárquica, não há ícone e não há exibição do título de negócio ("Heróis & Colaboradores", "Centro de Missões").
+
+#### 4. Impossibilidade de Reordenação e Falta de Drag & Drop
+- `@angular/cdk/drag-drop` não foi importado no componente.
+- Os blocos de nível 1 possuem botões textuais simples (`[Mover para cima]`, `[Mover para baixo]`), mas os itens de `compose` **nem sequer possuem esses botões** (possuem unicamente `[Remover]`).
+- A única forma oferecida pela plataforma para trocar a ordem de cartões aninhados é abrir a aba `JSON avançado` e recortar/colar código.
+
+#### 5. Ausência de Icon Picker Visual
+- Todos os campos de ícone são inputs textuais secos (`<input [ngModel]="getStringField(node, 'icon')">`). O usuário precisa adivinhar o identificador exato da fonte Material Symbols (`military_tech`, `receipt_long`, `inventory_2`). Se errar uma letra, o ícone quebra sem qualquer alerta.
+
+#### 6. Falhas Críticas de Ergonomia, Gestalt e Risco Destrutivo
+- **Vazamento Técnico no Topo:** A segunda linha do editor contém "Classe raiz" CSS e "Contexto do documento" (com inputs JsonLogic de escopos e aliases). Esse conteúdo técnico de baixo nível ocupa o espaço nobre inicial, confundindo montadores de tela.
+- **Risco de Destruição Acidental:** No topo do painel do bloco selecionado, há um dropdown de `Tipo de bloco` que permite mudar um `Compose` com 6 cartões para `Texto` em um clique, sem diálogo de confirmação, destruindo instantaneamente todo o trabalho.
+- **Violação de Gestalt:** O botão `+ Adicionar bloco` fica no canto direito superior, sobre o painel de propriedades, e não na barra lateral onde a lista de blocos é gerenciada.
+- **Edição Cega (Sem Live Preview):** Abas mutuamente exclusivas (`Edição guiada` vs `Prévia`). Não é possível ver o impacto visual imediato das edições sem alternar de aba.
+
+---
+
+### Solução Canônica Recomendada de Plataforma (Redesenho Estrutural)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                NOVO DESIGN DO EDITOR DE RICH CONTENT (DIDÁTICO & INTUITIVO)                     │
+├──────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────┤
+│ ÁRVORE DO DOCUMENTO (Treeview com Drag & Drop)       │ PAINEL DE PROPRIEDADES (Inspeção Contextual do Nó)       │
+│                                                      │                                                          │
+│ ▾ ⠿ 📦 Grid de Atalhos (Compose: 6 itens)           │ 🏷️ [actionCard] Heróis & Colaboradores                    │
+│   │                                                  │                                                          │
+│   ├─ ⠿ 👥 Heróis & Colaboradores         [⋮]         │ 📝 Título:     [Heróis & Colaboradores                 ] │
+│   ├─ ⠿ 🎖️ Centro de Missões               [⋮]         │ 📄 Subtítulo:  [Cadastros completos, identidades civis...] │
+│   ├─ ⠿ 🛡️ Ativos & Armaduras              [⋮]         │                                                          │
+│   ├─ ⠿ 📋 Suprimentos & Contratos        [⋮]         │ 🎨 Ícone:      [ 👥 group ] [ Alterar Ícone... ]          │
+│   ├─ ⠿ 🎯 Inteligência & Ameaças         [⋮]         │                                                          │
+│   └─ ⠿ 📈 Ranking Reputacional           [⋮]         │ 🔘 Botão Ação: [ Acessar RH             ] [ ➔ arrow_fw ] │
+│                                                      │ 🔗 Rota/Ação:  [ /rh/funcionarios                      ] │
+│ [+ Adicionar Card...] (Abre galeria de presets)      │ 🎨 Estilo/Tom: [ Accent / tone-rh                     ▼] │
+├──────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────┤
+│ 👁️ LIVE PREVIEW EMBUTIDO (Preview em tempo real abaixo ou em modo Split-Screen)                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 1. Evolução do Modelo Canônico em `@praxisui/core` (`rich-content.model.ts`)
+```typescript
+// projects/praxis-core/src/lib/models/rich-content/rich-content.model.ts
+export type RichComposeChildNode =
+  | RichPresenterNode
+  | RichActionCardNode
+  | RichCardNode
+  | RichCalloutNode
+  | RichMetricNode
+  | RichKeyValueListNode
+  | RichStatGroupNode;
+
+export interface RichComposeNode extends RichBlockBaseNode {
+  type: 'compose';
+  layout?: 'flex' | 'grid';
+  direction?: 'row' | 'column'; // quando layout === 'flex'
+  columns?: 'auto-fit' | 'auto-fill' | number; // quando layout === 'grid'
+  minColumnWidth?: string; // ex: '300px'
+  gap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  wrap?: boolean;
+  items: RichComposeChildNode[];
+}
+```
+
+#### 2. Árvore de Documento Hierárquica Recursiva com Rótulos Vivos
+- Substituir a lista rasa `.prx-rich-editor__structure-list` por uma árvore com expansão de pais e filhos.
+- **Rótulos Inteligentes de Negócio:**
+  - `actionCard` exibe o ícone real + `title` (ex.: `👥 Heróis & Colaboradores`);
+  - `metric` exibe o rótulo da métrica + valor;
+  - `compose` exibe `Grade de Cards (${node.items.length} itens)`;
+  - Ao clicar em um nó na árvore, o painel de propriedades foca o elemento correspondente instantaneamente.
+
+#### 3. Reordenação com Drag & Drop Nativo (`@angular/cdk/drag-drop`)
+- Integração de `cdkDropList` e `cdkDrag` com alça visual (`⠿ mat-icon drag_indicator`):
+  - Reordenação direta na árvore lateral;
+  - Reordenação nos cartões do painel principal com animação suave de transição;
+  - Menu de ações rápidas acessível (`[⋮]`): `[Mover para cima]`, `[Mover para baixo]`, `[Duplicar]`, `[Excluir]`.
+
+#### 4. Componente Canônico `PraxisIconPicker`
+- Desenvolver um seletor visual de ícones integrado:
+  - Input com preview gráfico do ícone renderizado (`<mat-icon>{{ value }}</mat-icon>`);
+  - Popover/Modal com campo de busca textual e catálogo do Material Symbols com sinônimos em português (busca "colaborador" -> sugere `group`, `person`);
+  - Categorias temáticas (Ações, Pessoas, Segurança, Finanças, Navegação, Status).
+
+#### 5. Limpeza de Vazamento Técnico & Prevenção Destrutiva
+- Mover "Classe raiz", "Escopos de Contexto" e "Aliases" para uma gaveta/aba colapsada **"Configurações Avançadas"**, mantendo a área inicial limpa e focada em conteúdo.
+- O campo de `Tipo de bloco` não deve ser um dropdown destrutivo que apaga nós filhos ao ser alterado. Transformá-lo em rótulo de tipo com botão de conversão assistida (ou bloquear alteração direta de tipo quando o nó já contiver filhos).
+- Mover o botão `+ Adicionar bloco` para a barra lateral de estrutura, alinhado à lista de nós.
+
+#### 6. Modo Split-View / Live Preview Sincronizado
+- Alternador de visualização:
+  - `[ Lado a Lado (Split) ]`: Editor à esquerda (50%), Prévia interativa à direita (50%);
+  - `[ Foco no Conteúdo ]`: Editor em largura completa;
+  - `[ Prévia Isolada ]`: Visualização com alternância de viewport (Desktop, Tablet, Mobile).
+- Mutações no formulário atualizam a prévia via Signals sem piscar e sem perda de foco.
+
+---
+
+### Critérios de Aceite para Resolução
+- [ ] O modelo `RichComposeNode` em `@praxisui/core` e o validador de documentos suportam nós compostos (`actionCard`, `card`, etc.) e configuração nativa de `grid` (`layout`, `columns`, `minColumnWidth`).
+- [ ] O editor de rich content renderiza formulários completos para `actionCard` dentro de `compose.items` (título, subtítulo, ícone, ação de rota, ctaLabel e tone).
+- [ ] A árvore lateral ("Estrutura do documento") renderiza hierarquia completa (pais e filhos), identificando cada cartão pelo seu título e ícone reais.
+- [ ] É possível reordenar cartões e blocos aninhados via Drag & Drop nativo (`@angular/cdk/drag-drop`) e através de botões de movimentação acessíveis.
+- [ ] A seleção de ícones conta com um seletor visual (`PraxisIconPicker`) com busca textual, categorias e pré-visualização instantânea.
+- [ ] Campos técnicos ("Classe raiz", "Contexto do documento") ficam isolados em "Configurações Avançadas", e o seletor de tipo de bloco não destrói conteúdos filhos acidentalmente.
+- [ ] O editor suporta modo Split-View (Edição + Live Preview lado a lado), refletindo alterações de digitação em tempo real.
 
 ---
 

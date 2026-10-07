@@ -144,6 +144,22 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
             Ordens de fornecimento de ligas de vibranium, propulsores quânticos, tecidos balísticos e insumos de laboratório.
           </p>
         </div>
+
+        <div class="header-actions">
+          <button
+            type="button"
+            class="customize-toggle-btn"
+            data-testid="toggle-table-customization-btn"
+            [class.active]="isCustomizing()"
+            (click)="toggleCustomization()"
+            title="Alternar modo de customização de colunas e tabela"
+          >
+            <span class="material-symbols-outlined">
+              {{ isCustomizing() ? 'visibility' : 'tune' }}
+            </span>
+            <span>{{ isCustomizing() ? 'Concluir Edição' : 'Customizar Tabela' }}</span>
+          </button>
+        </div>
       </header>
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content com Barramento Declarativo -->
@@ -217,6 +233,7 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
         <praxis-crud
           crudId="heroes-hq-pedidos-crud"
           [metadata]="activeCrudMetadata()"
+          [enableCustomization]="isCustomizing()"
         />
       </section>
     </div>
@@ -394,14 +411,50 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       padding: 20px;
       overflow: hidden;
     }
+
+    .customize-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 80%, transparent);
+      color: var(--foreground);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+      }
+
+      &.active {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        border-color: var(--primary);
+        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 40%, transparent);
+      }
+
+      span { font-size: 18px; }
+    }
   `],
 })
 export class PedidosPageComponent implements OnInit, OnDestroy {
+  protected readonly isCustomizing = signal<boolean>(false);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalPedidos = signal<number>(10);
   protected readonly approvedOrReceived = signal<number>(5);
   protected readonly draft = signal<number>(3);
   protected readonly cancelled = signal<number>(2);
+
+  protected toggleCustomization(): void {
+    this.isCustomizing.update((v) => !v);
+  }
 
   protected readonly kpiDocument = signal<RichContentDocument>(PEDIDOS_KPI_DOCUMENT);
 

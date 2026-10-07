@@ -2,12 +2,14 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   OnInit,
   inject,
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
+  CONFIG_STORAGE,
   GlobalActionService,
   type WidgetEventEnvelope,
   type WidgetPageDefinition,
@@ -15,6 +17,7 @@ import {
 import { DynamicPageBuilderComponent } from '@praxisui/page-builder';
 import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
 import { DashboardStatsService, type DashboardTacticalKpis } from './dashboard-stats.service';
+import { AuthSimulationService } from '../../core/auth-simulation.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -34,12 +37,50 @@ import { DashboardStatsService, type DashboardTacticalKpis } from './dashboard-s
             <span class="material-symbols-outlined">dashboard_customize</span>
             Praxis Page Builder 9.0 · Canvas Governed
           </span>
+
+          <!-- Layout Persistence Status Badge -->
+          @if (isLayoutCustomized()) {
+            <div
+              class="layout-persistence-badge customized"
+              data-testid="dashboard-layout-status"
+              title="Layout customizado persistido para esta persona"
+            >
+              <span class="pulse-indicator-amber"></span>
+              <span>Layout Customizado (Persistido)</span>
+              @if (lastSavedAt(); as saved) {
+                <span class="saved-time">· salvo às {{ saved }}</span>
+              }
+            </div>
+          } @else {
+            <div
+              class="layout-persistence-badge governed"
+              data-testid="dashboard-layout-status"
+              title="Layout padrão governado de fábrica"
+            >
+              <span class="pulse-indicator-cyan"></span>
+              <span>Layout de Fábrica (Governança)</span>
+            </div>
+          }
         </div>
 
         <div class="toolbar-actions">
+          @if (isCustomizing() && isLayoutCustomized()) {
+            <button
+              type="button"
+              class="reset-layout-btn"
+              data-testid="reset-layout-btn"
+              (click)="resetToFactoryLayout()"
+              title="Reverter para o layout padrão de fábrica e descartar customizações desta persona"
+            >
+              <span class="material-symbols-outlined">restart_alt</span>
+              <span>Restaurar Fábrica</span>
+            </button>
+          }
+
           <button
             type="button"
             class="customize-toggle-btn"
+            data-testid="toggle-customization-btn"
             [class.active]="isCustomizing()"
             (click)="toggleCustomization()"
             title="Alternar modo de customização de layout e widgets"
@@ -139,6 +180,75 @@ import { DashboardStatsService, type DashboardTacticalKpis } from './dashboard-s
       span { font-size: 15px; color: var(--cobalt); }
     }
 
+    .layout-persistence-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+
+      &.customized {
+        background: color-mix(in oklab, var(--warning) 15%, transparent);
+        border: 1px solid color-mix(in oklab, var(--warning) 35%, transparent);
+        color: var(--warning);
+      }
+
+      &.governed {
+        background: color-mix(in oklab, var(--cobalt) 12%, transparent);
+        border: 1px solid color-mix(in oklab, var(--cobalt) 30%, transparent);
+        color: var(--cobalt);
+      }
+
+      .saved-time {
+        font-size: 0.65rem;
+        opacity: 0.8;
+      }
+    }
+
+    .pulse-indicator-amber {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--warning);
+      box-shadow: 0 0 6px var(--warning);
+    }
+
+    .pulse-indicator-cyan {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--cobalt);
+      box-shadow: 0 0 6px var(--cobalt);
+    }
+
+    .reset-layout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid color-mix(in oklab, var(--destructive) 35%, transparent);
+      background: color-mix(in oklab, var(--destructive) 10%, transparent);
+      color: var(--destructive);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &:hover {
+        background: var(--destructive);
+        color: #fff;
+        border-color: var(--destructive);
+        transform: translateY(-1px);
+      }
+
+      span { font-size: 16px; }
+    }
+
     .customize-toggle-btn {
       display: inline-flex;
       align-items: center;
@@ -175,18 +285,61 @@ import { DashboardStatsService, type DashboardTacticalKpis } from './dashboard-s
     }
   `],
 })
-export class DashboardPageComponent implements OnInit {
+export class DashboardPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly globalAction = inject(GlobalActionService, { optional: true });
   private readonly statsService = inject(DashboardStatsService);
+  private readonly configStorage = inject(CONFIG_STORAGE);
+  protected readonly authService = inject(AuthSimulationService);
+
+  private readonly storageKey = 'dynamic-page:hq-dashboard';
 
   protected readonly pageDefinition = signal<WidgetPageDefinition>(DASHBOARD_PAGE_DEFINITION);
   protected readonly isCustomizing = signal<boolean>(false);
+  protected readonly isLayoutCustomized = signal<boolean>(false);
+  protected readonly lastSavedAt = signal<string | null>(null);
+
+  private currentKpis: DashboardTacticalKpis | null = null;
 
   ngOnInit(): void {
+    this.loadEffectiveLayout();
+
     this.statsService.getTacticalKpis().subscribe((kpis) => {
+      this.currentKpis = kpis;
       this.pageDefinition.update((def) => projectTacticalKpis(def, kpis));
     });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('praxis:identity-switch', this.onIdentitySwitch);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('praxis:identity-switch', this.onIdentitySwitch);
+    }
+  }
+
+  private readonly onIdentitySwitch = (): void => {
+    // Ao alternar a persona tática, recarrega o layout persistido da nova persona
+    this.loadEffectiveLayout();
+  };
+
+  private loadEffectiveLayout(): void {
+    const stored = this.configStorage.loadConfig<WidgetPageDefinition>(this.storageKey);
+    if (stored && stored.widgets && stored.widgets.length > 0) {
+      this.isLayoutCustomized.set(true);
+      const effective = this.currentKpis
+        ? projectTacticalKpis(stored, this.currentKpis)
+        : stored;
+      this.pageDefinition.set(effective);
+    } else {
+      this.isLayoutCustomized.set(false);
+      const effective = this.currentKpis
+        ? projectTacticalKpis(DASHBOARD_PAGE_DEFINITION, this.currentKpis)
+        : DASHBOARD_PAGE_DEFINITION;
+      this.pageDefinition.set(effective);
+    }
   }
 
   protected toggleCustomization(): void {
@@ -195,6 +348,16 @@ export class DashboardPageComponent implements OnInit {
 
   protected onPageChange(updated: WidgetPageDefinition): void {
     this.pageDefinition.set(updated);
+    this.configStorage.saveConfig(this.storageKey, updated);
+    this.isLayoutCustomized.set(true);
+    this.lastSavedAt.set(new Date().toLocaleTimeString('pt-BR'));
+  }
+
+  protected resetToFactoryLayout(): void {
+    this.configStorage.clearConfig(this.storageKey);
+    this.isLayoutCustomized.set(false);
+    this.lastSavedAt.set(null);
+    this.loadEffectiveLayout();
   }
 
   protected handleWidgetEvent(event: WidgetEventEnvelope): void {

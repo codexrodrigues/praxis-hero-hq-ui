@@ -165,7 +165,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
     columns: 12,
     gap: '20px',
     autoRows: 'content',
-    collisionPolicy: 'block',
+    collisionPolicy: 'swap',
     items: {
       heroBanner: {
         col: 1,

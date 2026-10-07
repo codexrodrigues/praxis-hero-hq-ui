@@ -22,6 +22,7 @@ import { LoadingContext, LoadingOrchestrator } from '@praxisui/core';
 import { map } from 'rxjs';
 import { ALL_NAV_ITEMS, HERO_NAVIGATION, NavGroup, NavItem } from '../core/navigation.model';
 import { ThemeService } from '../core/theme.service';
+import { AuthSimulationService } from '../core/auth-simulation.service';
 
 @Component({
   selector: 'app-hero-shell',
@@ -181,15 +182,63 @@ import { ThemeService } from '../core/theme.service';
               <span class="notification-count">3</span>
             </button>
 
-            <!-- Commander Profile -->
-            <div class="commander-profile">
-              <div class="avatar-ring primary-gradient">
-                <div class="avatar-inner">NF</div>
-              </div>
-              <div class="commander-details">
-                <p class="commander-name">Nick Fury</p>
-                <p class="commander-role">Diretor Geral de RH & Operações</p>
-              </div>
+            <!-- Tactical Persona / Authentication Simulation Switcher -->
+            <div class="commander-profile-wrapper">
+              <button
+                type="button"
+                class="commander-profile-btn"
+                data-testid="persona-switcher"
+                (click)="personaMenuOpen.set(!personaMenuOpen())"
+                [attr.aria-expanded]="personaMenuOpen()"
+                aria-label="Alternar persona tática"
+              >
+                <div class="avatar-ring" [style.background]="authService.currentPersona().badgeColor">
+                  <div class="avatar-inner">{{ authService.currentPersona().initials }}</div>
+                </div>
+                <div class="commander-details">
+                  <div class="commander-name-row">
+                    <p class="commander-name" data-testid="current-user-display">
+                      {{ authService.currentPersona().name }}
+                    </p>
+                    <span class="material-symbols-outlined dropdown-icon">
+                      {{ personaMenuOpen() ? 'expand_less' : 'expand_more' }}
+                    </span>
+                  </div>
+                  <p class="commander-role">{{ authService.currentPersona().role }}</p>
+                </div>
+              </button>
+
+              @if (personaMenuOpen()) {
+                <div class="persona-dropdown-backdrop" (click)="personaMenuOpen.set(false)"></div>
+                <div class="persona-dropdown glass-panel" data-testid="persona-dropdown">
+                  <div class="persona-dropdown-header">
+                    <span class="persona-header-title">Alternar Simulação de Usuário</span>
+                    <span class="persona-header-subtitle">Teste de Persistência & Isolamento Tático</span>
+                  </div>
+                  <div class="persona-options">
+                    @for (persona of authService.personas; track persona.id) {
+                      <button
+                        type="button"
+                        class="persona-option"
+                        [class.active]="persona.id === authService.currentPersona().id"
+                        [attr.data-testid]="'persona-option-' + persona.id"
+                        (click)="selectPersona(persona.id)"
+                      >
+                        <div class="avatar-ring small" [style.background]="persona.badgeColor">
+                          <div class="avatar-inner">{{ persona.initials }}</div>
+                        </div>
+                        <div class="persona-option-info">
+                          <span class="persona-option-name">{{ persona.name }}</span>
+                          <span class="persona-option-role">{{ persona.clearanceLevel }}</span>
+                        </div>
+                        @if (persona.id === authService.currentPersona().id) {
+                          <span class="material-symbols-outlined check-icon">check_circle</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
             </div>
           </div>
         </header>
@@ -646,18 +695,156 @@ import { ThemeService } from '../core/theme.service';
       justify-content: center;
     }
 
-    .commander-profile {
+    .commander-profile-wrapper {
+      position: relative;
+      padding-left: 14px;
+      border-left: 1px solid var(--border);
+    }
+
+    .commander-profile-btn {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding-left: 14px;
-      border-left: 1px solid var(--border);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 4px 8px;
+      cursor: pointer;
+      color: inherit;
+      text-align: left;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &:hover {
+        background: color-mix(in oklab, var(--primary) 8%, transparent);
+        border-color: color-mix(in oklab, var(--primary) 20%, transparent);
+      }
+    }
+
+    .commander-name-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dropdown-icon {
+      font-size: 16px;
+      color: var(--muted-foreground);
+      transition: transform 0.2s;
+    }
+
+    .persona-dropdown-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+    }
+
+    .persona-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 100;
+      width: 320px;
+      background: var(--popover);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .persona-dropdown-header {
+      padding: 4px 8px 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .persona-header-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--foreground);
+    }
+
+    .persona-header-subtitle {
+      font-size: 0.65rem;
+      color: var(--muted-foreground);
+    }
+
+    .persona-options {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .persona-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--foreground);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s ease;
+
+      &:hover {
+        background: color-mix(in oklab, var(--primary) 10%, transparent);
+        border-color: color-mix(in oklab, var(--primary) 25%, transparent);
+      }
+
+      &.active {
+        background: color-mix(in oklab, var(--primary) 15%, transparent);
+        border-color: var(--primary);
+      }
+    }
+
+    .persona-option-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .persona-option-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--foreground);
+    }
+
+    .persona-option-role {
+      font-size: 0.65rem;
+      color: var(--muted-foreground);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .check-icon {
+      font-size: 18px;
+      color: var(--primary);
     }
 
     .avatar-ring {
       padding: 2px;
       border-radius: 50%;
       display: flex;
+    }
+
+    .avatar-ring.small {
+      .avatar-inner {
+        width: 28px;
+        height: 28px;
+        font-size: 0.68rem;
+      }
     }
 
     .avatar-inner {
@@ -905,6 +1092,7 @@ import { ThemeService } from '../core/theme.service';
 })
 export class HeroAppShellComponent {
   protected readonly themeService = inject(ThemeService);
+  protected readonly authService = inject(AuthSimulationService);
   private readonly router = inject(Router);
   private readonly loadingOrchestrator = inject(LoadingOrchestrator);
 
@@ -914,6 +1102,7 @@ export class HeroAppShellComponent {
   protected readonly collapsed = signal<boolean>(false);
   protected readonly mobileOpen = signal<boolean>(false);
   protected readonly searchOpen = signal<boolean>(false);
+  protected readonly personaMenuOpen = signal<boolean>(false);
   protected readonly currentUrl = signal<string>(this.router.url);
 
   protected readonly isDark = this.themeService.isDark;
@@ -983,6 +1172,11 @@ export class HeroAppShellComponent {
     if (event.key === 'Escape' && this.searchOpen()) {
       this.searchOpen.set(false);
     }
+  }
+
+  protected selectPersona(personaId: string): void {
+    this.authService.switchPersona(personaId);
+    this.personaMenuOpen.set(false);
   }
 
   protected getDomainTone(domainKey: NavGroup['domainKey']): string {

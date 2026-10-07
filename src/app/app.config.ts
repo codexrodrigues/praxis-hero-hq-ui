@@ -25,8 +25,12 @@ import { finalize } from 'rxjs';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import {
+  API_CONFIG_STORAGE_OPTIONS,
+  type ApiConfigStorageOptions,
   API_URL,
   type ApiUrlConfig,
+  ASYNC_CONFIG_STORAGE,
+  ApiConfigStorage,
   GenericCrudService,
   GlobalActionService,
   LoadingContext,
@@ -108,12 +112,19 @@ export const appConfig: ApplicationConfig = {
         (req, next) => {
           const tenant =
             typeof localStorage !== 'undefined'
-              ? localStorage.getItem('pax.api.tenant') || 'demo'
-              : 'demo';
+              ? localStorage.getItem('pax.api.tenant') || 'shield-hq'
+              : 'shield-hq';
+          const user =
+            typeof localStorage !== 'undefined'
+              ? localStorage.getItem('praxis.demoUserId') ||
+                localStorage.getItem('pax.api.user') ||
+                'nick.fury'
+              : 'nick.fury';
           const cloned = req.clone({
             setHeaders: {
               'X-Tenant-ID': tenant,
               'X-Tenant': tenant,
+              'X-User-ID': user,
             },
           });
           return next(cloned);
@@ -142,6 +153,37 @@ export const appConfig: ApplicationConfig = {
     provideGlobalConfig(GLOBAL_CONFIG_SEED),
     provideGlobalConfigSeed(GLOBAL_CONFIG_SEED),
     provideGlobalConfigReady(),
+    {
+      provide: ASYNC_CONFIG_STORAGE,
+      useExisting: ApiConfigStorage,
+    },
+    {
+      provide: API_CONFIG_STORAGE_OPTIONS,
+      useValue: {
+        baseUrl: `${PRAXIS_API_BASE_URL}/praxis/config/ui`,
+        headersFactory: () => {
+          if (typeof localStorage === 'undefined') {
+            return {
+              'X-User-ID': 'nick.fury',
+              'X-Tenant-ID': 'shield-hq',
+              'X-Env': 'local',
+            };
+          }
+          const user =
+            localStorage.getItem('praxis.demoUserId') ||
+            localStorage.getItem('pax.api.user') ||
+            'nick.fury';
+          const tenant =
+            localStorage.getItem('pax.api.tenant') ||
+            'shield-hq';
+          return {
+            'X-User-ID': user,
+            'X-Tenant-ID': tenant,
+            'X-Env': 'local',
+          };
+        },
+      } as ApiConfigStorageOptions,
+    },
     DatePipe,
     DecimalPipe,
     CurrencyPipe,
