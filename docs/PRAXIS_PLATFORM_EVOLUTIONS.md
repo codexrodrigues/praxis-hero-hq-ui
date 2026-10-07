@@ -37,6 +37,7 @@
 | **ISSUE-021** | `@praxisui/rich-content` & `@praxisui/core` | Arquitetural / Composição | Suporte a `schemaRef`/`resourcePath` dinâmico em `RichPropertySheetNode` ou nó nativo de formulário dinâmico em `RichContent` | `[DONE]` |
 | **ISSUE-022** | `@praxisui/dynamic-fields` & `@praxisui/core` | Semântica / Reatividade | Reatividade Semântica de Ícone, Tom e Estado em Campos Booleanos no Modo Apresentação (`FieldShellComponent`) | `[DONE]` |
 | **ISSUE-023** | `@praxisui/rich-content` & `@praxisui/core` | Design / Layout | Espaçamento Canônico de Cabeçalho e Diagramação Interna Balanceada em Nós de Métricas (`statGroup` / `RichStatGroupNode`) | `[DONE]` |
+| **ISSUE-024** | `@praxisui/dynamic-fields` | Visual / Acessibilidade | Fallback automático de ícone padrão ('person' / 'account_circle') em `MaterialAvatarComponent` quando imagem e iniciais forem nulas | `[PENDING]` |
 
 
 ---
@@ -1655,3 +1656,58 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
       ...
     }
     ```
+
+---
+
+### ISSUE-024: Fallback Automático de Ícone Padrão ('person' / 'account_circle') em `MaterialAvatarComponent` quando Imagem e Iniciais forem Nulas
+* **Biblioteca:** `@praxisui/dynamic-fields` & `@praxisui/core`
+* **Status:** `[PENDING]`
+* **Gravidade:** Média (Qualidade Visual, Acessibilidade e Semântica de Formulários em Modo Apresentação)
+* **Diagnóstico Técnico & Evidência Real:**
+  Em formulários e fichas cadastrais geradas dinamicamente com base em OpenAPI/x-ui (ex: `FuncionarioDTO` com `avatarUrl` anotado com `controlType = FieldControlType.AVATAR`), quando o registro não possui URL de foto (`null` ou vazia) e o contexto de carregamento não repassa iniciais do colaborador ao componente de campo dinâmico, o componente `MaterialAvatarComponent` (`pdx-material-avatar`) renderiza o container circular `.pfx-avatar__inner` completamente vazio:
+  ```html
+  <pdx-material-avatar role="img" aria-label="Foto" data-field-type="avatar" data-field-name="avatarUrl" class="fill-solid pfx-avatar rounded-full size-medium theme-primary praxis-readonly presentation-mode">
+    <span class="pfx-avatar__label">Foto</span>
+    <span class="mat-mdc-tooltip-trigger pfx-avatar__inner mat-mdc-tooltip-disabled" aria-hidden="true">
+      <span class="pfx-avatar__custom"></span>
+    </span>
+  </pdx-material-avatar>
+  ```
+  Isso gera um círculo sólido preenchido exclusivamente com a cor do tema primário (`var(--primary)`), sem qualquer ícone ou glifo explicativo em seu interior. No tema claro e escuro, o usuário visualiza um disco colorido mudo, transmitindo a impressão de renderização incompleta ou bug de asset ausente.
+* **Proposta Canônica de Implementação na Plataforma:**
+  1. **Contrato & Configuração (`@praxisui/dynamic-fields`):**
+     - Em `MaterialAvatarComponent`, verificar se `imageSrc` e `initials` são vazios/nulos.
+     - Quando ambos forem vazios/nulos, adotar automaticamente o ícone de fallback definido no metadado do campo (`metadata?.icon`) ou, na sua ausência, o ícone universal `'person'` (ou `'account_circle'`).
+     - Renderizar dentro de `.pfx-avatar__inner`:
+       ```html
+       <span class="material-symbols-outlined pfx-avatar__fallback-icon">{{ fallbackIcon }}</span>
+       ```
+  2. **Estilização Canônica Material 3:**
+     - Quando operando em modo fallback de ícone, `.pfx-avatar__inner` deve utilizar container tonal suave (`background: color-mix(in oklab, var(--primary) 18%, var(--card))` e borda sutil) em vez de preenchimento 100% opaco sólido, garantindo contraste harmônico com os demais campos da ficha.
+* **Workaround Temporário Adotado no `praxis-hero-hq-ui`:**
+  - Injetado em `src/styles.scss`:
+    ```scss
+    .pfx-avatar:not(.has-image):not(.has-icon):not(.has-initials) {
+      background: transparent !important;
+      border: none !important;
+
+      .pfx-avatar__inner {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: color-mix(in oklab, var(--primary) 18%, var(--card)) !important;
+        color: var(--primary) !important;
+        border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent) !important;
+
+        &::after {
+          content: 'account_circle';
+          font-family: 'Material Symbols Outlined';
+          font-size: 32px;
+          line-height: 1;
+          color: currentColor;
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+      }
+    }
+    ```
+
