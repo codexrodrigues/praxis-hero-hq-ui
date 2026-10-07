@@ -4,6 +4,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -63,6 +64,37 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
     ],
+    toolbar: {
+      search: {
+        enabled: true,
+        placeholder: 'Buscar contratos por número, fornecedor ou motivo...',
+      },
+      filters: {
+        enabled: true,
+        quickFilters: [
+          { id: 'all', label: 'Todos os Contratos', filter: '', icon: 'description' },
+          { id: 'active', label: 'Vigentes & Assinados', filter: "status='ACTIVE' or status='SIGNED'", icon: 'verified' },
+          { id: 'expired', label: 'Contratos Expirados', filter: "status='EXPIRED'", icon: 'event_busy' },
+          { id: 'draft', label: 'Em Minuta / Draft', filter: "status='DRAFT'", icon: 'edit_note' },
+        ],
+        showAdvancedButton: true,
+      },
+    },
+    behavior: {
+      filtering: {
+        columnFilters: {
+          enabled: true,
+        },
+        advancedFilters: {
+          schemaUrl: '/schemas/filtered?path=/api/procurement/contracts/filter&operation=post&schemaType=request',
+          settings: {
+            inline: true,
+            alwaysVisibleFields: ['supplierName', 'status', 'number'],
+            useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+    },
   } as unknown as CrudMetadata['table'],
   defaults: {
     openMode: 'drawer',
@@ -138,15 +170,76 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       </header>
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
-      <section class="kpi-surface">
+      <section class="kpi-surface" (click)="onKpiCardClick($event)">
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
+
+      <!-- Barra Tática de Escopo e Filtros Rápidos -->
+      <div class="tactical-filter-bar glass-panel">
+        <div class="scope-label">
+          <span class="material-symbols-outlined">tune</span>
+          <span>Escopo Contratual:</span>
+        </div>
+
+        <div class="scope-chips">
+          <button
+            type="button"
+            class="scope-chip"
+            [class.is-active]="activeFilterId() === 'all'"
+            (click)="setFilter('all')"
+          >
+            <span class="material-symbols-outlined">description</span>
+            <span>Todos os Acordos</span>
+            <span class="chip-count">{{ totalContratos() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-ready"
+            [class.is-active]="activeFilterId() === 'vigentes'"
+            (click)="setFilter('vigentes')"
+          >
+            <span class="material-symbols-outlined">verified</span>
+            <span>Vigentes & Assinados</span>
+            <span class="chip-count">{{ activeAndSigned() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-warning"
+            [class.is-active]="activeFilterId() === 'expirados'"
+            (click)="setFilter('expirados')"
+          >
+            <span class="material-symbols-outlined">event_busy</span>
+            <span>Expirados</span>
+            <span class="chip-count">{{ expired() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-info"
+            [class.is-active]="activeFilterId() === 'draft'"
+            (click)="setFilter('draft')"
+          >
+            <span class="material-symbols-outlined">edit_note</span>
+            <span>Em Minuta / Draft</span>
+            <span class="chip-count">{{ draft() }}</span>
+          </button>
+        </div>
+
+        @if (activeFilterId() !== 'all') {
+          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
+            <span class="material-symbols-outlined">restart_alt</span>
+            <span>Limpar Filtro</span>
+          </button>
+        }
+      </div>
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-contratos-crud"
-          [metadata]="crudMetadata"
+          [metadata]="activeCrudMetadata()"
         />
       </section>
     </div>
@@ -172,15 +265,17 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       gap: 6px;
       padding: 4px 10px;
       border-radius: 9999px;
-      background: color-mix(in oklab, var(--supplies) 12%, transparent);
-      border: 1px solid color-mix(in oklab, var(--supplies) 30%, transparent);
-      color: var(--supplies);
       font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-
       span { font-size: 14px; }
+    }
+
+    .tone-supplies {
+      background: color-mix(in oklab, var(--supplies) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--supplies) 30%, transparent);
+      color: var(--supplies);
     }
 
     .page-title {
@@ -197,6 +292,126 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
+    .kpi-surface {
+      cursor: pointer;
+    }
+
+    /* Tactical Filter Bar */
+    .tactical-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      flex-wrap: wrap;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(18, 26, 43, 0.6);
+      backdrop-filter: blur(12px);
+    }
+
+    .scope-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted-foreground);
+      span.material-symbols-outlined { font-size: 18px; color: var(--primary); }
+    }
+
+    .scope-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .scope-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--foreground);
+      transition: all 0.2s ease;
+
+      span.material-symbols-outlined { font-size: 16px; }
+
+      .chip-count {
+        padding: 2px 7px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.22);
+      }
+
+      &.is-active {
+        background: color-mix(in oklab, var(--primary) 22%, transparent);
+        border-color: var(--primary);
+        color: #fff;
+        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
+
+        .chip-count {
+          background: var(--primary);
+          color: #fff;
+        }
+      }
+
+      &.chip-ready.is-active {
+        background: color-mix(in oklab, var(--ready) 22%, transparent);
+        border-color: var(--ready);
+        .chip-count { background: var(--ready); }
+      }
+
+      &.chip-warning.is-active {
+        background: color-mix(in oklab, var(--warning) 22%, transparent);
+        border-color: var(--warning);
+        .chip-count { background: var(--warning); }
+      }
+
+      &.chip-info.is-active {
+        background: color-mix(in oklab, var(--supplies) 22%, transparent);
+        border-color: var(--supplies);
+        .chip-count { background: var(--supplies); }
+      }
+    }
+
+    .clear-scope-btn {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted-foreground);
+      background: transparent;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      span { font-size: 16px; }
+
+      &:hover {
+        color: var(--foreground);
+        border-color: rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.04);
+      }
+    }
+
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -205,8 +420,31 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class ContratosPageComponent implements OnInit, OnDestroy {
-  protected readonly crudMetadata = CONTRATOS_CRUD_METADATA;
+  protected readonly activeFilterId = signal<string>('all');
+  protected readonly totalContratos = signal<number>(17);
+  protected readonly activeAndSigned = signal<number>(11);
+  protected readonly expired = signal<number>(3);
+  protected readonly draft = signal<number>(1);
+
   protected readonly kpiDocument = signal<RichContentDocument>(CONTRATOS_KPI_DOCUMENT);
+
+  protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
+    const filterId = this.activeFilterId();
+    let filterCriteria: Record<string, unknown> = {};
+
+    if (filterId === 'vigentes') {
+      filterCriteria = { status: 'ACTIVE' };
+    } else if (filterId === 'expirados') {
+      filterCriteria = { status: 'EXPIRED' };
+    } else if (filterId === 'draft') {
+      filterCriteria = { status: 'DRAFT' };
+    }
+
+    return {
+      ...CONTRATOS_CRUD_METADATA,
+      filterCriteria,
+    };
+  });
 
   private readonly dashboardStats = inject(DashboardStatsService);
   private kpiSub: Subscription | null = null;
@@ -219,9 +457,35 @@ export class ContratosPageComponent implements OnInit, OnDestroy {
     this.kpiSub?.unsubscribe();
   }
 
+  protected setFilter(filterId: string): void {
+    this.activeFilterId.set(filterId);
+  }
+
+  protected onKpiCardClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    const cardEl = target?.closest('.prx-stat-group__item, [data-stat-id], .prx-rich-card');
+    if (!cardEl) return;
+
+    const text = cardEl.textContent?.toLowerCase() ?? '';
+    if (text.includes('vigentes') || text.includes('ativos')) {
+      this.setFilter('vigentes');
+    } else if (text.includes('expirados') || text.includes('requerem ação')) {
+      this.setFilter('expirados');
+    } else if (text.includes('minuta') || text.includes('draft') || text.includes('aprovação')) {
+      this.setFilter('draft');
+    } else if (text.includes('total') || text.includes('cadastrados')) {
+      this.setFilter('all');
+    }
+  }
+
   private loadKpis(): void {
     this.kpiSub?.unsubscribe();
     this.kpiSub = this.dashboardStats.getContratosTacticalKpis().subscribe((kpis) => {
+      this.totalContratos.set(kpis.totalContratos);
+      this.activeAndSigned.set(kpis.activeAndSigned);
+      this.expired.set(kpis.expired);
+      this.draft.set(kpis.draft);
+
       this.kpiDocument.set({
         kind: 'praxis.rich-content',
         version: '1.0.0',

@@ -512,94 +512,84 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
           <main class="drawer-body">
             <div class="dossier-tab-content">
               <!-- ABA 1: IDENTIDADE (FICHA CADASTRAL GOVERNADA + AVALIAÇÃO 360°) -->
-              @if (activeTab() === 'identity') {
-                <div class="tab-pane identity-pane">
-                  <!-- Bloco 1: Ficha Cadastral Governada por Metadados (PraxisDynamicForm) -->
-                  <div class="glass-panel dossier-form-container">
-                    <div class="pane-section-header">
-                      <div class="pane-header-title">
-                        <span class="material-symbols-outlined">verified_user</span>
-                        <div>
-                          <h4>Ficha Cadastral Governada</h4>
-                          <p>Campos, agrupamentos e máscaras resolvidos dinamicamente de <code>human-resources/funcionarios</code></p>
-                        </div>
+              <div class="tab-pane identity-pane" [hidden]="activeTab() !== 'identity'">
+                <!-- Bloco 1: Ficha Cadastral Governada por Metadados (PraxisDynamicForm) -->
+                <div class="glass-panel dossier-form-container">
+                  <div class="pane-section-header">
+                    <div class="pane-header-title">
+                      <span class="material-symbols-outlined">verified_user</span>
+                      <div>
+                        <h4>Ficha Cadastral Governada</h4>
+                        <p>Campos, agrupamentos e máscaras resolvidos dinamicamente de <code>human-resources/funcionarios</code></p>
                       </div>
-                      <span class="governance-badge">OpenAPI · x-ui</span>
                     </div>
-
-                    <praxis-dynamic-form
-                      formId="hero-dossier-cadastral-form"
-                      resourcePath="human-resources/funcionarios"
-                      [resourceId]="hero()!.id"
-                      [initialValue]="heroRecord()"
-                      mode="view"
-                      [presentationModeGlobal]="true"
-                      [enableCustomization]="false"
-                      [showAiAssistant]="false"
-                      presentationPreset="corporate-dossier"
-                      class="presentation-mode pres-compact pres-label-left dossier-dynamic-form"
-                    />
+                    <span class="governance-badge">OpenAPI · x-ui</span>
                   </div>
 
-                  <!-- Bloco 2: Avaliação Reputacional 360° (Editorial Telemetria) -->
-                  <praxis-rich-content [document]="reputationDocument()" />
+                  <praxis-dynamic-form
+                    formId="hero-dossier-cadastral-form"
+                    resourcePath="human-resources/funcionarios"
+                    [resourceId]="hero()!.id"
+                    [initialValue]="heroRecord()"
+                    mode="view"
+                    [presentationModeGlobal]="true"
+                    [enableCustomization]="false"
+                    [showAiAssistant]="false"
+                    presentationPreset="corporate-dossier"
+                    class="presentation-mode pres-compact pres-label-left dossier-dynamic-form"
+                  />
                 </div>
-              }
+
+                <!-- Bloco 2: Avaliação Reputacional 360° (Editorial Telemetria) -->
+                <praxis-rich-content [document]="reputationDocument()" />
+              </div>
 
               <!-- ABA 2: COMPETÊNCIAS OPERACIONAIS -->
-              @if (activeTab() === 'skills') {
-                <div class="tab-pane">
-                  <praxis-rich-content [document]="skillsDocument()" />
-                </div>
-              }
+              <div class="tab-pane" [hidden]="activeTab() !== 'skills'">
+                <praxis-rich-content [document]="skillsDocument()" />
+              </div>
 
               <!-- ABA 3: FOLHA E HOLERITE -->
-              @if (activeTab() === 'payroll') {
-                <div class="tab-pane glass-panel p-20">
-                  <div class="pane-section-header mb-16">
-                    <div class="pane-header-title">
-                      <span class="material-symbols-outlined">receipt_long</span>
-                      <div>
-                        <h4>Histórico de Lançamentos Salariais</h4>
-                        <p>Folhas liquidadas e holerites emitidos pelo departamento de RH</p>
-                      </div>
+              <div class="tab-pane glass-panel p-20" [hidden]="activeTab() !== 'payroll'">
+                <div class="pane-section-header mb-16">
+                  <div class="pane-header-title">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    <div>
+                      <h4>Histórico de Lançamentos Salariais</h4>
+                      <p>Folhas liquidadas e holerites emitidos pelo departamento de RH</p>
                     </div>
                   </div>
-                  <praxis-rich-content [document]="payrollDocument()" />
                 </div>
-              }
+                <praxis-rich-content [document]="payrollDocument()" />
+              </div>
 
               <!-- ABA 4: MISSÕES TÁTICAS -->
-              @if (activeTab() === 'missions') {
-                <div class="tab-pane glass-panel p-20">
-                  <div class="pane-section-header mb-16">
-                    <div class="pane-header-title">
-                      <span class="material-symbols-outlined">flag</span>
-                      <div>
-                        <h4>Engajamento Operacional em Campo</h4>
-                        <p>Sorties, incursões e missões registradas com status de conclusão</p>
-                      </div>
+              <div class="tab-pane glass-panel p-20" [hidden]="activeTab() !== 'missions'">
+                <div class="pane-section-header mb-16">
+                  <div class="pane-header-title">
+                    <span class="material-symbols-outlined">flag</span>
+                    <div>
+                      <h4>Engajamento Operacional em Campo</h4>
+                      <p>Sorties, incursões e missões registradas com status de conclusão</p>
                     </div>
                   </div>
-                  <praxis-rich-content [document]="missionsDocument()" />
                 </div>
-              }
+                <praxis-rich-content [document]="missionsDocument()" />
+              </div>
 
               <!-- ABA 5: ATIVOS EM CUSTÓDIA -->
-              @if (activeTab() === 'assets') {
-                <div class="tab-pane assets-pane">
-                  <div class="pane-section-header mb-16">
-                    <div class="pane-header-title">
-                      <span class="material-symbols-outlined">shield</span>
-                      <div>
-                        <h4>Inventário de Ativos em Custódia</h4>
-                        <p>Equipamentos de alta tecnologia e armaduras alocadas ao herói</p>
-                      </div>
+              <div class="tab-pane assets-pane" [hidden]="activeTab() !== 'assets'">
+                <div class="pane-section-header mb-16">
+                  <div class="pane-header-title">
+                    <span class="material-symbols-outlined">shield</span>
+                    <div>
+                      <h4>Inventário de Ativos em Custódia</h4>
+                      <p>Equipamentos de alta tecnologia e armaduras alocadas ao herói</p>
                     </div>
                   </div>
-                  <praxis-rich-content [document]="assetsDocument()" />
                 </div>
-              }
+                <praxis-rich-content [document]="assetsDocument()" />
+              </div>
             </div>
           </main>
         </aside>
@@ -799,6 +789,10 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
       gap: 20px;
     }
 
+    .tab-pane[hidden] {
+      display: none !important;
+    }
+
     .p-20 { padding: 20px; }
     .mb-16 { margin-bottom: 16px; }
 
@@ -954,30 +948,37 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
 
       /* Dynamic Form Presentation Customization (Clean Enterprise Editorial Layout) */
       .dossier-dynamic-form {
+        .section-drop-wrapper {
+          margin-bottom: 20px !important;
+
+          &:last-of-type {
+            margin-bottom: 0 !important;
+          }
+        }
+
         .form-section {
           background: transparent !important;
           border: none !important;
           border-radius: 0 !important;
-          padding: 0 0 20px 0 !important;
-          margin-bottom: 24px !important;
+          padding: 0 0 16px 0 !important;
+          margin-bottom: 0 !important;
           border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
 
           &:last-child {
             border-bottom: none !important;
-            margin-bottom: 0 !important;
             padding-bottom: 0 !important;
           }
         }
 
         .section-title {
-          font-size: 0.84rem !important;
+          font-size: 0.82rem !important;
           font-weight: 700 !important;
           color: var(--primary) !important;
           display: flex !important;
           align-items: center !important;
           gap: 8px !important;
-          margin-bottom: 14px !important;
-          letter-spacing: 0.05em !important;
+          margin-bottom: 12px !important;
+          letter-spacing: 0.06em !important;
           text-transform: uppercase !important;
         }
 
@@ -1011,6 +1012,22 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
             color: var(--muted-foreground) !important;
             border: 1px solid color-mix(in oklab, var(--border) 80%, transparent) !important;
           }
+
+          .praxis-presentation__icon--prefix {
+            color: var(--muted-foreground) !important;
+            font-size: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            &::before {
+              content: 'toggle_off';
+              font-family: 'Material Symbols Outlined', 'Material Icons', sans-serif !important;
+              font-size: 19px !important;
+              line-height: 1;
+              color: var(--muted-foreground) !important;
+            }
+          }
         }
 
         .praxis-presentation--boolean-true {
@@ -1018,6 +1035,22 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
             background: color-mix(in oklab, #10b981 14%, transparent) !important;
             color: #059669 !important;
             border: 1px solid color-mix(in oklab, #10b981 30%, transparent) !important;
+          }
+
+          .praxis-presentation__icon--prefix {
+            color: #10b981 !important;
+            font-size: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            &::before {
+              content: 'toggle_on';
+              font-family: 'Material Symbols Outlined', 'Material Icons', sans-serif !important;
+              font-size: 19px !important;
+              line-height: 1;
+              color: #10b981 !important;
+            }
           }
         }
       }

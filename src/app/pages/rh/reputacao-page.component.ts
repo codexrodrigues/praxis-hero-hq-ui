@@ -72,6 +72,28 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
     ],
+    toolbar: {
+      search: {
+        enabled: true,
+        placeholder: 'Buscar heróis por codinome, nome civil ou equipe...',
+      },
+      filters: {
+        enabled: true,
+        quickFilters: [
+          { id: 'all', label: 'Todos os Heróis', filter: '', icon: 'groups' },
+          { id: 'top90', label: 'Score 90%+', filter: 'media >= 90', icon: 'military_tech' },
+          { id: 'top80', label: 'Score 80%+', filter: 'media >= 80', icon: 'trending_up' },
+        ],
+        showAdvancedButton: true,
+      },
+    },
+    behavior: {
+      filtering: {
+        columnFilters: {
+          enabled: true,
+        },
+      },
+    },
   } as unknown as CrudMetadata['table'],
   defaults: {
     openMode: 'drawer',

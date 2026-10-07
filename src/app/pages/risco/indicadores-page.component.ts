@@ -90,6 +90,28 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
     ],
+    toolbar: {
+      search: {
+        enabled: true,
+        placeholder: 'Buscar sinistros por local, missão ou descrição...',
+      },
+      filters: {
+        enabled: true,
+        quickFilters: [
+          { id: 'all', label: 'Todos os Sinistros', filter: '', icon: 'account_balance' },
+          { id: 'critico', label: 'Severidade Crítica', filter: "severidade='CRITICA'", icon: 'warning' },
+          { id: 'pendente', label: 'Saldo Pendente', filter: 'totalPendente > 0', icon: 'pending' },
+        ],
+        showAdvancedButton: true,
+      },
+    },
+    behavior: {
+      filtering: {
+        columnFilters: {
+          enabled: true,
+        },
+      },
+    },
   } as unknown as CrudMetadata['table'],
   defaults: {
     openMode: 'drawer',

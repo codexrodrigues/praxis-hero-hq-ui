@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   OnDestroy,
   OnInit,
   inject,
@@ -30,24 +31,28 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         header: 'Título da Missão',
         width: '280px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'prioridade',
         header: 'Prioridade',
         width: '140px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'status',
         header: 'Status Operacional',
         width: '160px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'localizacao',
         header: 'Teatro de Operações',
         width: '220px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'dataInicioPrevista',
@@ -56,6 +61,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         format: 'dd/MM/yyyy HH:mm',
         width: '180px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'dataFimPrevista',
@@ -64,8 +70,38 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         format: 'dd/MM/yyyy HH:mm',
         width: '180px',
         sortable: true,
+        filterable: true,
       },
     ],
+    toolbar: {
+      visible: true,
+      filters: {
+        enabled: true,
+        showAdvancedButton: true,
+        quickFilters: [
+          { id: 'all', label: 'Todas as Missões', icon: 'military_tech', filter: {} },
+          { id: 'ativas', label: 'Em Andamento', icon: 'flight_takeoff', filter: { status: 'EM_ANDAMENTO' } },
+          { id: 'omega', label: 'Prioridade Ômega', icon: 'crisis_alert', filter: { prioridade: 'CRITICA' } },
+          { id: 'planejamento', label: 'Em Planejamento', icon: 'schedule', filter: { status: 'PLANEJADA' } },
+        ],
+      },
+    },
+    behavior: {
+      filtering: {
+        enabled: true,
+        columnFilters: {
+          enabled: true,
+        },
+        advancedFilters: {
+          enabled: true,
+          settings: {
+            showAdvanced: true,
+            alwaysVisibleFields: ['titulo', 'status', 'prioridade'],
+            useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+    },
   } as unknown as CrudMetadata['table'],
   actions: [
     {
@@ -163,16 +199,92 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
         </div>
       </header>
 
-      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
-      <section class="kpi-surface">
+      <!-- Metadata-Driven KPI Bento Grid com Interatividade de Filtro -->
+      <section
+        class="kpi-surface"
+        (click)="onKpiSectionClicked($event)"
+        [attr.data-active-filter]="activeFilterId()"
+        title="Clique em um indicador para filtrar as missões abaixo"
+      >
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
+
+      <!-- Barra Tática de Filtro e Escopo de Missões -->
+      <div class="tactical-filter-bar glass-panel">
+        <div class="filter-bar-lead">
+          <span class="material-symbols-outlined filter-icon">filter_alt</span>
+          <span class="filter-lead-label">Status da Operação:</span>
+        </div>
+
+        <div class="filter-chips-track">
+          <button
+            type="button"
+            class="scope-chip"
+            [class.is-active]="activeFilterId() === 'all'"
+            (click)="setFilter('all')"
+          >
+            <span class="material-symbols-outlined">military_tech</span>
+            <span>Todas as Missões</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-ready"
+            [class.is-active]="activeFilterId() === 'ativas'"
+            (click)="setFilter('ativas')"
+          >
+            <span class="material-symbols-outlined">flight_takeoff</span>
+            <span>Em Andamento</span>
+            <span class="chip-count">{{ activeCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-danger"
+            [class.is-active]="activeFilterId() === 'omega'"
+            (click)="setFilter('omega')"
+          >
+            <span class="material-symbols-outlined">crisis_alert</span>
+            <span>Prioridade Ômega</span>
+            <span class="chip-count">{{ criticalCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-warning"
+            [class.is-active]="activeFilterId() === 'planejamento'"
+            (click)="setFilter('planejamento')"
+          >
+            <span class="material-symbols-outlined">schedule</span>
+            <span>Em Planejamento</span>
+            <span class="chip-count">{{ plannedCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-success"
+            [class.is-active]="activeFilterId() === 'concluidas'"
+            (click)="setFilter('concluidas')"
+          >
+            <span class="material-symbols-outlined">task_alt</span>
+            <span>Concluídas</span>
+            <span class="chip-count">{{ completedCount() }}</span>
+          </button>
+        </div>
+
+        @if (activeFilterId() !== 'all') {
+          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
+            <span class="material-symbols-outlined">restart_alt</span>
+            <span>Limpar Filtro</span>
+          </button>
+        }
+      </div>
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-missoes-crud"
-          [metadata]="crudMetadata"
+          [metadata]="activeCrudMetadata()"
           (rowClick)="onMissionRowClicked($event)"
         />
       </section>
@@ -234,6 +346,150 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
     .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
     .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
 
+    /* Tactical Filter Bar */
+    .tactical-filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar-lead {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted-foreground);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      .filter-icon {
+        font-size: 18px;
+        color: var(--operations);
+      }
+    }
+
+    .filter-chips-track {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scope-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
+      color: var(--muted-foreground);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      span.material-symbols-outlined {
+        font-size: 16px;
+      }
+
+      .chip-count {
+        padding: 2px 7px;
+        border-radius: 9999px;
+        font-size: 0.72rem;
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
+        color: var(--foreground);
+      }
+
+      &:hover {
+        border-color: color-mix(in oklab, var(--operations) 40%, var(--border));
+        color: var(--foreground);
+        transform: translateY(-1px);
+      }
+
+      &.is-active {
+        background: color-mix(in oklab, var(--operations) 15%, var(--card));
+        border-color: var(--operations);
+        color: var(--foreground);
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--operations) 40%, transparent);
+
+        .chip-count {
+          background: var(--operations);
+          color: #fff;
+        }
+      }
+
+      &.chip-ready.is-active {
+        background: color-mix(in oklab, var(--ready) 15%, var(--card));
+        border-color: var(--ready);
+
+        .chip-count {
+          background: var(--ready);
+          color: #fff;
+        }
+      }
+
+      &.chip-danger.is-active {
+        background: color-mix(in oklab, var(--risk) 15%, var(--card));
+        border-color: var(--risk);
+
+        .chip-count {
+          background: var(--risk);
+          color: #fff;
+        }
+      }
+
+      &.chip-warning.is-active {
+        background: color-mix(in oklab, var(--warning) 15%, var(--card));
+        border-color: var(--warning);
+
+        .chip-count {
+          background: var(--warning);
+          color: #fff;
+        }
+      }
+
+      &.chip-success.is-active {
+        background: color-mix(in oklab, #10b981 15%, var(--card));
+        border-color: #10b981;
+
+        .chip-count {
+          background: #10b981;
+          color: #fff;
+        }
+      }
+    }
+
+    .clear-scope-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--muted-foreground);
+      transition: all 0.15s ease;
+
+      span { font-size: 15px; }
+
+      &:hover {
+        border-color: var(--operations);
+        color: var(--operations);
+        background: color-mix(in oklab, var(--operations) 8%, transparent);
+      }
+    }
+
     /* KPI Bento Grid Styling */
     ::ng-deep {
       .missions-kpi-grid .prx-rich-stat-group__items,
@@ -254,12 +510,27 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
         -webkit-backdrop-filter: blur(12px);
         display: flex;
         flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.2s ease,
+                    box-shadow 0.2s ease,
+                    background 0.2s ease;
 
         &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+          transform: translateY(-3px);
+          border-color: color-mix(in oklab, var(--operations) 50%, var(--border)) !important;
+          box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.35);
         }
+      }
+
+      [data-active-filter="ativas"] .prx-rich-stat-group__item:nth-child(1),
+      [data-active-filter="concluidas"] .prx-rich-stat-group__item:nth-child(2),
+      [data-active-filter="planejamento"] .prx-rich-stat-group__item:nth-child(3),
+      [data-active-filter="omega"] .prx-rich-stat-group__item:nth-child(4) {
+        border-color: var(--operations) !important;
+        background: color-mix(in oklab, var(--operations) 12%, var(--card)) !important;
+        box-shadow: 0 0 0 2px color-mix(in oklab, var(--operations) 50%, transparent),
+                    0 8px 24px -6px rgba(0, 0, 0, 0.4) !important;
       }
 
       .missions-kpi-grid .prx-rich-stat-group__value,
@@ -296,7 +567,30 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class MissoesPageComponent implements OnInit, OnDestroy {
-  protected readonly crudMetadata = MISSOES_CRUD_METADATA;
+  protected readonly activeFilterId = signal<'all' | 'ativas' | 'concluidas' | 'planejamento' | 'omega'>('all');
+  protected readonly activeCount = signal<number>(6);
+  protected readonly completedCount = signal<number>(4);
+  protected readonly plannedCount = signal<number>(10);
+  protected readonly criticalCount = signal<number>(10);
+
+  protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
+    const filterId = this.activeFilterId();
+    let filterCriteria: Record<string, unknown> = {};
+    if (filterId === 'ativas') {
+      filterCriteria = { status: 'EM_ANDAMENTO' };
+    } else if (filterId === 'omega') {
+      filterCriteria = { prioridade: 'CRITICA' };
+    } else if (filterId === 'planejamento') {
+      filterCriteria = { status: 'PLANEJADA' };
+    } else if (filterId === 'concluidas') {
+      filterCriteria = { status: 'CONCLUIDA' };
+    }
+    return {
+      ...MISSOES_CRUD_METADATA,
+      filterCriteria,
+    };
+  });
+
   protected readonly kpiDocument = signal<RichContentDocument>(MISSIONS_KPI_DOCUMENT);
   protected readonly selectedMission = signal<MissionProfile | null>(null);
 
@@ -311,9 +605,40 @@ export class MissoesPageComponent implements OnInit, OnDestroy {
     this.kpiSub?.unsubscribe();
   }
 
+  protected onKpiSectionClicked(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const itemEl = target.closest('.prx-rich-stat-group__item') as HTMLElement | null;
+    if (!itemEl) return;
+
+    const items = Array.from(itemEl.parentElement?.children || []);
+    const index = items.indexOf(itemEl);
+
+    if (index === 0) {
+      this.setFilter('ativas');
+    } else if (index === 1) {
+      this.setFilter('concluidas');
+    } else if (index === 2) {
+      this.setFilter('planejamento');
+    } else if (index === 3) {
+      this.setFilter('omega');
+    }
+  }
+
+  protected setFilter(filterId: 'all' | 'ativas' | 'concluidas' | 'planejamento' | 'omega'): void {
+    if (this.activeFilterId() === filterId) return;
+    this.activeFilterId.set(filterId);
+  }
+
   private loadKpis(): void {
     this.kpiSub?.unsubscribe();
     this.kpiSub = this.dashboardStats.getMissionTacticalKpis().subscribe((kpis) => {
+      this.activeCount.set(kpis.activeMissions);
+      this.completedCount.set(kpis.completedMissions);
+      this.plannedCount.set(kpis.plannedMissions);
+      this.criticalCount.set(kpis.criticalPriorityMissions);
+
       const formattedRate = kpis.successRate.toLocaleString('pt-BR', {
         minimumFractionDigits: 1,
         maximumFractionDigits: 1,

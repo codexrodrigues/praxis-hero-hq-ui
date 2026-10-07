@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   OnDestroy,
   OnInit,
   inject,
@@ -47,18 +48,21 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         header: 'Nome Completo / Civil',
         width: '240px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'cargoNome',
         header: 'Cargo',
         width: '220px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'departamentoNome',
         header: 'Departamento',
         width: '240px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'ativo',
@@ -67,6 +71,7 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         format: 'custom|Ativo|Inativo',
         width: '120px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'dataAdmissao',
@@ -75,8 +80,38 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         format: 'dd/MM/yyyy',
         width: '160px',
         sortable: true,
+        filterable: true,
       },
     ],
+    toolbar: {
+      visible: true,
+      filters: {
+        enabled: true,
+        showAdvancedButton: true,
+        quickFilters: [
+          { id: 'all', label: 'Todos os Heróis', icon: 'group', filter: {} },
+          { id: 'ativos', label: 'Em Prontidão', icon: 'verified_user', filter: { ativo: true } },
+          { id: 'inativos', label: 'Reserva / Licença', icon: 'person_off', filter: { ativo: false } },
+        ],
+      },
+    },
+    behavior: {
+      filtering: {
+        enabled: true,
+        columnFilters: {
+          enabled: true,
+        },
+        advancedFilters: {
+          enabled: true,
+          settings: {
+            showAdvanced: true,
+            alwaysVisibleFields: ['nomeCompleto', 'departamentoNome', 'ativo'],
+            useInlineSearchableSelectVariant: true,
+            useInlineDateVariant: true,
+          },
+        },
+      },
+    },
   } as unknown as CrudMetadata['table'],
   actions: [
     {
@@ -207,16 +242,71 @@ const SAMPLE_HERO: HeroProfile = {
         </div>
       </header>
 
-      <!-- KPI Bento Grid Declarativo (praxis-rich-content) -->
-      <section class="kpi-section">
+      <!-- KPI Bento Grid Declarativo (praxis-rich-content) com Interatividade de Filtro -->
+      <section
+        class="kpi-section"
+        (click)="onKpiSectionClicked($event)"
+        [attr.data-active-filter]="activeFilterId()"
+        title="Clique em um indicador para filtrar a tabela operacional abaixo"
+      >
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
+
+      <!-- Barra Tática de Filtro e Escopo Rápido -->
+      <div class="tactical-filter-bar glass-panel">
+        <div class="filter-bar-lead">
+          <span class="material-symbols-outlined filter-icon">filter_alt</span>
+          <span class="filter-lead-label">Filtro de Escopo:</span>
+        </div>
+
+        <div class="filter-chips-track">
+          <button
+            type="button"
+            class="scope-chip"
+            [class.is-active]="activeFilterId() === 'all'"
+            (click)="setFilter('all')"
+          >
+            <span class="material-symbols-outlined">group</span>
+            <span>Todos os Heróis</span>
+            <span class="chip-count">{{ totalCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-ready"
+            [class.is-active]="activeFilterId() === 'ativos'"
+            (click)="setFilter('ativos')"
+          >
+            <span class="material-symbols-outlined">verified_user</span>
+            <span>Em Prontidão Ativa</span>
+            <span class="chip-count">{{ activeCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-warning"
+            [class.is-active]="activeFilterId() === 'inativos'"
+            (click)="setFilter('inativos')"
+          >
+            <span class="material-symbols-outlined">person_off</span>
+            <span>Em Reserva / Licença</span>
+            <span class="chip-count">{{ inactiveCount() }}</span>
+          </button>
+        </div>
+
+        @if (activeFilterId() !== 'all') {
+          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
+            <span class="material-symbols-outlined">restart_alt</span>
+            <span>Limpar Filtro</span>
+          </button>
+        }
+      </div>
 
       <!-- Canonical Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-funcionarios-crud"
-          [metadata]="crudMetadata"
+          [metadata]="activeCrudMetadata()"
           (rowClick)="onHeroRowClicked($event)"
         />
       </section>
@@ -319,6 +409,130 @@ const SAMPLE_HERO: HeroProfile = {
       span { font-size: 18px; }
     }
 
+    /* Tactical Scope Filter Bar */
+    .tactical-filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar-lead {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted-foreground);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      .filter-icon {
+        font-size: 18px;
+        color: var(--primary);
+      }
+    }
+
+    .filter-chips-track {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scope-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
+      color: var(--muted-foreground);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      span.material-symbols-outlined {
+        font-size: 16px;
+      }
+
+      .chip-count {
+        padding: 2px 7px;
+        border-radius: 9999px;
+        font-size: 0.72rem;
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
+        color: var(--foreground);
+      }
+
+      &:hover {
+        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+        color: var(--foreground);
+        transform: translateY(-1px);
+      }
+
+      &.is-active {
+        background: color-mix(in oklab, var(--primary) 15%, var(--card));
+        border-color: var(--primary);
+        color: var(--foreground);
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent);
+
+        .chip-count {
+          background: var(--primary);
+          color: var(--primary-foreground);
+        }
+      }
+
+      &.chip-ready.is-active {
+        background: color-mix(in oklab, var(--ready) 15%, var(--card));
+        border-color: var(--ready);
+
+        .chip-count {
+          background: var(--ready);
+          color: #fff;
+        }
+      }
+
+      &.chip-warning.is-active {
+        background: color-mix(in oklab, var(--warning) 15%, var(--card));
+        border-color: var(--warning);
+
+        .chip-count {
+          background: var(--warning);
+          color: #fff;
+        }
+      }
+    }
+
+    .clear-scope-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--muted-foreground);
+      transition: all 0.15s ease;
+
+      span { font-size: 15px; }
+
+      &:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: color-mix(in oklab, var(--primary) 8%, transparent);
+      }
+    }
+
     /* KPI Grid Enhancements */
     ::ng-deep {
       .heroes-kpi-grid {
@@ -326,6 +540,30 @@ const SAMPLE_HERO: HeroProfile = {
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
         gap: 16px;
         width: 100%;
+      }
+
+      .prx-rich-stat-group__item {
+        cursor: pointer;
+        border-radius: 16px !important;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.2s ease,
+                    box-shadow 0.2s ease,
+                    background 0.2s ease;
+
+        &:hover {
+          transform: translateY(-3px);
+          border-color: color-mix(in oklab, var(--primary) 50%, var(--border)) !important;
+          box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.35);
+        }
+      }
+
+      [data-active-filter="all"] .prx-rich-stat-group__item:nth-child(1),
+      [data-active-filter="ativos"] .prx-rich-stat-group__item:nth-child(2),
+      [data-active-filter="inativos"] .prx-rich-stat-group__item:nth-child(3) {
+        border-color: var(--primary) !important;
+        background: color-mix(in oklab, var(--primary) 12%, var(--card)) !important;
+        box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 50%, transparent),
+                    0 8px 24px -6px rgba(0, 0, 0, 0.4) !important;
       }
 
       .bento-kpi-card {
@@ -393,7 +631,25 @@ const SAMPLE_HERO: HeroProfile = {
   `],
 })
 export class FuncionariosPageComponent implements OnInit, OnDestroy {
-  protected readonly crudMetadata = HEROES_CRUD_METADATA;
+  protected readonly activeFilterId = signal<'all' | 'ativos' | 'inativos'>('all');
+  protected readonly totalCount = signal<number>(24);
+  protected readonly activeCount = signal<number>(21);
+  protected readonly inactiveCount = signal<number>(3);
+
+  protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
+    const filterId = this.activeFilterId();
+    let filterCriteria: Record<string, unknown> = {};
+    if (filterId === 'ativos') {
+      filterCriteria = { ativo: true };
+    } else if (filterId === 'inativos') {
+      filterCriteria = { ativo: false };
+    }
+    return {
+      ...HEROES_CRUD_METADATA,
+      filterCriteria,
+    };
+  });
+
   protected readonly kpiDocument = signal<RichContentDocument>(HEROES_KPI_DOCUMENT);
   protected readonly selectedHero = signal<HeroProfile | null>(null);
   protected readonly isTransitioning = signal(false);
@@ -423,6 +679,10 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
           minimumFractionDigits: 1,
           maximumFractionDigits: 1,
         });
+
+        this.totalCount.set(kpis.totalHeroes);
+        this.activeCount.set(kpis.activeHeroes);
+        this.inactiveCount.set(kpis.inactiveHeroes);
 
         this.kpiDocument.set({
           kind: 'praxis.rich-content',
@@ -473,6 +733,39 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
         });
       },
     });
+  }
+
+  protected onKpiSectionClicked(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const itemEl = target.closest('.prx-rich-stat-group__item') as HTMLElement | null;
+    if (!itemEl) return;
+
+    const items = Array.from(itemEl.parentElement?.children || []);
+    const index = items.indexOf(itemEl);
+
+    if (index === 0) {
+      this.setFilter('all');
+    } else if (index === 1) {
+      this.setFilter('ativos');
+    } else if (index === 2) {
+      this.setFilter('inativos');
+    } else if (index === 3) {
+      this.showNotice('Índice Reputacional Tático: ponderação contínua de missões, avaliações e compliance.');
+    }
+  }
+
+  protected setFilter(filterId: 'all' | 'ativos' | 'inativos'): void {
+    if (this.activeFilterId() === filterId) return;
+    this.activeFilterId.set(filterId);
+
+    const messages: Record<string, string> = {
+      all: 'Filtro redefinido: Exibindo todo o efetivo de heróis e colaboradores.',
+      ativos: 'Filtro tático ativado: Exibindo somente colaboradores em Prontidão Ativa.',
+      inativos: 'Filtro tático ativado: Exibindo somente colaboradores em Reserva ou Licença.',
+    };
+    this.showNotice(messages[filterId]);
   }
 
   protected openSampleDossier(): void {

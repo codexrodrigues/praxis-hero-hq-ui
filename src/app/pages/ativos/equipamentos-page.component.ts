@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   OnDestroy,
   OnInit,
   inject,
@@ -27,12 +28,14 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
         width: '80px',
         align: 'center',
         sortable: true,
+        filterable: false,
       },
       {
         field: 'nome',
         header: 'Equipamento / Traje',
         width: '260px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'tipo',
@@ -40,6 +43,7 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
         width: '160px',
         align: 'center',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'resistencia',
@@ -48,12 +52,14 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
         width: '160px',
         align: 'center',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'proprietarioNome',
         header: 'Custodiante / Herói',
         width: '220px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'status',
@@ -61,8 +67,38 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
         width: '160px',
         align: 'center',
         sortable: true,
+        filterable: true,
       },
     ],
+    toolbar: {
+      visible: true,
+      filters: {
+        enabled: true,
+        showAdvancedButton: true,
+        quickFilters: [
+          { id: 'all', label: 'Todos os Itens', icon: 'inventory_2', filter: {} },
+          { id: 'custodia', label: 'Em Uso / Custódia', icon: 'verified_user', filter: { status: 'EM_USO' } },
+          { id: 'manutencao', label: 'Em Manutenção', icon: 'build', filter: { status: 'MANUTENCAO' } },
+          { id: 'estoque', label: 'Disponível em Arsenal', icon: 'shelves', filter: { status: 'DISPONIVEL' } },
+        ],
+      },
+    },
+    behavior: {
+      filtering: {
+        enabled: true,
+        columnFilters: {
+          enabled: true,
+        },
+        advancedFilters: {
+          enabled: true,
+          settings: {
+            showAdvanced: true,
+            alwaysVisibleFields: ['nome', 'tipo', 'status'],
+            useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+    },
   } as unknown as CrudMetadata['table'],
   defaults: {
     openMode: 'drawer',
@@ -107,7 +143,7 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
         {
           id: 'estoque',
           label: 'Em Reserva de Arsenal',
-          value: '2 Itens',
+          value: '4 Itens',
           caption: 'Disponíveis no cofre central',
           icon: 'inventory_2',
           tone: 'neutral',
@@ -137,16 +173,82 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
         </div>
       </header>
 
-      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
-      <section class="kpi-surface">
+      <!-- Metadata-Driven KPI Bento Grid com Interatividade de Filtro -->
+      <section
+        class="kpi-surface"
+        (click)="onKpiSectionClicked($event)"
+        [attr.data-active-filter]="activeFilterId()"
+        title="Clique em um indicador para filtrar o inventário abaixo"
+      >
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
+
+      <!-- Barra Tática de Filtro e Escopo de Custódia -->
+      <div class="tactical-filter-bar glass-panel">
+        <div class="filter-bar-lead">
+          <span class="material-symbols-outlined filter-icon">filter_alt</span>
+          <span class="filter-lead-label">Status de Custódia:</span>
+        </div>
+
+        <div class="filter-chips-track">
+          <button
+            type="button"
+            class="scope-chip"
+            [class.is-active]="activeFilterId() === 'all'"
+            (click)="setFilter('all')"
+          >
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span>Todos os Itens</span>
+            <span class="chip-count">{{ totalCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-ready"
+            [class.is-active]="activeFilterId() === 'custodia'"
+            (click)="setFilter('custodia')"
+          >
+            <span class="material-symbols-outlined">verified_user</span>
+            <span>Em Custódia / Ativo</span>
+            <span class="chip-count">{{ inUseCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-warning"
+            [class.is-active]="activeFilterId() === 'manutencao'"
+            (click)="setFilter('manutencao')"
+          >
+            <span class="material-symbols-outlined">build</span>
+            <span>Em Manutenção</span>
+            <span class="chip-count">{{ maintenanceCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="scope-chip chip-stock"
+            [class.is-active]="activeFilterId() === 'estoque'"
+            (click)="setFilter('estoque')"
+          >
+            <span class="material-symbols-outlined">shelves</span>
+            <span>Reserva no Arsenal</span>
+            <span class="chip-count">{{ stockCount() }}</span>
+          </button>
+        </div>
+
+        @if (activeFilterId() !== 'all') {
+          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
+            <span class="material-symbols-outlined">restart_alt</span>
+            <span>Limpar Filtro</span>
+          </button>
+        }
+      </div>
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-equipamentos-crud"
-          [metadata]="crudMetadata"
+          [metadata]="activeCrudMetadata()"
         />
       </section>
     </div>
@@ -197,6 +299,164 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
+    /* Tactical Filter Bar */
+    .tactical-filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar-lead {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted-foreground);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      .filter-icon {
+        font-size: 18px;
+        color: var(--assets);
+      }
+    }
+
+    .filter-chips-track {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scope-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
+      color: var(--muted-foreground);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      span.material-symbols-outlined {
+        font-size: 16px;
+      }
+
+      .chip-count {
+        padding: 2px 7px;
+        border-radius: 9999px;
+        font-size: 0.72rem;
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
+        color: var(--foreground);
+      }
+
+      &:hover {
+        border-color: color-mix(in oklab, var(--assets) 40%, var(--border));
+        color: var(--foreground);
+        transform: translateY(-1px);
+      }
+
+      &.is-active {
+        background: color-mix(in oklab, var(--assets) 15%, var(--card));
+        border-color: var(--assets);
+        color: var(--foreground);
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--assets) 40%, transparent);
+
+        .chip-count {
+          background: var(--assets);
+          color: #fff;
+        }
+      }
+
+      &.chip-ready.is-active {
+        background: color-mix(in oklab, var(--ready) 15%, var(--card));
+        border-color: var(--ready);
+
+        .chip-count {
+          background: var(--ready);
+          color: #fff;
+        }
+      }
+
+      &.chip-warning.is-active {
+        background: color-mix(in oklab, var(--warning) 15%, var(--card));
+        border-color: var(--warning);
+
+        .chip-count {
+          background: var(--warning);
+          color: #fff;
+        }
+      }
+    }
+
+    .clear-scope-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--muted-foreground);
+      transition: all 0.15s ease;
+
+      span { font-size: 15px; }
+
+      &:hover {
+        border-color: var(--assets);
+        color: var(--assets);
+        background: color-mix(in oklab, var(--assets) 8%, transparent);
+      }
+    }
+
+    ::ng-deep {
+      .equipamentos-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        width: 100%;
+      }
+
+      .prx-rich-stat-group__item {
+        cursor: pointer;
+        border-radius: 16px !important;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.2s ease,
+                    box-shadow 0.2s ease,
+                    background 0.2s ease;
+
+        &:hover {
+          transform: translateY(-3px);
+          border-color: color-mix(in oklab, var(--assets) 50%, var(--border)) !important;
+          box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.35);
+        }
+      }
+
+      [data-active-filter="all"] .prx-rich-stat-group__item:nth-child(1),
+      [data-active-filter="custodia"] .prx-rich-stat-group__item:nth-child(2),
+      [data-active-filter="manutencao"] .prx-rich-stat-group__item:nth-child(3),
+      [data-active-filter="estoque"] .prx-rich-stat-group__item:nth-child(4) {
+        border-color: var(--assets) !important;
+        background: color-mix(in oklab, var(--assets) 12%, var(--card)) !important;
+        box-shadow: 0 0 0 2px color-mix(in oklab, var(--assets) 50%, transparent),
+                    0 8px 24px -6px rgba(0, 0, 0, 0.4) !important;
+      }
+    }
+
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -205,7 +465,28 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class EquipamentosPageComponent implements OnInit, OnDestroy {
-  protected readonly crudMetadata = EQUIPAMENTOS_CRUD_METADATA;
+  protected readonly activeFilterId = signal<'all' | 'custodia' | 'manutencao' | 'estoque'>('all');
+  protected readonly totalCount = signal<number>(62);
+  protected readonly inUseCount = signal<number>(56);
+  protected readonly maintenanceCount = signal<number>(2);
+  protected readonly stockCount = signal<number>(4);
+
+  protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
+    const filterId = this.activeFilterId();
+    let filterCriteria: Record<string, unknown> = {};
+    if (filterId === 'custodia') {
+      filterCriteria = { status: 'EM_USO' };
+    } else if (filterId === 'manutencao') {
+      filterCriteria = { status: 'MANUTENCAO' };
+    } else if (filterId === 'estoque') {
+      filterCriteria = { status: 'DISPONIVEL' };
+    }
+    return {
+      ...EQUIPAMENTOS_CRUD_METADATA,
+      filterCriteria,
+    };
+  });
+
   protected readonly kpiDocument = signal<RichContentDocument>(EQUIPAMENTOS_KPI_DOCUMENT);
 
   private readonly dashboardStats = inject(DashboardStatsService);
@@ -219,9 +500,40 @@ export class EquipamentosPageComponent implements OnInit, OnDestroy {
     this.kpiSub?.unsubscribe();
   }
 
+  protected onKpiSectionClicked(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const itemEl = target.closest('.prx-rich-stat-group__item') as HTMLElement | null;
+    if (!itemEl) return;
+
+    const items = Array.from(itemEl.parentElement?.children || []);
+    const index = items.indexOf(itemEl);
+
+    if (index === 0) {
+      this.setFilter('all');
+    } else if (index === 1) {
+      this.setFilter('custodia');
+    } else if (index === 2) {
+      this.setFilter('manutencao');
+    } else if (index === 3) {
+      this.setFilter('estoque');
+    }
+  }
+
+  protected setFilter(filterId: 'all' | 'custodia' | 'manutencao' | 'estoque'): void {
+    if (this.activeFilterId() === filterId) return;
+    this.activeFilterId.set(filterId);
+  }
+
   private loadKpis(): void {
     this.kpiSub?.unsubscribe();
     this.kpiSub = this.dashboardStats.getEquipamentosTacticalKpis().subscribe((kpis) => {
+      this.totalCount.set(kpis.totalEquipamentos);
+      this.inUseCount.set(kpis.inUse);
+      this.maintenanceCount.set(kpis.inMaintenance);
+      this.stockCount.set(kpis.inStock);
+
       this.kpiDocument.set({
         kind: 'praxis.rich-content',
         version: '1.0.0',
