@@ -1,8 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -20,9 +29,10 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
       {
-        field: 'funcionarioNome',
-        header: 'Colaborador / Herói',
-        width: '260px',
+        field: 'funcionarioId',
+        header: 'Colaborador ID',
+        width: '140px',
+        align: 'center',
         sortable: true,
       },
       {
@@ -67,34 +77,17 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
       {
-        field: 'status',
-        header: 'Status Liquidação',
-        width: '150px',
+        field: 'dataPagamento',
+        header: 'Data de Pagamento',
+        type: 'date',
+        width: '160px',
         align: 'center',
         sortable: true,
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [
-    {
-      id: 'edit',
-      label: 'Auditar Holerite',
-      action: 'edit',
-      openMode: 'modal',
-      formId: 'folha-edit',
-      params: [{ from: 'id', to: 'input', name: 'id' }],
-    },
-    {
-      id: 'create',
-      label: 'Novo Lançamento',
-      action: 'create',
-      openMode: 'modal',
-      formId: 'folha-create',
-    },
-  ],
   defaults: {
-    openMode: 'modal',
-    modal: { width: '840px', maxWidth: '95vw' },
+    openMode: 'drawer',
   },
 };
 
@@ -105,13 +98,15 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'folha-kpi-grid',
       items: [
         {
           id: 'volume',
           label: 'Volume Folha Mensal',
-          value: 'R$ 1,42M',
-          caption: 'Competência atual 03/2026',
+          value: 'R$ 3,45M',
+          caption: 'Competência ativa 03/2026',
           icon: 'account_balance_wallet',
           tone: 'info',
         },
@@ -126,8 +121,8 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
         {
           id: 'retencoes',
           label: 'Retenções & Encargos',
-          value: 'R$ 384k',
-          caption: 'Previdência, saúde e seguros',
+          value: 'R$ 868,7k',
+          caption: 'Previdência, saúde e encargos',
           icon: 'savings',
           tone: 'warning',
         },
@@ -166,7 +161,7 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
       <!-- Tabela CRUD Governança Canônica -->
@@ -230,65 +225,6 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .folha-kpi-grid .prx-rich-stat-group__items,
-      .folha-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .folha-kpi-grid .prx-rich-stat-group__item,
-      .folha-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .folha-kpi-grid .prx-rich-stat-group__value,
-      .folha-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .folha-kpi-grid .prx-rich-stat-group__label,
-      .folha-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .folha-kpi-grid .prx-rich-stat-group__caption,
-      .folha-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -296,7 +232,82 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class FolhaPagamentoPageComponent {
+export class FolhaPagamentoPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = FOLHA_PAGAMENTO_CRUD_METADATA;
-  protected readonly kpiDocument = FOLHA_PAGAMENTO_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(FOLHA_PAGAMENTO_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getPayrollTacticalKpis().subscribe((kpis) => {
+      const grossMillion = (kpis.monthlyGrossVolume / 1_000_000).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      const deductionsK = (kpis.monthlyDeductions / 1_000).toLocaleString('pt-BR', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      });
+
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'folha-kpi-grid',
+            items: [
+              {
+                id: 'volume',
+                label: 'Volume Folha Mensal',
+                value: `R$ ${grossMillion}M`,
+                caption: `Competência ativa ${kpis.activeCompetence}`,
+                icon: 'account_balance_wallet',
+                tone: 'info',
+              },
+              {
+                id: 'consolidados',
+                label: 'Registros Consolidados',
+                value: `${kpis.totalCycles.toLocaleString('pt-BR')} Ciclos`,
+                caption: 'Histórico fiscal e operacional',
+                icon: 'receipt_long',
+                tone: 'success',
+              },
+              {
+                id: 'retencoes',
+                label: 'Retenções & Encargos',
+                value: `R$ ${deductionsK}k`,
+                caption: 'Previdência, saúde e encargos',
+                icon: 'savings',
+                tone: 'warning',
+              },
+              {
+                id: 'liquidacao',
+                label: 'Próxima Liquidação',
+                value: kpis.nextPaymentDate,
+                caption: 'Programada via tesouraria',
+                icon: 'calendar_month',
+                tone: 'neutral',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }
+

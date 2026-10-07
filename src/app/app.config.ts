@@ -44,10 +44,18 @@ import {
   providePraxisChartsI18n,
   providePraxisChartsMetadata,
 } from '@praxisui/charts';
+import { providePraxisCrudMetadata } from '@praxisui/crud';
+import {
+  providePraxisDialogMetadata,
+  providePraxisSurfaceGlobalActions,
+} from '@praxisui/dialog';
 import { providePraxisDynamicFormMetadata } from '@praxisui/dynamic-form';
 import { providePraxisPageBuilderMetadata } from '@praxisui/page-builder';
 import { providePraxisRichContentMetadata } from '@praxisui/rich-content';
-import { providePraxisSettingsPanelBridge } from '@praxisui/settings-panel';
+import {
+  providePraxisSettingsPanelBridge,
+  providePraxisSurfaceDrawerBridge,
+} from '@praxisui/settings-panel';
 import { providePraxisTableMetadata } from '@praxisui/table';
 import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
@@ -116,12 +124,16 @@ export const appConfig: ApplicationConfig = {
     ...providePraxisDynamicFieldsCore(),
     providePraxisDynamicFormMetadata(),
     providePraxisTableMetadata(),
+    providePraxisCrudMetadata(),
+    providePraxisDialogMetadata(),
+    providePraxisSurfaceGlobalActions(),
     providePraxisRichContentMetadata(),
     providePraxisChartsMetadata(),
     providePraxisPageBuilderMetadata(),
     ...providePraxisCharts(),
     ...providePraxisChartsI18n({ locale: 'pt-BR', fallbackLocale: 'pt-BR' }),
     ...providePraxisSettingsPanelBridge(),
+    ...providePraxisSurfaceDrawerBridge(),
     ...providePraxisLoadingDefaults(),
     importProvidersFrom(MatDialogModule),
     { provide: API_URL, useValue: API_URL_VALUE },
