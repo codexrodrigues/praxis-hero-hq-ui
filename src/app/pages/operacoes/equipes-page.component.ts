@@ -1,8 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const EQUIPES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -26,15 +35,16 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
       {
-        field: 'liderNome',
-        header: 'Comandante de Campo / Líder',
-        width: '240px',
+        field: 'sigla',
+        header: 'Sigla',
+        width: '120px',
+        align: 'center',
         sortable: true,
       },
       {
-        field: 'baseNome',
-        header: 'Base Avançada Designada',
-        width: '220px',
+        field: 'basePrincipalNome',
+        header: 'Base Principal Designada',
+        width: '240px',
         sortable: true,
       },
       {
@@ -46,26 +56,8 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [
-    {
-      id: 'edit',
-      label: 'Despachar Esquadrão',
-      action: 'edit',
-      openMode: 'modal',
-      formId: 'equipes-edit',
-      params: [{ from: 'id', to: 'input', name: 'id' }],
-    },
-    {
-      id: 'create',
-      label: 'Formar Nova Equipe',
-      action: 'create',
-      openMode: 'modal',
-      formId: 'equipes-create',
-    },
-  ],
   defaults: {
-    openMode: 'modal',
-    modal: { width: '840px', maxWidth: '95vw' },
+    openMode: 'drawer',
   },
 };
 
@@ -76,38 +68,40 @@ export const EQUIPES_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'equipes-kpi-grid',
       items: [
         {
           id: 'equipes',
-          label: 'Equipes Operacionais',
-          value: '5 Forças Ativas',
+          label: 'Esquadrões Registrados',
+          value: '5 Equipes',
           caption: 'Compostas por heróis de ponta',
           icon: 'diversity_3',
           tone: 'info',
         },
         {
-          id: 'cobertura',
-          label: 'Cobertura de Bases',
-          value: '100% Integrada',
-          caption: 'Complexos Central, Selene e Stark',
-          icon: 'hub',
+          id: 'ativas',
+          label: 'Prontidão Operacional',
+          value: '4 Equipes Ativas',
+          caption: 'Prontas para engajamento imediato',
+          icon: 'military_tech',
           tone: 'success',
         },
         {
-          id: 'resposta',
-          label: 'Tempo Médio de Resposta',
-          value: '3,8 Minutos',
-          caption: 'Alerta imediato em todo o globo',
-          icon: 'timer',
+          id: 'reserva',
+          label: 'Reserva Estratégica',
+          value: '1 Equipe em Reserva',
+          caption: 'Escalável sob protocolo ômega',
+          icon: 'shield',
           tone: 'warning',
         },
         {
-          id: 'sinergia',
-          label: 'Índice de Sinergia',
-          value: '94,8%',
-          caption: 'Complementaridade de poderes',
-          icon: 'auto_fix_high',
+          id: 'bases',
+          label: 'Bases Interligadas',
+          value: '5 Instalações',
+          caption: 'Rede logística e suprimentos',
+          icon: 'hub',
           tone: 'neutral',
         },
       ],
@@ -137,7 +131,7 @@ export const EQUIPES_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
       <!-- Tabela CRUD Governança Canônica -->
@@ -201,65 +195,6 @@ export const EQUIPES_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .equipes-kpi-grid .prx-rich-stat-group__items,
-      .equipes-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .equipes-kpi-grid .prx-rich-stat-group__item,
-      .equipes-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .equipes-kpi-grid .prx-rich-stat-group__value,
-      .equipes-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .equipes-kpi-grid .prx-rich-stat-group__label,
-      .equipes-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .equipes-kpi-grid .prx-rich-stat-group__caption,
-      .equipes-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -267,7 +202,71 @@ export const EQUIPES_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class EquipesPageComponent {
+export class EquipesPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = EQUIPES_CRUD_METADATA;
-  protected readonly kpiDocument = EQUIPES_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(EQUIPES_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getEquipesTacticalKpis().subscribe((kpis) => {
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'equipes-kpi-grid',
+            items: [
+              {
+                id: 'equipes',
+                label: 'Esquadrões Registrados',
+                value: `${kpis.totalEquipes} Equipes`,
+                caption: 'Compostas por heróis de ponta',
+                icon: 'diversity_3',
+                tone: 'info',
+              },
+              {
+                id: 'ativas',
+                label: 'Prontidão Operacional',
+                value: `${kpis.activeEquipes} Equipes Ativas`,
+                caption: 'Prontas para engajamento imediato',
+                icon: 'military_tech',
+                tone: 'success',
+              },
+              {
+                id: 'reserva',
+                label: 'Reserva Estratégica',
+                value: `${kpis.reserveEquipes} em Reserva`,
+                caption: 'Escalável sob protocolo ômega',
+                icon: 'shield',
+                tone: 'warning',
+              },
+              {
+                id: 'bases',
+                label: 'Bases Interligadas',
+                value: `${kpis.linkedBases} Instalações`,
+                caption: 'Rede logística e suprimentos',
+                icon: 'hub',
+                tone: 'neutral',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }

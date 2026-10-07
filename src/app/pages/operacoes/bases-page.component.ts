@@ -1,8 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const BASES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -21,14 +30,8 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       },
       {
         field: 'nome',
-        header: 'Nome da Base',
+        header: 'Nome da Instalação / Base',
         width: '260px',
-        sortable: true,
-      },
-      {
-        field: 'localizacao',
-        header: 'Coordenadas / Localização',
-        width: '240px',
         sortable: true,
       },
       {
@@ -39,49 +42,23 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
         sortable: true,
       },
       {
-        field: 'capacidadeEquipes',
-        header: 'Capacidade (Squads)',
-        type: 'number',
-        width: '160px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'nivelSigilo',
+        field: 'sigilo',
         header: 'Nível de Sigilo',
-        width: '160px',
+        width: '180px',
         align: 'center',
         sortable: true,
       },
       {
-        field: 'status',
-        header: 'Status Operacional',
+        field: 'planeta',
+        header: 'Planeta / Teatro',
         width: '160px',
         align: 'center',
         sortable: true,
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [
-    {
-      id: 'edit',
-      label: 'Gerenciar Instalação',
-      action: 'edit',
-      openMode: 'modal',
-      formId: 'bases-edit',
-      params: [{ from: 'id', to: 'input', name: 'id' }],
-    },
-    {
-      id: 'create',
-      label: 'Registrar Nova Base',
-      action: 'create',
-      openMode: 'modal',
-      formId: 'bases-create',
-    },
-  ],
   defaults: {
-    openMode: 'modal',
-    modal: { width: '880px', maxWidth: '95vw' },
+    openMode: 'drawer',
   },
 };
 
@@ -92,39 +69,41 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'bases-kpi-grid',
       items: [
         {
-          id: 'instalacoes',
-          label: 'Instalações Globais',
-          value: '7 Complexos',
-          caption: 'Terrestres, móveis, subterrâneas e orbitais',
-          icon: 'apartment',
+          id: 'bases',
+          label: 'Complexos Operacionais',
+          value: '7 Instalações',
+          caption: 'Quartéis-generais, torres e hangares',
+          icon: 'home_pin',
           tone: 'info',
         },
         {
-          id: 'orbital',
-          label: 'Plataforma Orbital',
-          value: 'Enterprise NCC-1701',
-          caption: 'Vigilância subespacial contínua',
-          icon: 'satellite_alt',
-          tone: 'success',
-        },
-        {
           id: 'sigilo',
-          label: 'Nível Máximo de Sigilo',
-          value: 'Wakanda Citadel',
-          caption: 'Acesso restrito: Ultra Secreta',
-          icon: 'lock',
-          tone: 'warning',
+          label: 'Segurança Máxima',
+          value: '4 Bases Sigilosas',
+          caption: 'Classificação Secreta ou Ultra-Secreta',
+          icon: 'security',
+          tone: 'danger',
         },
         {
-          id: 'blindagem',
-          label: 'Blindagem Perimetral',
-          value: '100% Prontidão',
-          caption: 'Escudos defletores ativados',
-          icon: 'security',
+          id: 'mundos',
+          label: 'Teatros Planetários',
+          value: '2 Mundos',
+          caption: 'Operações terrestres e no espaço profundo',
+          icon: 'public',
           tone: 'neutral',
+        },
+        {
+          id: 'prontidao',
+          label: 'Prontidão Logística',
+          value: '100% Operacional',
+          caption: 'Suporte imediato a todas as equipes',
+          icon: 'verified_user',
+          tone: 'success',
         },
       ],
     },
@@ -141,19 +120,19 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
       <header class="section-header">
         <div class="header-intro">
           <div class="domain-tag tone-operations-bg">
-            <span class="material-symbols-outlined">fort</span>
-            Infraestrutura Tática & Instalações
+            <span class="material-symbols-outlined">hub</span>
+            Instalações & Infraestrutura Tática
           </div>
-          <h1 class="title-gradient page-title">Bases Operacionais & Acessos</h1>
+          <h1 class="title-gradient page-title">Bases & Níveis de Acesso</h1>
           <p class="page-subtitle">
-            Gestão de hangares avançados, instalações subterrâneas e plataformas orbitais com controle de sigilo e blindagem.
+            Gerenciamento de complexos militares, hangares, silos subterrâneos e postos avançados de apoio logístico.
           </p>
         </div>
       </header>
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
       <!-- Tabela CRUD Governança Canônica -->
@@ -217,65 +196,6 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 14%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .bases-kpi-grid .prx-rich-stat-group__items,
-      .bases-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .bases-kpi-grid .prx-rich-stat-group__item,
-      .bases-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .bases-kpi-grid .prx-rich-stat-group__value,
-      .bases-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .bases-kpi-grid .prx-rich-stat-group__label,
-      .bases-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .bases-kpi-grid .prx-rich-stat-group__caption,
-      .bases-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -283,7 +203,71 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class BasesPageComponent {
+export class BasesPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = BASES_CRUD_METADATA;
-  protected readonly kpiDocument = BASES_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(BASES_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getBasesTacticalKpis().subscribe((kpis) => {
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'bases-kpi-grid',
+            items: [
+              {
+                id: 'bases',
+                label: 'Complexos Operacionais',
+                value: `${kpis.totalBases} Instalações`,
+                caption: 'Quartéis-generais, torres e hangares',
+                icon: 'home_pin',
+                tone: 'info',
+              },
+              {
+                id: 'sigilo',
+                label: 'Segurança Máxima',
+                value: `${kpis.highSecurityBases} Bases Sigilosas`,
+                caption: 'Classificação Secreta ou Ultra-Secreta',
+                icon: 'security',
+                tone: 'danger',
+              },
+              {
+                id: 'mundos',
+                label: 'Teatros Planetários',
+                value: `${kpis.theaters} Mundos`,
+                caption: 'Operações terrestres e no espaço profundo',
+                icon: 'public',
+                tone: 'neutral',
+              },
+              {
+                id: 'prontidao',
+                label: 'Prontidão Logística',
+                value: `${kpis.readinessRate}% Operacional`,
+                caption: 'Suporte imediato a todas as equipes',
+                icon: 'verified_user',
+                tone: 'success',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }
