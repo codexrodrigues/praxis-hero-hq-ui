@@ -338,8 +338,10 @@ export function buildIncidentsDocument(incidents: IncidentRecord[]): RichContent
             <nav class="dossier-tabs-nav" role="tablist">
               <button
                 type="button"
+                role="tab"
                 class="tab-btn"
                 [class.is-active]="activeTab() === 'briefing'"
+                [attr.aria-selected]="activeTab() === 'briefing'"
                 (click)="activeTab.set('briefing')"
               >
                 <span class="material-symbols-outlined">description</span>
@@ -347,8 +349,10 @@ export function buildIncidentsDocument(incidents: IncidentRecord[]): RichContent
               </button>
               <button
                 type="button"
+                role="tab"
                 class="tab-btn"
                 [class.is-active]="activeTab() === 'squad'"
+                [attr.aria-selected]="activeTab() === 'squad'"
                 (click)="activeTab.set('squad')"
               >
                 <span class="material-symbols-outlined">groups</span>
@@ -359,8 +363,10 @@ export function buildIncidentsDocument(incidents: IncidentRecord[]): RichContent
               </button>
               <button
                 type="button"
+                role="tab"
                 class="tab-btn"
                 [class.is-active]="activeTab() === 'incidents'"
+                [attr.aria-selected]="activeTab() === 'incidents'"
                 (click)="activeTab.set('incidents')"
               >
                 <span class="material-symbols-outlined">crisis_alert</span>
@@ -381,23 +387,17 @@ export function buildIncidentsDocument(incidents: IncidentRecord[]): RichContent
               </div>
             }
 
-            @if (activeTab() === 'briefing') {
-              <div class="tab-pane">
-                <praxis-rich-content [document]="briefingDocument()" />
-              </div>
-            }
+            <div class="tab-pane" [hidden]="activeTab() !== 'briefing'">
+              <praxis-rich-content [document]="briefingDocument()" />
+            </div>
 
-            @if (activeTab() === 'squad') {
-              <div class="tab-pane">
-                <praxis-rich-content [document]="squadDocument()" />
-              </div>
-            }
+            <div class="tab-pane" [hidden]="activeTab() !== 'squad'">
+              <praxis-rich-content [document]="squadDocument()" />
+            </div>
 
-            @if (activeTab() === 'incidents') {
-              <div class="tab-pane">
-                <praxis-rich-content [document]="incidentsDocument()" />
-              </div>
-            }
+            <div class="tab-pane" [hidden]="activeTab() !== 'incidents'">
+              <praxis-rich-content [document]="incidentsDocument()" />
+            </div>
           </div>
         </aside>
       </div>
@@ -588,6 +588,10 @@ export function buildIncidentsDocument(incidents: IncidentRecord[]): RichContent
       flex-direction: column;
       gap: 16px;
       animation: fadeIn 0.2s ease-out;
+
+      &[hidden] {
+        display: none !important;
+      }
     }
 
     .glass-panel {

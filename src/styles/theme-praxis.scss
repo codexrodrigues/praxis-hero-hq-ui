@@ -8,6 +8,13 @@
 
 :root {
   @include praxis.define-praxis-theme();
+
+  --mat-menu-container-color: var(--card);
+  --mat-menu-container-shape: var(--radius-md, 14px);
+  --mat-menu-item-label-text-color: var(--foreground);
+  --mat-menu-item-icon-color: var(--muted-foreground);
+  --mat-menu-item-hover-state-layer-color: color-mix(in oklab, var(--primary) 12%, transparent);
+  --mat-menu-item-focus-state-layer-color: color-mix(in oklab, var(--primary) 18%, transparent);
 }
 
 .dark {
@@ -16,3 +23,153 @@
 
 @include praxis.praxis-shell-styles();
 @include praxis.praxis-tooltip-styles();
+
+/* ==========================================================================
+   Praxis Material Menu Polish & Interaction States (CDK Overlay - Issue #13)
+   ========================================================================== */
+.mat-mdc-menu-panel {
+  border-radius: 14px !important;
+  background: color-mix(in oklab, var(--card) 92%, var(--background)) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-command), 0 12px 32px rgba(0, 0, 0, 0.18) !important;
+  backdrop-filter: blur(18px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+}
+
+.mat-mdc-menu-item {
+  min-height: 40px !important;
+  border-radius: 10px !important;
+  margin: 2px 0 !important;
+  padding: 0 14px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  color: var(--foreground) !important;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease !important;
+
+  .mat-icon {
+    margin-right: 12px !important;
+    color: var(--muted-foreground) !important;
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    transition: color 0.15s ease, transform 0.15s ease !important;
+  }
+
+  &:hover:not([disabled]) {
+    background-color: color-mix(in oklab, var(--primary) 12%, transparent) !important;
+    color: var(--foreground) !important;
+    transform: translateX(3px);
+
+    .mat-icon {
+      color: var(--primary) !important;
+      transform: scale(1.08);
+    }
+  }
+
+  &:focus-visible:not([disabled]) {
+    background-color: color-mix(in oklab, var(--primary) 18%, transparent) !important;
+    outline: 2px solid var(--primary) !important;
+    outline-offset: -2px;
+  }
+
+  &[disabled] {
+    opacity: 0.42 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+  }
+}
+/* ==========================================================================
+   Praxis Chart Data View Polish & Contained Scroll (Issue #14)
+   ========================================================================== */
+.praxis-chart-accessible-data {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  padding: 44px 16px 14px !important;
+
+  h3 {
+    margin: 0 0 4px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    flex-shrink: 0;
+  }
+
+  table {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    caption {
+      padding: 0 0 8px !important;
+      font-size: 0.78rem !important;
+      color: var(--muted-foreground, #666) !important;
+      flex-shrink: 0;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--md-sys-color-surface-container-lowest, var(--card, #fff));
+
+      tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+
+      th {
+        font-weight: 600 !important;
+        font-size: 0.8rem !important;
+        color: var(--muted-foreground) !important;
+        border-bottom: 2px solid var(--border) !important;
+        background: inherit;
+      }
+    }
+
+    tbody {
+      flex: 1;
+
+      tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        transition: background-color 0.12s ease;
+
+        &:hover {
+          background-color: color-mix(in oklab, var(--primary) 5%, transparent);
+        }
+      }
+
+      td, th {
+        font-size: 0.82rem !important;
+        border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
+      }
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right !important;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .praxis-chart-point-action {
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+
+    &:hover {
+      text-decoration: none !important;
+      background: color-mix(in oklab, var(--primary) 10%, transparent) !important;
+    }
+  }
+}

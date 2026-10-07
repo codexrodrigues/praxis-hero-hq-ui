@@ -13,7 +13,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | ID | Título da Demanda | Módulos Afetados | Severidade | Status | Versão / Commit / PR | Data Resolução | Validação Downstream (Hero HQ) |
 |:---:|---|---|:---:|:---:|:---:|:---:|:---:|
 | [**#1**](#-issue-1-duplo-carregamento-redundante-no-praxiscuitable-via-praxisicrud) | Duplo Carregamento Redundante no `@praxisui/table` via `@praxisui/crud` | `@praxisui/crud`<br>`@praxisui/table` | 🔴 Alta | `[x] Resolvida` | PR #562 (`327fd7786`) | 2026-10-07 | Validado (interceptor removido) |
-| [**#2**](#-issue-2-destruição-de-estado-e-recarregamento-de-schemas-em-shells-com-abas) | Destruição de Estado e Recarregamento de Schemas em Shells com Abas | `@praxisui/dynamic-form`<br>`DynamicFormService` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#2**](#-issue-2-destruição-de-estado-e-recarregamento-de-schemas-em-shells-com-abas) | Destruição de Estado e Recarregamento de Schemas em Shells com Abas | `@praxisui/dynamic-form`<br>`DynamicFormService` | 🟡 Média | `[x] Resolvida` | PR #564 (`ae62e5c33`) | 2026-10-07 | Validado (L1 compiled schema cache, SelectOptionRegistry e *praxisKeepAliveTab) |
 | [**#3**](#-issue-3-barramento-canônico-de-eventos-entre-widgets-praxiswidgeteventbus) | Barramento Canônico de Eventos entre Widgets (`PraxisWidgetEventBus`) | `@praxisui/page-builder`<br>`@praxisui/rich-content`<br>`@praxisui/charts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#4**](#-issue-4-governança-declarativa-de-filtros-rápidos-e-filtros-avançados-na-tabela) | Governança Declarativa de Filtros Rápidos e Filtros Avançados na Tabela | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
 | [**#5**](#-issue-5-suporte-declarativo-a-ícones-e-cores-condicionais-em-apresentações-booleanas-e-enums) | Suporte Declarativo a Ícones e Cores Condicionais em Apresentações Booleanas e Enums | `@praxisui/dynamic-form`<br>`@praxisui/dynamic-fields`<br>`@UISchema` (Java) | 🟡 Média | `[x] Resolvida` | PR #563 (Frontend: `60aed6867`)<br>PR #241 (Backend: `484e488c47`) | 2026-10-07 | Validado (override CSS removido, build OK) |
@@ -24,6 +24,8 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#10**](#-issue-10-refinamento-visual-do-pdx-inline-toggle-e-seletor-tri-state-para-filtros-booleanos) | Refinamento Visual do `pdx-inline-toggle` e Seletor Tri-State para Filtros Booleanos | `@praxisui/dynamic-fields`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#11**](#-issue-11-suporte-a-filtros-desacoplados-e-teleporte-via-cdk-portal-praxisfilterportal) | Suporte a Filtros Desacoplados e Teleporte via CDK Portal (`PraxisFilterPortal`) | `@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#13**](#-issue-13-tokens-canônicos-de-menu-e-estilização-de-state-layer-de-hover-em-overlays-praxis-menu-styles) | Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 
 ---
 
@@ -100,7 +102,7 @@ O agente executor não deve limitar-se ao fluxo básico de listagem do CRUD. A i
 - **Módulos Afetados:** `@praxisui/dynamic-form`, `DynamicFormService`, Design System da Plataforma
 - **Severidade:** 🟡 Média (flicker visual, recriação desnecessária de DOM e perda de estado de formulário)
 - **Tipo:** Ciclo de Vida de Componente / Estratégia de Apresentação
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (PR #564 / commit `ae62e5c33`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 Em componentes de detalhe, dossiês e painéis com abas (como `HeroDossierDrawerComponent` ou formulários com `<mat-tab-group>`):
@@ -128,10 +130,10 @@ Em componentes de detalhe, dossiês e painéis com abas (como `HeroDossierDrawer
 - No [`hero-dossier-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/rh/hero-dossier-drawer.component.ts#L515-L593), os painéis de abas foram migrados para `[hidden]="activeTab() !== '...'"` com regras de CSS `.tab-pane[hidden] { display: none !important; }`, garantindo transição instantânea de 0ms sem chamadas de rede repetidas.
 
 ### Critérios de Aceite para Resolução
-- [ ] A navegação entre abas em um dossiê não gera novas chamadas a `/schemas/filtered` nem a `/locate`.
-- [ ] Nenhuma tela branca perceptível durante a alternância entre abas.
-- [ ] Manutenção integral do estado do formulário durante a navegação interna.
-- [ ] Teste unitário no `DynamicFormService` garantindo cache L1 de schema compilado.
+- [x] A navegação entre abas em um dossiê não gera novas chamadas a `/schemas/filtered` nem a `/locate`.
+- [x] Nenhuma tela branca perceptível durante a alternância entre abas.
+- [x] Manutenção integral do estado do formulário durante a navegação interna.
+- [x] Teste unitário no `DynamicFormService` garantindo cache L1 de schema compilado.
 
 ---
 
@@ -188,7 +190,12 @@ O agente executor deve considerar que essa comunicação precisa ser bidireciona
 3. **No `PraxisCrudComponent`:**
    - Adicionar suporte a `@Input() filterCriteria` reativo direto (além de `metadata.filterCriteria`), reagindo automaticamente às emissões do event bus.
 
-### Critérios de Aceite para Resolução
+### Avanço e Refatoração Canônica no Hero HQ (Etapa 4)
+- **Host Component Refatorado:** O [`dashboard-page.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/dashboard/dashboard-page.component.ts) foi desprovido de 150+ linhas de glue code (`hostCapabilities` e `injectHostCapabilities`), conectando-se diretamente às capacidades nativas do `DynamicWidgetPageComponent` e `GlobalActionService` (`navigation.openRoute`).
+- **Eliminação de Mutações Imperativas de AST:** A atualização de dados táticos foi migrada para o projetor declarativo `projectTacticalKpis` com `signal<WidgetPageDefinition>`, operando sob `ChangeDetectionStrategy.OnPush`.
+- **Validação E2E Playwright:** Navegação confirmada nos botões do banner e nos cards do Domain Hub (`/rh/funcionarios` e `/operacoes/missoes`) e alternância de customização do Page Builder validada com 100% de sucesso.
+
+### Critérios de Aceite para Resolução Definitiva na Plataforma
 - [ ] Possibilidade de vincular um card do `PraxisRichContent` a um filtro de tabela via configuração declarativa no Page Builder, sem necessidade de métodos TypeScript manuais no host.
 - [ ] Suporte a interoperabilidade com eventos emitidos por cliques em fatias e barras de `PraxisCharts`.
 - [ ] Teste unitário validando isolamento de eventos entre instâncias hierárquicas de `PraxisWidgetEventBus`.
@@ -640,6 +647,307 @@ A segmentação rápida por escopos táticos (ex.: *Todos, Em Prontidão, Em Res
 - [ ] O componente `<praxis-scope-bar>` renderiza layout equilibrado e esteticamente refinado sem vazios desproporcionais, com busca integrada na esquerda e chips na direita.
 - [ ] Os contadores numéricos de cada escopo são obtidos em uma única chamada agregada a `/stats/group-by`, sem emitir rajadas de consultas à API.
 - [ ] A seleção de qualquer escopo reflete imediatamente na filtragem da tabela conectada.
+
+---
+
+## 📌 Issue #13: Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/core`, `@praxisui/table`, `@praxisui/crud`, Design System da Plataforma
+- **Severidade:** 🟡 Média (Percepção de interface congelada/inerte, ausência de feedback de cursor no menu de ações de linhas)
+- **Tipo:** Design System / Tokens M3 / State Layers / CDK Overlay
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+Ao abrir o menu de overflow de ações em qualquer linha da tabela (`praxis-table`) ou em menus acionados por botões (`mat-menu`), os itens da lista não respondem ao evento de `hover` do mouse, não oferecem animação, transição de cor ou camada de realce (*State Layer*):
+
+1. **O Ciclo de Renderização em CDK Overlay:**
+   - No `projects/praxis-table/src/lib/praxis-table.html:2391`, o menu de ações de linha utiliza `<mat-menu #rowMoreMenuV="matMenu" xPosition="before">`.
+   - O Angular CDK desanexa o menu da árvore do componente da tabela e o projeta dentro de `<div class="cdk-overlay-container">`, anexado diretamente ao elemento `<body>`.
+   - Qualquer estilo encapsulado de componente (`ViewEncapsulation.Emulated`) da tabela ou da página não atinge o menu.
+
+2. **A Omissão no `@praxisui/core/theming`:**
+   - No arquivo canônico `projects/ts-core/theming/_theming.scss` (e publicado em `@praxisui/core/theming`), a plataforma define um ecossistema abrangente de tokens M3 (`--md-sys-color-*`, `--mat-sys-*`, `--pdx-*`).
+   - Para Tooltips, o starter criou explicitamente as variáveis `--mat-tooltip-*` e o mixin `@mixin praxis-tooltip-styles()`.
+   - Contudo, **os menus foram completamente omitidos**: não existe nenhuma variável `--mat-menu-*`, nenhum mixin `@mixin praxis-menu-styles()` e nenhuma regra de hover para `.mat-mdc-menu-item`.
+
+3. **A Falha de State Layer do Material MDC:**
+   - No Angular Material 18/19 com MDC, botões `.mat-mdc-menu-item` possuem `background: transparent;`.
+   - A camada de interação de hover depende da pseudo-classe `:hover` combinada com a variável CSS `--mat-menu-item-hover-state-layer-color`.
+   - Em aplicações que utilizam o bridge canônico da Praxis sem compilar a suite Sass monolítica `@include mat.all-component-themes()`, essa variável resolve para `undefined`/`transparent`.
+   - O navegador detecta o mouse sobre o elemento, mas visualmente nada acontece. O item permanece inerte até o momento do clique.
+
+4. **Ausência de Classe Semântica no `<mat-menu>` da Tabela:**
+   - Em `praxis-table.html:2391`, o `<mat-menu>` não recebe `panelClass="praxis-table-row-menu"`. Isso dificulta a segmentação de estilos de menu corporativo refinado sem afetar menus genéricos da aplicação.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Menus em Toolbars e Dropdowns do Page Builder:** Qualquer widget do Page Builder ou botão de toolbar que utilize `<mat-menu>` sofre do mesmo problema de hover inerte.
+2. **Tema Escuro vs Tema Claro:** No tema escuro, a falta de realce é ainda mais crítica, pois o contraste entre itens adjacentes é reduzido e o operador não consegue ter certeza visual sobre qual linha está prestes a clicar.
+3. **Micro-interações de Ações Destrutivas:** Ações de exclusão/reversão no menu (com tom vermelho/destructive) não ganham a cor de alerta correspondente no hover, reduzindo a segurança operacional contra cliques acidentais.
+
+### Solução Canônica Recomendada de Plataforma
+1. **No `@praxisui/core/theming` (`_theming.scss`):**
+   - Adicionar as variáveis M3 de menu nos mixins `define-praxis-theme()` e `praxis-dark-theme-overrides()`:
+     ```scss
+     --mat-menu-container-color: var(--card, var(--surface));
+     --mat-menu-container-shape: var(--radius-md, 14px);
+     --mat-menu-item-label-text-color: var(--foreground);
+     --mat-menu-item-icon-color: var(--muted-foreground);
+     --mat-menu-item-hover-state-layer-color: color-mix(in oklab, var(--primary) 12%, transparent);
+     --mat-menu-item-focus-state-layer-color: color-mix(in oklab, var(--primary) 18%, transparent);
+     ```
+   - Criar o mixin canônico `@mixin praxis-menu-styles()`:
+     ```scss
+     @mixin praxis-menu-styles() {
+       .mat-mdc-menu-panel {
+         border-radius: var(--radius-md, 14px) !important;
+         border: 1px solid var(--border) !important;
+         box-shadow: var(--shadow-command), 0 12px 32px rgba(0, 0, 0, 0.18) !important;
+         backdrop-filter: blur(18px) saturate(140%) !important;
+         -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
+         padding: 6px !important;
+       }
+
+       .mat-mdc-menu-item {
+         min-height: 40px !important;
+         border-radius: var(--radius-sm, 10px) !important;
+         margin: 2px 0 !important;
+         transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease !important;
+
+         &:hover:not([disabled]) {
+           background-color: var(--mat-menu-item-hover-state-layer-color) !important;
+           transform: translateX(3px);
+
+           .mat-icon {
+             color: var(--primary) !important;
+             transform: scale(1.08);
+           }
+         }
+       }
+     }
+     ```
+   - Invocar `@include praxis-menu-styles()` automaticamente dentro de `@mixin praxis-theme-bundle()`.
+
+2. **No `@praxisui/table` (`praxis-table.html`):**
+   - Adicionar `class="praxis-row-menu-panel"` no `<mat-menu #rowMoreMenuV="matMenu">` para governança e estilização previsível.
+
+### Mitigação Temporária Aplicada no Hero HQ
+- Foi inserido no tema do host (`src/styles/theme-praxis.scss`) o bloco de estilização global para `.mat-mdc-menu-panel` e `.mat-mdc-menu-item:hover:not([disabled])`, garantindo micro-transição fluida, iluminação de ícones e elevação em overlay enquanto a plataforma prepara o mixin oficial.
+
+### Critérios de Aceite para Resolução
+- [ ] Ao mover o cursor sobre qualquer item ativo do menu de overflow na tabela, o item exibe background suave de destaque, ícone colorido na cor primária e micro-deslocamento animado.
+- [ ] O card do menu em overlay possui bordas nítidas, arredondamento padrão do Design System e efeito de desfoque/vidro (*backdrop-filter*).
+- [ ] Itens desabilitados preservam estado neutro, opacidade reduzida e jamais respondem ao hover.
+- [ ] O mixin `@mixin praxis-menu-styles()` é exportado por `@praxisui/core/theming` e ativado pelo `praxis-theme-bundle()`.
+
+---
+
+## 📌 Issue #14: Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/charts` (`PraxisChartComponent`)
+- **Severidade:** 🟡 Média (degradação severa de usabilidade ao alternar gráficos densos para tabela, quebra de hierarquia visual e confusão de affordance de link em dados tabulares)
+- **Tipo:** Refinamento de Componente / UX e Acessibilidade Analítica
+- **Status:** `[ ] Aberta`
+
+### Contexto & Origem da Feature
+No componente `PraxisChartComponent` (`projects/praxis-charts/src/lib/components/praxis-chart/praxis-chart.component.ts`), existe uma funcionalidade acionada pelo botão da toolbar do widget shell (`chart-data-view`, ícone `table_view`), que permite ao usuário alternar a renderização do gráfico para uma tabela de dados estruturada.
+
+Historicamente, essa tabela foi concebida sob o rótulo de **Accessible Data View** para atender aos critérios de acessibilidade WCAG / WAI-ARIA (fornecendo uma representação tabular textual para tecnologias assistivas via `role="region"`, `aria-labelledby`, `<caption>` e tags semânticas `<table>`, `<thead>`, `<tbody>`).
+
+Entretanto, ao ser promovida a uma feature de **uso direto pelo usuário corporativo final** na interface gráfica (como alternativa analítica de visualização), o comportamento herdado do template e do CSS original gerou deficiências críticas de design e experiência do usuário.
+
+### Diagnóstico Detalhado da Causa Raiz
+
+#### 1. Scroll Desgovernado no Widget Inteiro (Perda de Cabeçalho e Título)
+No arquivo `projects/praxis-charts/src/lib/components/praxis-chart/praxis-chart.component.ts` (linhas 351–359):
+```css
+.praxis-chart-accessible-data {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: auto; /* <--- CAUSA RAIZ: overflow aplicado na section inteira */
+  padding: 52px 16px 16px;
+  color: var(--praxis-chart-config-text-color, var(--md-sys-color-on-surface, #1a1b20));
+  background: var(--md-sys-color-surface-container-lowest, #fff);
+}
+```
+E no template correspondente (linhas 214–252):
+```html
+<section class="praxis-chart-accessible-data" ...>
+  <h3 [id]="accessibilityPanelTitleId">{{ accessibleDataTitle() }}</h3>
+  <table>
+    <caption>{{ accessibleDataDescription() }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">{{ accessibleCategoryHeading() }}</th>
+        <th scope="col">{{ accessibleSeriesHeading() }}</th>
+        <th scope="col">{{ accessibleValueHeading() }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (point of accessiblePoints(); track point.id) { ... }
+    </tbody>
+  </table>
+</section>
+```
+**Consequências:**
+- Quando a lista possui mais linhas do que o card comporta, o `overflow: auto` da `<section>` faz o container inteiro rolar para baixo.
+- Ao rolar, o título `<h3>`, a descrição `<caption>` e, crucialmente, o cabeçalho de colunas `<thead>` **desaparecem da tela**, fazendo o usuário perder a referência de qual valor pertence a qual série.
+- A barra de rolagem estende-se por toda a altura do card, encostando nas bordas do widget e quebrando a contenção visual esperada em dashboards corporativos.
+
+#### 2. Falsa Affordance de Hyperlink (*Underline* Enganoso em Botões de Ação)
+No arquivo `praxis-chart.component.ts` (linhas 394–408):
+```css
+.praxis-chart-point-action {
+  appearance: none;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 4px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: underline; /* <--- CAUSA RAIZ: sublinhado fixo de hyperlink */
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.16em;
+  cursor: pointer;
+}
+```
+**Consequências:**
+- No template, cada categoria da tabela é envolvida por um `<button class="praxis-chart-point-action" (click)="activateAccessiblePoint(point)">`.
+- O objetivo original era permitir que usuários de teclado pudessem disparar o evento de seleção do ponto gráfico equivalente (`pointClick` / `selectionChange`).
+- No entanto, a estilização com `text-decoration: underline` emula visualmente um **hiperlink de navegação web** (`<a>`). Em tabelas corporativas, os usuários assumem que clicar no texto sublinhado irá navegar para o cadastro ou dossiê daquela categoria.
+- Como o clique apenas seleciona o ponto (que nem sequer está visível, pois o gráfico está oculto pelo modo de tabela), o usuário tem a sensação imediata de **link quebrado ou comportamento não responsivo**.
+
+#### 3. Lacunas Analíticas Corporativas Frente ao Padrão da Plataforma
+Ao comparar a tabela estática de acessibilidade com o padrão de excelência corporativa da plataforma (`@praxisui/table`):
+- **Alinhamento Numérico:** Os valores numéricos (`point.valueLabel`) são alinhados à esquerda (`text-align: left`) sem `font-variant-numeric: tabular-nums`, dificultando a leitura e a comparação rápida de grandezas pelo usuário de negócios.
+- **Falta de Ordenação (*Sorting*):** Ao alternar para o modo de tabela, a principal intenção do usuário analítico é consultar os maiores ou menores valores. O `<thead>` estático não suporta clique para alternar ordenação ascendente/descendente.
+- **Falta de Exportação / Cópia Rápida:** Não há facilidade para exportar os dados exibidos para CSV ou copiá-los para a área de transferência.
+
+---
+
+### Arquitetura de Solução Proposta
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ praxis-chart (Container do Widget Shell)                    │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ Cabeçalho Fixo (Título + Caption + Toolbar de Ações)    │  │
+│  │ [Tabela de Distribuição] [Copiar CSV] [Ocultar Tabela] │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ .praxis-chart-table-scroll-viewport (overflow-y: auto) │  │
+│  │                                                        │  │
+│  │   ┌──────────────────────────────────────────────────┐ │  │
+│  │   │ thead (position: sticky; top: 0; backdrop-filter)│ │  │
+│  │   │ [ Categoria ▲ ]   [ Série ]    [ Valor (R$) ▼ ]  │ │  │
+│  │   ├──────────────────────────────────────────────────┤ │  │
+│  │   │ tbody (apenas as linhas rolam)                  │ │  │
+│  │   │ • Alpha            Principal        1.450.000    │ │  │
+│  │   │ • Beta             Secundária         820.000    │ │  │
+│  │   │ • Gamma            Suporte            310.000    │ │  │
+│  │   └──────────────────────────────────────────────────┘ │  │
+│  └────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### 1. Refatoração de Layout: Flexbox e Viewport de Rolagem Dedicado
+No template de `praxis-chart.component.ts`:
+- Estruturar a `<section class="praxis-chart-accessible-data">` com `display: flex; flex-direction: column; overflow: hidden;`.
+- Separar o cabeçalho (`<h3>` e `<caption>`) da área da tabela.
+- Envolver a `<table>` em um container `<div class="praxis-chart-table-container">` com `flex: 1; min-height: 0; overflow-y: auto;`.
+- Aplicar `position: sticky; top: 0; z-index: 2;` no `thead th`, com fundo sólido/glass condizente com a superfície para que os dados rolem **por baixo** dos cabeçalhos das colunas sem perder legibilidade.
+
+#### 2. Eliminação da False Affordance de Hyperlink
+- Remover `text-decoration: underline` de `.praxis-chart-point-action`.
+- Adotar affordance limpa de botão/item tabular:
+  - Fundo sutilmente destacado no hover (`background: color-mix(in srgb, currentColor 6%, transparent)`).
+  - Indicador sutil de seleção (ex.: borda lateral primária ou tag `aria-pressed="true"` com chip discreto).
+  - Manter acessibilidade de teclado integral (`focus-visible` com anel de foco bem delineado).
+
+#### 3. Alinhamento Numérico e Suporte a Ordenação Básica
+- Adicionar classe `.praxis-chart-col-value` com `text-align: right; font-variant-numeric: tabular-nums;`.
+- Adicionar capacidade de clique no cabeçalho `<th>` para ordenar os `accessiblePoints()` por categoria ou valor numérico (crescente/decrescente).
+
+---
+
+### Mitigação Temporária no Host Hero HQ
+Enquanto a biblioteca `@praxisui/charts` não recebe a atualização canônica, aplicar no SCSS global do tema da aplicação (`theme-praxis.scss`):
+```scss
+// Mitigação para PraxisChart Accessible Data View
+.praxis-chart-accessible-data {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  padding: 52px 16px 16px !important;
+
+  h3, caption {
+    flex-shrink: 0;
+  }
+
+  table {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--md-sys-color-surface-container-lowest, #fff);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+
+      tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+    }
+
+    tbody {
+      flex: 1;
+
+      tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .praxis-chart-point-action {
+    text-decoration: none !important; // Elimina o falso aspecto de hyperlink
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: none !important;
+      background: rgba(18, 99, 180, 0.08);
+      border-radius: 4px;
+    }
+  }
+}
+```
+
+### Critérios de Aceite para Resolução Definitiva na Plataforma
+- [ ] Ao alternar para a visualização de tabela em um gráfico com grande volume de dados, apenas as linhas de dados rolam verticalmente.
+- [ ] O título da tabela e o cabeçalho das colunas (`thead`) permanecem perfeitamente visíveis e fixos no topo durante a rolagem.
+- [ ] Nenhum texto nas células da tabela possui sublinhado permanente (`text-decoration: underline`), eliminando a confusão com hyperlinks de navegação.
+- [ ] As colunas numéricas de valores utilizam alinhamento à direita e numerais tabulares (`tabular-nums`).
+- [ ] O estado de seleção ou clique no botão de categoria mantém total acessibilidade por teclado (`Enter`/`Space`) e leitor de tela (`aria-pressed`).
+- [ ] O design do container respeita as margens internas do widget shell sem vazar barras de rolagem para os limites externos do card.
 
 ---
 
