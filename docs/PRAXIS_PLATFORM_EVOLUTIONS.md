@@ -1565,50 +1565,51 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-023: Espaçamento Canônico de Cabeçalho e Diagramação Interna Balanceada em Nós de Métricas (`statGroup` / `RichStatGroupNode`)
 * **Biblioteca:** `@praxisui/rich-content` & `@praxisui/core`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Média (Qualidade Visual, Respiro de Layout e Ergonomia de Dashboards Corporativos)
 * **Diagnóstico Técnico & Evidência Real:**
   Na tela do Dossiê do Herói e em painéis executivos com `statGroup`, foram identificadas duas anomalias de espaçamento na biblioteca `@praxisui/rich-content`:
   1. **Ausência de Margem Inferior no Subtítulo:**
-     - Em `praxis-rich-content.ts`:
-       ```css
-       .prx-rich-stat-group__title,
-       .prx-rich-stat-group__subtitle,
-       .prx-rich-stat-group__caption {
-         margin: 0;
-       }
-       ```
-     - A `<div class="prx-rich-stat-group__subtitle">` não possui margem inferior (`margin: 0`). Como o container subsequente `<div class="prx-rich-stat-group__items">` também possui `margin: 0`, a última linha do texto do subtítulo encosta fisicamente (0px a 2px) na borda superior dos cartões de métrica, transmitindo a sensação de layout quebrado ou colado.
+     A `<div class="prx-rich-stat-group__subtitle">` possuía `margin: 0`, encostando fisicamente na borda superior dos cartões de métrica e transmitindo sensação de layout colado.
   2. **Assimetria de Layout Interno no Card com Ícone (`.prx-rich-stat-group__item`):**
-     - O item é modelado nativamente com:
-       ```css
-       display: grid;
-       grid-template-columns: auto minmax(0, 1fr);
-       column-gap: 10px;
-       ```
-     - O ícone (24px) ocupa sozinho a Coluna 1. Todo o restante do conteúdo (`label`, `value`, `caption`, `progress`) fica na Coluna 2.
-     - Como resultado, abaixo do ícone fica uma coluna inteira de espaço vazio vertical desperdiçado, enquanto o texto e os números ficam espremidos para a direita.
-     - Quando `progress` com variante circular (`variant: 'ring'`) é utilizado, o anel fica posicionado no canto inferior esquerdo da Coluna 2, deixando um grande vazio à direita e desalinhando visualmente o valor numérico em relação à métrica.
+     O item colocava o ícone na Coluna 1 e todo o restante na Coluna 2, deixando um grande vazio vertical sob o ícone e espremendo anéis de progresso circulares.
 
-* **Implementação Recomendada para a Plataforma:**
-  1. **Estilos Canônicos de Cabeçalho em `praxis-rich-content.ts`:**
-     - Definir margem inferior canônica para o cabeçalho do `statGroup`:
-       ```css
-       .prx-rich-stat-group__title {
-         margin: 0 0 4px 0;
-         font-size: 1.05rem;
-         font-weight: 700;
-       }
-       .prx-rich-stat-group__subtitle {
-         margin: 0 0 16px 0;
-         font-size: 0.8rem;
-         line-height: 1.45;
-       }
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Adicionados os tipos:
+       ```typescript
+       export type RichStatGroupHeaderSpacing = 'tight' | 'normal' | 'relaxed';
+       export type RichStatGroupTileLayout = 'classic' | 'tile' | 'split';
        ```
-  2. **Suporte a Variante Moderna de KPI Tile (`layoutVariant: 'tile' | 'classic'`):**
-     - Permitir que itens de `statGroup` com anel de progresso distribuam o anel no canto superior direito (`justify-self: end`) ao lado do rótulo, permitindo que o valor principal (`.prx-rich-stat-group__value`) ocupe a largura completa com tipografia destacada e a descrição (`.prx-rich-stat-group__caption`) atue como rodapé delimitado por divisor sutil.
-  3. **Contrato Canônico (`@praxisui/core`):**
-     - Estender `RichStatGroupNode` com `headerSpacing?: 'tight' | 'normal' | 'relaxed'` e `tileLayout?: 'stacked' | 'split' | 'inline'`.
+     - Estendido `RichStatGroupNode` com `headerSpacing?: RichStatGroupHeaderSpacing` e `tileLayout?: RichStatGroupTileLayout`.
+     - Estendido `RichStatItem` com `tileLayout?: RichStatGroupTileLayout` para overrides granulares por item.
+  2. **Estilos e Renderizador (`@praxisui/rich-content`):**
+     - **Espaçamento de Cabeçalho Canônico:**
+       * Título: `font-size: 1.05rem`, `font-weight: 700`, `margin: 0 0 4px 0`.
+       * Subtítulo: `margin: 0 0 16px 0`, `font-size: 0.8rem`, `line-height: 1.45`.
+       * Suporte a `headerSpacing`: `'tight'` (8px), `'normal'` (16px), `'relaxed'` (24px), inclusive quando não houver subtítulo.
+     - **Diagramação Moderna de Tile Executivo (`tileLayout: 'tile' | 'split'`):**
+       * `.prx-rich-stat-group__item-content` passa a usar `display: contents`, integrando todos os elementos no grid principal do cartão.
+       * Grid de 3 colunas e 3 linhas (`auto 1fr auto` / `auto auto 1fr`):
+         - Coluna 1 / Linha 1: Ícone centralizado.
+         - Coluna 2 / Linha 1: Label semântico.
+         - Coluna 3 / Linhas 1-2: Indicador de progresso circular (`ring`), alinhado à direita com respiro elegante.
+         - Coluna 1-2 / Linha 2: Valor da métrica (`.prx-rich-stat-group__value`) em tipografia destacada.
+         - Linha 3 (largura total): Caption / legenda com divisor pontilhado sutil delimitando o rodapé.
+  3. **Validação e Ferramentas:**
+     - `RichContentDocumentValidator` atualizado para validar `headerSpacing` e `tileLayout`.
+     - AI Capabilities e Editor Visual (`PraxisRichContentConfigEditor`) atualizados com i18n (`en-US`, `pt-BR`).
+     - Testes unitários adicionados em `praxis-rich-content.spec.ts` (60/60 passando) e `rich-content-document-validator.spec.ts` (19/19 passando).
+     - PR #557 integrado e aprovado na `main`.
 
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
-  - Aplicar `display: contents` em `.prx-rich-stat-group__item-content` dentro da classe de personalização do componente para reorganizar o grid em 3 áreas harmônicas (cabeçalho com ícone e label, indicador de progresso no canto superior direito e caption no rodapé) com margens explícitas.
+  - O workaround CSS estrutural com `display: contents !important` e grid placement manual em `hero-dossier-drawer.component.ts` foi removido.
+  - Para obter a diagramação de KPI moderno em qualquer `statGroup`, declare diretamente no nó:
+    ```json
+    {
+      "type": "statGroup",
+      "tileLayout": "tile",
+      "headerSpacing": "normal",
+      ...
+    }
+    ```

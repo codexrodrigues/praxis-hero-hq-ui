@@ -8,15 +8,42 @@ export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
   subtitle: 'Execução orçamentária dos últimos ciclos de pagamento tático',
   sizing: { mode: 'fixed', height: 320 },
   dataSource: {
-    kind: 'local',
-    items: [
-      { competencia: 'Mai/2026', totalLiquido: 3820000, encargos: 840000 },
-      { competencia: 'Jun/2026', totalLiquido: 3950000, encargos: 860000 },
-      { competencia: 'Jul/2026', totalLiquido: 4120000, encargos: 910000 },
-      { competencia: 'Ago/2026', totalLiquido: 4400000, encargos: 970000 },
-      { competencia: 'Set/2026', totalLiquido: 4680000, encargos: 1020000 },
-      { competencia: 'Out/2026', totalLiquido: 4850000, encargos: 1080000 },
-    ],
+    kind: 'remote',
+    resourcePath: 'human-resources/vw-analytics-folha-pagamento',
+    query: {
+      sourceKind: 'praxis.stats',
+      statsOperation: 'timeseries',
+      statsPath: 'human-resources/vw-analytics-folha-pagamento/stats/timeseries',
+      statsRequest: {
+        filter: {},
+        field: 'competencia',
+        granularity: 'MONTH',
+        from: '2025-10-01',
+        to: '2026-03-31',
+        metric: {
+          operation: 'SUM',
+          field: 'salarioLiquido',
+          alias: 'salarioLiquido',
+        },
+        metrics: [
+          {
+            operation: 'SUM',
+            field: 'salarioLiquido',
+            alias: 'salarioLiquido',
+          },
+          {
+            operation: 'SUM',
+            field: 'totalDescontos',
+            alias: 'totalDescontos',
+          },
+        ],
+      },
+      dimensions: ['competencia'],
+      metrics: [
+        { field: 'salarioLiquido', aggregation: 'sum', alias: 'salarioLiquido' },
+        { field: 'totalDescontos', aggregation: 'sum', alias: 'totalDescontos' },
+      ],
+    },
   },
   axes: {
     x: { field: 'competencia', type: 'category', label: 'Competência' },
@@ -28,18 +55,18 @@ export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
   },
   series: [
     {
-      id: 'totalLiquido',
+      id: 'salarioLiquido',
       name: 'Salário Líquido',
       type: 'line',
-      metric: { field: 'totalLiquido', aggregation: 'sum' },
+      metric: { field: 'salarioLiquido', aggregation: 'sum' },
       color: '#38bdf8',
       smooth: true,
     },
     {
-      id: 'encargos',
-      name: 'Encargos & Suporte',
+      id: 'totalDescontos',
+      name: 'Descontos & Encargos',
       type: 'line',
-      metric: { field: 'encargos', aggregation: 'sum' },
+      metric: { field: 'totalDescontos', aggregation: 'sum' },
       color: '#a855f7',
       smooth: true,
     },
@@ -53,23 +80,47 @@ export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
 export const REPUTATION_RANKING_CHART_CONFIG: PraxisChartConfig = {
   id: 'hero-reputation-ranking-chart',
   type: 'bar',
-  title: 'Ranking Reputacional da Força',
-  subtitle: 'Aprovação pública vs. respaldo regulatório por herói',
+  title: 'Ranking Reputacional por Equipe',
+  subtitle: 'Aprovação pública vs. respaldo governamental por esquadrão tático',
   sizing: { mode: 'fixed', height: 320 },
   dataSource: {
-    kind: 'local',
-    items: [
-      { heroi: 'Tony Stark', scorePublico: 96, scoreGoverno: 88 },
-      { heroi: 'Steve Rogers', scorePublico: 98, scoreGoverno: 95 },
-      { heroi: 'Thor Odinson', scorePublico: 92, scoreGoverno: 82 },
-      { heroi: 'Bruce Banner', scorePublico: 78, scoreGoverno: 91 },
-      { heroi: 'Natasha R.', scorePublico: 89, scoreGoverno: 96 },
-      { heroi: 'Peter Parker', scorePublico: 99, scoreGoverno: 84 },
-    ],
+    kind: 'remote',
+    resourcePath: 'human-resources/vw-ranking-reputacao',
+    query: {
+      sourceKind: 'praxis.stats',
+      statsOperation: 'group-by',
+      statsPath: 'human-resources/vw-ranking-reputacao/stats/group-by',
+      statsRequest: {
+        filter: {},
+        field: 'equipe',
+        metric: {
+          operation: 'AVG',
+          field: 'scorePublico',
+          alias: 'scorePublico',
+        },
+        metrics: [
+          {
+            operation: 'AVG',
+            field: 'scorePublico',
+            alias: 'scorePublico',
+          },
+          {
+            operation: 'AVG',
+            field: 'scoreGovernamental',
+            alias: 'scoreGovernamental',
+          },
+        ],
+      },
+      dimensions: ['equipe'],
+      metrics: [
+        { field: 'scorePublico', aggregation: 'avg', alias: 'scorePublico' },
+        { field: 'scoreGovernamental', aggregation: 'avg', alias: 'scoreGovernamental' },
+      ],
+    },
   },
   axes: {
-    x: { field: 'heroi', type: 'category', label: 'Herói' },
-    y: { type: 'value', min: 0, max: 100, label: 'Score' },
+    x: { field: 'equipe', type: 'category', label: 'Equipe' },
+    y: { type: 'value', min: 0, max: 100, label: 'Score Médio' },
   },
   series: [
     {
@@ -80,10 +131,10 @@ export const REPUTATION_RANKING_CHART_CONFIG: PraxisChartConfig = {
       color: '#06b6d4',
     },
     {
-      id: 'scoreGoverno',
+      id: 'scoreGovernamental',
       name: 'Confiança Governamental',
       type: 'bar',
-      metric: { field: 'scoreGoverno', aggregation: 'avg' },
+      metric: { field: 'scoreGovernamental', aggregation: 'avg' },
       color: '#10b981',
     },
   ],

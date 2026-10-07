@@ -168,6 +168,8 @@ export function buildHeroReputationDocument(hero: HeroProfile): RichContentDocum
         title: 'Avaliação Reputacional 360°',
         subtitle: 'Índices consolidados de conformidade governamental e aprovação popular',
         layout: 'grid',
+        headerSpacing: 'normal',
+        tileLayout: 'tile',
         className: 'dossier-scores-section',
         items: [
           {
@@ -1072,70 +1074,6 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
             background: color-mix(in oklab, #10b981 8%, var(--card)) !important;
             border-color: color-mix(in oklab, #10b981 22%, var(--border)) !important;
           }
-        }
-
-        .prx-rich-stat-group__item-content {
-          display: contents !important;
-        }
-
-        .prx-rich-stat-group__icon {
-          grid-column: 1 !important;
-          grid-row: 1 !important;
-          font-size: 20px !important;
-          line-height: 1 !important;
-          margin: 0 !important;
-          align-self: center !important;
-        }
-
-        .prx-rich-stat-group__label {
-          grid-column: 2 !important;
-          grid-row: 1 !important;
-          font-size: 0.82rem !important;
-          font-weight: 600 !important;
-          color: var(--muted-foreground) !important;
-          margin: 0 !important;
-          align-self: center !important;
-        }
-
-        .prx-rich-stat-group__progress {
-          grid-column: 3 !important;
-          grid-row: 1 / span 2 !important;
-          justify-self: end !important;
-          align-self: center !important;
-          margin: 0 !important;
-        }
-
-        .prx-rich-stat-group__progress-ring-container {
-          width: 48px !important;
-          height: 48px !important;
-        }
-
-        .prx-rich-stat-group__progress-ring-text {
-          font-size: 12px !important;
-          font-weight: 700 !important;
-        }
-
-        .prx-rich-stat-group__value {
-          grid-column: 1 / span 2 !important;
-          grid-row: 2 !important;
-          font-size: 2rem !important;
-          font-weight: 800 !important;
-          line-height: 1.15 !important;
-          letter-spacing: -0.02em !important;
-          color: var(--foreground) !important;
-          margin: 6px 0 2px 0 !important;
-        }
-
-        .prx-rich-stat-group__caption {
-          grid-column: 1 / span 3 !important;
-          grid-row: 3 !important;
-          font-size: 0.77rem !important;
-          color: var(--muted-foreground) !important;
-          line-height: 1.45 !important;
-          margin: 8px 0 0 0 !important;
-          padding-top: 10px !important;
-          border-top: 1px dashed color-mix(in oklab, var(--border) 60%, transparent) !important;
-          align-self: end !important;
         }
       }
 
