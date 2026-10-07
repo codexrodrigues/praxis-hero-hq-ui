@@ -168,7 +168,7 @@ export function buildHeroReputationDocument(hero: HeroProfile): RichContentDocum
         title: 'Avaliação Reputacional 360°',
         subtitle: 'Índices consolidados de conformidade governamental e aprovação popular',
         layout: 'grid',
-        className: 'glass-panel dossier-scores-section',
+        className: 'dossier-scores-section',
         items: [
           {
             id: 'scorePublico',
@@ -704,18 +704,18 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
       color: var(--muted-foreground);
     }
 
-    /* Tabs Bar */
+    /* Tabs Bar - Segmented Control Pattern */
     .dossier-tabs-nav {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
       overflow-x: auto;
-      padding: 6px;
-      border-radius: 14px;
-      background: color-mix(in oklab, var(--card) 90%, transparent);
+      padding: 4px;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--muted) 45%, var(--card));
       border: 1px solid var(--border);
       scrollbar-width: none;
-      min-height: 48px;
+      min-height: 44px;
       box-sizing: border-box;
       flex-shrink: 0;
       &::-webkit-scrollbar { display: none; }
@@ -724,34 +724,48 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
     .tab-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 10px;
+      gap: 7px;
+      padding: 7px 14px;
+      border-radius: 8px;
       border: 1px solid transparent;
+      outline: none;
       background: transparent;
       color: var(--muted-foreground);
       font-size: 0.82rem;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
-      transition: all 0.15s ease;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 
       span.material-symbols-outlined {
         font-size: 18px;
       }
 
       &:hover {
-        background: color-mix(in oklab, var(--accent) 50%, transparent);
+        background: color-mix(in oklab, var(--card) 60%, transparent);
         color: var(--foreground);
       }
 
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 18%, var(--card));
-        border-color: color-mix(in oklab, var(--primary) 40%, transparent);
-        color: var(--primary);
-        box-shadow: 0 2px 8px color-mix(in oklab, var(--primary) 15%, transparent);
+      &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
       }
+
+      &.is-active {
+        background: var(--card);
+        border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+        color: var(--primary);
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+    }
+
+    :host-context(.dark) .tab-btn.is-active {
+      background: color-mix(in oklab, var(--primary) 16%, var(--card));
+      border-color: color-mix(in oklab, var(--primary) 35%, transparent);
+      color: var(--primary);
+      box-shadow: 0 1px 4px color-mix(in oklab, var(--primary) 20%, transparent);
     }
 
     .tab-count-chip {
@@ -759,7 +773,7 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
       font-weight: 700;
       padding: 1px 6px;
       border-radius: 9999px;
-      background: color-mix(in oklab, var(--primary) 25%, transparent);
+      background: color-mix(in oklab, var(--primary) 18%, transparent);
       color: var(--primary);
     }
 
@@ -929,33 +943,42 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
         }
       }
 
-      /* Dynamic Form Presentation Customization */
+      /* Dynamic Form Presentation Customization (Clean Enterprise Editorial Layout) */
       .dossier-dynamic-form {
         .form-section {
-          background: color-mix(in oklab, var(--card) 40%, transparent) !important;
-          border: 1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
-          border-radius: 12px !important;
-          padding: 16px !important;
-          margin-bottom: 16px !important;
+          background: transparent !important;
+          border: none !important;
+          border-radius: 0 !important;
+          padding: 0 0 20px 0 !important;
+          margin-bottom: 24px !important;
+          border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
 
           &:last-child {
+            border-bottom: none !important;
             margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
           }
         }
 
         .section-title {
-          font-size: 0.88rem !important;
+          font-size: 0.84rem !important;
           font-weight: 700 !important;
           color: var(--primary) !important;
           display: flex !important;
           align-items: center !important;
-          gap: 6px !important;
-          margin-bottom: 12px !important;
+          gap: 8px !important;
+          margin-bottom: 14px !important;
+          letter-spacing: 0.05em !important;
+          text-transform: uppercase !important;
         }
 
         .praxis-presentation {
-          padding: 6px 0 !important;
-          border-bottom: 1px dashed color-mix(in oklab, var(--border) 40%, transparent) !important;
+          padding: 8px 0 !important;
+          border-bottom: 1px dashed color-mix(in oklab, var(--border) 35%, transparent) !important;
+
+          &:last-child {
+            border-bottom: none !important;
+          }
         }
 
         .praxis-presentation__label {
@@ -971,12 +994,69 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
           font-weight: 600 !important;
           color: var(--foreground) !important;
         }
+
+        /* Resolução Semântica Reativa para Campos Booleanos (ISSUE-022) */
+        .praxis-presentation--boolean-false {
+          .praxis-presentation__icon {
+            color: var(--muted-foreground) !important;
+            font-size: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 20px !important;
+            height: 20px !important;
+
+            &::after {
+              content: 'toggle_off';
+              font-family: 'Material Symbols Outlined';
+              font-size: 20px;
+              line-height: 1;
+              color: var(--muted-foreground) !important;
+            }
+          }
+
+          .praxis-presentation__value {
+            background: color-mix(in oklab, var(--muted) 70%, transparent) !important;
+            color: var(--muted-foreground) !important;
+            border: 1px solid color-mix(in oklab, var(--border) 80%, transparent) !important;
+          }
+        }
+
+        .praxis-presentation--boolean-true {
+          .praxis-presentation__icon {
+            color: #10b981 !important;
+          }
+
+          .praxis-presentation__value {
+            background: color-mix(in oklab, #10b981 14%, transparent) !important;
+            color: #059669 !important;
+            border: 1px solid color-mix(in oklab, #10b981 30%, transparent) !important;
+          }
+        }
       }
 
-      /* Stat Group / Reputação 360 */
+      /* Stat Group / Reputação 360 (Harmonious Executive Metric Tiles) */
       .dossier-scores-section {
         border-radius: 18px !important;
-        padding: 20px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+
+        .prx-rich-stat-group__header {
+          margin-bottom: 14px !important;
+        }
+
+        .prx-rich-stat-group__title {
+          font-size: 1.05rem !important;
+          font-weight: 700 !important;
+          color: var(--foreground) !important;
+        }
+
+        .prx-rich-stat-group__subtitle {
+          font-size: 0.78rem !important;
+          color: var(--muted-foreground) !important;
+          margin-top: 2px !important;
+        }
 
         .prx-rich-stat-group__grid {
           display: grid !important;
@@ -985,13 +1065,16 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
         }
 
         .prx-rich-stat-item {
-          background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+          background: color-mix(in oklab, var(--card) 85%, transparent) !important;
           border: 1px solid var(--border) !important;
-          border-radius: 14px !important;
-          padding: 16px !important;
+          border-radius: 16px !important;
+          padding: 18px 20px !important;
           display: flex !important;
           flex-direction: column !important;
-          gap: 10px !important;
+          gap: 12px !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+          backdrop-filter: blur(10px) !important;
+          -webkit-backdrop-filter: blur(10px) !important;
         }
 
         .prx-rich-stat-item__value {
