@@ -14,6 +14,7 @@ import {
   type RichBlockHostCapabilities,
   type RichContentDocument,
 } from '@praxisui/core';
+import { PraxisDynamicForm } from '@praxisui/dynamic-form';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 
@@ -34,7 +35,10 @@ export interface HeroProfile {
   scorePublico?: number;
   scoreGovernamental?: number;
   dataAdmissao?: string;
+  dataNascimento?: string;
+  estadoCivil?: string;
   resourceVersion?: string;
+  [key: string]: unknown;
 }
 
 export interface PayrollRecord {
@@ -66,11 +70,13 @@ export interface EquipmentRecord {
   proprietarioNome?: string;
 }
 
-export function buildHeroDossierDocument(
+export type DossierTabId = 'identity' | 'skills' | 'payroll' | 'missions' | 'assets';
+
+/**
+ * 1. Hero Identity Header Document (RichContent Editorial)
+ */
+export function buildHeroHeaderDocument(
   hero: HeroProfile,
-  payroll: PayrollRecord[],
-  missions: MissionParticipantRecord[],
-  assets: EquipmentRecord[],
   isTransitioning: boolean
 ): RichContentDocument {
   const isAtivo = hero.ativo;
@@ -89,7 +95,6 @@ export function buildHeroDossierDocument(
     kind: 'praxis.rich-content',
     version: '1.0.0',
     nodes: [
-      // 1. Header Hero Identity Card
       {
         type: 'card',
         variant: 'unstyled',
@@ -99,8 +104,12 @@ export function buildHeroDossierDocument(
         title: hero.nomeCompleto,
         subtitle: `${hero.codinome || hero.nomeCompleto} · ${hero.cargoNome || 'Especialista Tático'}`,
         style: {
-          '--hero-avatar-image': (hero.fotoPerfilUrl || hero.avatarUrl) ? `url("${hero.fotoPerfilUrl || hero.avatarUrl}")` : 'none',
-          '--hero-avatar-color': (hero.fotoPerfilUrl || hero.avatarUrl) ? 'transparent' : 'var(--primary)',
+          '--hero-avatar-image': (hero.fotoPerfilUrl || hero.avatarUrl)
+            ? `url("${hero.fotoPerfilUrl || hero.avatarUrl}")`
+            : 'none',
+          '--hero-avatar-color': (hero.fotoPerfilUrl || hero.avatarUrl)
+            ? 'transparent'
+            : 'var(--primary)',
         },
         media: {
           kind: 'avatar',
@@ -140,234 +149,52 @@ export function buildHeroDossierDocument(
           },
         ],
       },
+    ],
+  };
+}
 
-      // 2. Tabs: Identidade, Competências, Folha, Missões, Ativos
+/**
+ * 2. Avaliação Reputacional 360° (Editorial Telemetria)
+ */
+export function buildHeroReputationDocument(hero: HeroProfile): RichContentDocument {
+  return {
+    kind: 'praxis.rich-content',
+    version: '1.0.0',
+    nodes: [
       {
-        type: 'tabs',
-        appearance: 'pills',
-        defaultTabId: 'tab-identity',
-        className: 'dossier-tabs',
+        type: 'statGroup',
+        title: 'Avaliação Reputacional 360°',
+        subtitle: 'Índices consolidados de conformidade governamental e aprovação popular',
+        layout: 'grid',
+        className: 'glass-panel dossier-scores-section',
         items: [
-          // TAB 1: IDENTIDADE
           {
-            id: 'tab-identity',
-            label: 'Identidade',
-            icon: 'badge',
-            content: [
-              // Bloco 1: Vínculo Operacional & Remuneração (2x2 perfeito)
-              {
-                type: 'propertySheet',
-                title: 'Vínculo Operacional & Remuneração',
-                columns: 2,
-                className: 'glass-panel dossier-sheet-card',
-                items: [
-                  { id: 'cargo', label: 'Cargo / Posto Tático', value: hero.cargoNome || 'Especialista Operacional', icon: 'military_tech' },
-                  { id: 'departamento', label: 'Divisão Operacional', value: hero.departamentoNome || 'Divisão Tática', icon: 'business' },
-                  { id: 'admissao', label: 'Data de Integração', value: hero.dataAdmissao || '15/04/2018', icon: 'calendar_today' },
-                  { id: 'remuneracao', label: 'Remuneração Base', value: `R$ ${(hero.salario || 95000).toLocaleString('pt-BR')},00`, icon: 'payments' },
-                ],
-              },
-              // Bloco 2: Identidade Civil & Contato Seguro (2x2 perfeito)
-              {
-                type: 'propertySheet',
-                title: 'Identidade Civil & Contato Seguro',
-                columns: 2,
-                className: 'glass-panel dossier-sheet-card',
-                items: [
-                  { id: 'cpf', label: 'CPF Mascarado (LGPD)', value: hero.cpf || '109.876.543-21', icon: 'fingerprint' },
-                  { id: 'universo', label: 'Universo / Origem Multiversal', value: hero.universo || 'Terra-616', icon: 'public' },
-                  { id: 'email', label: 'Canal Seguro / E-mail', value: hero.email || 'tony.stark@avengers.praxis.org', icon: 'mail' },
-                  { id: 'telefone', label: 'Telefone Tático / Linha Direta', value: hero.telefone || '+55 (11) 99887-6655', icon: 'call' },
-                ],
-              },
-              // Bloco 3: Avaliação Reputacional 360° (StatGroup moderno com anéis de progresso)
-              {
-                type: 'statGroup',
-                title: 'Avaliação Reputacional 360°',
-                subtitle: 'Índices consolidados de conformidade governamental e respaldo da opinião pública',
-                layout: 'grid',
-                className: 'glass-panel dossier-scores-section',
-                items: [
-                  {
-                    id: 'scorePublico',
-                    label: 'Aprovação Pública',
-                    value: `${hero.scorePublico || 96}%`,
-                    caption: 'Índice de engajamento popular e mídia global',
-                    icon: 'public',
-                    tone: 'info',
-                    progress: {
-                      value: hero.scorePublico || 96,
-                      max: 100,
-                      variant: 'ring',
-                      tone: 'info',
-                    },
-                  },
-                  {
-                    id: 'scoreGov',
-                    label: 'Confiança Governamental',
-                    value: `${hero.scoreGovernamental || 88}%`,
-                    caption: 'Nível de conformidade e tratados com a ONU/Governo',
-                    icon: 'account_balance',
-                    tone: 'success',
-                    progress: {
-                      value: hero.scoreGovernamental || 88,
-                      max: 100,
-                      variant: 'ring',
-                      tone: 'success',
-                    },
-                  },
-                ],
-              },
-            ],
+            id: 'scorePublico',
+            label: 'Aprovação Pública',
+            value: `${hero.scorePublico || 96}%`,
+            caption: 'Índice de engajamento popular e respaldo midiático',
+            icon: 'public',
+            tone: 'info',
+            progress: {
+              value: hero.scorePublico || 96,
+              max: 100,
+              variant: 'ring',
+              tone: 'info',
+            },
           },
-
-          // TAB 2: COMPETÊNCIAS OPERACIONAIS
           {
-            id: 'tab-skills',
-            label: 'Competências',
-            icon: 'bolt',
-            content: [
-              {
-                type: 'card',
-                variant: 'unstyled',
-                tone: 'neutral',
-                className: 'glass-panel skills-card',
-                title: 'Matriz de Proficiência Tática',
-                content: [
-                  {
-                    type: 'compose',
-                    direction: 'column',
-                    gap: 'sm',
-                    items: [
-                      {
-                        type: 'text',
-                        text: 'Combate Avançado & Resposta Tática — 95%',
-                      },
-                      {
-                        type: 'progress',
-                        valueExpr: '95',
-                        showPercent: false,
-                        className: 'fill-training',
-                      },
-                      {
-                        type: 'text',
-                        text: 'Engenharia de Campo & Suporte Quântico — 92%',
-                      },
-                      {
-                        type: 'progress',
-                        valueExpr: '92',
-                        showPercent: false,
-                        className: 'fill-tech',
-                      },
-                      {
-                        type: 'text',
-                        text: 'Liderança Operacional & Coordenação de Crise — 98%',
-                      },
-                      {
-                        type: 'progress',
-                        valueExpr: '98',
-                        showPercent: false,
-                        className: 'fill-ready',
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-
-          // TAB 3: FOLHA (DADOS REAIS DA API)
-          {
-            id: 'tab-payroll',
-            label: 'Folha',
-            icon: 'payments',
-            badge: payroll.length > 0 ? String(payroll.length) : undefined,
-            content: payroll.length > 0
-              ? payroll.map((cycle) => ({
-                  type: 'card' as const,
-                  variant: 'outlined' as const,
-                  className: 'glass-panel cycle-card-item',
-                  title: `Competência ${cycle.mes}/${cycle.ano}`,
-                  subtitle: `Bruto: R$ ${cycle.salarioBruto.toLocaleString('pt-BR')} · Líquido: R$ ${cycle.salarioLiquido.toLocaleString('pt-BR')} · Descontos: R$ ${cycle.totalDescontos.toLocaleString('pt-BR')}`,
-                  content: [
-                    {
-                      type: 'badge' as const,
-                      label: 'CONSOLIDADA',
-                      className: 'status-tag status-paga',
-                    },
-                  ],
-                }))
-              : [
-                  {
-                    type: 'emptyState' as const,
-                    icon: 'receipt_long',
-                    title: 'Sem lançamentos recentes',
-                    message: 'Nenhum lançamento de folha salarial registrado para este colaborador na base de dados.',
-                  },
-                ],
-          },
-
-          // TAB 4: HISTÓRICO DE MISSÕES (TIMELINE REAL DA API)
-          {
-            id: 'tab-missions',
-            label: 'Missões',
-            icon: 'military_tech',
-            badge: missions.length > 0 ? String(missions.length) : undefined,
-            content: missions.length > 0
-              ? [
-                  {
-                    type: 'timeline' as const,
-                    density: 'comfortable' as const,
-                    connectorVariant: 'solid' as const,
-                    items: missions.map((m) => ({
-                      id: String(m.id),
-                      title: m.missaoTitulo,
-                      subtitle: `Papel: ${m.papel} · ${m.principal ? 'Participação Primária' : 'Força de Apoio'}`,
-                      icon: m.resultado === 'OK' ? 'check_circle' : 'pending',
-                      badge: m.resultado === 'OK' ? 'CONCLUÍDA' : 'EM ANDAMENTO',
-                      markerColor: m.resultado === 'OK' ? ('success' as const) : ('info' as const),
-                    })),
-                  },
-                ]
-              : [
-                  {
-                    type: 'emptyState' as const,
-                    icon: 'flag',
-                    title: 'Nenhuma missão registrada',
-                    message: 'Este herói não possui histórico de engajamento tático em campo até o momento.',
-                  },
-                ],
-          },
-
-          // TAB 5: ATIVOS EM CUSTÓDIA (DADOS REAIS DA API)
-          {
-            id: 'tab-assets',
-            label: 'Ativos',
-            icon: 'inventory_2',
-            badge: assets.length > 0 ? String(assets.length) : undefined,
-            content: assets.length > 0
-              ? assets.map((asset) => ({
-                  type: 'card' as const,
-                  variant: 'outlined' as const,
-                  className: 'glass-panel asset-card-item',
-                  title: asset.nome,
-                  subtitle: `Tipo: ${asset.tipo} · Resistência: ${asset.resistencia || 8}/10 · Status: ${asset.status}`,
-                  content: [
-                    {
-                      type: 'badge' as const,
-                      label: asset.status,
-                      className: 'status-tag status-programada',
-                    },
-                  ],
-                }))
-              : [
-                  {
-                    type: 'emptyState' as const,
-                    icon: 'shield_moon',
-                    title: 'Nenhum ativo vinculado',
-                    message: 'Nenhum equipamento, armadura ou veículo registrado sob custódia deste herói.',
-                  },
-                ],
+            id: 'scoreGov',
+            label: 'Conformidade Governamental',
+            value: `${hero.scoreGovernamental || 88}%`,
+            caption: 'Nível de alinhamento com tratados e auditorias da ONU',
+            icon: 'account_balance',
+            tone: 'success',
+            progress: {
+              value: hero.scoreGovernamental || 88,
+              max: 100,
+              variant: 'ring',
+              tone: 'success',
+            },
           },
         ],
       },
@@ -375,15 +202,205 @@ export function buildHeroDossierDocument(
   };
 }
 
+/**
+ * 3. Competências Operacionais (RichContent)
+ */
+export function buildHeroSkillsDocument(hero: HeroProfile): RichContentDocument {
+  return {
+    kind: 'praxis.rich-content',
+    version: '1.0.0',
+    nodes: [
+      {
+        type: 'card',
+        variant: 'unstyled',
+        tone: 'neutral',
+        className: 'glass-panel skills-card',
+        title: 'Matriz de Proficiência Tática',
+        subtitle: 'Competências operacionais auditadas pela divisão de treinamento',
+        content: [
+          {
+            type: 'compose',
+            direction: 'column',
+            gap: 'sm',
+            items: [
+              {
+                type: 'text',
+                text: 'Combate Avançado & Resposta Tática — 95%',
+              },
+              {
+                type: 'progress',
+                valueExpr: '95',
+                showPercent: false,
+                className: 'fill-training',
+              },
+              {
+                type: 'text',
+                text: 'Inteligência Estratégica & Análise de Ameaças — 90%',
+              },
+              {
+                type: 'progress',
+                valueExpr: '90',
+                showPercent: false,
+                className: 'fill-cyber',
+              },
+              {
+                type: 'text',
+                text: 'Engenharia & Sistemas Tecnológicos — 98%',
+              },
+              {
+                type: 'progress',
+                valueExpr: '98',
+                showPercent: false,
+                className: 'fill-tactical',
+              },
+              {
+                type: 'text',
+                text: 'Liderança de Esquadrão & Articulação Tática — 88%',
+              },
+              {
+                type: 'progress',
+                valueExpr: '88',
+                showPercent: false,
+                className: 'fill-diplomatic',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/**
+ * 4. Folha de Pagamento (RichContent)
+ */
+export function buildPayrollDocument(records: PayrollRecord[]): RichContentDocument {
+  if (records.length === 0) {
+    return {
+      kind: 'praxis.rich-content',
+      version: '1.0.0',
+      nodes: [
+        {
+          type: 'emptyState',
+          icon: 'receipt_long',
+          title: 'Sem lançamentos recentes',
+          message: 'Nenhum lançamento de folha salarial registrado para este colaborador na base de dados.',
+        },
+      ],
+    };
+  }
+
+  return {
+    kind: 'praxis.rich-content',
+    version: '1.0.0',
+    nodes: [
+      {
+        type: 'timeline',
+        density: 'comfortable',
+        connectorVariant: 'dashed',
+        items: records.map((p) => ({
+          id: String(p.id),
+          title: `Competência ${String(p.mes).padStart(2, '0')}/${p.ano}`,
+          subtitle: `Líquido: R$ ${p.salarioLiquido?.toLocaleString('pt-BR') || '0,00'} (Bruto: R$ ${p.salarioBruto?.toLocaleString('pt-BR') || '0,00'})`,
+          timestamp: p.dataPagamento ? `Pago em ${p.dataPagamento}` : 'Processado',
+          icon: 'payments',
+          badge: 'CONCLUÍDO',
+          markerColor: 'success',
+        })),
+      },
+    ],
+  };
+}
+
+/**
+ * 5. Missões Táticas (RichContent)
+ */
+export function buildMissionsDocument(records: MissionParticipantRecord[]): RichContentDocument {
+  if (records.length === 0) {
+    return {
+      kind: 'praxis.rich-content',
+      version: '1.0.0',
+      nodes: [
+        {
+          type: 'emptyState',
+          icon: 'military_tech',
+          title: 'Nenhuma missão registrada',
+          message: 'Este herói não possui histórico de engajamento tático em campo até o momento.',
+        },
+      ],
+    };
+  }
+
+  return {
+    kind: 'praxis.rich-content',
+    version: '1.0.0',
+    nodes: [
+      {
+        type: 'timeline',
+        density: 'comfortable',
+        connectorVariant: 'solid',
+        items: records.map((m) => ({
+          id: String(m.id),
+          title: m.missaoTitulo,
+          subtitle: `Papel: ${m.papel} · ${m.principal ? 'Participação Primária' : 'Força de Apoio'}`,
+          icon: m.resultado === 'OK' ? 'check_circle' : 'pending',
+          badge: m.resultado === 'OK' ? 'CONCLUÍDA' : 'EM ANDAMENTO',
+          markerColor: m.resultado === 'OK' ? 'success' : 'info',
+        })),
+      },
+    ],
+  };
+}
+
+/**
+ * 6. Ativos em Custódia (RichContent)
+ */
+export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocument {
+  if (records.length === 0) {
+    return {
+      kind: 'praxis.rich-content',
+      version: '1.0.0',
+      nodes: [
+        {
+          type: 'emptyState',
+          icon: 'shield_moon',
+          title: 'Nenhum ativo vinculado',
+          message: 'Nenhum equipamento, armadura ou veículo registrado sob custódia deste herói.',
+        },
+      ],
+    };
+  }
+
+  return {
+    kind: 'praxis.rich-content',
+    version: '1.0.0',
+    nodes: records.map((asset) => ({
+      type: 'card' as const,
+      variant: 'outlined' as const,
+      className: 'glass-panel asset-card-item',
+      title: asset.nome,
+      subtitle: `Tipo: ${asset.tipo} · Resistência: ${asset.resistencia || 8}/10 · Status: ${asset.status}`,
+      content: [
+        {
+          type: 'badge' as const,
+          label: asset.status,
+          className: 'status-tag status-programada',
+        },
+      ],
+    })),
+  };
+}
+
 @Component({
   selector: 'app-hero-dossier-drawer',
   standalone: true,
-  imports: [CommonModule, PraxisRichContent],
+  imports: [CommonModule, PraxisRichContent, PraxisDynamicForm],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (hero()) {
       <div class="drawer-overlay" (click)="close.emit()">
         <aside class="drawer-content" (click)="$event.stopPropagation()">
+          <!-- Top Bar -->
           <header class="drawer-top-bar">
             <div class="dossier-badge">
               <span class="material-symbols-outlined">badge</span>
@@ -406,10 +423,176 @@ export function buildHeroDossierDocument(
                 <span>Sincronizando registros operacionais do herói...</span>
               </div>
             }
+
+            <!-- 1. Header Hero Card (Editorial) -->
             <praxis-rich-content
-              [document]="dossierDocument()"
+              [document]="headerDocument()"
               [hostCapabilities]="hostCapabilities"
             />
+
+            <!-- 2. Navegação Canônica em Abas Táticas -->
+            <nav class="dossier-tabs-nav" role="tablist" aria-label="Abas do Dossiê">
+              <button
+                type="button"
+                role="tab"
+                class="tab-btn"
+                [class.is-active]="activeTab() === 'identity'"
+                [attr.aria-selected]="activeTab() === 'identity'"
+                (click)="activeTab.set('identity')"
+              >
+                <span class="material-symbols-outlined">badge</span>
+                <span>Identidade & Ficha</span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                class="tab-btn"
+                [class.is-active]="activeTab() === 'skills'"
+                [attr.aria-selected]="activeTab() === 'skills'"
+                (click)="activeTab.set('skills')"
+              >
+                <span class="material-symbols-outlined">bolt</span>
+                <span>Competências</span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                class="tab-btn"
+                [class.is-active]="activeTab() === 'payroll'"
+                [attr.aria-selected]="activeTab() === 'payroll'"
+                (click)="activeTab.set('payroll')"
+              >
+                <span class="material-symbols-outlined">payments</span>
+                <span>Folha</span>
+                @if (payroll().length > 0) {
+                  <span class="tab-count-chip">{{ payroll().length }}</span>
+                }
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                class="tab-btn"
+                [class.is-active]="activeTab() === 'missions'"
+                [attr.aria-selected]="activeTab() === 'missions'"
+                (click)="activeTab.set('missions')"
+              >
+                <span class="material-symbols-outlined">military_tech</span>
+                <span>Missões</span>
+                @if (missions().length > 0) {
+                  <span class="tab-count-chip">{{ missions().length }}</span>
+                }
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                class="tab-btn"
+                [class.is-active]="activeTab() === 'assets'"
+                [attr.aria-selected]="activeTab() === 'assets'"
+                (click)="activeTab.set('assets')"
+              >
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span>Ativos</span>
+                @if (assets().length > 0) {
+                  <span class="tab-count-chip">{{ assets().length }}</span>
+                }
+              </button>
+            </nav>
+
+            <!-- 3. Conteúdo Dinâmico por Aba -->
+            <div class="dossier-tab-content">
+              <!-- ABA 1: IDENTIDADE (FICHA CADASTRAL GOVERNADA + AVALIAÇÃO 360°) -->
+              @if (activeTab() === 'identity') {
+                <div class="tab-pane identity-pane">
+                  <!-- Bloco 1: Ficha Cadastral Governada por Metadados (PraxisDynamicForm) -->
+                  <div class="glass-panel dossier-form-container">
+                    <div class="pane-section-header">
+                      <div class="pane-header-title">
+                        <span class="material-symbols-outlined">verified_user</span>
+                        <div>
+                          <h4>Ficha Cadastral Governada</h4>
+                          <p>Campos, agrupamentos e máscaras resolvidos dinamicamente de <code>human-resources/funcionarios</code></p>
+                        </div>
+                      </div>
+                      <span class="governance-badge">OpenAPI · x-ui</span>
+                    </div>
+
+                    <praxis-dynamic-form
+                      formId="hero-dossier-cadastral-form"
+                      resourcePath="human-resources/funcionarios"
+                      [resourceId]="hero()!.id"
+                      [initialValue]="heroRecord()"
+                      mode="view"
+                      [presentationModeGlobal]="true"
+                      [enableCustomization]="false"
+                      [showAiAssistant]="false"
+                      class="presentation-mode pres-compact pres-label-left dossier-dynamic-form"
+                    />
+                  </div>
+
+                  <!-- Bloco 2: Avaliação Reputacional 360° (Editorial Telemetria) -->
+                  <praxis-rich-content [document]="reputationDocument()" />
+                </div>
+              }
+
+              <!-- ABA 2: COMPETÊNCIAS OPERACIONAIS -->
+              @if (activeTab() === 'skills') {
+                <div class="tab-pane">
+                  <praxis-rich-content [document]="skillsDocument()" />
+                </div>
+              }
+
+              <!-- ABA 3: FOLHA E HOLERITE -->
+              @if (activeTab() === 'payroll') {
+                <div class="tab-pane glass-panel p-20">
+                  <div class="pane-section-header mb-16">
+                    <div class="pane-header-title">
+                      <span class="material-symbols-outlined">receipt_long</span>
+                      <div>
+                        <h4>Histórico de Lançamentos Salariais</h4>
+                        <p>Folhas liquidadas e holerites emitidos pelo departamento de RH</p>
+                      </div>
+                    </div>
+                  </div>
+                  <praxis-rich-content [document]="payrollDocument()" />
+                </div>
+              }
+
+              <!-- ABA 4: MISSÕES TÁTICAS -->
+              @if (activeTab() === 'missions') {
+                <div class="tab-pane glass-panel p-20">
+                  <div class="pane-section-header mb-16">
+                    <div class="pane-header-title">
+                      <span class="material-symbols-outlined">flag</span>
+                      <div>
+                        <h4>Engajamento Operacional em Campo</h4>
+                        <p>Sorties, incursões e missões registradas com status de conclusão</p>
+                      </div>
+                    </div>
+                  </div>
+                  <praxis-rich-content [document]="missionsDocument()" />
+                </div>
+              }
+
+              <!-- ABA 5: ATIVOS EM CUSTÓDIA -->
+              @if (activeTab() === 'assets') {
+                <div class="tab-pane assets-pane">
+                  <div class="pane-section-header mb-16">
+                    <div class="pane-header-title">
+                      <span class="material-symbols-outlined">shield</span>
+                      <div>
+                        <h4>Inventário de Ativos em Custódia</h4>
+                        <p>Equipamentos de alta tecnologia e armaduras alocadas ao herói</p>
+                      </div>
+                    </div>
+                  </div>
+                  <praxis-rich-content [document]="assetsDocument()" />
+                </div>
+              }
+            </div>
           </main>
         </aside>
       </div>
@@ -429,7 +612,7 @@ export function buildHeroDossierDocument(
 
     .drawer-content {
       width: 100%;
-      max-width: 720px;
+      max-width: 740px;
       height: 100%;
       background: var(--background);
       border-left: 1px solid var(--border);
@@ -505,12 +688,153 @@ export function buildHeroDossierDocument(
       color: var(--muted-foreground);
     }
 
-    /* Rich Content Styles Inside Drawer */
+    /* Tabs Bar */
+    .dossier-tabs-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 6px;
+      border-radius: 14px;
+      background: color-mix(in oklab, var(--card) 90%, transparent);
+      border: 1px solid var(--border);
+      scrollbar-width: none;
+      min-height: 48px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      &::-webkit-scrollbar { display: none; }
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted-foreground);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+
+      span.material-symbols-outlined {
+        font-size: 18px;
+      }
+
+      &:hover {
+        background: color-mix(in oklab, var(--accent) 50%, transparent);
+        color: var(--foreground);
+      }
+
+      &.is-active {
+        background: color-mix(in oklab, var(--primary) 18%, var(--card));
+        border-color: color-mix(in oklab, var(--primary) 40%, transparent);
+        color: var(--primary);
+        box-shadow: 0 2px 8px color-mix(in oklab, var(--primary) 15%, transparent);
+      }
+    }
+
+    .tab-count-chip {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 9999px;
+      background: color-mix(in oklab, var(--primary) 25%, transparent);
+      color: var(--primary);
+    }
+
+    /* Pane Sections */
+    .dossier-tab-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .tab-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .p-20 { padding: 20px; }
+    .mb-16 { margin-bottom: 16px; }
+
+    .pane-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pane-header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      span.material-symbols-outlined {
+        font-size: 22px;
+        color: var(--primary);
+      }
+
+      h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--foreground);
+      }
+
+      p {
+        margin: 2px 0 0 0;
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+
+        code {
+          background: color-mix(in oklab, var(--muted) 40%, transparent);
+          padding: 1px 4px;
+          border-radius: 4px;
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+        }
+      }
+    }
+
+    .governance-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: color-mix(in oklab, var(--primary) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--primary) 25%, transparent);
+      color: var(--primary);
+      letter-spacing: 0.04em;
+    }
+
+    .dossier-form-container {
+      padding: 20px;
+      border-radius: 18px;
+    }
+
+    /* Glass Panel Token */
+    .glass-panel {
+      background: color-mix(in oklab, var(--card) 80%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    /* Hero Card Specific Styles */
     ::ng-deep {
       .dossier-hero-card {
         border-radius: 20px !important;
         padding: 20px !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 4px !important;
 
         .prx-rich-card {
           display: grid !important;
@@ -582,10 +906,6 @@ export function buildHeroDossierDocument(
           align-self: center !important;
         }
 
-        .prx-rich-card-header__action {
-          margin: 0 !important;
-        }
-
         .prx-rich-card-body {
           grid-column: 2 / span 2 !important;
           grid-row: 2 !important;
@@ -593,240 +913,134 @@ export function buildHeroDossierDocument(
         }
       }
 
-      .dossier-tabs {
-        margin-bottom: 8px;
+      /* Dynamic Form Presentation Customization */
+      .dossier-dynamic-form {
+        .form-section {
+          background: color-mix(in oklab, var(--card) 40%, transparent) !important;
+          border: 1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
+          border-radius: 12px !important;
+          padding: 16px !important;
+          margin-bottom: 16px !important;
 
-        .prx-rich-tabs__tablist {
-          display: flex !important;
-          flex-wrap: nowrap !important;
-          overflow-x: auto !important;
-          overflow-y: hidden !important;
-          gap: 6px !important;
-          padding: 6px !important;
-          border-radius: 14px !important;
-          background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-          border: 1px solid var(--border) !important;
-          backdrop-filter: blur(8px) !important;
-          -webkit-backdrop-filter: blur(8px) !important;
-          scrollbar-width: none !important;
-          margin-bottom: 20px !important;
-
-          &::-webkit-scrollbar {
-            display: none !important;
+          &:last-child {
+            margin-bottom: 0 !important;
           }
         }
 
-        .prx-rich-tabs__tab {
-          display: inline-flex !important;
+        .section-title {
+          font-size: 0.88rem !important;
+          font-weight: 700 !important;
+          color: var(--primary) !important;
+          display: flex !important;
           align-items: center !important;
           gap: 6px !important;
-          padding: 8px 14px !important;
-          border-radius: 10px !important;
-          border: 1px solid transparent !important;
-          font-size: 0.82rem !important;
-          font-weight: 600 !important;
-          white-space: nowrap !important;
-          flex-shrink: 0 !important;
-          min-width: max-content !important;
-          color: var(--muted-foreground) !important;
-          background: transparent !important;
-          cursor: pointer !important;
-          transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
-
-          &:hover {
-            color: var(--foreground) !important;
-            background: color-mix(in oklab, var(--accent) 50%, transparent) !important;
-            border-color: color-mix(in oklab, var(--border) 70%, transparent) !important;
-          }
-
-          &.prx-rich-tabs__tab--active {
-            color: var(--primary) !important;
-            background: color-mix(in oklab, var(--primary) 14%, var(--card)) !important;
-            border-color: color-mix(in oklab, var(--primary) 35%, transparent) !important;
-            font-weight: 700 !important;
-            box-shadow: 0 2px 8px color-mix(in oklab, var(--primary) 15%, transparent) !important;
-
-            .prx-rich-tabs__tab-icon {
-              color: var(--primary) !important;
-            }
-          }
-
-          .prx-rich-tabs__tab-icon {
-            font-size: 18px !important;
-            color: inherit !important;
-          }
-
-          .prx-rich-badge {
-            font-size: 0.68rem !important;
-            padding: 1px 6px !important;
-            border-radius: 9999px !important;
-            background: color-mix(in oklab, var(--primary) 20%, transparent) !important;
-            color: var(--primary) !important;
-            font-weight: 700 !important;
-            margin-left: 2px !important;
-          }
-        }
-      }
-
-      .dossier-sheet-card {
-        border-radius: 16px !important;
-        padding: 20px !important;
-        margin-bottom: 16px !important;
-
-        .prx-rich-property-sheet__title {
-          font-size: 1.02rem !important;
-          font-weight: 700 !important;
-          color: var(--foreground) !important;
-          margin: 0 0 16px 0 !important;
-        }
-      }
-
-      .dossier-scores-section {
-        border-radius: 16px !important;
-        padding: 20px !important;
-        margin-bottom: 16px !important;
-
-        .prx-rich-stat-group__title {
-          font-size: 1.02rem !important;
-          font-weight: 700 !important;
-          color: var(--foreground) !important;
-          margin: 0 0 2px 0 !important;
+          margin-bottom: 12px !important;
         }
 
-        .prx-rich-stat-group__subtitle {
-          font-size: 0.78rem !important;
-          color: var(--muted-foreground) !important;
-          margin: 0 0 16px 0 !important;
-        }
-      }
-
-      .prx-rich-property-sheet {
-        .prx-rich-property-sheet__items {
-          gap: 12px !important;
-          display: grid !important;
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        .praxis-presentation {
+          padding: 6px 0 !important;
+          border-bottom: 1px dashed color-mix(in oklab, var(--border) 40%, transparent) !important;
         }
 
-        .prx-rich-property-sheet__item {
-          background: color-mix(in oklab, var(--card) 45%, transparent) !important;
-          padding: 12px 14px !important;
-          border-radius: 12px !important;
-          border: 1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 4px !important;
-        }
-
-        .prx-rich-property-sheet__label {
-          color: var(--muted-foreground) !important;
+        .praxis-presentation__label {
           font-size: 0.72rem !important;
           font-weight: 600 !important;
+          color: var(--muted-foreground) !important;
           text-transform: uppercase !important;
           letter-spacing: 0.05em !important;
-          display: flex !important;
-          align-items: center !important;
-          gap: 6px !important;
-
-          .material-symbols-outlined {
-            font-size: 15px !important;
-            color: var(--primary) !important;
-          }
         }
 
-        .prx-rich-property-sheet__value {
-          color: var(--foreground) !important;
-          font-size: 0.92rem !important;
+        .praxis-presentation__value {
+          font-size: 0.88rem !important;
           font-weight: 600 !important;
-          font-family: var(--font-mono, inherit) !important;
-          margin: 0 !important;
+          color: var(--foreground) !important;
         }
       }
 
-      .dossier-reputation-grid {
-        .prx-rich-stat-group__items {
+      /* Stat Group / Reputação 360 */
+      .dossier-scores-section {
+        border-radius: 18px !important;
+        padding: 20px !important;
+
+        .prx-rich-stat-group__grid {
           display: grid !important;
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          gap: 14px !important;
+          gap: 16px !important;
         }
 
-        .prx-rich-stat-group__item {
-          padding: 18px !important;
-          border-radius: 14px !important;
-          background: color-mix(in oklab, var(--card) 50%, transparent) !important;
+        .prx-rich-stat-item {
+          background: color-mix(in oklab, var(--card) 60%, transparent) !important;
           border: 1px solid var(--border) !important;
+          border-radius: 14px !important;
+          padding: 16px !important;
           display: flex !important;
           flex-direction: column !important;
-          gap: 6px !important;
-          transition: transform 0.15s ease, border-color 0.15s ease !important;
-
-          &:hover {
-            transform: translateY(-1px) !important;
-            border-color: color-mix(in oklab, var(--primary) 40%, transparent) !important;
-          }
+          gap: 10px !important;
         }
 
-        .prx-rich-stat-group__label {
-          font-size: 0.82rem !important;
-          font-weight: 600 !important;
-          color: var(--muted-foreground) !important;
-        }
-
-        .prx-rich-stat-group__value {
-          font-size: 1.65rem !important;
+        .prx-rich-stat-item__value {
+          font-size: 1.6rem !important;
           font-weight: 800 !important;
-          font-family: var(--font-display) !important;
-          line-height: 1.2 !important;
-          margin: 2px 0 !important;
-          color: var(--foreground) !important;
-        }
-
-        .prx-rich-stat-group__caption {
-          font-size: 0.72rem !important;
-          color: var(--muted-foreground) !important;
-          line-height: 1.3 !important;
-        }
-
-        .prx-rich-stat-group__icon {
-          font-size: 24px !important;
-          color: var(--primary) !important;
-          margin-bottom: 2px !important;
+          letter-spacing: -0.02em !important;
         }
       }
 
-      .cycle-card-item,
+      /* Skills Card */
+      .skills-card {
+        padding: 20px !important;
+        border-radius: 16px !important;
+
+        .prx-rich-card-title {
+          font-size: 1.05rem !important;
+          font-weight: 700 !important;
+          margin-bottom: 16px !important;
+        }
+      }
+
       .asset-card-item {
-        border-radius: 14px !important;
         padding: 14px 18px !important;
-        transition: transform 0.15s ease;
-
-        &:hover {
-          transform: translateY(-1px);
-        }
-      }
-
-      .fill-training progress::-webkit-progress-value { background: var(--secondary) !important; border-radius: 9999px; }
-      .fill-tech progress::-webkit-progress-value { background: var(--primary) !important; border-radius: 9999px; }
-
-      .status-paga {
-        color: var(--ready);
-        background: color-mix(in oklab, var(--ready) 12%, transparent);
-      }
-      .status-programada {
-        color: var(--operations);
-        background: color-mix(in oklab, var(--operations) 12%, transparent);
+        border-radius: 12px !important;
+        margin-bottom: 12px !important;
       }
     }
 
-    @keyframes slideIn {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
+    /* Badges */
+    .status-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      letter-spacing: 0.04em;
+    }
+    .cobalt-pill {
+      background: color-mix(in oklab, #0284c7 15%, transparent);
+      color: #38bdf8;
+      border: 1px solid color-mix(in oklab, #0284c7 35%, transparent);
+    }
+    .ready-pill {
+      background: color-mix(in oklab, #10b981 15%, transparent);
+      color: #34d399;
+      border: 1px solid color-mix(in oklab, #10b981 35%, transparent);
+    }
+    .reserve-pill {
+      background: color-mix(in oklab, #f59e0b 15%, transparent);
+      color: #fbbf24;
+      border: 1px solid color-mix(in oklab, #f59e0b 35%, transparent);
+    }
+
+    .spin {
+      animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    .spin { animation: spin 1s infinite linear; }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
   `],
 })
 export class HeroDossierDrawerComponent {
@@ -835,6 +1049,7 @@ export class HeroDossierDrawerComponent {
   readonly close = output<void>();
   readonly toggleStatus = output<HeroProfile>();
 
+  protected readonly activeTab = signal<DossierTabId>('identity');
   protected readonly isLoading = signal<boolean>(false);
   protected readonly payroll = signal<PayrollRecord[]>([]);
   protected readonly missions = signal<MissionParticipantRecord[]>([]);
@@ -852,18 +1067,40 @@ export class HeroDossierDrawerComponent {
     isActionAvailable: () => true,
   };
 
-  protected readonly dossierDocument = computed<RichContentDocument>(() => {
+  protected readonly headerDocument = computed<RichContentDocument>(() => {
     const h = this.hero();
-    if (!h) {
-      return { kind: 'praxis.rich-content', version: '1.0.0', nodes: [] };
-    }
-    return buildHeroDossierDocument(
-      h,
-      this.payroll(),
-      this.missions(),
-      this.assets(),
-      this.isTransitioning()
-    );
+    if (!h) return { kind: 'praxis.rich-content', version: '1.0.0', nodes: [] };
+    return buildHeroHeaderDocument(h, this.isTransitioning());
+  });
+
+  protected readonly reputationDocument = computed<RichContentDocument>(() => {
+    const h = this.hero();
+    if (!h) return { kind: 'praxis.rich-content', version: '1.0.0', nodes: [] };
+    return buildHeroReputationDocument(h);
+  });
+
+  protected readonly skillsDocument = computed<RichContentDocument>(() => {
+    const h = this.hero();
+    if (!h) return { kind: 'praxis.rich-content', version: '1.0.0', nodes: [] };
+    return buildHeroSkillsDocument(h);
+  });
+
+  protected readonly heroRecord = computed<Record<string, unknown> | null>(() => {
+    const h = this.hero();
+    if (!h) return null;
+    return { ...h } as Record<string, unknown>;
+  });
+
+  protected readonly payrollDocument = computed<RichContentDocument>(() => {
+    return buildPayrollDocument(this.payroll());
+  });
+
+  protected readonly missionsDocument = computed<RichContentDocument>(() => {
+    return buildMissionsDocument(this.missions());
+  });
+
+  protected readonly assetsDocument = computed<RichContentDocument>(() => {
+    return buildAssetsDocument(this.assets());
   });
 
   constructor() {
@@ -873,6 +1110,7 @@ export class HeroDossierDrawerComponent {
         this.payroll.set([]);
         this.missions.set([]);
         this.assets.set([]);
+        this.activeTab.set('identity');
         return;
       }
       this.fetchAllHeroData(h.id);
@@ -882,7 +1120,6 @@ export class HeroDossierDrawerComponent {
   private fetchAllHeroData(heroId: number): void {
     this.isLoading.set(true);
 
-    // Parallel fetch from backend endpoints
     this.http
       .post<{ data?: { content?: PayrollRecord[] } }>(
         `${PRAXIS_API_BASE_URL}/human-resources/folhas-pagamento/filter`,

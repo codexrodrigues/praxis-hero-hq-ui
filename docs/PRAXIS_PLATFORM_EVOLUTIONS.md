@@ -32,6 +32,9 @@
 | **ISSUE-016** | `@praxisui/core` | Arquitetural / Temas | Ausência de Tokens Canônicos de Superfície Invertida e Tooltip no Theme Bridge (`--mat-sys-inverse-surface` e `--mat-tooltip-*`) | `[DONE]` |
 | **ISSUE-017** | `@praxisui/rich-content` | Funcional / Visual | `RichCardMedia[kind='avatar']` ignora URL de imagem (`src`) e renderiza apenas iniciais com fallback nulo quando `label`/`alt` são omitidos | `[PENDING]` |
 | **ISSUE-018** | `@praxisui/rich-content` | Design / Contraste & Layout | `RichTabsNode[appearance='pills']` possui `#fff` hardcoded no fundo da aba ativa e força `flex-wrap: wrap` quebrando o layout | `[PENDING]` |
+| **ISSUE-019** | `@praxisui/dynamic-form` | Design / Acabamento | Presets Visuais Ricos Nativos para Modo Apresentação (`presentationPreset: 'corporate-dossier' \| 'editorial-card'`) eliminando CSS customizado no host | `[PENDING]` |
+| **ISSUE-020** | `@praxisui/dynamic-form` & `@praxisui/core` | Arquitetural / Layout | Suporte Nativo a Layout por Abas (Tabs) e Acordeão no `FormConfig` para Organização Multisseção Governada | `[PENDING]` |
+| **ISSUE-021** | `@praxisui/rich-content` & `@praxisui/core` | Arquitetural / Composição | Suporte a `schemaRef`/`resourcePath` dinâmico em `RichPropertySheetNode` ou nó nativo de formulário dinâmico em `RichContent` | `[PENDING]` |
 
 
 ---
@@ -1337,6 +1340,123 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
   3. Suportar rolagem horizontal sem quebra (`flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;`) como opção ou padrão para densidade compacta.
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
   - Sobrescrever temporariamente o seletor `::ng-deep .prx-rich-tabs` no escopo do componente com estilos táticos de barra segmentada (`nowrap`, `overflow-x: auto`, pills com affordance e cores adaptativas para Dark e Light mode).
+
+
+---
+
+### ISSUE-019: Presets Visuais Ricos Nativos para Modo Apresentação em `PraxisDynamicForm` (`presentationPreset: 'corporate-dossier' | 'editorial-card'`)
+* **Biblioteca:** `@praxisui/dynamic-form` & `@praxisui/dynamic-fields`
+* **Status:** `[PENDING]`
+* **Gravidade:** Alta (Design de Plataforma / UX / Eliminação de CSS Ad Hoc)
+* **Diagnóstico Técnico:**
+  O `PraxisDynamicForm` suporta nativamente modo de apresentação (`mode="view"` com `[presentationModeGlobal]="true"`), gerando blocos semânticos de leitura para cada campo via `DynamicFieldLoaderDirective` e `FieldShellComponent` (`praxis-presentation`).
+  No entanto, visualmente:
+  1. **Aparência plana e crua:** As seções e campos são renderizados com estilos utilitários minimalistas, parecendo listas brutas ou formulários desabilitados simples.
+  2. **Ausência de acabamento de produto:** Faltam containers com acabamento contemporâneo (bordas sutis de alta definição, efeito translúcido/glass com tokens M3, padding e gaps calibrados, divisores refinados, badges de cabeçalho).
+  3. **Incentivo involuntário a débitos técnicos:** Como o componente não oferece uma opção "out of the box" para layouts ricos de dossiês ou visualização executiva, desenvolvedores e agentes são empurrados a criar réplicas estáticas de DTOs via `RichContentDocument` e a injetar centenas de linhas de CSS com `::ng-deep` nos apps consumidores, violando frontalmente a premissa de telas governadas por metadados.
+* **Implementação Recomendada para a Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core` & `@praxisui/dynamic-form`):**
+     - Adicionar suporte a `@Input() presentationPreset?: 'default' | 'compactPresentation' | 'corporateDossier' | 'editorialCard';` no `PraxisDynamicForm`.
+     - Permitir que essa opção seja declarada no próprio `FormConfig.metadata.presentationPreset` ou em `section.presentationPreset`.
+  2. **Estilos e Classes Canônicas (`@praxisui/dynamic-form` & `@praxisui/dynamic-fields`):**
+     - Criar o preset visual `.praxis-dynamic-form--corporate-dossier`:
+       - Seções renderizadas como cards elegantes com `background: var(--md-sys-color-surface-container-low)`, borda de 1px com `var(--md-sys-color-outline-variant)`, border-radius de 16px, padding de 20px.
+       - Título de seção com tipografia refinada, ícone temático alinhado e badge discreto de contagem de campos ou categoria.
+       - Pares Rótulo/Valor (`praxis-presentation`): rótulo discreto (`font-size: 0.75rem`, `letter-spacing: 0.05em`, cor `on-surface-variant`), valor em destaque (`font-size: 0.95rem`, `font-weight: 600`, cor `on-surface`), com espaçamento vertical harmônico e integração limpa com ícones prefixados (`x-ui.presentation.icon`).
+       - Suporte nativo e automático a Dark Mode e Light Mode via tokens do Theme Bridge.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Configurar o `PraxisDynamicForm` em `mode="view"` com `[presentationModeGlobal]="true"`.
+  - Aplicar classes de apresentação canônicas da plataforma (`pres-compact`, `pres-label-above` ou `pres-label-left`) em vez de recriar campos hardcoded via nós manuais.
+
+
+---
+
+### ISSUE-020: Suporte Nativo a Layout por Abas (Tabs) e Acordeão no `FormConfig` para Organização Multisseção Governada
+* **Biblioteca:** `@praxisui/dynamic-form` & `@praxisui/core`
+* **Status:** `[PENDING]`
+* **Gravidade:** Alta (Arquitetural / Governança de Layout / Redução de Código)
+* **Diagnóstico Técnico:**
+  Entidades de negócio ricas (como `FuncionarioDTO`, `ContratoDTO`, `PacienteDTO`) possuem dezenas de campos agrupados em múltiplos blocos (`@UISchema(group = "Identificação")`, `group = "Profissional"`, `group = "Remuneração"`, `group = "Contato"`, etc.).
+  Atualmente:
+  1. O `PraxisDynamicForm` empilha todas as seções estritamente de forma linear e vertical uma embaixo da outra.
+  2. Não há capacidade declarativa no `FormConfig` para instruir o formulário a renderizar as seções como **Abas (Tabs)** ou como **Acordeão colapsável integrado**.
+  3. Isso força as aplicações que precisam de navegação por abas a abandonar o formulário inteligente em bloco único e ter que criar abas manuais em Angular, instanciando múltiplos formulários separados com configs filtradas manualmente, ou migrando indevidamente para nós de apresentação estáticos.
+* **Implementação Recomendada para a Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Estender `FormConfig`:
+       ```typescript
+       export interface FormLayoutOptions {
+         mode?: 'vertical' | 'tabs' | 'accordion' | 'stepper';
+         defaultTabId?: string;
+         tabsAppearance?: 'pills' | 'underline' | 'buttons';
+         tabs?: Array<{
+           id: string;
+           label: string;
+           icon?: string;
+           sectionIds: string[];
+         }>;
+       }
+       ```
+  2. **Renderização Transparente (`praxis-dynamic-form.html`):**
+     - Quando `config.layout?.mode === 'tabs'`, o `PraxisDynamicForm` renderiza a barra de abas no topo e exibe apenas as seções vinculadas à aba ativa.
+     - Se `tabs` não for informado explicitamente, o motor deriva automaticamente 1 aba por `section`, usando o título e ícone de cada seção!
+  3. **Canvas & Governança:**
+     - O editor de layout do Canvas permite ao usuário mover uma seção para outra aba via drag-and-drop e persistir essa distribuição em `ui_user_config` por perfil/tenant.
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Quando a tela do dossiê necessitar de abas, compor abas orquestradas no nível superior com componentes canônicos e renderizar o `PraxisDynamicForm` para as seções de dados, garantindo que nenhum campo seja hardcoded.
+
+
+---
+
+### ISSUE-021: Suporte a `schemaRef`/`resourcePath` Dinâmico em `RichPropertySheetNode` ou Nó Nativo de Formulário Dinâmico em `RichContent`
+* **Biblioteca:** `@praxisui/rich-content` & `@praxisui/core`
+* **Status:** `[PENDING]`
+* **Gravidade:** Alta (Arquitetural / Integração de Metadados / Eliminação de Código Estático)
+* **Diagnóstico Técnico:**
+  O `RichContent` foi desenhado para orquestrar telas mistas e documentos ricos (banners, KPIs, tabelas, blocos de texto).
+  Para exibir fichas de propriedades (pares chave/valor), o `RichContent` oferece o nó `propertySheet`:
+  ```typescript
+  export interface RichPropertySheetNode {
+    type: 'propertySheet';
+    title?: string;
+    columns?: number;
+    items: RichPropertySheetItem[]; // OBRIGATÓRIO: array estático de itens
+  }
+  ```
+  Isso gera um problema arquitetural severo:
+  1. **Obrigatoriedade de itens estáticos:** O desenvolvedor é forçado a escrever no código do app um array fixo de itens (`{ id: 'cargo', label: '...', value: '...' }`).
+  2. **Falta de interoperabilidade com OpenAPI e `/schemas/filtered`:** O nó não sabe consultar os metadados do backend nem extrair os campos de um grupo (`group = "Identificação"`). Se um novo campo for adicionado no DTO pelo backend, o `propertySheet` nunca o exibirá a menos que alguém altere o código da aplicação consumidora.
+  3. **Sem Governança por Perfil:** Como os itens estão fixos no código da aplicação consumidora, o mecanismo de personalização por usuário/perfil da plataforma não consegue agir sobre a ficha.
+* **Implementação Recomendada para a Plataforma:**
+  1. **Opção A: Suporte Declarativo a Schema em `RichPropertySheetNode`:**
+     ```typescript
+     export interface RichPropertySheetNode {
+       type: 'propertySheet';
+       title?: string;
+       columns?: number;
+       // Suporte a resolução automática via metadados
+       resourcePath?: string;      // Ex: 'human-resources/funcionarios'
+       schemaRef?: string;         // Ex: '#/components/schemas/FuncionarioDTO'
+       group?: string;             // Ex: 'Identificação' ou 'Profissional'
+       dataContextPath?: string;   // Ex: 'hero' ou dados vinculados
+       items?: RichPropertySheetItem[]; // Opcional, para override pontual ou fallback
+     }
+     ```
+  2. **Opção B: Nó Nativo de Formulário Dinâmico em `RichContent` (`RichDynamicFormNode`):**
+     Permitir embutir um formulário governado diretamente como nó de um documento Rich Content:
+     ```typescript
+     export interface RichDynamicFormNode {
+       type: 'dynamicForm';
+       resourcePath: string;
+       mode?: 'view' | 'edit';
+       presentationMode?: boolean;
+       groupFilter?: string[];
+       dataBinding?: string; // Caminho para os dados no contexto do documento
+     }
+     ```
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Evitar replicar DTOs inteiros dentro de `propertySheet.items`.
+  - Usar `<praxis-dynamic-form mode="view" [presentationModeGlobal]="true" ...>` para exibir fichas cadastrais completas orientadas a schema, delegando ao runtime a criação dos campos.
 
 
 
