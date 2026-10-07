@@ -126,8 +126,8 @@ Em componentes de detalhe, dossiês e painéis com abas (como `HeroDossierDrawer
 2. **Recomendação e Prática de Engenharia para Shells de Aba:**
    - Incorporar na biblioteca de documentação e exemplos oficiais a recomendação de **preservação estrutural no DOM** (`[hidden]="activeTab !== '...'"` com CSS `.pane[hidden] { display: none !important; }`), ou disponibilizar uma diretiva estrutural canônica (ex.: `*praxisKeepAliveTab`).
 
-### Mitigação Temporária Aplicada no Hero HQ
-- No [`hero-dossier-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/rh/hero-dossier-drawer.component.ts#L515-L593), os painéis de abas foram migrados para `[hidden]="activeTab() !== '...'"` com regras de CSS `.tab-pane[hidden] { display: none !important; }`, garantindo transição instantânea de 0ms sem chamadas de rede repetidas.
+- No [`hero-dossier-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/rh/hero-dossier-drawer.component.ts#L515-L593) e no [`mission-briefing-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/operacoes/mission-briefing-drawer.component.ts#L375-L405), os painéis de abas foram migrados para `[hidden]="activeTab() !== '...'"` com regras de CSS `.tab-pane[hidden] { display: none !important; }`, garantindo transição instantânea de 0ms sem recriação de DOM nem chamadas de rede repetidas.
+- **Validação E2E Playwright:** Comprovado no script `test-drawer-tabs-persistence.js` que a alternância entre todas as 5 abas do dossiê e 3 abas do briefing de missão disparou exatamente **0 requisições** para `/schemas/filtered` ou `/locate`, preservando intactos o estado do formulário e os valores preenchidos.
 
 ### Critérios de Aceite para Resolução
 - [x] A navegação entre abas em um dossiê não gera novas chamadas a `/schemas/filtered` nem a `/locate`.
