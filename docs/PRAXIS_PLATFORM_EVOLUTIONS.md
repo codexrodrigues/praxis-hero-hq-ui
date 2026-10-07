@@ -1372,8 +1372,8 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 ---
 
 ### ISSUE-019: Presets Visuais Ricos Nativos para Modo Apresentação em `PraxisDynamicForm` (`presentationPreset: 'corporate-dossier' | 'editorial-card'`)
-* **Biblioteca:** `@praxisui/dynamic-form` & `@praxisui/dynamic-fields`
-* **Status:** `[PENDING]`
+* **Biblioteca:** `@praxisui/dynamic-form`, `@praxisui/dynamic-fields` & `@praxisui/core`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Design de Plataforma / UX / Eliminação de CSS Ad Hoc)
 * **Diagnóstico Técnico:**
   O `PraxisDynamicForm` suporta nativamente modo de apresentação (`mode="view"` com `[presentationModeGlobal]="true"`), gerando blocos semânticos de leitura para cada campo via `DynamicFieldLoaderDirective` e `FieldShellComponent` (`praxis-presentation`).
@@ -1381,19 +1381,48 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
   1. **Aparência plana e crua:** As seções e campos são renderizados com estilos utilitários minimalistas, parecendo listas brutas ou formulários desabilitados simples.
   2. **Ausência de acabamento de produto:** Faltam containers com acabamento contemporâneo (bordas sutis de alta definição, efeito translúcido/glass com tokens M3, padding e gaps calibrados, divisores refinados, badges de cabeçalho).
   3. **Incentivo involuntário a débitos técnicos:** Como o componente não oferece uma opção "out of the box" para layouts ricos de dossiês ou visualização executiva, desenvolvedores e agentes são empurrados a criar réplicas estáticas de DTOs via `RichContentDocument` e a injetar centenas de linhas de CSS com `::ng-deep` nos apps consumidores, violando frontalmente a premissa de telas governadas por metadados.
-* **Implementação Recomendada para a Plataforma:**
-  1. **Contrato Canônico (`@praxisui/core` & `@praxisui/dynamic-form`):**
-     - Adicionar suporte a `@Input() presentationPreset?: 'default' | 'compactPresentation' | 'corporateDossier' | 'editorialCard';` no `PraxisDynamicForm`.
-     - Permitir que essa opção seja declarada no próprio `FormConfig.metadata.presentationPreset` ou em `section.presentationPreset`.
-  2. **Estilos e Classes Canônicas (`@praxisui/dynamic-form` & `@praxisui/dynamic-fields`):**
-     - Criar o preset visual `.praxis-dynamic-form--corporate-dossier`:
-       - Seções renderizadas como cards elegantes com `background: var(--md-sys-color-surface-container-low)`, borda de 1px com `var(--md-sys-color-outline-variant)`, border-radius de 16px, padding de 20px.
-       - Título de seção com tipografia refinada, ícone temático alinhado e badge discreto de contagem de campos ou categoria.
-       - Pares Rótulo/Valor (`praxis-presentation`): rótulo discreto (`font-size: 0.75rem`, `letter-spacing: 0.05em`, cor `on-surface-variant`), valor em destaque (`font-size: 0.95rem`, `font-weight: 600`, cor `on-surface`), com espaçamento vertical harmônico e integração limpa com ícones prefixados (`x-ui.presentation.icon`).
-       - Suporte nativo e automático a Dark Mode e Light Mode via tokens do Theme Bridge.
+* **Implementação Realizada na Plataforma:**
+  1. **Contratos Canônicos (`@praxisui/core`):**
+     - Declarado o tipo exportado `FormPresentationPreset`:
+       ```typescript
+       export type FormPresentationPreset =
+         | 'default'
+         | 'corporate-dossier'
+         | 'corporateDossier'
+         | 'editorial-card'
+         | 'editorialCard'
+         | 'compact-presentation'
+         | 'compactPresentation';
+       ```
+     - Estendido `FormPresentationConfig` com `preset?: FormPresentationPreset; presentationPreset?: FormPresentationPreset;`.
+     - Estendido `FormSection` com `presentationPreset?: FormPresentationPreset;` (permitindo override por seção).
+     - Estendido `FormConfigMetadata` com `presentationPreset?: FormPresentationPreset;`.
+  2. **Runtime do `PraxisDynamicForm` (`@praxisui/dynamic-form`):**
+     - Adicionado `@Input() presentationPreset?: FormPresentationPreset;`.
+     - Resolução hierárquica por precedência:
+       `@Input() presentationPreset` > `presentation.presentationPreset` > `config.presentation.presentationPreset` > `config.metadata.presentationPreset` > `'default'`.
+     - Suporte a override individual por seção (`section.presentationPreset`).
+     - Atributos semânticos `[attr.data-presentation-preset]` e classes CSS correspondentes no form e nas seções:
+       `.praxis-dynamic-form--corporate-dossier`, `.praxis-dynamic-form--editorial-card`, `.praxis-dynamic-form--compact-presentation` e variantes de seção (`.form-section--*`).
+     - Estilização completa de cards de dossiê (`corporate-dossier`), divisores tracejados sutis, tipografia governada por tokens M3, badges de categoria e suporte pleno a Dark/Light Mode.
+     - Metadados, editorial copy e documentação pública atualizados (`praxis-dynamic-form.json-api.md`).
+  3. **Validação:**
+     - Build de produção completo (`node ./scripts/build-libs.js --prod`) bem-sucedido nas 13 bibliotecas.
+     - Suíte focal de 17 testes unitários (`praxis-dynamic-form.presentation-preset.spec.ts`) aprovada com 100% de sucesso em ChromeHeadless.
+     - PR #555 integrado na branch `main`.
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
-  - Configurar o `PraxisDynamicForm` em `mode="view"` com `[presentationModeGlobal]="true"`.
-  - Aplicar classes de apresentação canônicas da plataforma (`pres-compact`, `pres-label-above` ou `pres-label-left`) em vez de recriar campos hardcoded via nós manuais.
+  - O workaround CSS com `::ng-deep` no host `hero-dossier-drawer.component.ts` pode ser **removido integralmente**.
+  - No `<praxis-dynamic-form>`, utilize diretamente:
+    ```html
+    <praxis-dynamic-form
+      [config]="dossierConfig"
+      [value]="selectedHero"
+      [mode]="'view'"
+      [presentationModeGlobal]="true"
+      presentationPreset="corporate-dossier">
+    </praxis-dynamic-form>
+    ```
+    Ou declare `presentationPreset: 'corporate-dossier'` dentro de `config.presentation` ou em seções específicas de `config.sections`.
 
 
 ---
@@ -1485,6 +1514,67 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
   - Evitar replicar DTOs inteiros dentro de `propertySheet.items`.
   - Usar `<praxis-dynamic-form mode="view" [presentationModeGlobal]="true" ...>` para exibir fichas cadastrais completas orientadas a schema, delegando ao runtime a criação dos campos.
 
+---
 
+### ISSUE-022: Reatividade Semântica de Ícone, Tom e Estado em Campos Booleanos no Modo Apresentação (`FieldShellComponent`)
+* **Biblioteca:** `@praxisui/dynamic-fields` & `@praxisui/core` (com reflexo em `@praxisui/dynamic-form`)
+* **Status:** `[PENDING]`
+* **Gravidade:** Alta (Inconsistência Semântica / Confiabilidade de Apresentação em Dados Corporativos)
+* **Diagnóstico Técnico & Evidência Real:**
+  No Dossiê do Herói da tela de Recursos Humanos do `praxis-hero-hq-ui`, ao inspecionar colaboradores inativos (ex: *Ayla Hayes*, com `ativo: false`), foi observada uma inconsistência crítica de UI/UX corporativa:
+  - O campo **ATIVO** exibe o label `"ATIVO"`.
+  - O valor textual é resolvido corretamente para `"Não"` dentro de um chip.
+  - **Porém**, o ícone de prefixo renderizado é o toggle ligado verde (`toggle_on`) e o tom aplicado é `tone="success"`, transmitindo visualmente a impressão de que o registro está ativo!
 
+  **Causa-Raiz no Código da Plataforma:**
+  1. No backend (`FuncionarioDTO.java`), o campo `ativo` possui as anotações estáticas:
+     ```java
+     @ExtensionProperty(name = "presentation.presenter", value = "status"),
+     @ExtensionProperty(name = "presentation.icon", value = "toggle_on"),
+     @ExtensionProperty(name = "presentation.appearance", value = "soft"),
+     @ExtensionProperty(name = "presentation.tone", value = "success")
+     private Boolean ativo;
+     ```
+  2. No componente `FieldShellComponent` (`projects/praxis-dynamic-fields/src/lib/components/field-shell/field-shell.component.ts`):
+     ```typescript
+     getPresentationPrefixIcon(): string {
+       const semanticIcon = this.normalizeIconName(this.getResolvedPresentation().icon);
+       if (semanticIcon) {
+         return semanticIcon;
+       }
+       ...
+     }
 
+     getPresentationTone(): string | null {
+       return this.getResolvedPresentation().tone ?? null;
+     }
+     ```
+  3. Embora `FieldShellComponent` possua os métodos auxiliares `isBooleanPresentationField()` e `getBooleanPresentationState()`, os métodos `getPresentationPrefixIcon()` e `getPresentationTone()` priorizam a string estática do metadata sem verificar o estado booleano do campo.
+  4. Como resultado, quando o desenvolvedor backend define `presentation.icon = "toggle_on"` e `presentation.tone = "success"` para qualificar o campo como um switch de status, essa anotação estática anula a semântica dinâmica quando o registro possui valor `false` (ou `0`).
+
+* **Implementação Recomendada para a Plataforma:**
+  1. **Resolução Dinâmica Inteligente de Ícones e Tons em `FieldShellComponent`:**
+     - Quando `isBooleanPresentationField()` for verdadeiro (ou o presenter for `'status'`/`'boolean'`):
+       - Se o valor atual for estritamente `false` (ou `0`):
+         * **Mapeamento de Ícone Inativo:** Se `presentation.icon` foi configurado como `'toggle_on'`, resolver automaticamente para `'toggle_off'`. Se foi `'check_circle'` ou `'check'`, resolver para `'cancel'` ou `'close'`. Se foi `'visibility'`, resolver para `'visibility_off'`.
+         * **Mapeamento de Tom Inativo:** Se `presentation.tone` foi configurado como `'success'`, rebaixar para `'neutral'` (ou `'warn'`/`'muted'`).
+       - Permitir extensão explícita de anotações por estado no contrato OpenAPI / `x-ui`:
+         * `presentation.iconTrue` e `presentation.iconFalse` (ou `@ExtensionProperty(name = "presentation.icon.false", value = "toggle_off")`).
+         * `presentation.toneTrue` e `presentation.toneFalse` (ex: `success` para true, `neutral` para false).
+  2. **Contrato Canônico (`@praxisui/core`):**
+     - Estender `ValuePresentationConfig` para suportar pares booleanos explícitos:
+       ```typescript
+       export interface BooleanPresentationOptions {
+         iconTrue?: string;
+         iconFalse?: string;
+         toneTrue?: RichSemanticTone;
+         toneFalse?: RichSemanticTone;
+         labelTrue?: string;
+         labelFalse?: string;
+       }
+       ```
+  3. **Validação:**
+     - Teste unitário em `field-shell.component.spec.ts` validando que um campo booleano com `icon: 'toggle_on'` renderiza `toggle_off` e tom neutro quando `control.value === false`.
+
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Aplicar estilização semântica orientada às classes nativas `praxis-presentation--boolean-false` e `praxis-presentation--boolean-true` já emitidas pelo `FieldShellComponent` no host para garantir fidelidade visual enquanto a lib incorpora o mapeamento dinâmico automático.
