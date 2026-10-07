@@ -33,7 +33,7 @@
 | **ISSUE-017** | `@praxisui/rich-content` | Funcional / Visual | `RichCardMedia[kind='avatar']` ignora URL de imagem (`src`) e renderiza apenas iniciais com fallback nulo quando `label`/`alt` são omitidos | `[DONE]` |
 | **ISSUE-018** | `@praxisui/rich-content` | Design / Contraste & Layout | `RichTabsNode[appearance='pills']` possui `#fff` hardcoded no fundo da aba ativa e força `flex-wrap: wrap` quebrando o layout | `[DONE]` |
 | **ISSUE-019** | `@praxisui/dynamic-form` | Design / Acabamento | Presets Visuais Ricos Nativos para Modo Apresentação (`presentationPreset: 'corporate-dossier' \| 'editorial-card'`) eliminando CSS customizado no host | `[DONE]` |
-| **ISSUE-020** | `@praxisui/dynamic-form` & `@praxisui/core` | Arquitetural / Layout | Suporte Nativo a Layout por Abas (Tabs) e Acordeão no `FormConfig` para Organização Multisseção Governada | `[PENDING]` |
+| **ISSUE-020** | `@praxisui/dynamic-form` & `@praxisui/core` | Arquitetural / Layout | Suporte Nativo a Layout por Abas (Tabs) e Acordeão no `FormConfig` para Organização Multisseção Governada | `[DONE]` |
 | **ISSUE-021** | `@praxisui/rich-content` & `@praxisui/core` | Arquitetural / Composição | Suporte a `schemaRef`/`resourcePath` dinâmico em `RichPropertySheetNode` ou nó nativo de formulário dinâmico em `RichContent` | `[PENDING]` |
 | **ISSUE-022** | `@praxisui/dynamic-fields` & `@praxisui/core` | Semântica / Reatividade | Reatividade Semântica de Ícone, Tom e Estado em Campos Booleanos no Modo Apresentação (`FieldShellComponent`) | `[DONE]` |
 | **ISSUE-023** | `@praxisui/rich-content` & `@praxisui/core` | Design / Layout | Espaçamento Canônico de Cabeçalho e Diagramação Interna Balanceada em Nós de Métricas (`statGroup` / `RichStatGroupNode`) | `[DONE]` |
@@ -1431,37 +1431,84 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-020: Suporte Nativo a Layout por Abas (Tabs) e Acordeão no `FormConfig` para Organização Multisseção Governada
 * **Biblioteca:** `@praxisui/dynamic-form` & `@praxisui/core`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Arquitetural / Governança de Layout / Redução de Código)
 * **Diagnóstico Técnico:**
   Entidades de negócio ricas (como `FuncionarioDTO`, `ContratoDTO`, `PacienteDTO`) possuem dezenas de campos agrupados em múltiplos blocos (`@UISchema(group = "Identificação")`, `group = "Profissional"`, `group = "Remuneração"`, `group = "Contato"`, etc.).
-  Atualmente:
-  1. O `PraxisDynamicForm` empilha todas as seções estritamente de forma linear e vertical uma embaixo da outra.
-  2. Não há capacidade declarativa no `FormConfig` para instruir o formulário a renderizar as seções como **Abas (Tabs)** ou como **Acordeão colapsável integrado**.
-  3. Isso força as aplicações que precisam de navegação por abas a abandonar o formulário inteligente em bloco único e ter que criar abas manuais em Angular, instanciando múltiplos formulários separados com configs filtradas manualmente, ou migrando indevidamente para nós de apresentação estáticos.
-* **Implementação Recomendada para a Plataforma:**
+  Anteriormente:
+  1. O `PraxisDynamicForm` empilhava todas as seções estritamente de forma linear e vertical uma embaixo da outra.
+  2. Não havia capacidade declarativa no `FormConfig` para instruir o formulário a renderizar as seções como **Abas (Tabs)** ou como **Acordeão colapsável integrado**.
+  3. Isso forçava as aplicações que precisavam de navegação por abas a abandonar o formulário inteligente em bloco único e ter que criar abas manuais em Angular, instanciando múltiplos formulários separados com configs filtradas manualmente, ou migrando indevidamente para nós de apresentação estáticos.
+* **Implementação Realizada na Plataforma (PR #558):**
   1. **Contrato Canônico (`@praxisui/core`):**
-     - Estender `FormConfig`:
+     - Novos tipos exportados em `form-config.model.ts`:
        ```typescript
+       export type FormLayoutMode = 'vertical' | 'tabs' | 'accordion';
+       export type FormLayoutTabsAppearance = 'pills' | 'underline' | 'buttons';
+
+       export interface FormLayoutTabItem {
+         id: string;
+         label: string;
+         icon?: string;
+         sectionIds: string[];
+         badge?: string | number;
+         disabled?: boolean;
+         tooltip?: string;
+       }
+
        export interface FormLayoutOptions {
-         mode?: 'vertical' | 'tabs' | 'accordion' | 'stepper';
+         mode?: FormLayoutMode;
          defaultTabId?: string;
-         tabsAppearance?: 'pills' | 'underline' | 'buttons';
-         tabs?: Array<{
-           id: string;
-           label: string;
-           icon?: string;
-           sectionIds: string[];
-         }>;
+         tabsAppearance?: FormLayoutTabsAppearance;
+         tabs?: FormLayoutTabItem[];
+         accordionMulti?: boolean;
+         hideSectionHeaderInTabs?: boolean;
        }
        ```
-  2. **Renderização Transparente (`praxis-dynamic-form.html`):**
-     - Quando `config.layout?.mode === 'tabs'`, o `PraxisDynamicForm` renderiza a barra de abas no topo e exibe apenas as seções vinculadas à aba ativa.
-     - Se `tabs` não for informado explicitamente, o motor deriva automaticamente 1 aba por `section`, usando o título e ícone de cada seção!
-  3. **Canvas & Governança:**
-     - O editor de layout do Canvas permite ao usuário mover uma seção para outra aba via drag-and-drop e persistir essa distribuição em `ui_user_config` por perfil/tenant.
+     - Interface `FormConfig` estendida com `layout?: FormLayoutOptions;`.
+  2. **Runtime e Mecanismo de Layout (`@praxisui/dynamic-form`):**
+     - Adicionadas entradas `@Input() layoutMode?: FormLayoutMode;` e `@Input() formLayout?: FormLayoutOptions;`.
+     - Adicionadas saídas `@Output() tabChange = new EventEmitter<string>();` e `@Output() tabSelected = new EventEmitter<FormLayoutTabItem>();`.
+     - **Auto-Derivação Inteligente:** Quando `mode === 'tabs'` e `tabs` for omitido, o componente deriva automaticamente 1 aba por seção visível (`id: section.id`, `label: title`, `icon: icon`, `sectionIds: [section.id]`).
+     - **Preservação de Integridade Reativa:** Seções inativas são ocultadas via `[hidden]` em vez de remoção do DOM, garantindo que todos os `FormControl`s permaneçam ativos, validados e reativos no `FormGroup`, sem perda de estado, sem re-fetching e com submissão integral.
+     - **Feedback Visual de Erros:** `getTabErrorCount(tab)` calcula dinamicamente campos com erro dentro das seções da aba para exibição de badge de erro.
+     - **Modo Acordeão:** Em `mode === 'accordion'`, todas as seções tornam-se colapsáveis nativamente, com suporte a colapso exclusivo (`accordionMulti: false`) ou múltiplo (`accordionMulti: true`).
+     - **Acessibilidade:** Marcação ARIA completa (`role="tablist"`, `role="tab"`, `aria-selected`, `role="tabpanel"`, `aria-labelledby`, `aria-controls`).
+  3. **Estilos Canônicos (`praxis-dynamic-form.scss`):**
+     - Criada folha de estilos completa para `.prx-form-tabs`, `.prx-form-tabs__tablist` (com rolagem horizontal suave sem scrollbar visível), `.prx-form-tabs__tab` e variantes de aparência (`pills`, `underline`, `buttons`) governadas por tokens M3.
+     - Guarda estrita `.section-drop-wrapper[hidden] { display: none !important; }`.
+  4. **Validação:**
+     - 13 testes unitários focais em `praxis-dynamic-form.layout-tabs.spec.ts` (100% SUCCESS).
+     - 17 testes de `presentation-preset.spec.ts` preservados com 100% de sucesso.
+     - Build de `@praxisui/core`, `@praxisui/dynamic-form` e downstream do `praxis-hero-hq-ui` concluídos com código 0.
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
-  - Quando a tela do dossiê necessitar de abas, compor abas orquestradas no nível superior com componentes canônicos e renderizar o `PraxisDynamicForm` para as seções de dados, garantindo que nenhum campo seja hardcoded.
+  - Para transformar qualquer formulário multisseção em abas nativas, passe diretamente no componente:
+    ```html
+    <praxis-dynamic-form
+      [config]="formConfig"
+      layoutMode="tabs"
+      [formLayout]="{ tabsAppearance: 'pills' }">
+    </praxis-dynamic-form>
+    ```
+    Ou defina dentro de `config.layout`:
+    ```json
+    {
+      "layout": {
+        "mode": "tabs",
+        "tabsAppearance": "pills",
+        "defaultTabId": "identificacao"
+      },
+      "sections": [ ... ]
+    }
+    ```
+  - Para modo acordeão corporativo:
+    ```html
+    <praxis-dynamic-form
+      [config]="formConfig"
+      layoutMode="accordion"
+      [formLayout]="{ accordionMulti: false }">
+    </praxis-dynamic-form>
+    ```
 
 
 ---
