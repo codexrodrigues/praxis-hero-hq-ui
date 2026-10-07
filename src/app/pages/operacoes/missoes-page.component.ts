@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
@@ -7,6 +15,7 @@ import {
   MissionBriefingDrawerComponent,
   type MissionProfile,
 } from './mission-briefing-drawer.component';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const MISSOES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -88,37 +97,39 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'missions-kpi-grid',
       items: [
         {
           id: 'ativas',
           label: 'Missões Ativas em Campo',
-          value: '07 Incursões',
-          caption: 'Todas em comunicação segura',
+          value: '06 Incursões',
+          caption: 'Em andamento no radar operacional',
           icon: 'flight_takeoff',
           tone: 'info',
         },
         {
           id: 'sucesso',
           label: 'Taxa de Sucesso Histórica',
-          value: '96,2%',
-          caption: 'Últimos 12 meses consolidados',
+          value: '66,7%',
+          caption: '4 missões concluídas com êxito',
           icon: 'task_alt',
           tone: 'success',
         },
         {
           id: 'planejamento',
           label: 'Em Planejamento / Briefing',
-          value: '05 Missões',
-          caption: 'Aguardando aprovação de compliance',
+          value: '10 Missões',
+          caption: 'Em preparação e briefing tático',
           icon: 'schedule',
           tone: 'warning',
         },
         {
           id: 'omega',
           label: 'Prioridade Ômega / Crítica',
-          value: '01 Alerta',
-          caption: 'Protocolo de resposta imediata ativo',
+          value: '10 Alertas',
+          caption: 'Engajamento de prioridade crítica',
           icon: 'crisis_alert',
           tone: 'danger',
         },
@@ -154,7 +165,7 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
 
       <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
       <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument" />
+        <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
       <!-- Metadata-Driven CRUD Runtime -->
@@ -284,10 +295,79 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class MissoesPageComponent {
+export class MissoesPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = MISSOES_CRUD_METADATA;
-  protected readonly kpiDocument = MISSIONS_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(MISSIONS_KPI_DOCUMENT);
   protected readonly selectedMission = signal<MissionProfile | null>(null);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getMissionTacticalKpis().subscribe((kpis) => {
+      const formattedRate = kpis.successRate.toLocaleString('pt-BR', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      });
+
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'missions-kpi-grid',
+            items: [
+              {
+                id: 'ativas',
+                label: 'Missões Ativas em Campo',
+                value: `${kpis.activeMissions < 10 ? '0' : ''}${kpis.activeMissions} Incursões`,
+                caption: 'Em andamento no radar operacional',
+                icon: 'flight_takeoff',
+                tone: 'info',
+              },
+              {
+                id: 'sucesso',
+                label: 'Taxa de Sucesso Histórica',
+                value: `${formattedRate}%`,
+                caption: `${kpis.completedMissions} missões concluídas com êxito`,
+                icon: 'task_alt',
+                tone: 'success',
+              },
+              {
+                id: 'planejamento',
+                label: 'Em Planejamento / Briefing',
+                value: `${kpis.plannedMissions < 10 ? '0' : ''}${kpis.plannedMissions} Missões`,
+                caption: 'Em preparação e briefing tático',
+                icon: 'schedule',
+                tone: 'warning',
+              },
+              {
+                id: 'omega',
+                label: 'Prioridade Ômega / Crítica',
+                value: `${kpis.criticalPriorityMissions < 10 ? '0' : ''}${kpis.criticalPriorityMissions} Alertas`,
+                caption: 'Engajamento de prioridade crítica',
+                icon: 'crisis_alert',
+                tone: 'danger',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 
   protected onMissionRowClicked(event: unknown): void {
     const raw = (event as any)?.row ?? (event as any)?.data ?? event;
