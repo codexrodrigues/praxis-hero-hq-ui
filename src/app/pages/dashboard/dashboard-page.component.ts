@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   inject,
   signal,
 } from '@angular/core';
@@ -14,6 +15,7 @@ import {
 } from '@praxisui/core';
 import { DynamicPageBuilderComponent } from '@praxisui/page-builder';
 import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
+import { DashboardStatsService, type DashboardTacticalKpis } from './dashboard-stats.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -174,9 +176,10 @@ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
     }
   `],
 })
-export class DashboardPageComponent {
+export class DashboardPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly globalAction = inject(GlobalActionService, { optional: true });
+  private readonly statsService = inject(DashboardStatsService);
 
   private readonly hostCapabilities: RichBlockHostCapabilities = {
     dispatchAction: (actionId: string, payload: unknown) => {
@@ -197,6 +200,150 @@ export class DashboardPageComponent {
 
   protected pageDefinition: WidgetPageDefinition = this.injectHostCapabilities(DASHBOARD_PAGE_DEFINITION);
   protected readonly isCustomizing = signal<boolean>(false);
+
+  ngOnInit(): void {
+    this.statsService.getTacticalKpis().subscribe((kpis) => {
+      this.pageDefinition = this.applyRealKpis(this.pageDefinition, kpis);
+    });
+  }
+
+  private applyRealKpis(def: WidgetPageDefinition, kpis: DashboardTacticalKpis): WidgetPageDefinition {
+    return {
+      ...def,
+      widgets: (def.widgets || []).map((w) => {
+        if (w.key === 'kpiProntidao' && w.definition?.inputs?.['document']?.nodes?.[0]) {
+          const card = { ...w.definition.inputs['document'].nodes[0] };
+          card.title = `${kpis.activeHeroes} Ativos`;
+          card.subtitle = 'Prontidão Operacional';
+          if (card.header?.[0]?.items?.[1]) {
+            card.header[0].items[1] = { ...card.header[0].items[1], label: `${kpis.readinessRate}% Força` };
+          }
+          if (card.content?.[0]) {
+            card.content[0] = { ...card.content[0], value: kpis.readinessRate };
+          }
+          if (card.content?.[1]) {
+            card.content[1] = {
+              ...card.content[1],
+              text: `${kpis.activeHeroes} de ${kpis.totalHeroes} heróis prontos para ação`,
+            };
+          }
+          return {
+            ...w,
+            definition: {
+              ...w.definition,
+              inputs: {
+                ...w.definition.inputs,
+                context: { progressValue: kpis.readinessRate },
+                document: {
+                  ...w.definition.inputs['document'],
+                  nodes: [card],
+                },
+              },
+            },
+          };
+        }
+
+        if (w.key === 'kpiMissoes' && w.definition?.inputs?.['document']?.nodes?.[0]) {
+          const card = { ...w.definition.inputs['document'].nodes[0] };
+          card.title = `${kpis.plannedMissions} Planejadas`;
+          card.subtitle = 'Missões Operacionais';
+          if (card.header?.[0]?.items?.[1]) {
+            card.header[0].items[1] = {
+              ...card.header[0].items[1],
+              label: `${kpis.inProgressMissions < 10 ? '0' : ''}${kpis.inProgressMissions} Em Curso`,
+            };
+          }
+          const percent = Math.min(100, Math.round((kpis.inProgressMissions / Math.max(1, kpis.totalMissions)) * 100));
+          if (card.content?.[0]) {
+            card.content[0] = { ...card.content[0], value: percent };
+          }
+          if (card.content?.[1]) {
+            card.content[1] = {
+              ...card.content[1],
+              text: `${kpis.totalMissions} missões catalogadas no radar tático`,
+            };
+          }
+          return {
+            ...w,
+            definition: {
+              ...w.definition,
+              inputs: {
+                ...w.definition.inputs,
+                context: { progressValue: percent },
+                document: {
+                  ...w.definition.inputs['document'],
+                  nodes: [card],
+                },
+              },
+            },
+          };
+        }
+
+        if (w.key === 'kpiFolha' && w.definition?.inputs?.['document']?.nodes?.[0]) {
+          const card = { ...w.definition.inputs['document'].nodes[0] };
+          card.title = `R$ ${kpis.latestPayrollNetMillion} M`;
+          card.subtitle = 'Execução da Folha';
+          if (card.header?.[0]?.items?.[1]) {
+            card.header[0].items[1] = { ...card.header[0].items[1], label: kpis.latestPayrollMonth };
+          }
+          if (card.content?.[1]) {
+            card.content[1] = {
+              ...card.content[1],
+              text: `Folha de ${kpis.latestPayrollEmployees} colaboradores auditados`,
+            };
+          }
+          return {
+            ...w,
+            definition: {
+              ...w.definition,
+              inputs: {
+                ...w.definition.inputs,
+                document: {
+                  ...w.definition.inputs['document'],
+                  nodes: [card],
+                },
+              },
+            },
+          };
+        }
+
+        if (w.key === 'kpiRiscos' && w.definition?.inputs?.['document']?.nodes?.[0]) {
+          const card = { ...w.definition.inputs['document'].nodes[0] };
+          card.title = `${kpis.criticalIncidents < 10 ? '0' : ''}${kpis.criticalIncidents} Críticos`;
+          card.subtitle = 'Ameaças & Incidentes';
+          if (card.header?.[0]?.items?.[1]) {
+            card.header[0].items[1] = { ...card.header[0].items[1], label: `${kpis.totalIncidents} Incidentes` };
+          }
+          const percent = Math.min(100, Math.round((kpis.criticalIncidents / Math.max(1, kpis.totalIncidents)) * 100));
+          if (card.content?.[0]) {
+            card.content[0] = { ...card.content[0], value: percent };
+          }
+          if (card.content?.[1]) {
+            card.content[1] = {
+              ...card.content[1],
+              text: `${kpis.highIncidents} ocorrências de severidade alta em contenção`,
+            };
+          }
+          return {
+            ...w,
+            definition: {
+              ...w.definition,
+              inputs: {
+                ...w.definition.inputs,
+                context: { progressValue: percent },
+                document: {
+                  ...w.definition.inputs['document'],
+                  nodes: [card],
+                },
+              },
+            },
+          };
+        }
+
+        return w;
+      }),
+    };
+  }
 
   private injectHostCapabilities(def: WidgetPageDefinition): WidgetPageDefinition {
     return {

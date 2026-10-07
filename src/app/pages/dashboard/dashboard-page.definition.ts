@@ -4,8 +4,6 @@ import type { PraxisChartConfig } from '@praxisui/charts';
 export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
   id: 'hero-payroll-trend-chart',
   type: 'line',
-  title: 'Evolução da Folha Salarial & Benefícios',
-  subtitle: 'Execução orçamentária dos últimos ciclos de pagamento tático',
   sizing: { mode: 'fixed', height: 320 },
   dataSource: {
     kind: 'remote',
@@ -80,8 +78,6 @@ export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
 export const REPUTATION_RANKING_CHART_CONFIG: PraxisChartConfig = {
   id: 'hero-reputation-ranking-chart',
   type: 'bar',
-  title: 'Ranking Reputacional por Equipe',
-  subtitle: 'Aprovação pública vs. respaldo governamental por esquadrão tático',
   sizing: { mode: 'fixed', height: 320 },
   dataSource: {
     kind: 'remote',
