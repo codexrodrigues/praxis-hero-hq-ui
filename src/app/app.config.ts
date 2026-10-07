@@ -61,6 +61,7 @@ import {
   providePraxisSurfaceDrawerBridge,
 } from '@praxisui/settings-panel';
 import { providePraxisTableMetadata } from '@praxisui/table';
+import { providePraxisListMetadata } from '@praxisui/list';
 import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
 
@@ -135,6 +136,7 @@ export const appConfig: ApplicationConfig = {
     ...providePraxisDynamicFieldsCore(),
     providePraxisDynamicFormMetadata(),
     providePraxisTableMetadata(),
+    providePraxisListMetadata(),
     providePraxisCrudMetadata(),
     providePraxisDialogMetadata(),
     providePraxisSurfaceGlobalActions(),

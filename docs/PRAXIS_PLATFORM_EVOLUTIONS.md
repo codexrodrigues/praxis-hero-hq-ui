@@ -38,7 +38,10 @@
 | **ISSUE-022** | `@praxisui/dynamic-fields` & `@praxisui/core` | Semântica / Reatividade | Reatividade Semântica de Ícone, Tom e Estado em Campos Booleanos no Modo Apresentação (`FieldShellComponent`) | `[DONE]` |
 | **ISSUE-023** | `@praxisui/rich-content` & `@praxisui/core` | Design / Layout | Espaçamento Canônico de Cabeçalho e Diagramação Interna Balanceada em Nós de Métricas (`statGroup` / `RichStatGroupNode`) | `[DONE]` |
 | **ISSUE-024** | `@praxisui/dynamic-fields` | Visual / Acessibilidade | Fallback automático de ícone padrão ('person' / 'account_circle') em `MaterialAvatarComponent` quando imagem e iniciais forem nulas | `[DONE]` |
-
+| **ISSUE-025** | `@praxisui/core` & `praxis-config-starter` | Arquitetural / Persistência | Persistência Remota Assíncrona Multi-Usuário e Isolamento Estrito de Sessão Corporativa no Page Builder e CRUD | `[DONE]` |
+| **ISSUE-026** | `@praxisui/charts` | Visual / Contrato | Contrato Canônico de Gráficos de Área (`area`) e Barras Horizontais (`horizontal-bar`) com Inversão Automática de Eixos | `[DONE]` |
+| **ISSUE-027** | `@praxisui/table` & `@praxisui/crud` | Estrutural / Governança | Projeção Canônica de Colunas Schema-Driven (`columnProjection`), Composição de Células (`compose`) e Regras Condicionais | `[DONE]` |
+| **ISSUE-028** | `@praxisui/dynamic-form` & `@praxisui/page-builder` | Composição / DX | Instanciação e Governança de Formulários Dinâmicos como Widgets Nativos no Canvas do Page Builder | `[DONE]` |
 
 ---
 
@@ -1692,3 +1695,81 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 * **Remoção do Workaround:**
   - O workaround pontual em `src/styles.scss` do `praxis-hero-hq-ui` foi removido com sucesso, pois a biblioteca agora provê o comportamento canônico de fábrica.
 
+---
+
+### ISSUE-025: Persistência Remota Assíncrona Multi-Usuário e Isolamento Estrito de Sessão Corporativa no Page Builder e CRUD
+* **Biblioteca:** `@praxisui/core` & `praxis-config-starter`
+* **Status:** `[DONE]`
+* **Gravidade:** Alta (Governança Corporativa, Multitenancy e Requisitos de Produção)
+* **Diagnóstico Técnico & Evidência Real:**
+  Em cenários corporativos reais, a customização de dashboards e tabelas não pode ficar restrita ao `localStorage` do navegador do cliente e nem ser compartilhada indiscriminadamente entre usuários distintos da mesma máquina ou rede. Quando um usuário corporativo (ex.: Nick Fury) personaliza os widgets do seu dashboard ou formata colunas de compras com regras operacionais, essas modificações devem ser salvas no serviço de governança (`praxis-config-starter`) com isolamento estrito de chave, garantindo que outro colaborador (ex.: Tony Stark) continue recebendo o baseline limpo de fábrica.
+* **Resolução Canônica Implementada na Plataforma:**
+  1. **Token `ASYNC_CONFIG_STORAGE` e Bridge Remota (`@praxisui/core`):**
+     - Suporte a injeção opcional de storage assíncrono conectado a `/api/praxis/config/ui/**`.
+     - Propagação obrigatória do header `X-User-ID` para segregação multi-inquilino/multi-persona.
+     - Suporte a métodos `loadConfig<T>`, `saveConfig<T>` e `clearConfig` com reatividade RxJS (`take(1)`).
+  2. **Isolamento Comprovado e Reversão Limpa:**
+     - Usuário customizado obtém `HTTP 200` com seu payload estendido de tela ou tabela.
+     - Usuário padrão obtém `HTTP 404` limpo do backend, acionando o fallback transparente para o baseline de fábrica.
+     - Botão "Restaurar Fábrica" emite `HTTP DELETE 204` e desfaz todas as preferências locais e remotas.
+  3. **Validação E2E com Prova Real:**
+     - Suite Playwright (`test-multiuser-persistence.cjs`) executa 8 etapas de alternância entre Nick Fury e Tony Stark, conferindo ausência de contaminação cruzada e retenção pós-F5.
+
+---
+
+### ISSUE-026: Contrato Canônico de Gráficos de Área (`area`) e Barras Horizontais (`horizontal-bar`) com Inversão Automática de Eixos
+* **Biblioteca:** `@praxisui/charts`
+* **Status:** `[DONE]`
+* **Gravidade:** Média (Visualização Executiva de Dados e Consistência Cartesiana)
+* **Diagnóstico Técnico & Evidência Real:**
+  Dashboards executivos demandam variações visuais além de barras verticais e linhas simples:
+  1. *Curvas de Área:* Para indicar acúmulo de orçamento e evolução volumétrica.
+  2. *Barras Horizontais:* Para comparativos de ranking com rótulos de texto longos.
+  Anteriormente, a configuração manual de eixos em gráficos de barras horizontais invertia os papéis dos eixos de forma ambígua ou falhava ao consultar endpoints de agregação como `/stats/group-by` quando o filtro padrão era omitido.
+* **Resolução Canônica Implementada na Plataforma:**
+  1. **Inversão Semântica Canônica no `EChartsOptionBuilderService`:**
+     - O contrato do chart mantém a declaração intuitiva: `axes.x` é a dimensão categórica (`field: 'equipe', type: 'category'`) e `axes.y` é a métrica de valor (`type: 'value'`).
+     - Ao configurar `orientation: 'horizontal'` (ou `type: 'horizontal-bar'`), o compilador projeta automaticamente `xAxis = value` e `yAxis = category`, truncando rótulos longos com elegância.
+  2. **Integração de Agregação e Filtro Quickstart:**
+     - Requisições `/stats/group-by` incluem o critério canônico `filter: { <campo>: '%' }` para views relacionais.
+  3. **Gráficos de Área Volumétrica:**
+     - `type: 'area'` suporta `series.smooth = true`, gradientes e formatação de valores compactos em moeda (`BRL|symbol|0|compact`).
+
+---
+
+### ISSUE-027: Projeção Canônica de Colunas Schema-Driven (`columnProjection`), Composição de Células (`compose`) e Regras Condicionais
+* **Biblioteca:** `@praxisui/table` & `@praxisui/crud`
+* **Status:** `[DONE]`
+* **Gravidade:** Alta (Integridade de Schema e Flexibilidade de Layout)
+* **Diagnóstico Técnico & Evidência Real:**
+  Em tabelas schema-driven (`praxis-table` associada a `resourcePath`), enviar um array simples de `columns: [...]` causava conflito com o `projectSchemaColumns` da biblioteca, mantendo rótulos e colunas originais do schema em vez de refletir colunas ocultadas e cabeçalhos customizados.
+* **Resolução Canônica Implementada na Plataforma:**
+  1. **Adoção do Bloco `columnProjection`:**
+     - `source: 'schema'`: Indica que a tipagem e dados estruturais continuam sendo governados pelo schema remoto.
+     - `include: string[]`: Lista exata de colunas a exibir. Colunas omitidas (ex.: `approvedAt`, `disabledReason`, `currency`) tornam-se automaticamente invisíveis.
+     - `overrides: Record<string, Partial<TableColumn>>`: Modificações pontuais em propriedades canônicas.
+  2. **Composição de Múltiplos Campos em uma Coluna (`compose` renderer):**
+     - Permite fundir dois campos em uma célula elegante (ex.: ID em negrito + badge de moeda).
+  3. **Regras Condicionais de Célula e Linha Inteira (JsonLogic):**
+     - `conditionalRenderers` em colunas (ex.: badges com ícones específicos para cada status de ordem).
+     - `conditionalStyles` em células (ex.: cor ciano e negrito 800 para lotes > 10).
+     - `rowConditionalStyles` na linha (ex.: borda lateral azul para alto volume; fundo vermelho com opacidade para canceladas).
+  4. **Densidade Compacta e Animações:**
+     - Suporte a `appearance.density = 'compact'` e transições suaves de hover/pulso em linhas.
+
+---
+
+### ISSUE-028: Instanciação e Governança de Formulários Dinâmicos como Widgets Nativos no Canvas do Page Builder
+* **Biblioteca:** `@praxisui/dynamic-form` & `@praxisui/page-builder`
+* **Status:** `[DONE]`
+* **Gravidade:** Média (Composição Avançada de Páginas Executivas)
+* **Diagnóstico Técnico & Evidência Real:**
+  Dashboards corporativos frequentemente exigem não apenas visualização analítica (gráficos, KPIs e tabelas), mas também superfícies de ação e despacho imediato com campos de entrada, seletores de urgência e validações.
+* **Resolução Canônica Implementada na Plataforma:**
+  1. **Registro Declarativo de Widget no Canvas:**
+     - O `praxis-dynamic-form` pode ser registrado diretamente como `widget` no array de itens do Page Builder.
+     - Mapeamento de colunas responsivas (`colSpan: 12`, `rowSpan: 8`).
+  2. **Estrutura Hierárquica em Seções e Linhas:**
+     - Suporte a seções (`sections`), linhas de formulário (`rows`) com sistema de 12 colunas proporcionais (`width: 6`, `width: 12`), e metadados de campos tipados (`input`, `select`, `textarea`).
+  3. **Isolamento de Estado:**
+     - Os dados do formulário dinâmico são persistidos e renderizados com total compatibilidade na árvore JSON do Page Builder.

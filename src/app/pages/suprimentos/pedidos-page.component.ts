@@ -607,10 +607,18 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
     }
 
     const customTable = this.persistedTableConfig();
+    const effectiveTable = customTable
+      ? ({
+          ...PEDIDOS_CRUD_METADATA.table,
+          ...customTable,
+          columnProjection: customTable.columnProjection || (PEDIDOS_CRUD_METADATA.table as any)?.columnProjection,
+        } as unknown as CrudMetadata['table'])
+      : PEDIDOS_CRUD_METADATA.table;
+
     return {
       ...PEDIDOS_CRUD_METADATA,
       filterCriteria,
-      table: customTable ? (customTable as unknown as CrudMetadata['table']) : PEDIDOS_CRUD_METADATA.table,
+      table: effectiveTable,
     };
   });
 
@@ -680,7 +688,7 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
             if (this.authService.currentPersona().id !== currentUserId) {
               return;
             }
-            if (remote && remote.columns && remote.columns.length > 0) {
+            if (remote && ((remote.columns && remote.columns.length > 0) || remote.columnProjection)) {
               this.persistedTableConfig.set(remote);
               this.isTableCustomized.set(true);
               if (typeof localStorage !== 'undefined') {
@@ -752,9 +760,7 @@ export class PedidosPageComponent implements OnInit, OnDestroy {
   }
 
   protected onTableConfigChange(config: TableConfig): void {
-    if (this.isCustomizing()) {
-      this.saveTableConfig(config);
-    }
+    // Snapshot de runtime em memória
   }
 
 

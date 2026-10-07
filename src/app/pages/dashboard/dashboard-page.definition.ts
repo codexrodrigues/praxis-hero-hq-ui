@@ -1,5 +1,150 @@
 import type { WidgetPageDefinition } from '@praxisui/core';
 import type { PraxisChartConfig } from '@praxisui/charts';
+import type { PraxisListConfig } from '@praxisui/list';
+
+export const INCIDENT_SEVERITY_DONUT_CONFIG: PraxisChartConfig = {
+  id: 'hero-incident-severity-donut-chart',
+  type: 'donut',
+  sizing: { mode: 'fixed', height: 280 },
+  dataSource: {
+    kind: 'remote',
+    resourcePath: 'risk-intelligence/vw-indicadores-incidentes',
+    query: {
+      sourceKind: 'praxis.stats',
+      statsOperation: 'group-by',
+      statsPath: 'risk-intelligence/vw-indicadores-incidentes/stats/group-by',
+      statsRequest: {
+        filter: {},
+        field: 'severidade',
+        metric: {
+          operation: 'COUNT',
+          field: 'severidade',
+          alias: 'total',
+        },
+      },
+      dimensions: ['severidade'],
+      metrics: [
+        { field: 'total', aggregation: 'count', alias: 'total' },
+      ],
+    },
+  },
+  axes: {
+    x: {
+      field: 'severidade',
+      type: 'category',
+      label: 'Severidade',
+    },
+    y: {
+      type: 'value',
+      label: 'Total de Ocorrências',
+    },
+  },
+  series: [
+    {
+      id: 'incidentesSeveridade',
+      name: 'Severidade',
+      type: 'pie',
+      categoryField: 'severidade',
+      metric: { field: 'total', aggregation: 'count' },
+      labels: { visible: true },
+    },
+  ],
+  theme: {
+    tooltip: { enabled: true },
+    palette: ['#ef4444', '#f97316', '#eab308', '#38bdf8'],
+    legend: { visible: true },
+  },
+};
+
+export const DEFCON_GAUGE_CONFIG: PraxisChartConfig = {
+  id: 'hero-defcon-gauge-chart',
+  type: 'gauge',
+  sizing: { mode: 'fixed', height: 280 },
+  gauge: {
+    scale: { min: 1, max: 5 },
+  },
+  axes: {
+    x: {
+      field: 'estagio',
+      type: 'category',
+    },
+  },
+  series: [
+    {
+      id: 'nivelDefcon',
+      name: 'DEFCON',
+      categoryField: 'estagio',
+      metric: { field: 'defcon', aggregation: 'avg' },
+      labels: { visible: true },
+    },
+  ],
+  dataSource: {
+    kind: 'local',
+    items: [
+      { estagio: 'Prontidão Global', defcon: 4.2 },
+    ],
+  },
+  theme: {
+    palette: ['#06b6d4'],
+    tooltip: { enabled: true },
+  },
+};
+
+export const DISTRESS_SIGNALS_LIST_CONFIG: PraxisListConfig = {
+  id: 'hero-distress-signals-list',
+  dataSource: {
+    resourcePath: 'operations/sinais-socorro',
+    query: {
+      sort: ['abertoEm,desc'],
+    },
+    data: [
+      { id: 1, origem: 'Complexo Stark Sul', local: 'Laboratório de Fusão Arc', nivelAmeaca: 4, status: 'ATIVO', abertoEm: '14:25' },
+      { id: 2, origem: 'Porto Metropolitano', local: 'Terminal de Cargas 3', nivelAmeaca: 3, status: 'EM_ATENDIMENTO', abertoEm: '13:50' },
+      { id: 3, origem: 'Setor Aeroespacial', local: 'Órbita Baixa LEO-2', nivelAmeaca: 5, status: 'ATIVO', abertoEm: '12:15' },
+      { id: 4, origem: 'Subterrâneos Metro', local: 'Linha Vermelha Setor B', nivelAmeaca: 2, status: 'CONCLUIDO', abertoEm: '10:40' },
+      { id: 5, origem: 'Embaixada Wakanda', local: 'Pavilhão Cultural', nivelAmeaca: 1, status: 'CONCLUIDO', abertoEm: '09:05' },
+    ],
+  },
+  layout: {
+    variant: 'list',
+    density: 'compact',
+    lines: 2,
+    dividers: 'between',
+  },
+  skin: {
+    type: 'glass',
+    radius: '12px',
+  },
+  selection: {
+    mode: 'single',
+    return: 'item',
+  },
+  templating: {
+    leading: {
+      type: 'icon',
+      expr: 'emergency',
+      color: 'warn',
+    },
+    primary: {
+      type: 'text',
+      expr: '${item.origem} · ${item.local}',
+    },
+    secondary: {
+      type: 'text',
+      expr: 'Ameaça Nível ${item.nivelAmeaca}',
+    },
+    meta: {
+      type: 'text',
+      expr: '${item.abertoEm}',
+    },
+    trailing: {
+      type: 'chip',
+      expr: '${item.status}',
+      variant: 'outlined',
+      color: 'accent',
+    },
+  },
+};
 
 export const PAYROLL_TREND_CHART_CONFIG: PraxisChartConfig = {
   id: 'hero-payroll-trend-chart',
@@ -216,21 +361,74 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
         rowSpan: 6,
         constraints: { minColSpan: 4, maxColSpan: 12 },
       },
-      recentIncidents: {
+      incidentsSeverityDonut: {
         col: 1,
         row: 14,
-        colSpan: 12,
+        colSpan: 4,
         rowSpan: 6,
-        constraints: { minColSpan: 6, maxColSpan: 12 },
+        constraints: { minColSpan: 3, maxColSpan: 6 },
       },
-      domainHub: {
+      defconGaugeChart: {
+        col: 5,
+        row: 14,
+        colSpan: 3,
+        rowSpan: 6,
+        constraints: { minColSpan: 3, maxColSpan: 6 },
+      },
+      distressSignalsList: {
+        col: 8,
+        row: 14,
+        colSpan: 5,
+        rowSpan: 6,
+        constraints: { minColSpan: 4, maxColSpan: 12 },
+      },
+      recentIncidents: {
         col: 1,
         row: 20,
         colSpan: 12,
-        rowSpan: 6,
+        rowSpan: 7,
         constraints: { minColSpan: 6, maxColSpan: 12 },
       },
+      missionsTimeline: {
+        col: 1,
+        row: 27,
+        colSpan: 6,
+        rowSpan: 7,
+        constraints: { minColSpan: 4, maxColSpan: 12 },
+      },
+      domainHub: {
+        col: 7,
+        row: 27,
+        colSpan: 6,
+        rowSpan: 7,
+        constraints: { minColSpan: 4, maxColSpan: 12 },
+      },
     },
+  },
+  composition: {
+    version: '1.0.0',
+    links: [
+      {
+        id: 'link-donut-severity-to-incidents',
+        intent: 'event-propagation',
+        from: {
+          kind: 'component-port',
+          ref: {
+            widget: 'incidentsSeverityDonut',
+            port: 'crossFilter',
+            direction: 'output',
+          },
+        },
+        to: {
+          kind: 'component-port',
+          ref: {
+            widget: 'recentIncidents',
+            port: 'queryContext',
+            direction: 'input',
+          },
+        },
+      },
+    ],
   },
   widgets: [
     // 1. Executive Banner Widget via praxis-rich-content
@@ -612,13 +810,67 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
       },
     },
 
-    // 8. Incidentes & Ameaças Recentes via praxis-table
+    // 8. Donut Chart: Severidade de Incidentes
+    {
+      key: 'incidentsSeverityDonut',
+      shell: {
+        kind: 'dashboard-card',
+        title: 'Distribuição de Severidade',
+        subtitle: 'Classificação de risco dos incidentes registrados',
+        icon: 'pie_chart',
+        showHeader: true,
+      },
+      definition: {
+        id: 'praxis-chart',
+        inputs: {
+          config: INCIDENT_SEVERITY_DONUT_CONFIG,
+        },
+      },
+    },
+
+    // 9. Gauge Chart: Alerta DEFCON
+    {
+      key: 'defconGaugeChart',
+      shell: {
+        kind: 'dashboard-card',
+        title: 'Prontidão Global (DEFCON)',
+        subtitle: 'Status consolidado de alerta de defesa tática',
+        icon: 'speed',
+        showHeader: true,
+      },
+      definition: {
+        id: 'praxis-chart',
+        inputs: {
+          config: DEFCON_GAUGE_CONFIG,
+        },
+      },
+    },
+
+    // 10. List Component: Sinais de Socorro Ativos
+    {
+      key: 'distressSignalsList',
+      shell: {
+        kind: 'dashboard-card',
+        title: 'Sinais de Socorro Ativos',
+        subtitle: 'Chamados de emergência tática recebidos pelo QG',
+        icon: 'podcasts',
+        showHeader: true,
+      },
+      definition: {
+        id: 'praxis-list',
+        inputs: {
+          config: DISTRESS_SIGNALS_LIST_CONFIG,
+        },
+      },
+    },
+
+    // 11. Incidentes & Ameaças Recentes via praxis-table (com Microchart Bullet e Row Expansion)
     {
       key: 'recentIncidents',
       shell: {
         kind: 'dashboard-card',
         title: 'Monitoramento de Incidentes & Ameaças Recentes',
-        subtitle: 'Feed operacional em tempo real governado por schemas Praxis',
+        subtitle: 'Feed operacional com telemetria tática, contenção e auditoria detalhada',
         icon: 'emergency',
         showHeader: true,
       },
@@ -630,12 +882,31 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
           config: {
             columns: [
               { field: 'id', header: 'Código', width: '100px', align: 'center', sortable: true },
-              { field: 'descricao', header: 'Ocorrência / Sinistro', width: '320px', sortable: true },
-              { field: 'severidade', header: 'Severidade', width: '130px', align: 'center', sortable: true },
+              { field: 'descricao', header: 'Ocorrência / Sinistro', width: '300px', sortable: true },
+              { field: 'severidade', header: 'Severidade', width: '120px', align: 'center', sortable: true },
+              {
+                field: 'contencao',
+                header: 'Contenção Tática',
+                width: '180px',
+                renderer: {
+                  type: 'microVisualization',
+                  microVisualization: {
+                    visualization: {
+                      kind: 'bullet',
+                      surface: 'table-cell',
+                      valueExpr: 'row.contencaoAtual',
+                      targetExpr: 'row.contencaoMeta',
+                      toneExpr: 'row.contencaoTone',
+                      fallbackTextExpr: 'row.contencaoFallback',
+                      total: 100,
+                    },
+                  },
+                },
+              },
               { field: 'local', header: 'Teatro Operacional', width: '180px', sortable: true },
-              { field: 'ocorridoEm', header: 'Data / Hora', width: '150px', sortable: true },
-              { field: 'danosCivis', header: 'Danos Civis (R$)', width: '160px', align: 'right', sortable: true },
-              { field: 'status', header: 'Status Tático', width: '130px', align: 'center', sortable: true },
+              { field: 'ocorridoEm', header: 'Data / Hora', width: '140px', sortable: true },
+              { field: 'danosCivis', header: 'Danos Civis (R$)', width: '150px', align: 'right', sortable: true },
+              { field: 'status', header: 'Status Tático', width: '120px', align: 'center', sortable: true },
             ],
             toolbar: {
               visible: true,
@@ -644,19 +915,192 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
             appearance: {
               density: 'compact',
             },
+            behavior: {
+              expansion: {
+                enabled: true,
+                contractVersion: '1.0.0',
+                identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+                state: { mode: 'uncontrolled' },
+                interaction: {
+                  trigger: 'icon',
+                  toggleOnRowClick: false,
+                },
+                limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+                detail: {
+                  source: {
+                    mode: 'inline',
+                    inlineSchema: {
+                      layout: 'stack',
+                      items: [
+                        {
+                          type: 'card',
+                          title: 'Relatório Tático de Campo & Análise de Risco',
+                          subtitle: 'Protocolo de resposta rápida sob governança do Centro de Comando',
+                          items: [
+                            {
+                              type: 'value',
+                              label: 'Resumo Operacional',
+                              value: 'Perímetro evacuado com sucesso. Esquadrões de apoio em solo coordenando perícia técnica e blindagem de contenção.',
+                            },
+                            {
+                              type: 'value',
+                              label: 'Diretiva de Engajamento',
+                              value: 'Nível de força proporcional autorizado. Monitoramento satelital contínuo com telemetria quântica.',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
           },
           data: [
-            { id: 'INC-881', descricao: 'Incursão de drones hostis na Zona Portuária', severidade: 'CRÍTICA', local: 'Setor Bravo - Cais 4', ocorridoEm: '15/10 14:22', danosCivis: 'R$ 1.450.000', status: 'Contido' },
-            { id: 'INC-880', descricao: 'Falha de contenção no Reator Arc Subterrâneo', severidade: 'ALTA', local: 'Complexo Stark Sul', ocorridoEm: '15/10 11:05', danosCivis: 'R$ 380.000', status: 'Em Análise' },
-            { id: 'INC-879', descricao: 'Perturbação gravitacional não catalogada', severidade: 'MÉDIA', local: 'Quadrante Ártico', ocorridoEm: '14/10 22:40', danosCivis: 'R$ 0', status: 'Investigando' },
-            { id: 'INC-878', descricao: 'Tentativa de violação ao cofre de vibranium', severidade: 'CRÍTICA', local: 'Embaixada de Wakanda', ocorridoEm: '14/10 19:15', danosCivis: 'R$ 820.000', status: 'Mitigado' },
-            { id: 'INC-877', descricao: 'Interceptação de comboio com tecnologia Chitauri', severidade: 'ALTA', local: 'Rodovia Interestadual 9', ocorridoEm: '14/10 08:30', danosCivis: 'R$ 2.100.000', status: 'Concluído' },
+            {
+              id: 'INC-881',
+              descricao: 'Incursão de drones hostis na Zona Portuária',
+              severidade: 'CRÍTICA',
+              local: 'Setor Bravo - Cais 4',
+              ocorridoEm: '15/10 14:22',
+              danosCivis: 'R$ 1.450.000',
+              status: 'Contido',
+              contencaoAtual: 92,
+              contencaoMeta: 85,
+              contencaoTone: 'success',
+              contencaoFallback: 'Contenção 92% (Meta 85%)',
+            },
+            {
+              id: 'INC-880',
+              descricao: 'Falha de contenção no Reator Arc Subterrâneo',
+              severidade: 'ALTA',
+              local: 'Complexo Stark Sul',
+              ocorridoEm: '15/10 11:05',
+              danosCivis: 'R$ 380.000',
+              status: 'Em Análise',
+              contencaoAtual: 68,
+              contencaoMeta: 90,
+              contencaoTone: 'warning',
+              contencaoFallback: 'Contenção 68% (Meta 90%)',
+            },
+            {
+              id: 'INC-879',
+              descricao: 'Perturbação gravitacional não catalogada',
+              severidade: 'MÉDIA',
+              local: 'Quadrante Ártico',
+              ocorridoEm: '14/10 22:40',
+              danosCivis: 'R$ 0',
+              status: 'Investigando',
+              contencaoAtual: 45,
+              contencaoMeta: 80,
+              contencaoTone: 'warning',
+              contencaoFallback: 'Contenção 45% (Meta 80%)',
+            },
+            {
+              id: 'INC-878',
+              descricao: 'Tentativa de violação ao cofre de vibranium',
+              severidade: 'CRÍTICA',
+              local: 'Embaixada de Wakanda',
+              ocorridoEm: '14/10 19:15',
+              danosCivis: 'R$ 820.000',
+              status: 'Mitigado',
+              contencaoAtual: 98,
+              contencaoMeta: 95,
+              contencaoTone: 'success',
+              contencaoFallback: 'Contenção 98% (Meta 95%)',
+            },
+            {
+              id: 'INC-877',
+              descricao: 'Interceptação de comboio com tecnologia Chitauri',
+              severidade: 'ALTA',
+              local: 'Rodovia Interestadual 9',
+              ocorridoEm: '14/10 08:30',
+              danosCivis: 'R$ 2.100.000',
+              status: 'Concluído',
+              contencaoAtual: 100,
+              contencaoMeta: 90,
+              contencaoTone: 'success',
+              contencaoFallback: 'Contenção 100% (Meta 90%)',
+            },
           ],
         },
       },
     },
 
-    // 9. Centros de Comando & Especialidades via praxis-rich-content
+    // 12. Diário Operacional de Missões via praxis-rich-content Timeline
+    {
+      key: 'missionsTimeline',
+      shell: {
+        kind: 'dashboard-card',
+        title: 'Diário Operacional de Missões',
+        subtitle: 'Cronologia tática e despacho de forças especiais em tempo real',
+        icon: 'timeline',
+        showHeader: true,
+      },
+      definition: {
+        id: 'praxis-rich-content',
+        inputs: {
+          document: {
+            kind: 'praxis.rich-content',
+            version: '1.0.0',
+            nodes: [
+              {
+                type: 'timeline',
+                title: 'Atividades Recentes de Campo',
+                position: 'right',
+                orientation: 'vertical',
+                markerVariant: 'dot',
+                markerStyle: 'filled',
+                items: [
+                  {
+                    title: 'Interceptação Orbital Completa',
+                    description: 'Esquadrão Vanguarda neutralizou satélite espião em órbita LEO-2.',
+                    opposite: '15:20',
+                    badge: 'Concluído',
+                    markerColor: 'success',
+                    markerStyle: 'filled',
+                    connectorColor: 'success',
+                    connectorVariant: 'solid',
+                  },
+                  {
+                    title: 'Contenção no Reator Arc',
+                    description: 'Equipe Stark isolou vazamento térmico e restabeleceu campo magnético.',
+                    opposite: '13:45',
+                    badge: 'Em Curso',
+                    markerColor: 'accent',
+                    markerStyle: 'filled',
+                    connectorColor: 'accent',
+                    connectorVariant: 'solid',
+                  },
+                  {
+                    title: 'Alerta DEFCON 4 Elevado',
+                    description: 'Detecção de anomalia quântica não catalogada no Ártico.',
+                    opposite: '11:10',
+                    badge: 'Alerta',
+                    markerColor: 'warn',
+                    markerStyle: 'outlined',
+                    connectorColor: 'warn',
+                    connectorVariant: 'dashed',
+                  },
+                  {
+                    title: 'Início de Turno & Calibração',
+                    description: 'Checklist tático de prontidão executado por 21 heróis da base.',
+                    opposite: '08:00',
+                    badge: 'Rotina',
+                    markerColor: 'neutral',
+                    markerStyle: 'filled',
+                    connectorColor: 'neutral',
+                    connectorVariant: 'solid',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    },
+
+    // 13. Centros de Comando & Especialidades via praxis-rich-content
     {
       key: 'domainHub',
       shell: {
@@ -677,7 +1121,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 type: 'compose',
                 layout: 'grid',
                 columns: 'auto-fit',
-                minColumnWidth: '320px',
+                minColumnWidth: '240px',
                 gap: 'md',
                 className: 'hub-action-cards-grid',
                 items: [

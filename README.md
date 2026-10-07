@@ -35,3 +35,35 @@ npm start
 ```bash
 npm run build
 ```
+
+---
+
+## 🛡️ Customização Avançada & Persistência Multi-Usuário
+
+A aplicação implementa um case corporativo de governança com persistência remota no `praxis-config-starter` (`https://praxis-api-quickstart.onrender.com/api/praxis/config/ui`):
+
+1. **Dashboard Executivo (Page Builder):**
+   - Gráficos customizados com dados reais de agregação: **Área Volumétrica** (`type: 'area'`) e **Barras Horizontais** (`type: 'horizontal-bar'`).
+   - Novo widget governado com **Formulário Dinâmico Tático** (`praxis-dynamic-form`) integrado ao grid.
+2. **Tabela de Suprimentos / Pedidos (`praxis-table` & `praxis-crud`):**
+   - **Coluna Composta (`compose` renderer):** Unificação de `id` e `currency` na coluna *"Ordem & Moeda"*.
+   - **Ocultação Seletiva de Colunas:** Projeção canônica via `columnProjection.include`.
+   - **Regras Condicionais de Célula e Linha:** Badges temáticos com ícones, realces para lotes volumosos e opacidade em ordens canceladas via JsonLogic.
+   - **Densidade Compacta e Animações:** Layout otimizado para visão executiva.
+3. **Isolamento Estrito entre Personas:**
+   - **Nick Fury (`nick.fury`):** Visualiza e persiste seus layouts customizados (HTTP 200).
+   - **Tony Stark (`tony.stark`):** Recebe o baseline 100% de fábrica / governança limpo (HTTP 404).
+   - **Restauração de Fábrica:** Botão que dispara `HTTP DELETE 204` e retorna aos padrões de governança.
+
+### 🧪 Executando a Bateria E2E Automatizada (Playwright)
+
+```powershell
+# Execução da bateria automatizada de 8 etapas
+$env:NODE_PATH = "D:\Developer\praxis-plataform\.worktrees\praxis-json-upgrade-p31a\praxis-ui-angular\node_modules"
+node test-e2e\test-multiuser-persistence.cjs
+```
+
+Para mais detalhes sobre as propostas e evoluções canônicas de plataforma, consulte:
+- [`docs/PRAXIS_PLATFORM_EVOLUTIONS.md`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/docs/PRAXIS_PLATFORM_EVOLUTIONS.md)
+- [`../docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md`](file:///d:/Developer/praxis-plataform/docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md)
+

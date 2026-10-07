@@ -28,6 +28,12 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[ ] Aberta` | — | — | Pendente |
 | [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
+| [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 
 ---
 
@@ -1449,6 +1455,201 @@ No `praxis-chart.component.ts`:
 - [ ] O `PraxisChartWidgetConfigEditor` detecta quando um widget possui apenas `inputs.config` e habilita o editor visual de gráficos normalmente, sem exibir mensagem de aviso de documento ausente.
 - [ ] Ao salvar alterações no editor de configuração, tanto o `chartDocument` quanto o `config` de runtime são atualizados de forma sincronizada.
 - [ ] O botão de configurações flutuante (`praxisIconButton="tune"`) sobre o `<praxis-chart>` é exibido em modo de customização mesmo quando o gráfico é instanciado apenas com `[config]`.
+
+---
+
+## 📌 Issue #19: Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/list`, `@praxisui/page-builder`
+- **Severidade:** 🟡 Média (atrito de onboarding, exigência de glue code de inicialização no host e ausência de catálogo de templates no editor visual)
+- **Tipo:** Developer Experience / Autoria Low-Code / Composição de Widgets
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+O pacote `@praxisui/list` (`projects/praxis-list`) disponibiliza um componente de lista de alta maturidade (`PraxisList`), suportando skins executivas (`glass`, `gradient-tile`, `pill-soft`), seleção de registros (`single`, `multiple`), agrupamento e templating declarativo (`leading`, `primary`, `secondary`, `meta`, `trailing`).
+
+No entanto:
+1. **Falta de Auto-Registro no Host:** Ao instalar `@praxisui/list` em uma aplicação que utiliza o Page Builder (`@praxisui/page-builder`), o widget `praxis-list` **não é descoberto automaticamente**, exigindo a injeção explícita de `providePraxisListMetadata()` no `app.config.ts`. Caso o desenvolvedor esqueça este provider, o canvas exibe mensagem de erro informando que o componente `praxis-list` não está registrado no `ComponentMetadataRegistry`.
+2. **Ausência de Preset Palette no Editor:** No editor visual do Page Builder, a gaveta de componentes exibe o item básico de lista, mas não fornece presets estruturados (ex.: *"Feed de Alertas em Tempo Real"*, *"Catálogo com Avatares"*, *"Lista Financeira de Saldos"*). O operador é obrigado a montar manualmente o objeto `PraxisListConfig` em JSON cru.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Em `@praxisui/page-builder`:**
+   - Adicionar helper de auto-registro ou preset bundle oficial que descubra módulos `@praxisui/*` instalados no monorepo sem exigir dezenas de imports manuais em `app.config.ts`.
+2. **Em `@praxisui/list` (`praxis-list.metadata.ts`):**
+   - Disponibilizar `presetTemplates` com configurações prontas na metadata do componente para que o usuário do Page Builder possa arrastar um "Feed Operacional" ou "Lista Executiva" em 1 clique.
+
+### Critérios de Aceite para Resolução
+- [ ] O componente `@praxisui/list` oferece presets na metadata para facilitar a inserção no Page Builder.
+- [ ] Documentação oficial na `praxis-ui-landing-page` inclui receitas de integração declarativa do `praxis-list` no Page Builder.
+
+---
+
+## 📌 Issue #20: Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/page-builder`
+- **Severidade:** 🟡 Média (desorientação do usuário corporativo ao receber filtros interativos de gráficos, sem pista visual de por que a lista foi filtrada nem botão para redefinição)
+- **Tipo:** UX / Feedback de Interação Cruzada / Governança de Query Context
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+Quando uma página dinâmica do Page Builder estabelece uma conexão via `composition.links` entre um gráfico de origem (ex.: `PraxisChart` emitindo `crossFilter` ao clicar em uma fatia de Donut ou barra) e uma tabela de destino (`PraxisTable` recebendo o payload no input `queryContext`):
+1. **Filtragem Ocorre no Silêncio:** A tabela aplica os critérios de filtro remotos perfeitamente e recarrega os dados.
+2. **Ausência de Feedback Visual na Toolbar:** A barra de ferramentas da tabela (`praxis-table-toolbar.ts`) **não exibe nenhuma indicação visual de que há um filtro externo ativo**. Os chips de `quickFilters` continuam neutros e o botão de filtros avançados não destaca o critério injetado por barramento externo.
+3. **Impossibilidade de Desfazer Sem Recarregar:** O usuário corporativo fica sem um botão direto na tabela para descartar o filtro cruzado (ex.: `[✕ Limpar filtro de Severidade: CRÍTICA]`), sendo forçado a adivinhar que precisa re-clicar na mesma fatia do gráfico ou recarregar a rota da aplicação.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Em `@praxisui/table` (`praxis-table-toolbar.ts`):**
+   - Ao receber `queryContext` com filtros ativos originados de portas de composição externas, sintetizar um chip contextual destacado na toolbar:
+     ```html
+     <div class="praxis-table-active-cross-filter-chip">
+       <mat-icon>filter_alt</mat-icon>
+       <span>Filtro externo: <strong>{{ crossFilterLabel }}</strong></span>
+       <button (click)="clearCrossFilter()" aria-label="Limpar filtro cruzado">✕</button>
+     </div>
+     ```
+   - Emitir evento de notificação de redefinição para que o componente emissor desfaça a seleção do ponto gráfico sincronizadamente.
+
+### Critérios de Aceite para Resolução
+- [ ] Ao receber `queryContext` via link do Page Builder, a tabela exibe um chip informativo na toolbar destacando o filtro ativo.
+- [ ] O chip possui botão de remoção (`✕`) que limpa o filtro na tabela e desmarca o setor correspondente no gráfico de origem.
+
+---
+
+## 📌 Issue #21: Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema`
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/rich-content`, `@praxisui/core`
+- **Severidade:** 🟡 Média (duplicação de modelos de visualização e incapacidade de usar grids modernos de rich content dentro do master-detail de tabelas)
+- **Tipo:** Composição de Modelos Canônicos / Master-Detail
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+O motor de expansão de linhas do `@praxisui/table` (`TableBehaviorConfig.expansion`, implementado em `praxis-table.ts`) possui um resolvedor de schema inline (`resolveExpansionDetailInlineSchema`) que valida e sanitiza nós contra `DEFAULT_EXPANSION_ALLOWED_NODES` (`card`, `value`, `list`, `tab`, `tabs`, `richText`, `action`, `timeline`, `cardGrid`, `detailList`).
+
+Contudo:
+1. Os nós aceitos em `TableDetailSchemaNode` utilizam uma tipagem paralela própria em vez de aceitar diretamente um `RichContentDocument`.
+2. Se o desenvolvedor desejar exibir um grid de cartões compostos, atalhos departamentais ou layouts dinâmicos complexos dentro da linha expandida, ele não pode reutilizar o documento já criado no editor de Rich Content: é obrigado a converter manualmente a estrutura para a sintaxe fragmentada da tabela.
+3. Se houvesse um nó de primeira classe `type: 'richContent', document: RichContentDocument` dentro do `inlineSchema`, a tabela delegaria a renderização do corpo da linha expandida diretamente ao `PraxisRichContentComponent`, eliminando código duplicado de renderização de cards e tags.
+
+### Solução Canônica Recomendada de Plataforma
+1. Em `projects/praxis-core/src/lib/models/table-config-v2.model.ts`:
+   - Adicionar à união `TableDetailSchemaNode`:
+     ```typescript
+     export interface TableDetailRichContentNode extends TableDetailBaseNode {
+       type: 'richContent';
+       document: RichContentDocument;
+       contextMap?: Record<string, string>; // Mapeia campos da linha da tabela para o context do documento
+     }
+     ```
+2. Em `praxis-table.ts`:
+   - Incluir `'richContent'` em `DEFAULT_EXPANSION_ALLOWED_NODES`.
+   - No template de detalhe, quando `node.type === 'richContent'`, instanciar `<praxis-rich-content [document]="node.document" [context]="resolveRowContext(row, node.contextMap)">`.
+
+### Critérios de Aceite para Resolução
+- [ ] É possível declarar um `RichContentDocument` completo dentro de `behavior.expansion.detail.source.inlineSchema.items`.
+- [ ] Dados da linha atual da tabela são injetados automaticamente no `context` do documento rich content para interpolação de Live Expressions.
+
+---
+
+## 📌 Issue #22: Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/charts`, `EchartsOptionBuilderService`
+- **Severidade:** 🟢 Baixa (restrição estética em gráficos analíticos de velocímetro)
+- **Tipo:** Capacidade Analítica / Visualização de Dados
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+No arquivo `projects/praxis-charts/src/lib/adapters/echarts/echarts-option-builder.service.ts` (linhas 41–60):
+- Ao construir a configuração ECharts para `type: 'gauge'`, o serviço aplica uma cor estática única:
+  ```typescript
+  const gaugeColor = gauge.color ?? palette[0];
+  ```
+- Em painéis executivos e industriais de monitoramento (como níveis de alerta DEFCON, temperatura de reatores ou risco de crédito), um gráfico velocímetro necessita de **faixas coloridas graduadas no arco** (ex.: 0 a 2 em Verde Sucesso, 2 a 4 em Amarelo Alerta, e 4 a 5 em Vermelho Crítico).
+- O motor Apache ECharts suporta nativamente `axisLine.lineStyle.color: [[0.4, '#10b981'], [0.8, '#f59e0b'], [1, '#ef4444']]`, mas o `PraxisChartConfig` não expõe essa propriedade em seu modelo tipado.
+
+### Solução Canônica Recomendada de Plataforma
+1. No modelo `PraxisChartGaugeConfig`:
+   - Adicionar suporte a `colorBands`:
+     ```typescript
+     export interface PraxisChartGaugeColorBand {
+       upTo: number; // Fração de 0 a 1 ou valor na escala
+       color?: string;
+       tone?: 'success' | 'warning' | 'danger' | 'critical' | 'info';
+     }
+     ```
+2. No `EchartsOptionBuilderService`:
+   - Converter `colorBands` na matriz `axisLine.lineStyle.color` do ECharts, aplicando tokens de cor do Material Design 3.
+
+### Critérios de Aceite para Resolução
+- [ ] Gráficos do tipo `gauge` aceitam faixas coloridas no arco perimetral de acordo com limites operacionais configurados.
+
+---
+
+## 📌 Issue #23: Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java
+
+### Classificação
+- **Módulos Afetados:** `praxis-metadata-starter`, `@UISchema`, `@praxisui/table`
+- **Severidade:** 🟡 Média (lacuna de governança metadata-driven entre backend e frontend)
+- **Tipo:** Metadados OpenAPI / Contrato `x-ui`
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+O `@praxisui/table` implementou suporte a micro-visualizações ultraleves e *cell-safe* (`bullet`, `comparison`, `stackedBar`, `radial`, `delta`, `harveyBall`, `line`, `column`, `area`, `processFlow`) conforme a RFC `rfc-micro-visualization-presentation.md`.
+
+Entretanto:
+1. No backend Java (`praxis-metadata-starter`), a anotação `@UISchema` **não possui propriedades nem anotações filhas para declarar micro visualizações**.
+2. O desenvolvedor é forçado a declarar manualmente o objeto `TableConfig.columns[].renderer.microVisualization` no código Angular/TypeScript, perdendo a essência *metadata-driven* da plataforma onde contratos e apresentações devem nascer governados nos DTOs de negócio.
+
+### Solução Canônica Recomendada de Plataforma
+1. No `praxis-metadata-starter`:
+   - Criar anotação `@MicroVisualization`:
+     ```java
+     @Target({ElementType.FIELD, ElementType.METHOD})
+     @Retention(RetentionPolicy.RUNTIME)
+     public @interface MicroVisualization {
+         MicroVisualizationKind kind() default MicroVisualizationKind.BULLET;
+         double target() default 0.0;
+         double total() default 100.0;
+         String tone() default "neutral";
+         String fallbackText() default "";
+     }
+     ```
+   - No processador OpenAPI do starter, enriquecer o vocabulário `x-ui.table.columns[].presentation.visualization`.
+2. No `@praxisui/table`:
+   - O mapper automático de OpenAPI para `TableConfig` deve reconhecer `presentation.visualization` e materializar o renderer correspondente sem nenhuma configuração adicional no frontend.
+
+### Critérios de Aceite para Resolução
+- [ ] DTOs anotados com `@MicroVisualization` no backend geram colunas com microcharts na tabela automaticamente sem necessidade de TypeScript no host.
+
+---
+
+## 📌 Issue #24: Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/charts`, `@praxisui/page-builder`, `@praxisui/core`
+- **Severidade:** 🟡 Média (restrição de reuso de componente canônico no canvas)
+- **Tipo:** Extensibilidade de Widgets / Autoria Low-Code
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+O componente `PraxisMicroVisualizationComponent` está exportado publicamente por `@praxisui/charts` (`public-api.ts:6`) e possui implementação completa de 10 tipos de visualização.
+
+Contudo:
+1. O componente foi concebido primariamente como renderer de célula de tabela (`table-cell`) e de itens de apresentação.
+2. **Ele não possui um descritor de widget (`ComponentDocMeta`) registrado para o Page Builder**.
+3. Se um montador de dashboards desejar colocar um microchart (ex.: um Bullet Graph de teto de gastos ou um Radial de prontidão) como um widget independente em um slot de $3 \times 2$ no canvas grid, ele não consegue selecionar `praxis-micro-visualization` na paleta de componentes.
+
+### Solução Canônica Recomendada de Plataforma
+1. Em `projects/praxis-charts`:
+   - Criar `praxis-micro-visualization.metadata.ts` com id `'praxis-micro-visualization'`.
+   - Exportar a função de injeção `providePraxisMicroVisualizationMetadata()`.
+2. Adicionar suporte a inputs declarativos `visualization` e `fallbackText`, permitindo seu uso imediato em `WidgetPageDefinition.widgets[]`.
+
+### Critérios de Aceite para Resolução
+- [ ] O componente `praxis-micro-visualization` pode ser instanciado como widget de primeira classe em qualquer página do Page Builder.
 
 ---
 
