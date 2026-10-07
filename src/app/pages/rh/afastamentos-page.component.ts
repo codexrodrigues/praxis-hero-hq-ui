@@ -1,8 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -22,14 +31,14 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
       {
         field: 'tipo',
         header: 'Tipo de Licença / Ausência',
-        width: '160px',
-        align: 'center',
+        width: '180px',
+        align: 'left',
         sortable: true,
       },
       {
         field: 'funcionarioId',
-        header: 'ID Colaborador',
-        width: '130px',
+        header: 'Colaborador ID',
+        width: '140px',
         align: 'center',
         sortable: true,
       },
@@ -38,7 +47,8 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
         header: 'Início da Vigência',
         type: 'date',
         format: 'dd/MM/yyyy',
-        width: '160px',
+        width: '150px',
+        align: 'center',
         sortable: true,
       },
       {
@@ -46,37 +56,20 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
         header: 'Término Previsto',
         type: 'date',
         format: 'dd/MM/yyyy',
-        width: '160px',
+        width: '150px',
+        align: 'center',
         sortable: true,
       },
       {
         field: 'observacoes',
-        header: 'Observações / Parecer Médico-Operacional',
+        header: 'Observações / Parecer Operacional',
         width: '320px',
         sortable: true,
       },
     ],
   } as unknown as CrudMetadata['table'],
-  actions: [
-    {
-      id: 'edit',
-      label: 'Revisar Licença',
-      action: 'edit',
-      openMode: 'modal',
-      formId: 'afastamentos-edit',
-      params: [{ from: 'id', to: 'input', name: 'id' }],
-    },
-    {
-      id: 'create',
-      label: 'Conceder Afastamento',
-      action: 'create',
-      openMode: 'modal',
-      formId: 'afastamentos-create',
-    },
-  ],
   defaults: {
-    openMode: 'modal',
-    modal: { width: '840px', maxWidth: '95vw' },
+    openMode: 'drawer',
   },
 };
 
@@ -87,39 +80,41 @@ export const AFASTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
     {
       type: 'statGroup',
       layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
       className: 'afastamentos-kpi-grid',
       items: [
         {
           id: 'ciclos',
-          label: 'Total de Ciclos',
+          label: 'Total de Registros',
           value: '111 Registros',
           caption: 'Férias regulamentares e licenças',
-          icon: 'history_toggle_drop',
+          icon: 'history',
           tone: 'neutral',
         },
         {
-          id: 'recuperacao',
-          label: 'Em Recuperação Tática',
-          value: '12 Colaboradores',
-          caption: 'Tratamento e regeneração celular',
+          id: 'criticos',
+          label: 'Casos Críticos / Graves',
+          value: '51 Ocorrências',
+          caption: 'Trauma de combate e regeneração',
           icon: 'health_and_safety',
-          tone: 'warning',
+          tone: 'danger',
         },
         {
-          id: 'disponibilidade',
-          label: 'Disponibilidade Operacional',
-          value: '88,0%',
-          caption: 'Quadro de prontidão sustentada',
-          icon: 'check_circle',
-          tone: 'success',
-        },
-        {
-          id: 'retorno',
-          label: 'Taxa de Pleno Retorno',
-          value: '97,4%',
-          caption: 'Retorno à ativa sem sequelas',
-          icon: 'sentiment_very_satisfied',
+          id: 'padrao',
+          label: 'Licenças Padrão',
+          value: '60 Registros',
+          caption: 'Descanso e suporte preventivo',
+          icon: 'event_available',
           tone: 'info',
+        },
+        {
+          id: 'dias',
+          label: 'Dias em Recuperação',
+          value: '1.204 Dias',
+          caption: 'Total acumulado em afastamento',
+          icon: 'calendar_month',
+          tone: 'warning',
         },
       ],
     },
@@ -147,7 +142,9 @@ export const AFASTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       </header>
 
       <!-- Bento Grid de KPIs via RichContent Canonical -->
-      <praxis-rich-content [document]="kpiDocument" />
+      <section class="kpi-surface">
+        <praxis-rich-content [document]="kpiDocument()" />
+      </section>
 
       <!-- Tabela CRUD Governança Canônica -->
       <section class="glass-panel crud-surface">
@@ -185,6 +182,7 @@ export const AFASTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+
       span { font-size: 14px; }
     }
 
@@ -209,65 +207,6 @@ export const AFASTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    .tone-rh { color: var(--rh); background: color-mix(in oklab, var(--rh) 12%, transparent); }
-    .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 12%, transparent); }
-    .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 12%, transparent); }
-    .tone-operations { color: var(--operations); background: color-mix(in oklab, var(--operations) 12%, transparent); }
-
-    /* KPI Bento Grid Styling */
-    ::ng-deep {
-      .afastamentos-kpi-grid .prx-rich-stat-group__items,
-      .afastamentos-kpi-grid .pdx-rich-stat-group__items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
-        width: 100%;
-      }
-
-      .afastamentos-kpi-grid .prx-rich-stat-group__item,
-      .afastamentos-kpi-grid .pdx-rich-stat-group__item {
-        border-radius: 16px !important;
-        padding: 18px !important;
-        border: 1px solid var(--border) !important;
-        background: color-mix(in oklab, var(--card) 60%, transparent) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        }
-      }
-
-      .afastamentos-kpi-grid .prx-rich-stat-group__value,
-      .afastamentos-kpi-grid .pdx-rich-stat-group__value {
-        font-family: var(--font-display) !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: var(--foreground) !important;
-        margin: 4px 0 0 !important;
-      }
-
-      .afastamentos-kpi-grid .prx-rich-stat-group__label,
-      .afastamentos-kpi-grid .pdx-rich-stat-group__label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: var(--muted-foreground) !important;
-      }
-
-      .afastamentos-kpi-grid .prx-rich-stat-group__caption,
-      .afastamentos-kpi-grid .pdx-rich-stat-group__caption {
-        font-size: 0.72rem !important;
-        color: var(--muted-foreground) !important;
-        margin-top: 4px !important;
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -275,7 +214,71 @@ export const AFASTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
     }
   `],
 })
-export class AfastamentosPageComponent {
+export class AfastamentosPageComponent implements OnInit, OnDestroy {
   protected readonly crudMetadata = AFASTAMENTOS_CRUD_METADATA;
-  protected readonly kpiDocument = AFASTAMENTOS_KPI_DOCUMENT;
+  protected readonly kpiDocument = signal<RichContentDocument>(AFASTAMENTOS_KPI_DOCUMENT);
+
+  private readonly dashboardStats = inject(DashboardStatsService);
+  private kpiSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    this.loadKpis();
+  }
+
+  ngOnDestroy(): void {
+    this.kpiSub?.unsubscribe();
+  }
+
+  private loadKpis(): void {
+    this.kpiSub?.unsubscribe();
+    this.kpiSub = this.dashboardStats.getAfastamentosTacticalKpis().subscribe((kpis) => {
+      this.kpiDocument.set({
+        kind: 'praxis.rich-content',
+        version: '1.0.0',
+        nodes: [
+          {
+            type: 'statGroup',
+            layout: 'grid',
+            tileLayout: 'tile',
+            headerSpacing: 'normal',
+            className: 'afastamentos-kpi-grid',
+            items: [
+              {
+                id: 'ciclos',
+                label: 'Total de Registros',
+                value: `${kpis.totalRecords.toLocaleString('pt-BR')} Registros`,
+                caption: 'Férias regulamentares e licenças',
+                icon: 'history',
+                tone: 'neutral',
+              },
+              {
+                id: 'criticos',
+                label: 'Casos Críticos / Graves',
+                value: `${kpis.criticalCases.toLocaleString('pt-BR')} Ocorrências`,
+                caption: 'Trauma de combate e regeneração',
+                icon: 'health_and_safety',
+                tone: 'danger',
+              },
+              {
+                id: 'padrao',
+                label: 'Licenças Padrão',
+                value: `${kpis.standardLeaves.toLocaleString('pt-BR')} Registros`,
+                caption: 'Descanso e suporte preventivo',
+                icon: 'event_available',
+                tone: 'info',
+              },
+              {
+                id: 'dias',
+                label: 'Dias em Recuperação',
+                value: `${kpis.totalDaysAway.toLocaleString('pt-BR')} Dias`,
+                caption: 'Total acumulado em afastamento',
+                icon: 'calendar_month',
+                tone: 'warning',
+              },
+            ],
+          },
+        ],
+      });
+    });
+  }
 }

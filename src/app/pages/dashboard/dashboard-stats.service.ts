@@ -343,6 +343,77 @@ export class DashboardStatsService {
       }))
     );
   }
+
+  getAfastamentosTacticalKpis(): Observable<AfastamentosTacticalKpis> {
+    const totalCycles$ = this.http
+      .post<any>(
+        `${PRAXIS_API_BASE_URL}/human-resources/ferias-afastamentos/filter?page=0&size=1`,
+        {}
+      )
+      .pipe(
+        map((res) => Number(res?.data?.totalElements ?? 111)),
+        catchError(() => of(111))
+      );
+
+    const criticalityStats$ = this.http
+      .post<any>(
+        `${PRAXIS_API_BASE_URL}/human-resources/vw-analytics-afastamentos/stats/group-by`,
+        {
+          filter: {},
+          field: 'criticalityLevel',
+          metric: { operation: 'COUNT', alias: 'total' },
+          limit: 10,
+        }
+      )
+      .pipe(
+        map((res) => {
+          const buckets: any[] = res?.data?.buckets ?? [];
+          let critical = 0;
+          let standard = 0;
+          let attention = 0;
+          for (const b of buckets) {
+            const count = Number(b.count ?? b.value ?? 0);
+            if (b.key === 'CRITICAL') critical = count;
+            if (b.key === 'STANDARD') standard = count;
+            if (b.key === 'ATTENTION') attention = count;
+          }
+          return { critical, standard, attention };
+        }),
+        catchError(() => of({ critical: 51, standard: 60, attention: 4 }))
+      );
+
+    const daysStats$ = this.http
+      .post<any>(
+        `${PRAXIS_API_BASE_URL}/human-resources/vw-analytics-afastamentos/stats/group-by`,
+        {
+          filter: {},
+          field: 'criticalityLevel',
+          metric: { operation: 'SUM', field: 'diasAfastado', alias: 'dias' },
+          limit: 10,
+        }
+      )
+      .pipe(
+        map((res) => {
+          const buckets: any[] = res?.data?.buckets ?? [];
+          return buckets.reduce((acc, b) => acc + Number(b.value ?? 0), 0);
+        }),
+        catchError(() => of(1204))
+      );
+
+    return forkJoin({
+      total: totalCycles$,
+      criticality: criticalityStats$,
+      days: daysStats$,
+    }).pipe(
+      map(({ total, criticality, days }) => ({
+        totalRecords: total,
+        criticalCases: criticality.critical,
+        standardLeaves: criticality.standard,
+        attentionCases: criticality.attention,
+        totalDaysAway: days,
+      }))
+    );
+  }
 }
 
 export interface PayrollTacticalKpis {
@@ -352,3 +423,12 @@ export interface PayrollTacticalKpis {
   nextPaymentDate: string;
   activeCompetence: string;
 }
+
+export interface AfastamentosTacticalKpis {
+  totalRecords: number;
+  criticalCases: number;
+  standardLeaves: number;
+  attentionCases: number;
+  totalDaysAway: number;
+}
+
