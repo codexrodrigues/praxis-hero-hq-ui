@@ -30,8 +30,8 @@
 | **ISSUE-014** | `@praxisui/core` | Arquitetural / DX | Governança Canônica de Temas: Ausência de SCSS Starter/Mixin e Mapeamento Obrigatório de Tokens Material 3 | `[DONE]` |
 | **ISSUE-015** | `@praxisui/core` | Design / UX & Layout | Fundo Translúcido em Widgets Sobrepostos e Omissão do Modo de Inspeção de Janela ('expand') na Toolbar de WidgetShell | `[DONE]` |
 | **ISSUE-016** | `@praxisui/core` | Arquitetural / Temas | Ausência de Tokens Canônicos de Superfície Invertida e Tooltip no Theme Bridge (`--mat-sys-inverse-surface` e `--mat-tooltip-*`) | `[DONE]` |
-| **ISSUE-017** | `@praxisui/rich-content` | Funcional / Visual | `RichCardMedia[kind='avatar']` ignora URL de imagem (`src`) e renderiza apenas iniciais com fallback nulo quando `label`/`alt` são omitidos | `[PENDING]` |
-| **ISSUE-018** | `@praxisui/rich-content` | Design / Contraste & Layout | `RichTabsNode[appearance='pills']` possui `#fff` hardcoded no fundo da aba ativa e força `flex-wrap: wrap` quebrando o layout | `[PENDING]` |
+| **ISSUE-017** | `@praxisui/rich-content` | Funcional / Visual | `RichCardMedia[kind='avatar']` ignora URL de imagem (`src`) e renderiza apenas iniciais com fallback nulo quando `label`/`alt` são omitidos | `[DONE]` |
+| **ISSUE-018** | `@praxisui/rich-content` | Design / Contraste & Layout | `RichTabsNode[appearance='pills']` possui `#fff` hardcoded no fundo da aba ativa e força `flex-wrap: wrap` quebrando o layout | `[DONE]` |
 | **ISSUE-019** | `@praxisui/dynamic-form` | Design / Acabamento | Presets Visuais Ricos Nativos para Modo Apresentação (`presentationPreset: 'corporate-dossier' \| 'editorial-card'`) eliminando CSS customizado no host | `[PENDING]` |
 | **ISSUE-020** | `@praxisui/dynamic-form` & `@praxisui/core` | Arquitetural / Layout | Suporte Nativo a Layout por Abas (Tabs) e Acordeão no `FormConfig` para Organização Multisseção Governada | `[PENDING]` |
 | **ISSUE-021** | `@praxisui/rich-content` & `@praxisui/core` | Arquitetural / Composição | Suporte a `schemaRef`/`resourcePath` dinâmico em `RichPropertySheetNode` ou nó nativo de formulário dinâmico em `RichContent` | `[PENDING]` |
@@ -1264,10 +1264,10 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-017: `RichCardMedia[kind='avatar']` ignora URL de imagem (`src`) e renderiza apenas iniciais com fallback nulo quando `label`/`alt` são omitidos
 * **Biblioteca:** `@praxisui/rich-content`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Média (Inconsistência visual em cabeçalhos de perfil e cards com avatar)
 * **Diagnóstico Técnico:**
-  No arquivo `praxis-rich-content.ts` (template `#cardMedia`), o ramo condicional `@else if (media.kind === 'avatar')` contém apenas:
+  No arquivo `praxis-rich-content.ts` (template `#cardMedia`), o ramo condicional `@else if (media.kind === 'avatar')` continha apenas:
   ```html
   <span
     class="prx-rich-card-media__avatar"
@@ -1276,41 +1276,61 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
     {{ resolveCardMediaFallback(media) }}
   </span>
   ```
-  1. **Omissão da tag `<img>`:** Mesmo que o desenvolvedor passe `media.src` ou `media.srcExpr` apontando para a foto do colaborador, o componente ignora a URL e não tenta renderizar a imagem.
-  2. **Fallback nulo:** A função `resolveCardMediaFallback(media)` busca o texto em `media.label` ou `media.alt`. Se o objeto JSON passar apenas `{ kind: 'avatar', src: '...' }` (comum ao mapear DTOs de usuário), o fallback retorna string vazia `""`, renderizando uma bola redonda vazia sem foto e sem iniciais.
-  3. **Contraste com `@praxisui/table`:** Na tabela, a coluna de avatar tenta renderizar a imagem `<img>` e recorre às iniciais apenas se `src` for nulo ou falhar. Em `RichCardMedia`, isso não existe.
-* **Implementação Recomendada para a Plataforma:**
-  1. No template `#cardMedia` de `@praxisui/rich-content`:
+  1. **Omissão da tag `<img>`:** Mesmo que o desenvolvedor passasse `media.src` ou `media.srcExpr` apontando para a foto do colaborador, o componente ignorava a URL e não tentava renderizar a imagem.
+  2. **Fallback nulo:** A função `resolveCardMediaFallback(media)` buscava o texto em `media.label` ou `media.alt`. Se o objeto JSON passasse apenas `{ kind: 'avatar', src: '...' }` (comum ao mapear DTOs de usuário), o fallback retornava string vazia `""`, renderizando uma bola redonda vazia sem foto e sem iniciais.
+  3. **Contraste com `@praxisui/table`:** Na tabela, a coluna de avatar tenta renderizar a imagem `<img>` e recorre às iniciais apenas se `src` for nulo ou falhar. Em `RichCardMedia`, isso não existia.
+* **Implementação Realizada na Plataforma:**
+  1. **Renderização de Imagem com Fallback no Template (`#cardMedia`):**
      ```html
      @else if (media.kind === 'avatar') {
-       @if (resolveCardMediaSrc(media); as avatarSrc) {
-         <img
-           class="prx-rich-card-media__avatar-image"
-           [src]="avatarSrc"
-           [alt]="resolveCardMediaAlt(media) || resolveCardMediaLabel(media) || ''"
-           (error)="onAvatarImageError($event, media)"
-         />
-       } @else {
-         <span
-           class="prx-rich-card-media__avatar"
-           [attr.aria-label]="resolveCardMediaLabel(media)"
-         >
-           {{ resolveCardMediaFallback(media) }}
-         </span>
-       }
+       <span
+         class="prx-rich-card-media__avatar"
+         [attr.aria-label]="resolveCardMediaLabel(media)"
+       >
+         @if (resolveCardMediaSrc(media); as avatarSrc) {
+           @if (!isAvatarImageFailed(media)) {
+             <img
+               class="prx-rich-card-media__avatar-image"
+               [src]="avatarSrc"
+               [alt]="resolveCardMediaAlt(media) || resolveCardMediaLabel(media) || (node?.title ?? '')"
+               (error)="onAvatarImageError($event, media)"
+             />
+           } @else {
+             {{ resolveCardMediaFallback(media, node) }}
+           }
+         } @else {
+           {{ resolveCardMediaFallback(media, node) }}
+         }
+       </span>
      }
      ```
-  2. Em `resolveCardMediaFallback(media)`, incluir fallback secundário para `node.title` quando `label` e `alt` não forem declarados no objeto de mídia.
+  2. **Estilos Canônicos do Avatar:**
+     - Adicionado `overflow: hidden;` ao container `.prx-rich-card-media__avatar`.
+     - Criada a classe `.prx-rich-card-media__avatar-image` com `width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;`.
+  3. **Fallback Multinível em `resolveCardMediaFallback`:**
+     - Resolução em cascata: `resolveCardMediaLabel(media) || resolveCardMediaAlt(media) || node.title` garantindo iniciais derivadas do título do card quando `label` e `alt` forem omitidos.
+     - Suporte a detecção de erro via evento `(error)` que registra a URL com falha no `avatarImageErrors` e ativa o fallback de iniciais sem quebrar a UI.
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
-  - Enquanto a issue estiver `[PENDING]`, passar explicitamente `label: hero.nomeCompleto` e `alt: hero.nomeCompleto` para garantir que o fallback gere iniciais textuais perfeitamente legíveis (ex: "AS" para Anthony Stark).
-  - Quando for indispensável exibir a foto real no Card Hero, utilizar `media: { kind: 'image', src: hero.fotoPerfilUrl, placement: 'leading' }` associado a estilos de avatar circular (`border-radius: 50%`).
+  - O workaround de trocar `kind: 'avatar'` por `kind: 'image'` pode ser **removido**.
+  - Declare diretamente no JSON do card:
+    ```json
+    {
+      "type": "card",
+      "title": hero.nomeCompleto,
+      "media": {
+        "kind": "avatar",
+        "src": hero.fotoPerfilUrl
+      }
+    }
+    ```
+  - Se a URL da foto for inválida ou não responder, as iniciais (ex: "AS" para Anthony Stark) serão exibidas automaticamente com o tom semântico do card.
 
 
 ---
 
 ### ISSUE-018: `RichTabsNode[appearance='pills']` possui `#fff` hardcoded no fundo da aba ativa e força `flex-wrap: wrap` quebrando o layout
-* **Biblioteca:** `@praxisui/rich-content`
-* **Status:** `[PENDING]`
+* **Biblioteca:** `@praxisui/rich-content` & `@praxisui/core`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Quebra de contraste em Dark Mode e quebra assimétrica de abas em painéis)
 * **Diagnóstico Técnico:**
   1. **`#fff` hardcoded:** No CSS interno da biblioteca:
@@ -1319,27 +1339,34 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
        background: color-mix(in srgb, var(--md-sys-color-primary, #6750a4) 14%, #fff);
      }
      ```
-     Misturar `#fff` com a cor primária gera um fundo claro pastel que funciona apenas em Light Mode. Em Dark Mode, onde o fundo da página é escuro, a aba ativa fica quase 100% branca, gerando um contraste agressivo e ofuscante que viola as diretrizes de Dark Mode.
-  2. **Ausência de affordance em abas inativas:** Abas inativas têm `background: transparent; border: 0; color: var(--md-sys-color-on-surface);`. Não há contorno, elevação ou indicação de cápsula clicável, fazendo com que pareçam meros rótulos textuais estáticos.
-  3. **`flex-wrap: wrap` involuntário:** O container `.prx-rich-tabs__tablist` declara `flex-wrap: wrap`. Em superfícies estreitas (drawers de 600px–720px, modais ou split-views), 4 a 6 abas quebram em 2 linhas desiguais e desalinhadas, prejudicando a escaneabilidade.
-* **Implementação Recomendada para a Plataforma:**
-  1. Trocar o `#fff` hardcoded por tokens Material 3 semânticos:
-     ```css
-     .prx-rich-tabs[data-appearance=pills] .prx-rich-tabs__tab--active {
-       background: var(--md-sys-color-primary-container, color-mix(in srgb, var(--md-sys-color-primary, #6750a4) 16%, var(--md-sys-color-surface-container-high, #2b2930)));
-       color: var(--md-sys-color-on-primary-container, var(--md-sys-color-primary, #6750a4));
-     }
-     ```
-  2. Prover affordance sutil para abas inativas no modo `pills` com borda e hover:
-     ```css
-     .prx-rich-tabs[data-appearance=pills] .prx-rich-tabs__tab {
-       border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.1));
-       background: color-mix(in srgb, var(--md-sys-color-surface, transparent) 40%, transparent);
-     }
-     ```
-  3. Suportar rolagem horizontal sem quebra (`flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;`) como opção ou padrão para densidade compacta.
+     Misturar `#fff` com a cor primária gerava um fundo claro pastel que funcionava apenas em Light Mode. Em Dark Mode, onde o fundo da página é escuro, a aba ativa ficava quase 100% branca, gerando contraste ofuscante e ilegível com texto claro.
+  2. **Ausência de affordance em abas inativas:** Abas inativas tinham `background: transparent; border: 0; color: var(--md-sys-color-on-surface);`. Não havia contorno, elevação ou indicação de cápsula clicável, parecendo rótulos textuais estáticos.
+  3. **`flex-wrap: wrap` involuntário:** O container `.prx-rich-tabs__tablist` declarava `flex-wrap: wrap`. Em superfícies estreitas (drawers de 600px–720px, modais ou split-views), 4 a 6 abas quebravam em 2 linhas desiguais e desalinhadas, prejudicando a escaneabilidade.
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Adicionadas propriedades opcionais `wrap?: boolean;` e `scrollable?: boolean;` em `RichTabsNode`.
+     - `RichContentDocumentValidator` atualizado para validar ambas as propriedades.
+  2. **Substituição de Cor Hardcoded por Tokens Semânticos:**
+     - Aba ativa no modo `pills` adota:
+       ```css
+       .prx-rich-tabs[data-appearance='pills'] .prx-rich-tabs__tab--active {
+         background: var(
+           --md-sys-color-primary-container,
+           color-mix(in srgb, var(--md-sys-color-primary, #6750a4) 16%, var(--md-sys-color-surface-container-high, #2b2930))
+         );
+         color: var(--md-sys-color-on-primary-container, var(--md-sys-color-primary, #6750a4));
+         border-color: transparent;
+         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+       }
+       ```
+  3. **Affordance e Hover em Abas Inativas:**
+     - Abas inativas de pills receberam contorno suave `border: 1px solid var(--md-sys-color-outline-variant, ...)` e transição suave no `:hover`.
+  4. **Prevenção de Quebra e Rolagem Horizontal Nativas:**
+     - Classes `.prx-rich-tabs__tablist--nowrap` e `.prx-rich-tabs__tablist--scrollable` com ocultação suave de scrollbar (`scrollbar-width: none;`).
+     - Por padrão, o modo `appearance: 'pills'` aplica `nowrap` e `scrollable` automaticamente, a menos que `wrap: true` seja explicitamente declarado.
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
-  - Sobrescrever temporariamente o seletor `::ng-deep .prx-rich-tabs` no escopo do componente com estilos táticos de barra segmentada (`nowrap`, `overflow-x: auto`, pills com affordance e cores adaptativas para Dark e Light mode).
+  - O workaround CSS com `::ng-deep .prx-rich-tabs` no host pode ser **removido integralmente**.
+  - O componente de abas com `appearance: "pills"` agora tem contraste perfeito em Dark Mode e Light Mode e não quebra linhas em drawers estreitos.
 
 
 ---
