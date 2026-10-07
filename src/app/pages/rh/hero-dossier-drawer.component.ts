@@ -7,6 +7,7 @@ import {
   effect,
   inject,
   input,
+  OnDestroy,
   output,
   signal,
 } from '@angular/core';
@@ -16,6 +17,7 @@ import {
 } from '@praxisui/core';
 import { PraxisDynamicForm } from '@praxisui/dynamic-form';
 import { PraxisRichContent } from '@praxisui/rich-content';
+import { catchError, forkJoin, map, of, Subscription } from 'rxjs';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 
 export interface HeroProfile {
@@ -416,7 +418,8 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
             </button>
           </header>
 
-          <main class="drawer-body">
+          <!-- Fixed Header: Hero Card and Tactical Tabs -->
+          <div class="drawer-fixed-header">
             @if (isLoading()) {
               <div class="dossier-loading">
                 <span class="material-symbols-outlined spin">sync</span>
@@ -501,8 +504,10 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
                 }
               </button>
             </nav>
+          </div>
 
-            <!-- 3. Conteúdo Dinâmico por Aba -->
+          <!-- 3. Scrollable Body: Conteúdo Dinâmico por Aba -->
+          <main class="drawer-body">
             <div class="dossier-tab-content">
               <!-- ABA 1: IDENTIDADE (FICHA CADASTRAL GOVERNADA + AVALIAÇÃO 360°) -->
               @if (activeTab() === 'identity') {
@@ -620,6 +625,7 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
       flex-direction: column;
       box-shadow: var(--shadow-command);
       animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
     }
 
     .drawer-top-bar {
@@ -629,6 +635,16 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
       justify-content: space-between;
       align-items: center;
       background: color-mix(in oklab, var(--card) 60%, transparent);
+    }
+
+    .drawer-fixed-header {
+      padding: 16px 24px 12px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: color-mix(in oklab, var(--card) 45%, var(--background));
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
     .dossier-badge {
@@ -1043,7 +1059,7 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
     }
   `],
 })
-export class HeroDossierDrawerComponent {
+export class HeroDossierDrawerComponent implements OnDestroy {
   readonly hero = input<HeroProfile | null>(null);
   readonly isTransitioning = input<boolean>(false);
   readonly close = output<void>();
@@ -1056,6 +1072,7 @@ export class HeroDossierDrawerComponent {
   protected readonly assets = signal<EquipmentRecord[]>([]);
 
   private readonly http = inject(HttpClient);
+  private dataSub: Subscription | null = null;
 
   protected readonly hostCapabilities: RichBlockHostCapabilities = {
     dispatchAction: (actionId: string, payload: unknown) => {
@@ -1107,53 +1124,73 @@ export class HeroDossierDrawerComponent {
     effect(() => {
       const h = this.hero();
       if (!h?.id) {
+        this.dataSub?.unsubscribe();
         this.payroll.set([]);
         this.missions.set([]);
         this.assets.set([]);
         this.activeTab.set('identity');
+        this.isLoading.set(false);
         return;
       }
       this.fetchAllHeroData(h.id);
     });
   }
 
+  ngOnDestroy(): void {
+    this.dataSub?.unsubscribe();
+  }
+
   private fetchAllHeroData(heroId: number): void {
+    this.dataSub?.unsubscribe();
     this.isLoading.set(true);
 
-    this.http
+    const payroll$ = this.http
       .post<{ data?: { content?: PayrollRecord[] } }>(
         `${PRAXIS_API_BASE_URL}/human-resources/folhas-pagamento/filter`,
         { funcionarioId: heroId }
       )
-      .subscribe({
-        next: (res) => this.payroll.set(res.data?.content || []),
-        error: () => this.payroll.set([]),
-      });
+      .pipe(
+        map((res) => res.data?.content || []),
+        catchError(() => of([] as PayrollRecord[]))
+      );
 
-    this.http
+    const missions$ = this.http
       .post<{ data?: { content?: MissionParticipantRecord[] } }>(
         `${PRAXIS_API_BASE_URL}/operations/missao-participantes/filter`,
         { funcionarioId: heroId }
       )
-      .subscribe({
-        next: (res) => this.missions.set(res.data?.content || []),
-        error: () => this.missions.set([]),
-      });
+      .pipe(
+        map((res) => res.data?.content || []),
+        catchError(() => of([] as MissionParticipantRecord[]))
+      );
 
-    this.http
+    const assets$ = this.http
       .post<{ data?: { content?: EquipmentRecord[] } }>(
         `${PRAXIS_API_BASE_URL}/assets/equipamentos/filter`,
         { proprietarioId: heroId }
       )
-      .subscribe({
-        next: (res) => {
-          this.assets.set(res.data?.content || []);
-          this.isLoading.set(false);
-        },
-        error: () => {
-          this.assets.set([]);
-          this.isLoading.set(false);
-        },
-      });
+      .pipe(
+        map((res) => res.data?.content || []),
+        catchError(() => of([] as EquipmentRecord[]))
+      );
+
+    this.dataSub = forkJoin({
+      payroll: payroll$,
+      missions: missions$,
+      assets: assets$,
+    }).subscribe({
+      next: ({ payroll, missions, assets }) => {
+        this.payroll.set(payroll);
+        this.missions.set(missions);
+        this.assets.set(assets);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.payroll.set([]);
+        this.missions.set([]);
+        this.assets.set([]);
+        this.isLoading.set(false);
+      },
+    });
   }
 }
