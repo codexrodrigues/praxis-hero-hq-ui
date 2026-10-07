@@ -997,24 +997,6 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
 
         /* Resolução Semântica Reativa para Campos Booleanos (ISSUE-022) */
         .praxis-presentation--boolean-false {
-          .praxis-presentation__icon {
-            color: var(--muted-foreground) !important;
-            font-size: 0 !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            width: 20px !important;
-            height: 20px !important;
-
-            &::after {
-              content: 'toggle_off';
-              font-family: 'Material Symbols Outlined';
-              font-size: 20px;
-              line-height: 1;
-              color: var(--muted-foreground) !important;
-            }
-          }
-
           .praxis-presentation__value {
             background: color-mix(in oklab, var(--muted) 70%, transparent) !important;
             color: var(--muted-foreground) !important;
@@ -1023,10 +1005,6 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
         }
 
         .praxis-presentation--boolean-true {
-          .praxis-presentation__icon {
-            color: #10b981 !important;
-          }
-
           .praxis-presentation__value {
             background: color-mix(in oklab, #10b981 14%, transparent) !important;
             color: #059669 !important;

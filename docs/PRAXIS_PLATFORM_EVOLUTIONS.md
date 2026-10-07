@@ -1518,13 +1518,13 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-022: Reatividade Semântica de Ícone, Tom e Estado em Campos Booleanos no Modo Apresentação (`FieldShellComponent`)
 * **Biblioteca:** `@praxisui/dynamic-fields` & `@praxisui/core` (com reflexo em `@praxisui/dynamic-form`)
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Inconsistência Semântica / Confiabilidade de Apresentação em Dados Corporativos)
 * **Diagnóstico Técnico & Evidência Real:**
   No Dossiê do Herói da tela de Recursos Humanos do `praxis-hero-hq-ui`, ao inspecionar colaboradores inativos (ex: *Ayla Hayes*, com `ativo: false`), foi observada uma inconsistência crítica de UI/UX corporativa:
   - O campo **ATIVO** exibe o label `"ATIVO"`.
   - O valor textual é resolvido corretamente para `"Não"` dentro de um chip.
-  - **Porém**, o ícone de prefixo renderizado é o toggle ligado verde (`toggle_on`) e o tom aplicado é `tone="success"`, transmitindo visualmente a impressão de que o registro está ativo!
+  - **Porém**, o ícone de prefixo renderizado era o toggle ligado verde (`toggle_on`) e o tom aplicado era `tone="success"`, transmitindo visualmente a impressão de que o registro estava ativo!
 
   **Causa-Raiz no Código da Plataforma:**
   1. No backend (`FuncionarioDTO.java`), o campo `ativo` possui as anotações estáticas:
@@ -1535,49 +1535,31 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
      @ExtensionProperty(name = "presentation.tone", value = "success")
      private Boolean ativo;
      ```
-  2. No componente `FieldShellComponent` (`projects/praxis-dynamic-fields/src/lib/components/field-shell/field-shell.component.ts`):
-     ```typescript
-     getPresentationPrefixIcon(): string {
-       const semanticIcon = this.normalizeIconName(this.getResolvedPresentation().icon);
-       if (semanticIcon) {
-         return semanticIcon;
-       }
-       ...
-     }
+  2. No componente `FieldShellComponent` (`projects/praxis-dynamic-fields/src/lib/components/field-shell/field-shell.component.ts`), os métodos `getPresentationPrefixIcon()` e `getPresentationTone()` priorizavam a string estática do metadata sem verificar o estado booleano do campo.
 
-     getPresentationTone(): string | null {
-       return this.getResolvedPresentation().tone ?? null;
-     }
-     ```
-  3. Embora `FieldShellComponent` possua os métodos auxiliares `isBooleanPresentationField()` e `getBooleanPresentationState()`, os métodos `getPresentationPrefixIcon()` e `getPresentationTone()` priorizam a string estática do metadata sem verificar o estado booleano do campo.
-  4. Como resultado, quando o desenvolvedor backend define `presentation.icon = "toggle_on"` e `presentation.tone = "success"` para qualificar o campo como um switch de status, essa anotação estática anula a semântica dinâmica quando o registro possui valor `false` (ou `0`).
-
-* **Implementação Recomendada para a Plataforma:**
-  1. **Resolução Dinâmica Inteligente de Ícones e Tons em `FieldShellComponent`:**
-     - Quando `isBooleanPresentationField()` for verdadeiro (ou o presenter for `'status'`/`'boolean'`):
-       - Se o valor atual for estritamente `false` (ou `0`):
-         * **Mapeamento de Ícone Inativo:** Se `presentation.icon` foi configurado como `'toggle_on'`, resolver automaticamente para `'toggle_off'`. Se foi `'check_circle'` ou `'check'`, resolver para `'cancel'` ou `'close'`. Se foi `'visibility'`, resolver para `'visibility_off'`.
-         * **Mapeamento de Tom Inativo:** Se `presentation.tone` foi configurado como `'success'`, rebaixar para `'neutral'` (ou `'warn'`/`'muted'`).
-       - Permitir extensão explícita de anotações por estado no contrato OpenAPI / `x-ui`:
-         * `presentation.iconTrue` e `presentation.iconFalse` (ou `@ExtensionProperty(name = "presentation.icon.false", value = "toggle_off")`).
-         * `presentation.toneTrue` e `presentation.toneFalse` (ex: `success` para true, `neutral` para false).
-  2. **Contrato Canônico (`@praxisui/core`):**
-     - Estender `ValuePresentationConfig` para suportar pares booleanos explícitos:
+* **Implementação Realizada na Plataforma:**
+  1. **Contrato Canônico (`@praxisui/core`):**
+     - Estendido `FieldPresentationConfig` e `normalizeFieldPresentation` com pares semânticos por estado:
        ```typescript
-       export interface BooleanPresentationOptions {
-         iconTrue?: string;
-         iconFalse?: string;
-         toneTrue?: RichSemanticTone;
-         toneFalse?: RichSemanticTone;
-         labelTrue?: string;
-         labelFalse?: string;
-       }
+       iconTrue?: string;
+       iconFalse?: string;
+       toneTrue?: FieldPresentationTone;
+       toneFalse?: FieldPresentationTone;
+       labelTrue?: string;
+       labelFalse?: string;
        ```
+  2. **Runtime Reativo em `FieldShellComponent` (`@praxisui/dynamic-fields`):**
+     - **Reatividade Automática de Ícones:** Se o valor for `false`, mapeia automaticamente pares binários clássicos (`toggle_on` $\to$ `toggle_off`, `check_circle` $\to$ `cancel`, `check` $\to$ `close`, `visibility` $\to$ `visibility_off`, etc.), a menos que sobrescrito explicitamente por `iconFalse`.
+     - **Reatividade de Tom:** Se o valor for `false` e o tom base configurado for `'success'`, rebaixa automaticamente para `'neutral'`. Suporta também `toneFalse` explícito.
+     - **Supressão de Rótulo Positivo Incompatível:** Em estado `false`, evita que um `label` estático positivo (ex: `"Ativo"`) sobreponha o valor formatado `"Não"`, a menos que um `labelFalse` deliberado tenha sido declarado.
+     - **Tokens CSS Oficiais:** Adicionadas regras para `--pfx-pres-boolean-false-icon-color` e `--pfx-pres-boolean-true-icon-color`.
   3. **Validação:**
-     - Teste unitário em `field-shell.component.spec.ts` validando que um campo booleano com `icon: 'toggle_on'` renderiza `toggle_off` e tom neutro quando `control.value === false`.
+     - 8 testes unitários focais implementados em `field-shell.boolean-presentation.spec.ts` cobrindo valores booleanos, numéricos (0/1), strings ("Sim"/"Não"), reatividade dinâmica em tempo real no `FormControl`, e overrides explícitos de ícone/tom/label.
+     - PR #556 integrado e aprovado na `main`.
 
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
-  - Aplicar estilização semântica orientada às classes nativas `praxis-presentation--boolean-false` e `praxis-presentation--boolean-true` já emitidas pelo `FieldShellComponent` no host para garantir fidelidade visual enquanto a lib incorpora o mapeamento dinâmico automático.
+  - O workaround CSS com `&::after { content: 'toggle_off' }` e `font-size: 0` em `hero-dossier-drawer.component.ts` foi removido.
+  - O componente agora usufrui nativamente da inteligência da plataforma para resolver `toggle_off` e tom `neutral` para colaboradores inativos.
 
 ---
 
