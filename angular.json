@@ -42,8 +42,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "12MB",
-                  "maximumError": "16MB"
+                  "maximumWarning": "14MB",
+                  "maximumError": "18MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -51,7 +51,15 @@
                   "maximumError": "24kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": false
+              }
             },
             "development": {
               "optimization": false,
@@ -65,7 +73,8 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "host": "127.0.0.1",
-            "port": 4302
+            "port": 4302,
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {

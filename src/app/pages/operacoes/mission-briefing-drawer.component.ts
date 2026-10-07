@@ -77,7 +77,7 @@ function buildMissionBriefingDocument(
       // 1. Header Mission Identity Card
       {
         type: 'card',
-        variant: 'elevated',
+        variant: 'unstyled',
         tone: 'neutral',
         className: 'glass-panel briefing-hero-card',
         title: mission.titulo,

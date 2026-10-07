@@ -1,6 +1,13 @@
 import type { GlobalConfig } from '@praxisui/core';
 
-export const PRAXIS_API_ORIGIN = 'https://praxis-api-quickstart.onrender.com';
+const isBrowser = typeof window !== 'undefined';
+const isLocalhost =
+  isBrowser &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+export const PRAXIS_API_ORIGIN = isLocalhost
+  ? ''
+  : 'https://praxis-api-quickstart.onrender.com';
 export const PRAXIS_API_BASE_URL = `${PRAXIS_API_ORIGIN}/api`;
 
 export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {

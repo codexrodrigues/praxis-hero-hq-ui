@@ -1,0 +1,14 @@
+{
+  "/api": {
+    "target": "https://praxis-api-quickstart.onrender.com",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/schemas": {
+    "target": "https://praxis-api-quickstart.onrender.com",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

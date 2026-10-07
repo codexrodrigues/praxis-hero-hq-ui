@@ -92,7 +92,7 @@ export function buildHeroDossierDocument(
       // 1. Header Hero Identity Card
       {
         type: 'card',
-        variant: 'elevated',
+        variant: 'unstyled',
         tone: 'neutral',
         className: 'glass-panel dossier-hero-card',
         title: hero.nomeCompleto,
@@ -193,7 +193,7 @@ export function buildHeroDossierDocument(
             content: [
               {
                 type: 'card',
-                variant: 'elevated',
+                variant: 'unstyled',
                 tone: 'neutral',
                 className: 'glass-panel skills-card',
                 title: 'Matriz de Proficiência Tática',

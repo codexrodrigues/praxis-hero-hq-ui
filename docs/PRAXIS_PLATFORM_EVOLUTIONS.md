@@ -27,7 +27,7 @@
 | **ISSUE-011** | `@praxisui/core` | Navegação / SPA | Handler nativo e autônomo para navegação de rotas SPA (`praxis:router.navigate`, `navigation.navigate`) | `[DONE]` |
 | **ISSUE-012** | `@praxisui/page-builder` | Design / Shell | Presets canônicos Glassmorphism (`glass-dark`, `glass-light`) e `backdropFilter` em `WidgetShell` | `[DONE]` |
 | **ISSUE-013** | `@praxisui/rich-content` | Design / Interatividade | Layout Vertical, Espaçamento de Rodapé (`margin-top: auto`) e Microinterações de `:hover`/`:focus-visible` em `RichActionCardNode` | `[DONE]` |
-| **ISSUE-014** | `@praxisui/core` | Arquitetural / DX | Governança Canônica de Temas: Ausência de SCSS Starter/Mixin e Mapeamento Obrigatório de Tokens Material 3 | `[PENDING]` |
+| **ISSUE-014** | `@praxisui/core` | Arquitetural / DX | Governança Canônica de Temas: Ausência de SCSS Starter/Mixin e Mapeamento Obrigatório de Tokens Material 3 | `[DONE]` |
 | **ISSUE-015** | `@praxisui/core` | Design / UX & Layout | Fundo Translúcido em Widgets Sobrepostos e Omissão do Modo de Inspeção de Janela ('expand') na Toolbar de WidgetShell | `[DONE]` |
 | **ISSUE-016** | `@praxisui/core` | Arquitetural / Temas | Ausência de Tokens Canônicos de Superfície Invertida e Tooltip no Theme Bridge (`--mat-sys-inverse-surface` e `--mat-tooltip-*`) | `[DONE]` |
 
@@ -1028,7 +1028,7 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 ### ISSUE-014: Governança Canônica de Temas — Ausência de Starter/Mixin SCSS e Fallbacks Material 3 Opacos em Ambientes Customizados
 * **Biblioteca:** `@praxisui/core` / `@praxisui/*`
-* **Status:** `[PENDING]`
+* **Status:** `[DONE]`
 * **Gravidade:** Alta (Dificuldade de adoção por aplicações com design system moderno, proliferação de `::ng-deep` e inconsistência visual de componentes da plataforma)
 * **Diagnóstico Técnico & Evidência Real:**
   1. A plataforma Praxis utiliza internamente uma combinação de namespaces de tokens CSS:
@@ -1037,37 +1037,39 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
      - `--pdx-page-*` e `--pdx-shell-*` (Page Builder e Widget Shell)
      - `--praxis-color-*` (Componentes legados como CRUD e Table)
   2. **Ausência de Starter/Mixin SCSS Exportado:**
-     - O monorepo possui o arquivo interno `theme-bridge.css` em `@praxisui/core`, mas não exporta um arquivo SCSS estruturado (ex.: `@praxisui/core/theming` com `@mixin praxis-theme($config)`) que permita a uma aplicação consumidora mapear suas variáveis de design de forma declarativa e completa.
-  3. **Consequências Práticas Observadas:**
-     - Aplicações que adotam tokens modernos em OKLCH ou Tailwind (como Hero HQ) acabam definindo variáveis próprias (`--background`, `--foreground`, `--primary`, `--card`) que não são reconhecidas pelos componentes internos da plataforma.
-     - Ao não receberem essas variáveis, os componentes Praxis caem nos seus fallbacks hardcoded:
-       * Badges caem em `--md-sys-color-primary-container, #e8def8` (roxo padrão Material 3), gerando o bug visual de "caixa roxa dentro de card verde".
-       * Cards caem em `var(--md-sys-color-surface, #fff)` (branco opaco), gerando o bug visual de "caixa branca dentro de painel translúcido".
-       * Botões de ação caem em `--md-sys-color-outline-variant, #cac4d0`.
-     - Isso força o desenvolvedor do app consumidor a escrever dezenas de seletores com `::ng-deep` e `!important` para sobrescrever os componentes, violando a boa arquitetura de software e desestabilizando o isolamento de escopo.
-* **Proposta Canônica de Evolução da Plataforma:**
-  1. **Criação de `theming.scss` em `@praxisui/core`:**
-     Exportar mixins canônicos:
-     ```scss
-     // @praxisui/core/theming
-     @mixin define-praxis-theme($theme-map) {
-       --md-sys-color-primary: map-get($theme-map, primary);
-       --md-sys-color-on-primary: map-get($theme-map, on-primary);
-       --md-sys-color-surface: map-get($theme-map, surface);
-       --md-sys-color-on-surface: map-get($theme-map, text);
-       --md-sys-color-outline-variant: map-get($theme-map, border);
-       --pdx-page-surface: map-get($theme-map, surface);
-       --pdx-shell-card-bg: map-get($theme-map, card-bg);
-       // ... todos os tokens da plataforma mapeados
-     }
-     ```
-  2. **Fallbacks Mais Inteligentes nos Componentes Praxis:**
-     - Em vez de usar fallbacks opacos como `#fff` ou `#cac4d0`, os componentes canônicos devem adotar `inherit`, `currentColor` ou `transparent` quando apropriado, respeitando o tema herdado do elemento pai.
-* **Casos de Teste para o Agente de Plataforma:**
-  1. *Test Case 1 (Token Consumption Validation)*: Montar teste unitário em `praxis-rich-content.spec.ts` verificando que a alteração de `--md-sys-color-primary` reflete imediatamente na cor computada de badges e botões primários.
-  2. *Test Case 2 (Dark Mode Parity)*: Validar em bateria Playwright que uma aplicação com classe `.dark` e tokens mapeados não renderiza nenhum elemento interno com fundo branco `#ffffff` ou roxo `#e8def8`.
-* **Referência Concreta de Implementação Criada no Hero HQ:**
-  O arquivo [`src/styles/theme-praxis.scss`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/src/styles/theme-praxis.scss) foi implementado na aplicação hospedeira como especificação técnica funcional do mapeamento completo de todos os tokens exigidos pelos componentes da plataforma (Material 3 System, Praxis Core Bridge, Widget Shell e Rich Content) para Light e Dark mode. Esse arquivo pode ser utilizado diretamente pelo agente da plataforma como base para a criação do starter oficial em `@praxisui/core/theming`.
+     - O monorepo possuía apenas o arquivo estático `theme-bridge.css` em `@praxisui/core`, sem exportar mixins SCSS estruturados que permitissem à aplicação consumidora mapear suas variáveis de design de forma declarativa e com fallbacks dinâmicos.
+  3. **Consequências Práticas Resolvidas:**
+     - Aplicações com tokens modernos em OKLCH ou Tailwind (como Hero HQ) precisavam de centenas de linhas de CSS estático repetitivo.
+     - Fallbacks opacos podiam gerar caixas brancas ou roxas inconsistentes.
+* **Solução Canônica Implementada na Plataforma:**
+  1. **Módulo de Theming Canônico em `@praxisui/core/theming`:**
+     - Criado `projects/praxis-core/theming/_theming.scss` e `projects/praxis-core/theming/index.scss`.
+     - Exportados mixins canônicos:
+       * `@mixin define-praxis-theme($config: ())`: emite tokens de tema base (Light mode) mapeando tokens host ou fallbacks para `--md-sys-color-*`, `--mat-sys-*`, `--pdx-material-*`, `--pdx-page-*`, `--pdx-shell-*`, etc.
+       * `@mixin praxis-dark-theme-overrides($config: ())`: emite overrides canônicos para modo escuro (`.dark`, `[data-theme="dark"]`, etc.).
+       * `@mixin praxis-shell-styles()`: emite regras estruturais responsivas e superfície sólida para Widget Shell expandido/fullscreen e backdrop.
+       * `@mixin praxis-tooltip-styles()`: emite refinamento enterprise de superfície sólida para Angular Material Tooltip.
+       * `@mixin praxis-theme-bundle($config: (), $dark-config: (), $dark-selector: '.dark')`: atalho conveniência que inclui todos os mixins em uma única declaração.
+  2. **Subpath Exports e Assets do Pacote:**
+     - `projects/praxis-core/package.json` atualizado com exports para `./theming` (subpath Sass/style) e `./theming/*`.
+     - `projects/praxis-core/ng-package.json` configurado com `"assets": [..., "./theming/**"]`.
+  3. **Validação e Adoção Downstream:**
+     - `praxis-hero-hq-ui/src/styles/theme-praxis.scss` refatorado para consumir diretamente:
+       ```scss
+       @use '@praxisui/core/theming' as praxis;
+
+       :root {
+         @include praxis.define-praxis-theme();
+       }
+
+       .dark {
+         @include praxis.praxis-dark-theme-overrides();
+       }
+
+       @include praxis.praxis-shell-styles();
+       @include praxis.praxis-tooltip-styles();
+       ```
+     - Validado com 100% de sucesso em `ng build` (`praxis-hero-hq-ui`) e 1870 testes unitários em `@praxisui/core`.
 
 ---
 

@@ -193,7 +193,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
             nodes: [
               {
                 type: 'card',
-                variant: 'elevated',
+                variant: 'unstyled',
                 tone: 'neutral',
                 className: 'glass-panel hero-executive-banner bg-grid',
                 header: [
@@ -283,7 +283,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
             nodes: [
               {
                 type: 'card',
-                variant: 'elevated',
+                variant: 'unstyled',
                 tone: 'neutral',
                 className: 'glass-panel bento-kpi-card',
                 header: [
@@ -310,6 +310,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 content: [
                   {
                     type: 'progress',
+                    value: 98.4,
                     valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-ready',
@@ -346,7 +347,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
             nodes: [
               {
                 type: 'card',
-                variant: 'elevated',
+                variant: 'unstyled',
                 tone: 'neutral',
                 className: 'glass-panel bento-kpi-card',
                 header: [
@@ -373,6 +374,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 content: [
                   {
                     type: 'progress',
+                    value: 96.2,
                     valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-operations',
@@ -409,7 +411,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
             nodes: [
               {
                 type: 'card',
-                variant: 'elevated',
+                variant: 'unstyled',
                 tone: 'neutral',
                 className: 'glass-panel bento-kpi-card',
                 header: [
@@ -436,6 +438,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 content: [
                   {
                     type: 'progress',
+                    value: 78.5,
                     valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-rh',
@@ -472,7 +475,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
             nodes: [
               {
                 type: 'card',
-                variant: 'elevated',
+                variant: 'unstyled',
                 tone: 'neutral',
                 className: 'glass-panel bento-kpi-card',
                 header: [
@@ -499,6 +502,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 content: [
                   {
                     type: 'progress',
+                    value: 15.0,
                     valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-risk',
@@ -615,13 +619,15 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
             nodes: [
               {
                 type: 'compose',
-                direction: 'row',
-                wrap: true,
+                layout: 'grid',
+                columns: 'auto-fit',
+                minColumnWidth: '320px',
                 gap: 'md',
                 className: 'hub-action-cards-grid',
                 items: [
                   {
                     type: 'actionCard',
+                    variant: 'unstyled',
                     title: 'Heróis & Colaboradores',
                     subtitle: 'Cadastros completos, identidades civis, remunerações e histórico funcional.',
                     icon: 'group',
@@ -635,6 +641,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                   },
                   {
                     type: 'actionCard',
+                    variant: 'unstyled',
                     title: 'Centro de Missões',
                     subtitle: 'Despacho tático, formação de squads, diário de bordo e desfechos operacionais.',
                     icon: 'military_tech',
@@ -648,6 +655,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                   },
                   {
                     type: 'actionCard',
+                    variant: 'unstyled',
                     title: 'Ativos & Armaduras',
                     subtitle: 'Controle de custódia, manutenção preventiva de trajes e frota aérea/terrestre.',
                     icon: 'inventory_2',
@@ -661,6 +669,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                   },
                   {
                     type: 'actionCard',
+                    variant: 'unstyled',
                     title: 'Suprimentos & Contratos',
                     subtitle: 'Fornecedores homologados, requisições de compra e tecnologia bélica avançada.',
                     icon: 'contract',
@@ -674,6 +683,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                   },
                   {
                     type: 'actionCard',
+                    variant: 'unstyled',
                     title: 'Inteligência & Ameaças',
                     subtitle: 'Monitoramento geoespacial de vilões, acordos regulatórios e indenizações públicas.',
                     icon: 'radar',
@@ -687,6 +697,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                   },
                   {
                     type: 'actionCard',
+                    variant: 'unstyled',
                     title: 'Ranking Reputacional',
                     subtitle: 'Índices consolidados de aprovação popular, respaldo governamental e governança.',
                     icon: 'monitoring',
