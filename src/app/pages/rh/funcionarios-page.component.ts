@@ -150,6 +150,8 @@ const SAMPLE_HERO: HeroProfile = {
   cpf: '109.876.543-21',
   telefone: '+55 (11) 99887-6655',
   email: 'tony.stark@avengers.praxis.org',
+  fotoPerfilUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=face',
+  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=face',
   scorePublico: 96,
   scoreGovernamental: 88,
   dataAdmissao: '15/04/2018',
