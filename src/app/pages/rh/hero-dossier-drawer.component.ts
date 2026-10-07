@@ -685,10 +685,10 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
     .drawer-body {
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
+      padding: 24px 24px 48px 24px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     .dossier-loading {
@@ -1037,50 +1037,127 @@ export function buildAssetsDocument(records: EquipmentRecord[]): RichContentDocu
 
       /* Stat Group / Reputação 360 (Harmonious Executive Metric Tiles) */
       .dossier-scores-section {
-        border-radius: 18px !important;
-        padding: 0 !important;
-        background: transparent !important;
-        border: none !important;
-
-        .prx-rich-stat-group__header {
-          margin-bottom: 14px !important;
-        }
+        display: block !important;
+        margin-top: 12px !important;
 
         .prx-rich-stat-group__title {
           font-size: 1.05rem !important;
           font-weight: 700 !important;
           color: var(--foreground) !important;
+          margin: 0 0 6px 0 !important;
+          letter-spacing: -0.01em !important;
         }
 
         .prx-rich-stat-group__subtitle {
-          font-size: 0.78rem !important;
+          font-size: 0.8rem !important;
           color: var(--muted-foreground) !important;
-          margin-top: 2px !important;
+          margin: 0 0 18px 0 !important;
+          line-height: 1.45 !important;
         }
 
-        .prx-rich-stat-group__grid {
+        .prx-rich-stat-group__items {
           display: grid !important;
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
           gap: 16px !important;
+          width: 100% !important;
+          margin: 0 !important;
         }
 
-        .prx-rich-stat-item {
-          background: color-mix(in oklab, var(--card) 85%, transparent) !important;
-          border: 1px solid var(--border) !important;
+        .prx-rich-stat-group__item {
+          display: grid !important;
+          grid-template-columns: auto 1fr auto !important;
+          grid-template-rows: auto auto 1fr !important;
+          column-gap: 10px !important;
+          row-gap: 4px !important;
+          align-items: center !important;
+          padding: 20px 22px !important;
           border-radius: 16px !important;
-          padding: 18px 20px !important;
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 12px !important;
+          border: 1px solid var(--border) !important;
+          min-height: 195px !important;
+          box-sizing: border-box !important;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-          backdrop-filter: blur(10px) !important;
-          -webkit-backdrop-filter: blur(10px) !important;
+          backdrop-filter: blur(12px) !important;
+          -webkit-backdrop-filter: blur(12px) !important;
+          transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+
+          &:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+          }
+
+          &[data-tone="info"] {
+            background: color-mix(in oklab, #0284c7 8%, var(--card)) !important;
+            border-color: color-mix(in oklab, #0284c7 22%, var(--border)) !important;
+          }
+
+          &[data-tone="success"] {
+            background: color-mix(in oklab, #10b981 8%, var(--card)) !important;
+            border-color: color-mix(in oklab, #10b981 22%, var(--border)) !important;
+          }
         }
 
-        .prx-rich-stat-item__value {
-          font-size: 1.6rem !important;
+        .prx-rich-stat-group__item-content {
+          display: contents !important;
+        }
+
+        .prx-rich-stat-group__icon {
+          grid-column: 1 !important;
+          grid-row: 1 !important;
+          font-size: 20px !important;
+          line-height: 1 !important;
+          margin: 0 !important;
+          align-self: center !important;
+        }
+
+        .prx-rich-stat-group__label {
+          grid-column: 2 !important;
+          grid-row: 1 !important;
+          font-size: 0.82rem !important;
+          font-weight: 600 !important;
+          color: var(--muted-foreground) !important;
+          margin: 0 !important;
+          align-self: center !important;
+        }
+
+        .prx-rich-stat-group__progress {
+          grid-column: 3 !important;
+          grid-row: 1 / span 2 !important;
+          justify-self: end !important;
+          align-self: center !important;
+          margin: 0 !important;
+        }
+
+        .prx-rich-stat-group__progress-ring-container {
+          width: 48px !important;
+          height: 48px !important;
+        }
+
+        .prx-rich-stat-group__progress-ring-text {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+        }
+
+        .prx-rich-stat-group__value {
+          grid-column: 1 / span 2 !important;
+          grid-row: 2 !important;
+          font-size: 2rem !important;
           font-weight: 800 !important;
+          line-height: 1.15 !important;
           letter-spacing: -0.02em !important;
+          color: var(--foreground) !important;
+          margin: 6px 0 2px 0 !important;
+        }
+
+        .prx-rich-stat-group__caption {
+          grid-column: 1 / span 3 !important;
+          grid-row: 3 !important;
+          font-size: 0.77rem !important;
+          color: var(--muted-foreground) !important;
+          line-height: 1.45 !important;
+          margin: 8px 0 0 0 !important;
+          padding-top: 10px !important;
+          border-top: 1px dashed color-mix(in oklab, var(--border) 60%, transparent) !important;
+          align-self: end !important;
         }
       }
 

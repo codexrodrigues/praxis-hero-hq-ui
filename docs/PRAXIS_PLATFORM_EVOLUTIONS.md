@@ -1578,3 +1578,55 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
 
 * **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
   - Aplicar estilização semântica orientada às classes nativas `praxis-presentation--boolean-false` e `praxis-presentation--boolean-true` já emitidas pelo `FieldShellComponent` no host para garantir fidelidade visual enquanto a lib incorpora o mapeamento dinâmico automático.
+
+---
+
+### ISSUE-023: Espaçamento Canônico de Cabeçalho e Diagramação Interna Balanceada em Nós de Métricas (`statGroup` / `RichStatGroupNode`)
+* **Biblioteca:** `@praxisui/rich-content` & `@praxisui/core`
+* **Status:** `[PENDING]`
+* **Gravidade:** Média (Qualidade Visual, Respiro de Layout e Ergonomia de Dashboards Corporativos)
+* **Diagnóstico Técnico & Evidência Real:**
+  Na tela do Dossiê do Herói e em painéis executivos com `statGroup`, foram identificadas duas anomalias de espaçamento na biblioteca `@praxisui/rich-content`:
+  1. **Ausência de Margem Inferior no Subtítulo:**
+     - Em `praxis-rich-content.ts`:
+       ```css
+       .prx-rich-stat-group__title,
+       .prx-rich-stat-group__subtitle,
+       .prx-rich-stat-group__caption {
+         margin: 0;
+       }
+       ```
+     - A `<div class="prx-rich-stat-group__subtitle">` não possui margem inferior (`margin: 0`). Como o container subsequente `<div class="prx-rich-stat-group__items">` também possui `margin: 0`, a última linha do texto do subtítulo encosta fisicamente (0px a 2px) na borda superior dos cartões de métrica, transmitindo a sensação de layout quebrado ou colado.
+  2. **Assimetria de Layout Interno no Card com Ícone (`.prx-rich-stat-group__item`):**
+     - O item é modelado nativamente com:
+       ```css
+       display: grid;
+       grid-template-columns: auto minmax(0, 1fr);
+       column-gap: 10px;
+       ```
+     - O ícone (24px) ocupa sozinho a Coluna 1. Todo o restante do conteúdo (`label`, `value`, `caption`, `progress`) fica na Coluna 2.
+     - Como resultado, abaixo do ícone fica uma coluna inteira de espaço vazio vertical desperdiçado, enquanto o texto e os números ficam espremidos para a direita.
+     - Quando `progress` com variante circular (`variant: 'ring'`) é utilizado, o anel fica posicionado no canto inferior esquerdo da Coluna 2, deixando um grande vazio à direita e desalinhando visualmente o valor numérico em relação à métrica.
+
+* **Implementação Recomendada para a Plataforma:**
+  1. **Estilos Canônicos de Cabeçalho em `praxis-rich-content.ts`:**
+     - Definir margem inferior canônica para o cabeçalho do `statGroup`:
+       ```css
+       .prx-rich-stat-group__title {
+         margin: 0 0 4px 0;
+         font-size: 1.05rem;
+         font-weight: 700;
+       }
+       .prx-rich-stat-group__subtitle {
+         margin: 0 0 16px 0;
+         font-size: 0.8rem;
+         line-height: 1.45;
+       }
+       ```
+  2. **Suporte a Variante Moderna de KPI Tile (`layoutVariant: 'tile' | 'classic'`):**
+     - Permitir que itens de `statGroup` com anel de progresso distribuam o anel no canto superior direito (`justify-self: end`) ao lado do rótulo, permitindo que o valor principal (`.prx-rich-stat-group__value`) ocupe a largura completa com tipografia destacada e a descrição (`.prx-rich-stat-group__caption`) atue como rodapé delimitado por divisor sutil.
+  3. **Contrato Canônico (`@praxisui/core`):**
+     - Estender `RichStatGroupNode` com `headerSpacing?: 'tight' | 'normal' | 'relaxed'` e `tileLayout?: 'stacked' | 'split' | 'inline'`.
+
+* **Instruções de Adoção para o Agente do `praxis-hero-hq-ui`:**
+  - Aplicar `display: contents` em `.prx-rich-stat-group__item-content` dentro da classe de personalização do componente para reorganizar o grid em 3 áreas harmônicas (cabeçalho com ícone e label, indicador de progresso no canto superior direito e caption no rodapé) com margens explícitas.
