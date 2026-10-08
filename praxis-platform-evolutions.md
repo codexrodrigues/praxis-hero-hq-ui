@@ -39,9 +39,9 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`buildEventFilters`) | 2026-10-08 | Validado (omissão de métricas agregadas sem mapping, 403/403 specs) |
 | [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`SafeExpressionEvaluator`, `warnOnceLog`) | 2026-10-08 | Validado (função `if`, ternários `? :`, 8/8 specs de avaliador) |
 | [**#28**](#-issue-28-padronização-e-exposição-canônica-da-tipagem-do-evento-rowclick-rowclickeventt-no-barrel-público-de-praxiscuitable-e-praxisuicrud) | Padronização e Exposição Canônica da Tipagem do Evento `(rowClick)` (`RowClickEvent<T>`) | `@praxisui/table`<br>`@praxisui/crud` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`RowClickEvent<T>`) | 2026-10-08 | Validado (`public-api`, 61/61 table events specs, 223/223 crud specs) |
-| [**#29**](#-issue-29-ausência-de-formatação-automática-currencydate-nos-nós-type-value-do-behaviordetail-e-baixa-visibilidade-monocromática-de-microcharts-bullet-em-surface-table-cell) | Ausência de Formatação Automática (Currency/Date) nos Nós `type: 'value'` de `behavior.detail` e Monocromia de Microcharts Bullet em `table-cell` | `@praxisui/table`<br>`@praxisui/core`<br>`presentation-visualization` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via Bento `cardGrid`, interceptor de enriquecimento e CSS customizado |
+| [**#29**](#-issue-29-ausência-de-formatação-automática-currencydate-nos-nós-type-value-do-behaviordetail-e-baixa-visibilidade-monocromática-de-microcharts-bullet-em-surface-table-cell) | Ausência de Formatação Automática (Currency/Date) nos Nós `type: 'value'` de `behavior.detail` e Monocromia de Microcharts Bullet em `table-cell` | `@praxisui/table`<br>`@praxisui/core`<br>`presentation-visualization` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`getExpansionDetailValue`, `DataFormattingService`), `@praxisui/core` (`renderBulletVisualizationHtml`, `compactValue`) | 2026-10-08 | Validado (formatação automática BRL/USD/Data/Escala em nós de expansão, valor compacto em bullet, 35/35 specs table, 11/11 specs viz) |
 | [**#30**](#-issue-30-suporte-canônico-a-gavetas-analíticas-e-dossiês-multi-aba-via-metadadosjson-praxisanalyticaldrawerschema) | Suporte Canônico a Gavetas Analíticas e Dossiês Multi-Aba via Metadados/JSON (`behavior.drawer.analyticalSchema`) | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via componente customizado `IncidentAnalysisDrawerComponent` |
-| [**#31**](#-issue-31-dimensionamento-inflexível-de-rótulos-de-etapa-no-microchart-processflow-causando-quebras-e-truncamentos) | Dimensionamento Inflexível de Rótulos de Etapa no Microchart `processFlow` Causando Quebras e Truncamentos | `@praxisui/charts`<br>`praxis-micro-visualization.component.ts` | 🟢 Baixa | `[ ] Aberta` | — | — | Mitigado no Hero HQ via override de estilo no drawer (`inline-size: 80px`) |
+| [**#31**](#-issue-31-dimensionamento-inflexível-de-rótulos-de-etapa-no-microchart-processflow-causando-quebras-e-truncamentos) | Dimensionamento Inflexível de Rótulos de Etapa no Microchart `processFlow` Causando Quebras e Truncamentos | `@praxisui/charts`<br>`praxis-micro-visualization.component.ts` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/charts` (`PraxisMicroVisualizationComponent`), `@praxisui/core` (`stepLabelWidth`, `stepLabelLineClamp`) | 2026-10-08 | Validado (variáveis CSS dinâmicas, clamp responsivo, 405/405 specs charts verdes) |
 | [**#32**](#-issue-32-orquestração-declarativa-de-sub-recursos-e-relações-vinculadas-em-dossiês-analíticos-relations--subresourcebindings-em-behaviordrawer) | Orquestração Declarativa de Sub-Recursos e Relações Vinculadas em Dossiês Analíticos (`relations` em `behavior.drawer`) | `@praxisui/crud`<br>`@praxisui/table`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | — | — | Elimina >2.500 linhas de boilerplate nos 5 drawers customizados |
 | [**#33**](#-issue-33-banda-canônica-declarativa-de-resumo-executivo-e-kpis-no-praxis-crud-behaviorkpiband--praxiskpiband) | Banda Canônica Declarativa de Resumo Executivo e KPIs no `<praxis-crud>` (`behavior.kpiBand`) | `@praxisui/crud`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | — | — | Elimina `DashboardStatsService` (855 linhas) e signals manuais em 14 páginas |
 | [**#34**](#-issue-34-suporte-canônico-a-propriedades-calculadas-e-expressões-de-domínio-no-schema-computedfields--virtualproperties) | Suporte Canônico a Propriedades Calculadas e Expressões de Domínio no Schema (`computedFields`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/dynamic-form`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Elimina `tacticalDataEnrichmentInterceptor` (571 linhas) |
@@ -1870,7 +1870,7 @@ Nas páginas `missoes-page.component.ts`, `ameacas-page.component.ts`, `incident
 - **Módulos Afetados:** `@praxisui/table`, `@praxisui/core` (`presentation-visualization.model.ts`)
 - **Severidade:** 🟡 Média (Impacto direto em UX analítica, legibilidade visual e acabamento corporativo em aplicações vitrine)
 - **Tipo:** UX / Formatação de Apresentação / Design System de Micro Visualizações
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 Na evolução das telas corporativas e vitrines da plataforma (como o **Praxis Hero HQ**), foram identificadas duas inconsistências severas de apresentação de dados:
@@ -1924,8 +1924,8 @@ Na evolução das telas corporativas e vitrines da plataforma (como o **Praxis H
    - Elevação da altura da barra bullet para 8px com bordas suaves, gradientes vívidos (`#10b981`, `#f59e0b`, `#ef4444`, `#06b6d4`), glow semântico, agulha de alvo contrastante e suporte refinado para `kind: 'radial'` exibindo anéis SVG luminosos com valores numéricos adjacentes.
 
 ### Critérios de Aceite para Resolução
-- [ ] O nó `type: 'value'` no `behavior.detail` formata moedas, datas e números automaticamente conforme o tipo de dado da coluna correspondente.
-- [ ] O renderizador `bullet` em `table-cell` oferece affordance numérica e contraste cromático nítido em tema claro.
+- [x] O nó `type: 'value'` no `behavior.detail` formata moedas, datas e números automaticamente conforme o tipo de dado da coluna correspondente.
+- [x] O renderizador `bullet` em `table-cell` oferece affordance numérica e contraste cromático nítido em tema claro.
 
 ---
 
@@ -2007,7 +2007,7 @@ Criação do componente de vitrine [`IncidentAnalysisDrawerComponent`](file:///D
 - **Módulos Afetados:** `@praxisui/charts` (`praxis-micro-visualization.component.ts`)
 - **Severidade:** 🟢 Baixa (Design System / Tipografia / Responsividade de Micro Visualizações)
 - **Tipo:** Visual Bug / Responsividade de SVG e CSS
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 No componente `PraxisMicroVisualizationComponent` em `projects/praxis-charts/src/lib/components/praxis-micro-visualization/praxis-micro-visualization.component.ts:842-856`, o estilo padrão para rótulos de etapas no fluxo de processo (`kind: 'processFlow'`) define uma largura máxima fixa excessivamente restrita:
@@ -2045,8 +2045,8 @@ No componente `PraxisMicroVisualizationComponent` em `projects/praxis-charts/src
 Aplicação de regras de estilo focais no container do drawer (`.flow-chart-wrap ::ng-deep .prx-micro-process__label`), definindo `inline-size: 80px !important`, `max-width: 80px !important` e rótulos concisos (*Perícia*, *Homologação*, *Repasse*, *Auditoria*), garantindo visualização sem nenhum corte.
 
 ### Critérios de Aceite para Resolução
-- [ ] Rótulos de etapas com até 12-14 caracteres são renderizados sem hifenização truncada em containers com largura padrão de cartão (`>= 280px`).
-- [ ] Variáveis CSS `--prx-micro-process-label-width` e `--prx-micro-process-line-clamp` documentadas e suportadas no `@praxisui/charts`.
+- [x] Rótulos de etapas com até 12-14 caracteres são renderizados sem hifenização truncada em containers com largura padrão de cartão (`>= 280px`).
+- [x] Variáveis CSS `--prx-micro-process-label-width` e `--prx-micro-process-line-clamp` documentadas e suportadas no `@praxisui/charts`.
 
 
 ---
