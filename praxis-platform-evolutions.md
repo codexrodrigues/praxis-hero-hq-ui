@@ -29,7 +29,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`praxis-table-toolbar.ts`, `praxis-table.ts`), `@praxisui/core` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (build downstream OK, 99/99 testes) |
 | [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[x] Resolvida` | `@praxisui/rich-content` | 2026-10-07 | Suporte total a `actionCard` e nós compostos no `compose`, controles nativos de Grid, árvore hierárquica na lateral com ícones e rótulos de negócio, botões de reordenação vertical e seletor visual de ícones Material Symbols com busca integrada; 175/175 testes unitários e build downstream aprovados |
 | [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`toPraxisXUiChartContract`, auto-promote no editor, sync bidirecional) | 2026-10-07 | 397/397 testes unitários OK, build downstream OK |
-| [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (`PRAXIS_LIST_INSERTION_PRESETS`), `@praxisui/page-builder` (`providePraxisPageBuilderWidgets`) | 2026-10-07 | 13/13 spec list metadata OK, 4/4 spec page-builder OK, build downstream OK |
 | [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
@@ -1394,7 +1394,7 @@ No `praxis-chart.component.ts`:
 - **Módulos Afetados:** `@praxisui/list`, `@praxisui/page-builder`
 - **Severidade:** 🟡 Média (atrito de onboarding, exigência de glue code de inicialização no host e ausência de catálogo de templates no editor visual)
 - **Tipo:** Developer Experience / Autoria Low-Code / Composição de Widgets
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida (2026-10-07)`
 
 ### Diagnóstico Detalhado da Causa Raiz
 O pacote `@praxisui/list` (`projects/praxis-list`) disponibiliza um componente de lista de alta maturidade (`PraxisList`), suportando skins executivas (`glass`, `gradient-tile`, `pill-soft`), seleção de registros (`single`, `multiple`), agrupamento e templating declarativo (`leading`, `primary`, `secondary`, `meta`, `trailing`).
@@ -1410,8 +1410,8 @@ No entanto:
    - Disponibilizar `presetTemplates` com configurações prontas na metadata do componente para que o usuário do Page Builder possa arrastar um "Feed Operacional" ou "Lista Executiva" em 1 clique.
 
 ### Critérios de Aceite para Resolução
-- [ ] O componente `@praxisui/list` oferece presets na metadata para facilitar a inserção no Page Builder.
-- [ ] Documentação oficial na `praxis-ui-landing-page` inclui receitas de integração declarativa do `praxis-list` no Page Builder.
+- [x] O componente `@praxisui/list` oferece presets na metadata para facilitar a inserção no Page Builder.
+- [x] Documentação oficial na `praxis-ui-landing-page` inclui receitas de integração declarativa do `praxis-list` no Page Builder.
 
 ---
 
