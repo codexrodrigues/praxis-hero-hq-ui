@@ -308,6 +308,80 @@ function enrichPurchaseOrder(item: any): any {
   };
 }
 
+function enrichReputation(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const media = Number(item.media ?? 80);
+  const mediaScore = Math.round(media);
+  const mediaTone = mediaScore >= 90 ? 'success' : mediaScore >= 80 ? 'info' : 'warning';
+  const pub = Number(item.scorePublico ?? 80);
+  const gov = Number(item.scoreGovernamental ?? 80);
+
+  return {
+    ...item,
+    id: item.funcionarioId ?? item.id,
+    mediaScore,
+    mediaPercentual: `${mediaScore}%`,
+    mediaTone,
+    scorePublicoPercentual: `${pub}%`,
+    scoreGovernamentalPercentual: `${gov}%`,
+    tendenciaMidia: 'Alta Positiva (99.2% de satisfação civil)',
+    statusImagem: mediaScore >= 90 ? 'Herói Classe S / Embaixador Global' : 'Operador de Alto Impacto',
+  };
+}
+
+function enrichAfastamento(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const idNum = Number(item.id ?? 1);
+  const progressoRecuperacao = Math.min(100, Math.max(30, 40 + (idNum % 5) * 14));
+  const leaveTone = progressoRecuperacao >= 80 ? 'success' : progressoRecuperacao >= 50 ? 'info' : 'warning';
+
+  return {
+    ...item,
+    progressoRecuperacao,
+    progressoRecuperacaoPercentual: `${progressoRecuperacao}%`,
+    leaveTone,
+    laudoMedico: 'Em recuperação tecidual acelerada (Câmara de Cura S.H.I.E.L.D.)',
+    substitutoDesignado: 'Sentinela de Apoio Tático Alpha',
+    previsaoRetorno: item.dataFim ?? '30 dias',
+  };
+}
+
+function enrichDepartamento(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const idNum = Number(item.id ?? 1);
+  const ocupacaoScore = Math.min(100, Math.max(65, 75 + (idNum % 5) * 5));
+  const ocupacaoTone = ocupacaoScore >= 85 ? 'success' : 'info';
+
+  return {
+    ...item,
+    ocupacaoScore,
+    ocupacaoPercentual: `${ocupacaoScore}%`,
+    ocupacaoTone,
+    contingenteTotal: `${Math.round(ocupacaoScore * 0.4)} Especialistas`,
+    nivelSigilo: 'Nível Alfa (Conselho de Segurança)',
+    salaComando: `Complexo S.H.I.E.L.D. - Setor ${item.codigo || 'HQ'}`,
+  };
+}
+
+function enrichFolha(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const bruto = Number(item.salarioBruto ?? 10000);
+  const liquido = Number(item.salarioLiquido ?? 8000);
+  const ratio = bruto > 0 ? Math.round((liquido / bruto) * 100) : 80;
+  const margemTone = ratio >= 80 ? 'success' : 'info';
+
+  return {
+    ...item,
+    margemLiquida: ratio,
+    margemLiquidaPercentual: `${ratio}%`,
+    margemTone,
+    salarioBrutoFormatado: formatCurrencyBrl(bruto),
+    salarioLiquidoFormatado: formatCurrencyBrl(liquido),
+    totalDescontosFormatado: formatCurrencyBrl(item.totalDescontos),
+    statusTransferencia: 'Liquidado via Banco Central S.H.I.E.L.D.',
+  };
+}
+
 function enrichDataPayload(body: any, url: string): any {
   if (!body) return body;
 
@@ -319,6 +393,10 @@ function enrichDataPayload(body: any, url: string): any {
   const isVeiculos = url.includes('veiculos');
   const isContracts = url.includes('procurement/contracts') || url.includes('/contracts');
   const isPurchaseOrders = url.includes('purchase-orders');
+  const isReputacao = url.includes('reputacao');
+  const isAfastamentos = url.includes('afastamentos');
+  const isDepartamentos = url.includes('departamentos');
+  const isFolha = url.includes('folhas-pagamento') || url.includes('folha-pagamento');
 
   const enricher = isIncidentes
     ? enrichIncident
@@ -336,7 +414,15 @@ function enrichDataPayload(body: any, url: string): any {
                 ? enrichContract
                 : isPurchaseOrders
                   ? enrichPurchaseOrder
-                  : (x: any) => x;
+                  : isReputacao
+                    ? enrichReputation
+                    : isAfastamentos
+                      ? enrichAfastamento
+                      : isDepartamentos
+                        ? enrichDepartamento
+                        : isFolha
+                          ? enrichFolha
+                          : (x: any) => x;
 
   // Case 1: body.data.content (Spring Page wrapped in ApiResponse)
   if (body.data && Array.isArray(body.data.content)) {
@@ -399,7 +485,12 @@ export const tacticalDataEnrichmentInterceptor: HttpInterceptorFn = (req, next) 
     req.url.includes('veiculos') ||
     req.url.includes('procurement/') ||
     req.url.includes('contracts') ||
-    req.url.includes('purchase-orders');
+    req.url.includes('purchase-orders') ||
+    req.url.includes('human-resources/') ||
+    req.url.includes('reputacao') ||
+    req.url.includes('afastamentos') ||
+    req.url.includes('departamentos') ||
+    req.url.includes('folhas-pagamento');
 
   if (!shouldEnrich) {
     return next(req);

@@ -38,9 +38,29 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
       {
         field: 'codigo',
         header: 'Sigla / Código',
-        width: '140px',
+        width: '130px',
         align: 'center',
         sortable: true,
+      },
+      {
+        field: 'ocupacaoScore',
+        header: 'Taxa de Ocupação',
+        width: '180px',
+        align: 'center',
+        sortable: true,
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: 'row.ocupacaoScore',
+              total: 100,
+              toneExpr: 'row.ocupacaoTone',
+              fallbackText: 'Ocupação',
+            },
+          },
+        },
       },
       {
         field: 'responsavelNome',
@@ -75,6 +95,154 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
             inline: true,
             alwaysVisibleFields: ['nome', 'codigo', 'responsavelNome'],
             useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'cardGrid',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'metric',
+            'progress',
+            'compose',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'Dossiê da Divisão & Organização Tática',
+                subtitle: 'Estrutura administrativa, liderança setorial e contingente alocado',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
+                  {
+                    id: 'card-estrutura',
+                    title: 'Estrutura & Identificação',
+                    subtitle: 'Divisão e código setorial',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.codigo',
+                            icon: 'corporate_fare',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Divisão',
+                            valueExpr: 'row.nome',
+                            icon: 'business',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Instalação / Local',
+                            valueExpr: 'row.salaComando',
+                            icon: 'apartment',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-lideranca',
+                    title: 'Liderança & Governança',
+                    subtitle: 'Diretoria e credenciamento',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Líder / Diretor',
+                            valueExpr: 'row.responsavelNome',
+                            icon: 'military_tech',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Credencial de Acesso',
+                            valueExpr: 'row.nivelSigilo',
+                            icon: 'lock',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'ID Cadastral',
+                            valueExpr: 'row.id',
+                            icon: 'tag',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-contingente',
+                    title: 'Contingente & Ocupação',
+                    subtitle: 'Capacidade e alocação humana',
+                    content: [
+                      {
+                        type: 'progress',
+                        label: 'Taxa de Ocupação do Setor',
+                        valueExpr: 'row.ocupacaoScore',
+                        max: 100,
+                        showPercent: true,
+                      },
+                      {
+                        type: 'metric',
+                        label: 'Especialistas Ativos',
+                        valueExpr: 'row.contingenteTotal',
+                        icon: 'groups',
+                      },
+                      {
+                        type: 'metric',
+                        label: 'Prontidão Operacional',
+                        valueExpr: "'99.8% Operante'",
+                        icon: 'verified',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         },
       },
@@ -280,8 +448,8 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       padding: 12px 18px;
       border-radius: 14px;
       flex-wrap: wrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
       backdrop-filter: blur(12px);
     }
 
@@ -313,8 +481,8 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 40%, transparent);
       color: var(--foreground);
       transition: all 0.2s ease;
 
@@ -323,20 +491,20 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       .chip-count {
         padding: 2px 7px;
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.08);
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
         font-size: 0.75rem;
         font-weight: 700;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.22);
+        background: color-mix(in oklab, var(--muted) 50%, transparent);
+        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
       }
 
       &.is-active {
         background: color-mix(in oklab, var(--primary) 22%, transparent);
         border-color: var(--primary);
-        color: #fff;
+        color: var(--foreground);
         box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
 
         .chip-count {
@@ -348,13 +516,13 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       &.chip-ready.is-active {
         background: color-mix(in oklab, var(--ready) 22%, transparent);
         border-color: var(--ready);
-        .chip-count { background: var(--ready); }
+        .chip-count { background: var(--ready); color: #fff; }
       }
 
       &.chip-info.is-active {
         background: color-mix(in oklab, var(--primary) 22%, transparent);
         border-color: var(--primary);
-        .chip-count { background: var(--primary); }
+        .chip-count { background: var(--primary); color: #fff; }
       }
     }
 
@@ -369,7 +537,7 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 600;
       color: var(--muted-foreground);
       background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border: 1px dashed var(--border);
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -377,8 +545,8 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
 
       &:hover {
         color: var(--foreground);
-        border-color: rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--primary);
+        background: color-mix(in oklab, var(--primary) 8%, transparent);
       }
     }
 

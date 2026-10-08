@@ -73,15 +73,35 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         header: 'Líquido a Pagar',
         type: 'currency',
         format: 'BRL',
-        width: '160px',
+        width: '140px',
         align: 'right',
         sortable: true,
+      },
+      {
+        field: 'margemLiquida',
+        header: 'Eficiência Líquida (%)',
+        width: '170px',
+        align: 'center',
+        sortable: true,
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: 'row.margemLiquida',
+              total: 100,
+              toneExpr: 'row.margemTone',
+              fallbackText: 'Margem',
+            },
+          },
+        },
       },
       {
         field: 'dataPagamento',
         header: 'Data de Pagamento',
         type: 'date',
-        width: '160px',
+        width: '150px',
         align: 'center',
         sortable: true,
       },
@@ -113,6 +133,161 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
             inline: true,
             alwaysVisibleFields: ['mes', 'ano', 'funcionarioId'],
             useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'cardGrid',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'metric',
+            'progress',
+            'compose',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'Dossiê do Ciclo de Compensação & Liquidação',
+                subtitle: 'Discriminação de proventos, encargos operacionais e liquidação bancária',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
+                  {
+                    id: 'card-demonstrativo',
+                    title: 'Demonstrativo Salarial',
+                    subtitle: 'Valores brutos e créditos',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.statusTransferencia',
+                            icon: 'account_balance',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Salário Bruto Tático',
+                            valueExpr: 'row.salarioBrutoFormatado',
+                            icon: 'payments',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Líquido Disponível',
+                            valueExpr: 'row.salarioLiquidoFormatado',
+                            icon: 'account_balance_wallet',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-descontos',
+                    title: 'Retenções & Encargos',
+                    subtitle: 'Previdência e fundo de danos',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'progress',
+                            label: 'Eficiência de Repasse Líquido',
+                            valueExpr: 'row.margemLiquida',
+                            max: 100,
+                            showPercent: true,
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Total de Retenções',
+                            valueExpr: 'row.totalDescontosFormatado',
+                            icon: 'price_check',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Competência',
+                            valueExpr: 'row.mes + "/" + row.ano',
+                            icon: 'calendar_month',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-liquidacao',
+                    title: 'Liquidação & Identificação',
+                    subtitle: 'Protocolo de tesouraria',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Data de Pagamento',
+                            valueExpr: 'row.dataPagamento',
+                            icon: 'event_available',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Colaborador Credenciado (ID)',
+                            valueExpr: 'row.funcionarioId',
+                            icon: 'badge',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Ciclo Contábil (ID)',
+                            valueExpr: 'row.id',
+                            icon: 'receipt',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         },
       },
@@ -318,8 +493,8 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
       padding: 12px 18px;
       border-radius: 14px;
       flex-wrap: wrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
       backdrop-filter: blur(12px);
     }
 
@@ -351,8 +526,8 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 40%, transparent);
       color: var(--foreground);
       transition: all 0.2s ease;
 
@@ -361,20 +536,20 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
       .chip-count {
         padding: 2px 7px;
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.08);
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
         font-size: 0.75rem;
         font-weight: 700;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.22);
+        background: color-mix(in oklab, var(--muted) 50%, transparent);
+        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
       }
 
       &.is-active {
         background: color-mix(in oklab, var(--primary) 22%, transparent);
         border-color: var(--primary);
-        color: #fff;
+        color: var(--foreground);
         box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
 
         .chip-count {
@@ -386,13 +561,13 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
       &.chip-ready.is-active {
         background: color-mix(in oklab, var(--ready) 22%, transparent);
         border-color: var(--ready);
-        .chip-count { background: var(--ready); }
+        .chip-count { background: var(--ready); color: #fff; }
       }
 
       &.chip-info.is-active {
         background: color-mix(in oklab, var(--primary) 22%, transparent);
         border-color: var(--primary);
-        .chip-count { background: var(--primary); }
+        .chip-count { background: var(--primary); color: #fff; }
       }
     }
 
@@ -407,7 +582,7 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 600;
       color: var(--muted-foreground);
       background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border: 1px dashed var(--border);
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -415,8 +590,8 @@ export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
 
       &:hover {
         color: var(--foreground);
-        border-color: rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--primary);
+        background: color-mix(in oklab, var(--primary) 8%, transparent);
       }
     }
 

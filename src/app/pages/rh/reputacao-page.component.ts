@@ -24,34 +24,54 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
     columns: [
       {
         field: 'posicao',
-        header: 'Ranking',
-        width: '90px',
+        header: 'Pos.',
+        width: '70px',
         align: 'center',
         sortable: true,
       },
       {
         field: 'codinome',
         header: 'Codinome / Identidade Heroica',
-        width: '220px',
+        width: '180px',
         sortable: true,
+      },
+      {
+        field: 'media',
+        header: 'Score Médio Global',
+        width: '170px',
+        align: 'center',
+        sortable: true,
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: 'row.mediaScore',
+              total: 100,
+              toneExpr: 'row.mediaTone',
+              fallbackText: 'Score',
+            },
+          },
+        },
       },
       {
         field: 'nomeCompleto',
         header: 'Nome Civil',
-        width: '220px',
+        width: '180px',
         sortable: true,
       },
       {
         field: 'equipe',
         header: 'Equipe Vinculada',
-        width: '180px',
+        width: '160px',
         sortable: true,
       },
       {
         field: 'scorePublico',
         header: 'Aprovação Civil (%)',
         type: 'number',
-        width: '160px',
+        width: '140px',
         align: 'center',
         sortable: true,
       },
@@ -59,15 +79,7 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
         field: 'scoreGovernamental',
         header: 'Confiança Governo (%)',
         type: 'number',
-        width: '180px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'media',
-        header: 'Score Médio',
-        type: 'number',
-        width: '160px',
+        width: '150px',
         align: 'center',
         sortable: true,
       },
@@ -91,6 +103,161 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
       filtering: {
         columnFilters: {
           enabled: true,
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'cardGrid',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'metric',
+            'progress',
+            'compose',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'Dossiê de Reputação & Relações Públicas',
+                subtitle: 'Auditoria de imagem governamental, opinião pública e impacto da atuação heroica',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
+                  {
+                    id: 'card-indices',
+                    title: 'Opinião Pública & Governo',
+                    subtitle: 'Chancelas civis e estatais',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.statusImagem',
+                            icon: 'military_tech',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Aprovação Civil Popular',
+                            valueExpr: 'row.scorePublicoPercentual',
+                            icon: 'public',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Confiança Governamental',
+                            valueExpr: 'row.scoreGovernamentalPercentual',
+                            icon: 'account_balance',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-auditoria',
+                    title: 'Mídia & Opinião Global',
+                    subtitle: 'Impacto midiático e redes',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'progress',
+                            label: 'Score Médio Consolidado',
+                            valueExpr: 'row.mediaScore',
+                            max: 100,
+                            showPercent: true,
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Tendência de Mídia',
+                            valueExpr: 'row.tendenciaMidia',
+                            icon: 'trending_up',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Posição no Ranking',
+                            valueExpr: 'row.posicao',
+                            icon: 'workspace_premium',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-enquadramento',
+                    title: 'Alocação & Protocolo',
+                    subtitle: 'Equipe e diretrizes',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Equipe Vinculada',
+                            valueExpr: 'row.equipe',
+                            icon: 'groups',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Identidade Heroica',
+                            valueExpr: 'row.codinome',
+                            icon: 'shield',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Nome de Registro Civil',
+                            valueExpr: 'row.nomeCompleto',
+                            icon: 'badge',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
         },
       },
     },
