@@ -24,7 +24,7 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
     columns: [
       {
         field: 'id',
-        header: 'ID',
+        header: 'Cód.',
         width: '80px',
         align: 'center',
         sortable: true,
@@ -47,12 +47,24 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
       },
       {
         field: 'resistencia',
-        header: 'Resistência / Blindagem',
-        type: 'number',
-        width: '160px',
+        header: 'Integridade da Blindagem',
+        width: '190px',
         align: 'center',
         sortable: true,
         filterable: true,
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: 'row.resistenciaScore',
+              total: 100,
+              toneExpr: 'row.resistenciaTone',
+              fallbackText: 'Blindagem',
+            },
+          },
+        },
       },
       {
         field: 'proprietarioNome',
@@ -95,6 +107,161 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
             showAdvanced: true,
             alwaysVisibleFields: ['nome', 'tipo', 'status'],
             useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'cardGrid',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'metric',
+            'progress',
+            'compose',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'Dossiê Técnico & Telemetria Balística',
+                subtitle: 'Especificações de manufatura, blindagem reativa e protocolos de custódia militar',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
+                  {
+                    id: 'card-especificacoes',
+                    title: 'Blindagem & Integridade',
+                    subtitle: 'Diagnóstico estrutural e absorção de impacto',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.statusBadge',
+                            icon: 'verified_user',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Categoria Tática',
+                            valueExpr: 'row.tipo',
+                            icon: 'category',
+                          },
+                          {
+                            type: 'progress',
+                            label: 'Integridade Estrutural',
+                            valueExpr: 'row.resistenciaScore',
+                            max: 100,
+                            showPercent: true,
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-telemetria',
+                    title: 'Telemetria & Propulsão',
+                    subtitle: 'Célula de energia e suporte balístico',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Fonte de Energia Primária',
+                            valueExpr: 'row.fonteEnergia',
+                            icon: 'bolt',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Engenharia & Origem',
+                            valueExpr: 'row.tecnologiaOrigem',
+                            icon: 'precision_manufacturing',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Última Calibração Tática',
+                            valueExpr: 'row.ultimaRevisaoFormatada',
+                            icon: 'history_toggle_off',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-custodia',
+                    title: 'Custódia & Governança',
+                    subtitle: 'Protocolo de cofre e credenciamento',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Custodiante Credenciado',
+                            valueExpr: 'row.proprietarioNome',
+                            icon: 'shield_person',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Localização de Armaria',
+                            valueExpr: 'row.localizacaoArmaria',
+                            icon: 'shelves',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Nível de Autorização',
+                            valueExpr: 'row.autorizacaoAcesso',
+                            icon: 'key',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         },
       },

@@ -158,6 +158,156 @@ function enrichThreat(item: any): any {
   };
 }
 
+function enrichEquipment(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const rawRes = Number(item.resistencia ?? 8);
+  const score = rawRes <= 10 ? rawRes * 10 : rawRes;
+  const tone = score >= 80 ? 'success' : score >= 60 ? 'info' : score >= 40 ? 'warning' : 'danger';
+  const tipo = String(item.tipo || 'OUTRO').toUpperCase();
+  const status = String(item.status || 'DISPONIVEL').toUpperCase();
+
+  const statusBadge =
+    status === 'EM_USO'
+      ? 'Em Custódia Ativa'
+      : status === 'MANUTENCAO'
+        ? 'Em Manutenção'
+        : 'Disponível em Arsenal';
+
+  const fonteEnergia =
+    tipo.includes('ARMADURA')
+      ? 'Micro-Reator Arc Mark VI'
+      : tipo.includes('ARTEFATO') || tipo.includes('GADGET')
+        ? 'Matriz de Vibranium Estabilizada'
+        : tipo.includes('ARMA')
+          ? 'Célula de Plasma Iônico'
+          : 'Bateria Quântica de Alto Rendimento';
+
+  const tecnologiaOrigem =
+    tipo.includes('ARMADURA')
+      ? 'Stark Industries R&D'
+      : tipo.includes('ARTEFATO')
+        ? 'Wakanda Design Group'
+        : 'Divisão Científica S.H.I.E.L.D.';
+
+  const localizacaoArmaria =
+    status === 'EM_USO'
+      ? 'Em Campo com Operador'
+      : status === 'MANUTENCAO'
+        ? 'Hangar Tático - Bancada 3'
+        : 'Cofre Central Subterrâneo - Nível 4';
+
+  const autorizacaoAcesso =
+    score >= 80 ? 'Nível Ômega (Vingadores)' : 'Nível Alfa (Comando Superior)';
+
+  return {
+    ...item,
+    resistenciaScore: score,
+    resistenciaPercentual: `${score}%`,
+    resistenciaTone: tone,
+    statusBadge,
+    fonteEnergia,
+    tecnologiaOrigem,
+    localizacaoArmaria,
+    autorizacaoAcesso,
+    ultimaRevisaoFormatada: 'Há 3 dias (Homologado)',
+  };
+}
+
+function enrichVehicle(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const status = String(item.status || 'OPERACIONAL').toUpperCase();
+  const tipo = String(item.tipo || 'AEREO').toUpperCase();
+  const idNum = Number(item.id ?? 1);
+  const prontidao = status === 'OPERACIONAL' ? Math.min(100, Math.max(88, 85 + (idNum % 3) * 5)) : 42;
+  const prontidaoTone = prontidao >= 80 ? 'success' : 'warning';
+
+  const sistemaPropulsao =
+    tipo.includes('ESPACIAL')
+      ? 'Propulsor Hiperespacial Quântico'
+      : tipo.includes('AEREO')
+        ? 'Turbinas Repulsoras Stark VTOL'
+        : 'Motor Híbrido Turbinado Nível V';
+
+  const velocidadeMax =
+    tipo.includes('ESPACIAL')
+      ? 'Dobra 2 (Suborbital)'
+      : tipo.includes('AEREO')
+        ? 'Mach 4.5'
+        : '380 km/h com Blindagem Reativa';
+
+  const hangarAlocacao =
+    tipo.includes('ESPACIAL')
+      ? 'Plataforma Orbital S.H.I.E.L.D.'
+      : tipo.includes('AEREO')
+        ? 'Hangar Central - Helicarrier'
+        : 'Batmower / Garagem Subterrânea';
+
+  const nivelCombustivel =
+    status === 'OPERACIONAL' ? '98% Carga Total' : '35% Em Recarga';
+
+  return {
+    ...item,
+    prontidaoScore: prontidao,
+    prontidaoPercentual: `${prontidao}%`,
+    prontidaoTone,
+    sistemaPropulsao,
+    velocidadeMax,
+    hangarAlocacao,
+    nivelCombustivel,
+    autonomiaVoo: '12.000 km sem reabastecimento',
+    blindagemCasco: 'Liga de Titânio-Vibranium',
+  };
+}
+
+function enrichContract(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const idNum = Number(item.id ?? 1);
+  const status = String(item.status || 'ACTIVE').toUpperCase();
+  const complianceScore =
+    status === 'ACTIVE' || status === 'SIGNED'
+      ? Math.min(99, Math.max(85, 88 + (idNum % 4) * 3))
+      : status === 'DRAFT'
+        ? 65
+        : 38;
+  const slaTone = complianceScore >= 80 ? 'success' : complianceScore >= 60 ? 'info' : 'warning';
+
+  return {
+    ...item,
+    complianceScore,
+    compliancePercentual: `${complianceScore}%`,
+    slaTone,
+    indiceSla: complianceScore,
+    gestorContrato: 'Diretoria de Suprimentos & Armaria',
+    renovacaoAutomatica: 'Cláusula de Renovação Bianual',
+    penalidadeDescricao: 'Multa de 15% por atraso de entrega de insumos',
+  };
+}
+
+function enrichPurchaseOrder(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const status = String(item.status || 'APPROVED').toUpperCase();
+  const idNum = Number(item.id ?? 1);
+  const progresso =
+    status === 'RECEIVED'
+      ? 100
+      : status === 'APPROVED'
+        ? 75
+        : status === 'PENDING' || status === 'DRAFT'
+          ? 35
+          : 10;
+  const orderTone = progresso >= 90 ? 'success' : progresso >= 60 ? 'info' : progresso >= 30 ? 'warning' : 'neutral';
+
+  return {
+    ...item,
+    progressoEntrega: progresso,
+    progressoPercentual: `${progresso}%`,
+    orderTone,
+    especificacaoCarga: 'Lotes de Ligas Especiais e Microcomponentes',
+    centroCusto: 'Divisão Tática Operacional - CC-408',
+    prazoEstimado: status === 'RECEIVED' ? 'Entregue no Armazém' : '7 dias úteis',
+  };
+}
+
 function enrichDataPayload(body: any, url: string): any {
   if (!body) return body;
 
@@ -165,6 +315,10 @@ function enrichDataPayload(body: any, url: string): any {
   const isMissoes = url.includes('missoes');
   const isBases = url.includes('bases');
   const isAmeacas = url.includes('ameacas');
+  const isEquipamentos = url.includes('equipamentos');
+  const isVeiculos = url.includes('veiculos');
+  const isContracts = url.includes('procurement/contracts') || url.includes('/contracts');
+  const isPurchaseOrders = url.includes('purchase-orders');
 
   const enricher = isIncidentes
     ? enrichIncident
@@ -174,7 +328,15 @@ function enrichDataPayload(body: any, url: string): any {
         ? enrichBase
         : isAmeacas
           ? enrichThreat
-          : (x: any) => x;
+          : isEquipamentos
+            ? enrichEquipment
+            : isVeiculos
+              ? enrichVehicle
+              : isContracts
+                ? enrichContract
+                : isPurchaseOrders
+                  ? enrichPurchaseOrder
+                  : (x: any) => x;
 
   // Case 1: body.data.content (Spring Page wrapped in ApiResponse)
   if (body.data && Array.isArray(body.data.content)) {
@@ -225,15 +387,21 @@ function enrichDataPayload(body: any, url: string): any {
 }
 
 export const tacticalDataEnrichmentInterceptor: HttpInterceptorFn = (req, next) => {
-  const isOperationsOrRisk =
+  const shouldEnrich =
     req.url.includes('operations/') ||
     req.url.includes('riskintelligence/') ||
     req.url.includes('incidentes') ||
     req.url.includes('missoes') ||
     req.url.includes('bases') ||
-    req.url.includes('ameacas');
+    req.url.includes('ameacas') ||
+    req.url.includes('assets/') ||
+    req.url.includes('equipamentos') ||
+    req.url.includes('veiculos') ||
+    req.url.includes('procurement/') ||
+    req.url.includes('contracts') ||
+    req.url.includes('purchase-orders');
 
-  if (!isOperationsOrRisk) {
+  if (!shouldEnrich) {
     return next(req);
   }
 

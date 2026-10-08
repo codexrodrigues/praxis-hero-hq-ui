@@ -25,19 +25,39 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
       {
         field: 'number',
         header: 'Nº do Contrato',
-        width: '160px',
+        width: '150px',
         sortable: true,
       },
       {
         field: 'supplierName',
         header: 'Fornecedor / Fabricante',
-        width: '260px',
+        width: '240px',
         sortable: true,
+      },
+      {
+        field: 'indiceSla',
+        header: 'Conformidade / SLA',
+        width: '180px',
+        align: 'center',
+        sortable: true,
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: 'row.complianceScore',
+              total: 100,
+              toneExpr: 'row.slaTone',
+              fallbackText: 'SLA',
+            },
+          },
+        },
       },
       {
         field: 'currency',
         header: 'Moeda',
-        width: '100px',
+        width: '90px',
         align: 'center',
         sortable: true,
       },
@@ -46,7 +66,7 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
         header: 'Vigência Até',
         type: 'date',
         format: 'dd/MM/yyyy',
-        width: '150px',
+        width: '140px',
         align: 'center',
         sortable: true,
       },
@@ -60,7 +80,7 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
       {
         field: 'disabledReason',
         header: 'Observações / Motivo',
-        width: '260px',
+        width: '240px',
         sortable: true,
       },
     ],
@@ -91,6 +111,161 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
             inline: true,
             alwaysVisibleFields: ['supplierName', 'status', 'number'],
             useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'cardGrid',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'metric',
+            'progress',
+            'compose',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'Dossiê Contratual & Gestão de Fornecedores',
+                subtitle: 'Cláusulas de suprimento, indicadores de entrega e governança orçamentária S.H.I.E.L.D.',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
+                  {
+                    id: 'card-clausulas',
+                    title: 'Cláusulas & Vigência',
+                    subtitle: 'Prazos legais e prorrogações',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.status',
+                            icon: 'description',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Fornecedor Credenciado',
+                            valueExpr: 'row.supplierName',
+                            icon: 'store',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Renovação',
+                            valueExpr: 'row.renovacaoAutomatica',
+                            icon: 'autorenew',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-sla',
+                    title: 'Performance & SLA',
+                    subtitle: 'Confiabilidade e penalidades',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'progress',
+                            label: 'Índice de Conformidade de Entregas',
+                            valueExpr: 'row.complianceScore',
+                            max: 100,
+                            showPercent: true,
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Cláusula Penal',
+                            valueExpr: 'row.penalidadeDescricao',
+                            icon: 'policy',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Observações de Auditoria',
+                            valueExpr: 'row.disabledReason',
+                            icon: 'info',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-governanca',
+                    title: 'Governança & Finanças',
+                    subtitle: 'Moeda e gestão fiscal',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Gestor Responsável',
+                            valueExpr: 'row.gestorContrato',
+                            icon: 'supervisor_account',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Moeda de Faturamento',
+                            valueExpr: 'row.currency',
+                            icon: 'payments',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Protocolo Contratual',
+                            valueExpr: 'row.number',
+                            icon: 'pin',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         },
       },
@@ -304,8 +479,8 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       padding: 12px 18px;
       border-radius: 14px;
       flex-wrap: wrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
       backdrop-filter: blur(12px);
     }
 
@@ -337,8 +512,8 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 60%, transparent);
       color: var(--foreground);
       transition: all 0.2s ease;
 
@@ -347,21 +522,22 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       .chip-count {
         padding: 2px 7px;
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.08);
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
+        color: var(--foreground);
         font-size: 0.75rem;
         font-weight: 700;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.22);
+        background: color-mix(in oklab, var(--card) 90%, transparent);
+        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
       }
 
       &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
+        background: color-mix(in oklab, var(--primary) 18%, var(--card));
         border-color: var(--primary);
-        color: #fff;
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
+        color: var(--foreground);
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent);
 
         .chip-count {
           background: var(--primary);
@@ -370,21 +546,24 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       }
 
       &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 22%, transparent);
+        background: color-mix(in oklab, var(--ready) 18%, var(--card));
         border-color: var(--ready);
-        .chip-count { background: var(--ready); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--ready) 35%, transparent);
+        .chip-count { background: var(--ready); color: #fff; }
       }
 
       &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 22%, transparent);
+        background: color-mix(in oklab, var(--warning) 18%, var(--card));
         border-color: var(--warning);
-        .chip-count { background: var(--warning); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--warning) 35%, transparent);
+        .chip-count { background: var(--warning); color: #fff; }
       }
 
       &.chip-info.is-active {
-        background: color-mix(in oklab, var(--supplies) 22%, transparent);
+        background: color-mix(in oklab, var(--supplies) 18%, var(--card));
         border-color: var(--supplies);
-        .chip-count { background: var(--supplies); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--supplies) 35%, transparent);
+        .chip-count { background: var(--supplies); color: #fff; }
       }
     }
 
@@ -399,7 +578,7 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 600;
       color: var(--muted-foreground);
       background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border: 1px dashed var(--border);
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -407,8 +586,8 @@ export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
 
       &:hover {
         color: var(--foreground);
-        border-color: rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--primary);
+        background: color-mix(in oklab, var(--primary) 8%, transparent);
       }
     }
 

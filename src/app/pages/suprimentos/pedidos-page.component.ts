@@ -31,16 +31,37 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
     columnProjection: {
       source: 'schema',
       include: ['id', 'orderDate', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
-      order: ['id', 'orderDate', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
+      order: ['id', 'orderDate', 'progressoEntrega', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
+      additions: [
+        {
+          field: 'progressoEntrega',
+          header: 'Progresso da Ordem',
+          width: '180px',
+          align: 'center',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: 'row.progressoEntrega',
+                total: 100,
+                toneExpr: 'row.orderTone',
+                fallbackText: 'Progresso',
+              },
+            },
+          },
+        },
+      ],
       overrides: {
-        id: { width: '80px', align: 'center' },
-        orderDate: { width: '140px', align: 'center', format: 'dd/MM/yyyy' },
-        quantity: { width: '120px', align: 'center' },
-        currency: { width: '100px', align: 'center' },
-        status: { width: '150px', align: 'center' },
-        approvedAt: { width: '140px', align: 'center', format: 'dd/MM/yyyy' },
-        receivedAt: { width: '140px', align: 'center', format: 'dd/MM/yyyy' },
-        disabledReason: { width: '220px' },
+        id: { width: '80px', align: 'center', header: 'Cód.' },
+        orderDate: { width: '130px', align: 'center', format: 'dd/MM/yyyy', header: 'Data do Pedido' },
+        quantity: { width: '120px', align: 'center', header: 'Qtd. Lote' },
+        currency: { width: '90px', align: 'center', header: 'Moeda' },
+        status: { width: '140px', align: 'center', header: 'Status' },
+        approvedAt: { width: '130px', align: 'center', format: 'dd/MM/yyyy', header: 'Aprovado Em' },
+        receivedAt: { width: '130px', align: 'center', format: 'dd/MM/yyyy', header: 'Recebido Em' },
+        disabledReason: { width: '220px', header: 'Observações' },
       },
     },
     columns: [],
@@ -71,6 +92,161 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
             inline: true,
             alwaysVisibleFields: ['status', 'orderDate', 'quantity'],
             useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'cardGrid',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'metric',
+            'progress',
+            'compose',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'Dossiê do Pedido & Logística de Expedição',
+                subtitle: 'Acompanhamento de entrega, homologação fiscal e especificação de suprimentos',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
+                  {
+                    id: 'card-carga',
+                    title: 'Especificação & Lote',
+                    subtitle: 'Insumos e materiais solicitados',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.status',
+                            icon: 'local_shipping',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Especificação de Carga',
+                            valueExpr: 'row.especificacaoCarga',
+                            icon: 'inventory_2',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Volume Total / Quantidade',
+                            valueExpr: 'row.quantity',
+                            icon: 'tag',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-timeline',
+                    title: 'Status de Expedição & Entrega',
+                    subtitle: 'Rastreabilidade operacional',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'progress',
+                            label: 'Progresso da Expedição',
+                            valueExpr: 'row.progressoEntrega',
+                            max: 100,
+                            showPercent: true,
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Previsão de Recebimento',
+                            valueExpr: 'row.prazoEstimado',
+                            icon: 'schedule',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Data da Ordem',
+                            valueExpr: 'row.orderDate',
+                            icon: 'event',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-financeiro',
+                    title: 'Centro de Custo & Auditoria',
+                    subtitle: 'Alocação contábil S.H.I.E.L.D.',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Centro de Custo',
+                            valueExpr: 'row.centroCusto',
+                            icon: 'account_balance',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Moeda de Liquidação',
+                            valueExpr: 'row.currency',
+                            icon: 'payments',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Observações de Compra',
+                            valueExpr: 'row.disabledReason',
+                            icon: 'info',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         },
       },
@@ -344,8 +520,8 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       padding: 12px 18px;
       border-radius: 14px;
       flex-wrap: wrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
       backdrop-filter: blur(12px);
     }
 
@@ -377,8 +553,8 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 60%, transparent);
       color: var(--foreground);
       transition: all 0.2s ease;
 
@@ -387,21 +563,22 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       .chip-count {
         padding: 2px 7px;
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.08);
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
+        color: var(--foreground);
         font-size: 0.75rem;
         font-weight: 700;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.22);
+        background: color-mix(in oklab, var(--card) 90%, transparent);
+        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
       }
 
       &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
+        background: color-mix(in oklab, var(--primary) 18%, var(--card));
         border-color: var(--primary);
-        color: #fff;
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
+        color: var(--foreground);
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent);
 
         .chip-count {
           background: var(--primary);
@@ -410,21 +587,24 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       }
 
       &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 22%, transparent);
+        background: color-mix(in oklab, var(--risk) 18%, var(--card));
         border-color: var(--risk);
-        .chip-count { background: var(--risk); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--risk) 35%, transparent);
+        .chip-count { background: var(--risk); color: #fff; }
       }
 
       &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 22%, transparent);
+        background: color-mix(in oklab, var(--warning) 18%, var(--card));
         border-color: var(--warning);
-        .chip-count { background: var(--warning); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--warning) 35%, transparent);
+        .chip-count { background: var(--warning); color: #fff; }
       }
 
       &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 22%, transparent);
+        background: color-mix(in oklab, var(--ready) 18%, var(--card));
         border-color: var(--ready);
-        .chip-count { background: var(--ready); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--ready) 35%, transparent);
+        .chip-count { background: var(--ready); color: #fff; }
       }
     }
 
@@ -439,7 +619,7 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 600;
       color: var(--muted-foreground);
       background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border: 1px dashed var(--border);
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -447,8 +627,8 @@ export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
 
       &:hover {
         color: var(--foreground);
-        border-color: rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--primary);
+        background: color-mix(in oklab, var(--primary) 8%, transparent);
       }
     }
 

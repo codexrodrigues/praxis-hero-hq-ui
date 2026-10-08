@@ -24,7 +24,7 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
     columns: [
       {
         field: 'id',
-        header: 'ID',
+        header: 'Cód.',
         width: '80px',
         align: 'center',
         sortable: true,
@@ -32,34 +32,54 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
       {
         field: 'nome',
         header: 'Identificação da Unidade',
-        width: '260px',
+        width: '240px',
         sortable: true,
       },
       {
         field: 'tipo',
-        header: 'Categoria / Tipo',
-        width: '160px',
+        header: 'Plataforma',
+        width: '140px',
         align: 'center',
         sortable: true,
       },
       {
+        field: 'prontidao',
+        header: 'Prontidão de Voo',
+        width: '180px',
+        align: 'center',
+        sortable: true,
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: 'row.prontidaoScore',
+              total: 100,
+              toneExpr: 'row.prontidaoTone',
+              fallbackText: 'Prontidão',
+            },
+          },
+        },
+      },
+      {
         field: 'capacidade',
-        header: 'Capacidade (Tripulação/Carga)',
+        header: 'Tripulação / Carga',
         type: 'number',
-        width: '160px',
+        width: '140px',
         align: 'center',
         sortable: true,
       },
       {
         field: 'proprietarioNome',
         header: 'Custodiante / Piloto',
-        width: '240px',
+        width: '220px',
         sortable: true,
       },
       {
         field: 'status',
         header: 'Disponibilidade',
-        width: '160px',
+        width: '150px',
         align: 'center',
         sortable: true,
       },
@@ -91,6 +111,160 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
             inline: true,
             alwaysVisibleFields: ['nome', 'tipo', 'status', 'proprietarioNome'],
             useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'cardGrid',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'metric',
+            'progress',
+            'compose',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'Dossiê Técnico & Hangar Operacional',
+                subtitle: 'Especificações aeroespaciais, capacidade de propulsão e telemetria de frota',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
+                  {
+                    id: 'card-propulsao',
+                    title: 'Propulsão & Performance',
+                    subtitle: 'Motores, turbinas e velocidade limite',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Sistema de Propulsão',
+                            valueExpr: 'row.sistemaPropulsao',
+                            icon: 'mode_fan',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Velocidade Máxima',
+                            valueExpr: 'row.velocidadeMax',
+                            icon: 'speed',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Autonomia de Voo',
+                            valueExpr: 'row.autonomiaVoo',
+                            icon: 'flight_takeoff',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-hangar',
+                    title: 'Telemetria de Hangar',
+                    subtitle: 'Armazenamento e combustível',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Hangar de Alocação',
+                            valueExpr: 'row.hangarAlocacao',
+                            icon: 'warehouse',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Carga de Baterias / Combustível',
+                            valueExpr: 'row.nivelCombustivel',
+                            icon: 'local_gas_station',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Blindagem do Casco',
+                            valueExpr: 'row.blindagemCasco',
+                            icon: 'security',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-piloto',
+                    title: 'Piloto & Sortie Tática',
+                    subtitle: 'Comandante e capacidade de missão',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.status',
+                            icon: 'verified',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Piloto Credenciado',
+                            valueExpr: 'row.proprietarioNome',
+                            icon: 'person_pin',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Capacidade Total',
+                            valueExpr: 'row.capacidade',
+                            icon: 'airline_seat_recline_extra',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         },
       },
@@ -293,8 +467,8 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
       padding: 12px 18px;
       border-radius: 14px;
       flex-wrap: wrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
       backdrop-filter: blur(12px);
     }
 
@@ -326,8 +500,8 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 60%, transparent);
       color: var(--foreground);
       transition: all 0.2s ease;
 
@@ -336,21 +510,22 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
       .chip-count {
         padding: 2px 7px;
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.08);
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
+        color: var(--foreground);
         font-size: 0.75rem;
         font-weight: 700;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.22);
+        background: color-mix(in oklab, var(--card) 90%, transparent);
+        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
       }
 
       &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
+        background: color-mix(in oklab, var(--primary) 18%, var(--card));
         border-color: var(--primary);
-        color: #fff;
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
+        color: var(--foreground);
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent);
 
         .chip-count {
           background: var(--primary);
@@ -359,21 +534,24 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
       }
 
       &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 22%, transparent);
+        background: color-mix(in oklab, var(--risk) 18%, var(--card));
         border-color: var(--risk);
-        .chip-count { background: var(--risk); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--risk) 35%, transparent);
+        .chip-count { background: var(--risk); color: #fff; }
       }
 
       &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 22%, transparent);
+        background: color-mix(in oklab, var(--warning) 18%, var(--card));
         border-color: var(--warning);
-        .chip-count { background: var(--warning); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--warning) 35%, transparent);
+        .chip-count { background: var(--warning); color: #fff; }
       }
 
       &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 22%, transparent);
+        background: color-mix(in oklab, var(--ready) 18%, var(--card));
         border-color: var(--ready);
-        .chip-count { background: var(--ready); }
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--ready) 35%, transparent);
+        .chip-count { background: var(--ready); color: #fff; }
       }
     }
 
@@ -388,7 +566,7 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 600;
       color: var(--muted-foreground);
       background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border: 1px dashed var(--border);
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -396,8 +574,8 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
 
       &:hover {
         color: var(--foreground);
-        border-color: rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--primary);
+        background: color-mix(in oklab, var(--primary) 8%, transparent);
       }
     }
 
