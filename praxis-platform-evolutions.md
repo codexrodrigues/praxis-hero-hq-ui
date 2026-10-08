@@ -30,7 +30,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[x] Resolvida` | `@praxisui/rich-content` | 2026-10-07 | Suporte total a `actionCard` e nós compostos no `compose`, controles nativos de Grid, árvore hierárquica na lateral com ícones e rótulos de negócio, botões de reordenação vertical e seletor visual de ícones Material Symbols com busca integrada; 175/175 testes unitários e build downstream aprovados |
 | [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`toPraxisXUiChartContract`, auto-promote no editor, sync bidirecional) | 2026-10-07 | 397/397 testes unitários OK, build downstream OK |
 | [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (`PRAXIS_LIST_INSERTION_PRESETS`), `@praxisui/page-builder` (`providePraxisPageBuilderWidgets`) | 2026-10-07 | 13/13 spec list metadata OK, 4/4 spec page-builder OK, build downstream OK |
-| [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/charts`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (chips na toolbar, `queryContextClear`), `@praxisui/charts` (`clearSelection`), `@praxisui/core` (`DynamicWidgetPageComponent.handleQueryContextClear`) | 2026-10-08 | 396/396 testes unitários verdes, build downstream OK |
 | [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
 | [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
@@ -40,6 +40,8 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ com fórmulas aritméticas suportadas |
 | [**#28**](#-issue-28-padronização-e-exposição-canônica-da-tipagem-do-evento-rowclick-rowclickeventt-no-barrel-público-de-praxiscuitable-e-praxisuicrud) | Padronização e Exposição Canônica da Tipagem do Evento `(rowClick)` (`RowClickEvent<T>`) | `@praxisui/table`<br>`@praxisui/crud` | 🟢 Baixa | `[ ] Aberta` | — | — | Mitigado no Hero HQ com unwrap de conveniência |
 | [**#29**](#-issue-29-ausência-de-formatação-automática-currencydate-nos-nós-type-value-do-behaviordetail-e-baixa-visibilidade-monocromática-de-microcharts-bullet-em-surface-table-cell) | Ausência de Formatação Automática (Currency/Date) nos Nós `type: 'value'` de `behavior.detail` e Monocromia de Microcharts Bullet em `table-cell` | `@praxisui/table`<br>`@praxisui/core`<br>`presentation-visualization` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via Bento `cardGrid`, interceptor de enriquecimento e CSS customizado |
+| [**#30**](#-issue-30-suporte-canônico-a-gavetas-analíticas-e-dossiês-multi-aba-via-metadadosjson-praxisanalyticaldrawerschema) | Suporte Canônico a Gavetas Analíticas e Dossiês Multi-Aba via Metadados/JSON (`behavior.drawer.analyticalSchema`) | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via componente customizado `IncidentAnalysisDrawerComponent` |
+| [**#31**](#-issue-31-dimensionamento-inflexível-de-rótulos-de-etapa-no-microchart-processflow-causando-quebras-e-truncamentos) | Dimensionamento Inflexível de Rótulos de Etapa no Microchart `processFlow` Causando Quebras e Truncamentos | `@praxisui/charts`<br>`praxis-micro-visualization.component.ts` | 🟢 Baixa | `[ ] Aberta` | — | — | Mitigado no Hero HQ via override de estilo no drawer (`inline-size: 80px`) |
 
 ---
 
@@ -1418,10 +1420,10 @@ No entanto:
 ## 📌 Issue #20: Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela
 
 ### Classificação
-- **Módulos Afetados:** `@praxisui/table`, `@praxisui/page-builder`
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/charts`, `@praxisui/core`, `@praxisui/page-builder`
 - **Severidade:** 🟡 Média (desorientação do usuário corporativo ao receber filtros interativos de gráficos, sem pista visual de por que a lista foi filtrada nem botão para redefinição)
 - **Tipo:** UX / Feedback de Interação Cruzada / Governança de Query Context
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida (2026-10-08)`
 
 ### Diagnóstico Detalhado da Causa Raiz
 Quando uma página dinâmica do Page Builder estabelece uma conexão via `composition.links` entre um gráfico de origem (ex.: `PraxisChart` emitindo `crossFilter` ao clicar em uma fatia de Donut ou barra) e uma tabela de destino (`PraxisTable` recebendo o payload no input `queryContext`):
@@ -1429,21 +1431,25 @@ Quando uma página dinâmica do Page Builder estabelece uma conexão via `compos
 2. **Ausência de Feedback Visual na Toolbar:** A barra de ferramentas da tabela (`praxis-table-toolbar.ts`) **não exibe nenhuma indicação visual de que há um filtro externo ativo**. Os chips de `quickFilters` continuam neutros e o botão de filtros avançados não destaca o critério injetado por barramento externo.
 3. **Impossibilidade de Desfazer Sem Recarregar:** O usuário corporativo fica sem um botão direto na tabela para descartar o filtro cruzado (ex.: `[✕ Limpar filtro de Severidade: CRÍTICA]`), sendo forçado a adivinhar que precisa re-clicar na mesma fatia do gráfico ou recarregar a rota da aplicação.
 
-### Solução Canônica Recomendada de Plataforma
-1. **Em `@praxisui/table` (`praxis-table-toolbar.ts`):**
-   - Ao receber `queryContext` com filtros ativos originados de portas de composição externas, sintetizar um chip contextual destacado na toolbar:
-     ```html
-     <div class="praxis-table-active-cross-filter-chip">
-       <mat-icon>filter_alt</mat-icon>
-       <span>Filtro externo: <strong>{{ crossFilterLabel }}</strong></span>
-       <button (click)="clearCrossFilter()" aria-label="Limpar filtro cruzado">✕</button>
-     </div>
-     ```
-   - Emitir evento de notificação de redefinição para que o componente emissor desfaça a seleção do ponto gráfico sincronizadamente.
+### Solução Canônica Implementada na Plataforma
+1. **Em `@praxisui/table` (`praxis-table-toolbar.ts` e `praxis-table.ts`):**
+   - Criação do container semântico `.praxis-table-active-cross-filters` com chips temáticos Material 3 para cada filtro ativo do `queryContext` (`.praxis-table-active-cross-filter-chip`), exibindo ícone `filter_alt`, rótulo legível do campo com fallback i18n (`table.toolbar.crossFilterPrefix`) e valor formatado.
+   - Botão de remoção individual `✕` (`.praxis-table-active-cross-filter-remove`) com acessibilidade completa (`aria-label`, tooltip i18n), emitindo `clearCrossFilter` e `queryContextClear`.
+   - Botão "Limpar todos" (`.praxis-table-clear-all-cross-filters-btn`) renderizado automaticamente quando houver mais de um filtro ativo (`length > 1`), emitindo `clearAllCrossFilters` e `queryContextClear`.
+   - Ignora filtros estruturais de relacionamento pai-filho (`meta.relatedResource === true && meta.parentFilterField === key`) para preservar a integridade de telas master-detail.
+   - Registro canônico dos ports e outputs em `PRAXIS_TABLE_PORTS` e `PRAXIS_TABLE_COMPONENT_METADATA.outputs` (`queryContextClear`, `queryContextChange`).
+2. **Em `@praxisui/charts` (`PraxisChartComponent`):**
+   - Implementação do método público `clearSelection(): void` que reseta a fatia/barra selecionada (`activeSelectionSignature.set(null)`), emite `selectionChange` (`selected: false`, `filters: {}`), emite `crossFilter` (`filters: {}`) e atualiza `renderAttempt` para redesenho nativo do ECharts.
+3. **Em `@praxisui/core` (`DynamicWidgetPageComponent` e `DynamicWidgetLoaderDirective`):**
+   - Exposição de `clearSelection()` na diretiva `DynamicWidgetLoaderDirective`.
+   - Orquestração centralizada em `DynamicWidgetPageComponent.handleQueryContextClear(fromKey, evt)`: ao receber `queryContextClear`, rastreia as portas e nós de estado conectados à entrada `queryContext` da tabela e aciona `clearSelection()` em todos os widgets de origem (como gráficos `praxis-chart`), resetando simultaneamente os nós do barramento de estado correspondentes.
 
 ### Critérios de Aceite para Resolução
-- [ ] Ao receber `queryContext` via link do Page Builder, a tabela exibe um chip informativo na toolbar destacando o filtro ativo.
-- [ ] O chip possui botão de remoção (`✕`) que limpa o filtro na tabela e desmarca o setor correspondente no gráfico de origem.
+- [x] Ao receber `queryContext` via link do Page Builder, a tabela exibe chips informativos destacados na toolbar (`.praxis-table-active-cross-filters`), identificando o campo e valor do filtro externo ativo, com acessibilidade e i18n (pt-BR e en-US).
+- [x] Cada chip possui botão de remoção (`✕`) com `aria-label` e tooltip acessíveis, emitindo `clearCrossFilter` e `queryContextClear`.
+- [x] Quando há mais de um filtro ativo (`length > 1`), a toolbar renderiza o botão "Limpar todos" (`.praxis-table-clear-all-cross-filters-btn`), emitindo `clearAllCrossFilters` e `queryContextClear`.
+- [x] O container do Page Builder (`DynamicWidgetPageComponent`) orquestra o ciclo interceptando `queryContextClear`, identificando os emissores de origem (como `PraxisChartComponent`), invocando `clearSelection()` para desmarcar a fatia/barra ativa e resetando os estados associados.
+- [x] Cobertura abrangente com 396 testes unitários passando em `@praxisui/table`, `@praxisui/charts` e `@praxisui/core`, além de build downstream 100% verificado no Hero HQ.
 
 ---
 
@@ -1885,6 +1891,127 @@ Na evolução das telas corporativas e vitrines da plataforma (como o **Praxis H
 ### Critérios de Aceite para Resolução
 - [ ] O nó `type: 'value'` no `behavior.detail` formata moedas, datas e números automaticamente conforme o tipo de dado da coluna correspondente.
 - [ ] O renderizador `bullet` em `table-cell` oferece affordance numérica e contraste cromático nítido em tema claro.
+
+---
+
+## 📌 Issue #30: Suporte Canônico a Gavetas Analíticas e Dossiês Multi-Aba via Metadados/JSON (`behavior.drawer.analyticalSchema`)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`, `@praxisui/core`, `praxis-metadata-starter`
+- **Severidade:** 🟡 Média (Arquitetura de Apresentação e Governança Zero-Code)
+- **Tipo:** Extensão de Contrato de Metadados / Capacidade de Apresentação
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+Atualmente, no `@praxisui/table` e `@praxisui/crud`, o suporte declarativo a gavetas laterais de detalhe (`openMode: 'drawer'`) é restrito à montagem de formulários de CRUD tradicionais (leitura de registro via schema OpenAPI gerado por `/schemas/filtered` ou edição simples com campos dinâmicos).
+No entanto, cenários analíticos corporativos avançados (como o **Dossiê de Investigação de Sinistro** e o **Briefing Tático de Missão** no Hero HQ) demandam:
+1. **Múltiplas Abas Temáticas:** Abas analíticas independentes (ex.: *Laudo & Perícia*, *Mitigação & Indenizações*, *Resposta Emergencial*).
+2. **Composição em Bento Grid com Microcharts Embutidos:** Cartões ricos com gráficos de área (*sparklines*), medidores radiais, gráficos de bala (*bullet*) e diagramas de fluxo sequencial (*processFlow*), alimentados por dados do registro ou por serviços analíticos correlacionados.
+3. **Ausência de Contrato Declarativo para Gavetas Analíticas:**
+   - Como o `behavior.detail` é projetado prioritariamente para expansão inline de linhas dentro do corpo da tabela (`praxis.detail.schema`), não existe um contrato equivalente `behavior.drawer` que permita especificar um layout analítico bento governado inteiramente por JSON para abertura em gaveta lateral.
+   - Isso forçou o aplicativo consumidor a instanciar um componente customizado (`IncidentAnalysisDrawerComponent`) contendo HTML e orquestração próprios, afastando a aplicação do ideal de governança 100% *metadata-driven*.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Criação do Contrato `praxis.analytical-drawer.schema` em `@praxisui/core`:**
+   Permitir que o nó de configuração da tabela defina:
+   ```json
+   {
+     "behavior": {
+       "drawer": {
+         "enabled": true,
+         "mode": "analytical",
+         "schema": {
+           "kind": "praxis.analytical-drawer.schema",
+           "version": "1.0.0",
+           "tabs": [
+             {
+               "id": "visaoGeral",
+               "label": "Laudo & Perícia",
+               "icon": "description",
+               "content": { "type": "cardGrid", "cards": [ ... ] }
+             },
+             {
+               "id": "financeiro",
+               "label": "Mitigação & Indenizações",
+               "icon": "payments",
+               "badge": "Auditado",
+               "content": {
+                 "type": "cardGrid",
+                 "columns": 2,
+                 "cards": [
+                   {
+                     "title": "Prejuízo Civil Apurado",
+                     "visualization": { "kind": "area", "pointsExpr": "row.trendPoints" }
+                   }
+                 ]
+               }
+             }
+           ]
+         }
+       }
+     }
+   }
+   ```
+2. **Integração no `@praxisui/crud` e `@praxisui/table`:**
+   - O runtime do `<praxis-table>` ou `<praxis-crud>` renderiza a gaveta analítica automaticamente a partir dos metadados, dispensando qualquer componente TypeScript customizado na aplicação host.
+   - Fornecer resolução de dados correlacionados via `dataSourceUrl` ou `enrichmentUrl` parametrizado por `{id}`.
+
+### Mitigação Temporária Adotada no Hero HQ
+Criação do componente de vitrine [`IncidentAnalysisDrawerComponent`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/operacoes/incident-analysis-drawer.component.ts), orquestrando o layout Bento, abas com `[hidden]` preservando DOM (conforme Issue #2) e consumindo `PraxisMicroVisualizationComponent` do `@praxisui/charts`.
+
+### Critérios de Aceite para Resolução
+- [ ] O contrato `TableConfig` suporta `behavior.drawer.analyticalSchema` com abas e nós de apresentação.
+- [ ] A gaveta analítica pode ser configurada 100% via JSON vindo do backend (`praxis-metadata-starter`), sem necessidade de código Angular no consumidor.
+- [ ] Microcharts SVG de `@praxisui/charts` são suportados nativamente nos cartões da gaveta analítica.
+
+---
+
+## 📌 Issue #31: Dimensionamento Inflexível de Rótulos de Etapa no Microchart `processFlow` Causando Quebras e Truncamentos
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/charts` (`praxis-micro-visualization.component.ts`)
+- **Severidade:** 🟢 Baixa (Design System / Tipografia / Responsividade de Micro Visualizações)
+- **Tipo:** Visual Bug / Responsividade de SVG e CSS
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+No componente `PraxisMicroVisualizationComponent` em `projects/praxis-charts/src/lib/components/praxis-micro-visualization/praxis-micro-visualization.component.ts:842-856`, o estilo padrão para rótulos de etapas no fluxo de processo (`kind: 'processFlow'`) define uma largura máxima fixa excessivamente restrita:
+```css
+.prx-micro-process__label {
+  display: -webkit-box;
+  inline-size: 56px;
+  max-width: 56px;
+  margin-top: 5px;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 9px;
+  text-align: center;
+}
+```
+1. **Truncamento de Palavras Corporativas:** Palavras comuns em fluxos operacionais e regulatórios como *"Homologação"*, *"Conformidade"*, *"Faturamento"* ou termos compostos não cabem em 56px com fonte padrão, sofrendo quebra irregular no meio da palavra (ex.: "Homologaçã...") mesmo quando há espaço horizontal disponível no container host (como um cartão de gaveta lateral de 600px de largura).
+2. **Falta de Propriedade de Configuração no Contrato:** O contrato `PraxisPresentationVisualizationConfig` para `processFlow` não possui propriedades como `stepLabelWidth` ou `lineClamp`, impedindo que o autor ajuste o layout sem aplicar `!important` no CSS global.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Tornar a Largura Mínima/Máxima Flexível via Tokens ou Propriedades:**
+   Substituir os valores estáticos por propriedades customizáveis via variáveis CSS com fallbacks responsivos:
+   ```css
+   .prx-micro-process__label {
+     inline-size: var(--prx-micro-process-label-width, clamp(56px, 12cqi, 88px));
+     max-width: var(--prx-micro-process-label-max-width, 96px);
+     -webkit-line-clamp: var(--prx-micro-process-line-clamp, 2);
+   }
+   ```
+2. **Suporte no Contrato de Apresentação:**
+   Adicionar no `PraxisPresentationVisualizationConfig` as opções opcionais `stepLabelWidth?: number | string` e `stepLabelLineClamp?: number`.
+
+### Mitigação Temporária Adotada no Hero HQ
+Aplicação de regras de estilo focais no container do drawer (`.flow-chart-wrap ::ng-deep .prx-micro-process__label`), definindo `inline-size: 80px !important`, `max-width: 80px !important` e rótulos concisos (*Perícia*, *Homologação*, *Repasse*, *Auditoria*), garantindo visualização sem nenhum corte.
+
+### Critérios de Aceite para Resolução
+- [ ] Rótulos de etapas com até 12-14 caracteres são renderizados sem hifenização truncada em containers com largura padrão de cartão (`>= 280px`).
+- [ ] Variáveis CSS `--prx-micro-process-label-width` e `--prx-micro-process-line-clamp` documentadas e suportadas no `@praxisui/charts`.
 
 ---
 
