@@ -38,6 +38,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via `eventActions.crossFilter.mapping` |
 | [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ com fórmulas aritméticas suportadas |
+| [**#28**](#-issue-28-padronização-e-exposição-canônica-da-tipagem-do-evento-rowclick-rowclickeventt-no-barrel-público-de-praxiscuitable-e-praxisuicrud) | Padronização e Exposição Canônica da Tipagem do Evento `(rowClick)` (`RowClickEvent<T>`) | `@praxisui/table`<br>`@praxisui/crud` | 🟢 Baixa | `[ ] Aberta` | — | — | Mitigado no Hero HQ com unwrap de conveniência |
 
 ---
 
@@ -949,7 +950,7 @@ No arquivo `praxis-table-toolbar.ts` (linhas 1990–2006):
 - **Módulos Afetados:** `@praxisui/page-builder`, `@praxisui/core` (`DynamicWidgetPageComponent`)
 - **Severidade:** 🟡 Média (experiência de personalização do dashboard confusa, artefato visual estranho de "chapa vermelha" cortando componentes e falha em trocas entre widgets de dimensões assimétricas)
 - **Tipo:** Refinamento de UX / Motor de Layout de Grade / Animações de Interação
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Implementado suporte canônico a `push-down`, preservação estrita de dimensões assimétricas, eliminação da chapa vermelha opaca com micro-badge contextual de bloqueio e preview pill de swap com live shift)
 
 ### Contexto & Descoberta
 Durante os testes de manipulação de layout no Dashboard em modo de authoring, observou-se dois comportamentos distintos:
@@ -1080,10 +1081,10 @@ export type WidgetPageCanvasCollisionPolicy = 'block' | 'swap' | 'push-down';
 ---
 
 ### Critérios de Aceite para Resolução
-- [ ] Ao arrastar um widget sobre uma área incompatível para troca direta, a plataforma não exibe uma mancha vermelha sólida cortando o componente subjacente.
-- [ ] O feedback de colisão inválida apresenta um contorno limpo e uma mensagem clara (badge/tooltip) explicando a razão da restrição.
-- [ ] A plataforma suporta deslocamento vertical automático (`push-down`), permitindo inserir widgets menores acima de tabelas ou blocos largos de 12 colunas sem exigir reestruturação manual da grade.
-- [ ] Itens simétricos realizam troca com animação visual contínua e badge de confirmação de swap.
+- [x] Ao arrastar um widget sobre uma área incompatível para troca direta, a plataforma não exibe uma mancha vermelha sólida cortando o componente subjacente.
+- [x] O feedback de colisão inválida apresenta um contorno limpo e uma mensagem clara (badge/tooltip) explicando a razão da restrição.
+- [x] A plataforma suporta deslocamento vertical automático (`push-down`), permitindo inserir widgets menores acima de tabelas ou blocos largos de 12 colunas sem exigir reestruturação manual da grade.
+- [x] Itens simétricos realizam troca com animação visual contínua e badge de confirmação de swap.
 
 ---
 
@@ -1762,6 +1763,62 @@ Essa fórmula avalia perfeitamente a telemetria do registro, renderizando a barr
 ### Critérios de Aceite para Resolução
 - [ ] O `SafeExpressionEvaluator` aceita a função condicional `if(cond, a, b)` ou o operador ternário `? :`.
 - [ ] Fórmulas inválidas em tempo de desenvolvimento emitem `warn` no console com a causa do erro em vez de falharem silenciosamente.
+
+---
+
+## 📌 Issue #28: Padronização e Exposição Canônica da Tipagem do Evento `(rowClick)` (`RowClickEvent<T>`) no Barrel Público de `@praxisui/table` e `@praxisui/crud`
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`
+- **Severidade:** 🟢 Baixa (Ergonomia e Type Safety de Developer Experience)
+- **Tipo:** DX / Contrato de Eventos Públicos de Componente
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+Na composição de aplicações corporativas complexas (como no **Praxis Hero HQ**), é prática comum integrar o `<praxis-crud>` com painéis laterais de contexto tático (drawers ou dossiês) acionados pelo clique do usuário na linha da tabela via `(rowClick)="onRowClicked($event)"`.
+
+No entanto, a assinatura de saída do `@Output() rowClick`:
+1. No `@praxisui/table`, a emissão interna encapsula ou despacha o objeto de linha, mas dependendo se a emissão atravessa o template wrapper do `@praxisui/crud` (`praxis-crud.component.html`), o payload recebido pelo consumidor pode chegar como o próprio item `T`, ou como envelope `{ row: T, index?: number, event?: MouseEvent }`, ou `{ data: T }`.
+2. Como não há um tipo canônico exportado formalmente (ex.: `RowClickEvent<T>`) no `public-api.ts` de `@praxisui/table` e `@praxisui/crud`, os desenvolvedores são forçados a utilizar unwrap defensivo com casting não tipado:
+   ```typescript
+   protected onIncidentRowClicked(event: unknown): void {
+     const row =
+       (event as { row?: IncidentProfile; data?: IncidentProfile })?.row ||
+       (event as { row?: IncidentProfile; data?: IncidentProfile })?.data ||
+       (event as IncidentProfile);
+     if (row && row.id) {
+       this.selectedIncident.set(row);
+     }
+   }
+   ```
+3. A ausência de tipagem forte em contratos de eventos dificulta refatorações, gera boilerplate repetitivo em todas as páginas corporativas e aumenta a probabilidade de erros sutis de runtime.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Definição de Interface Padronizada:**
+   Em `projects/praxis-table/src/lib/models/table-events.ts`:
+   ```typescript
+   export interface RowClickEvent<T = unknown> {
+     row: T;
+     index: number;
+     originalEvent: MouseEvent;
+     selectionState?: {
+       isSelected: boolean;
+       isExpanded: boolean;
+     };
+   }
+   ```
+2. **Exposição Canônica nos Barrels Públicos:**
+   Exportar `RowClickEvent` no `public-api.ts` de `@praxisui/table` e reexportar convenientemente no `public-api.ts` de `@praxisui/crud`.
+3. **Propagação Transparente no `PraxisCrudComponent`:**
+   Garantir que `<praxis-crud (rowClick)="...">` repasse exatamente o `RowClickEvent<T>` estruturado recebido da tabela subjacente, preservando tipagem forte no template Angular com `@Output() rowClick = new EventEmitter<RowClickEvent<T>>();`.
+
+### Mitigação Temporária Adotada no Hero HQ
+Nas páginas `missoes-page.component.ts`, `ameacas-page.component.ts`, `incidentes-page.component.ts` e `bases-page.component.ts`, foi implementada função helper de unwrap seguro que normaliza o payload do evento em runtime de forma tolerante.
+
+### Critérios de Aceite para Resolução
+- [ ] Interface genérica `RowClickEvent<T>` exportada no `public-api.ts` de `@praxisui/table` e `@praxisui/crud`.
+- [ ] `@Output() rowClick` de ambos os componentes emite payload padronizado no formato `{ row, index, originalEvent }`.
+- [ ] Type-checking estrito em templates Angular habilitado sem necessidade de casting `unknown`.
 
 ---
 
