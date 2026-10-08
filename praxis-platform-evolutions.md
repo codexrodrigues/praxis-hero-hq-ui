@@ -47,6 +47,9 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#34**](#-issue-34-suporte-canônico-a-propriedades-calculadas-e-expressões-de-domínio-no-schema-computedfields--virtualproperties) | Suporte Canônico a Propriedades Calculadas e Expressões de Domínio no Schema (`computedFields`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/dynamic-form`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Elimina `tacticalDataEnrichmentInterceptor` (571 linhas) |
 | [**#35**](#-issue-35-eliminação-de-dtos-typescript-estáticos-redundantes-via-contratos-genéricos-dinâmicos-dynamicdatarecord--governança-por-schema) | Eliminação de DTOs TypeScript Estáticos Redundantes via Contratos Genéricos Dinâmicos (`DynamicDataRecord`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Previne acoplamento estático e quebra de tipos com o backend |
 | [**#36**](#-issue-36-modo-de-apresentação-e-ficha-técnica-editorial-para-formulários-dinâmicos-mode-presentation-no-praxisuidynamic-form) | Modo de Apresentação e Ficha Técnica Editorial para Formulários Dinâmicos (`mode: 'presentation'`) | `@praxisui/dynamic-form`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Elimina centenas de linhas de HTML customizado para fichas de leitura |
+| [**#37**](#-issue-37-componente-canônico-de-layout-e-shell-de-aplicação-corporativa-praxisappshell--praxisishell-ou-praxisicore) | Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell`) | `@praxisui/core`<br>`@praxisui/shell` | 🟡 Média | `[ ] Aberta` | — | — | Elimina `hero-app-shell.component.ts` (1.192 linhas de CSS/sidebar manual) |
+| [**#38**](#-issue-38-descoberta-integral-de-recurso-e-roteamento-zero-code-no-praxis-crud-praxisresourcepage--auto-resource-host) | Descoberta Integral de Recurso e Roteamento Zero-Code no `<praxis-crud>` (`PraxisResourcePage`) | `@praxisui/crud`<br>`@praxisui/table`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | — | — | Reduz as 14 páginas de CRUD de ~800 linhas cada para ~25 linhas declarativas |
+
 
 
 ---
@@ -2285,28 +2288,116 @@ Construção manual de templates HTML repetitivos para exibição de atributos d
 - [ ] `<praxis-dynamic-form [mode]="'presentation'">` renderiza os dados do registro como uma ficha técnica editorial sem affordance de campos de entrada desabilitados.
 - [ ] É possível reutilizar 100% do schema JSON do formulário para apresentação de dados de leitura.
 
+
+---
+
+## 📌 Issue #37: Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell` / `@praxisui/shell` ou `@praxisui/core`)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/core`, `@praxisui/shell`
+- **Severidade:** 🟡 Média (Elimina o arquivo `hero-app-shell.component.ts` de 1.192 linhas no Hero HQ)
+- **Tipo:** UX / Arquitetura de Shell / Layout Corporativo
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+Toda aplicação desenvolvida sobre o ecossistema Praxis necessita de um esqueleto visual corporativo: barra lateral retrátil (sidebar), agrupamentos de navegação por domínio com ícones, indicador de status operacional no rodapé, barra superior com busca/comando, alternador de tema (Light/Dark), badge de perfil do usuário e barra de carregamento reativa.
+Pela ausência de um componente de shell governado na biblioteca `@praxisui/core` (ou em um pacote dedicado `@praxisui/shell`), a aplicação Hero HQ foi obrigada a criar o arquivo [`hero-app-shell.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/shell/hero-app-shell.component.ts) com **1.192 linhas de código** — das quais mais de 850 linhas são puro CSS embutido cuidando de animações de colapso, backdrops móveis, gradientes de borda e posicionamento de elementos.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Criação do Componente Canônico `PraxisAppShellComponent`:**
+   Expor em `@praxisui/core` (ou `@praxisui/shell`) um componente de casca configurável via contrato declarativo:
+   ```html
+   <praxis-app-shell
+     [brand]="{ title: 'Praxis Hero HQ', version: 'v1.0', icon: 'shield' }"
+     [navigation]="navigationGroups"
+     [user]="currentUserProfile"
+     [showThemeToggle]="true"
+     [loadingContext]="appLoadingContext"
+   >
+     <router-outlet />
+   </praxis-app-shell>
+   ```
+2. **Encapsulamento de Comportamento:**
+   O componente assume nativamente o controle de colapso da sidebar, navegação mobile com backdrop, alternância de tema respeitando tokens do Design System, barra de progresso conectada ao `LoadingOrchestrator` e slots de projeção de conteúdo para header e footer.
+
+### Mitigação Temporária Adotada no Hero HQ
+Shell customizado artesanal com 1.192 linhas de código e CSS embutido.
+
+### Critérios de Aceite para Resolução
+- [ ] O componente `PraxisAppShell` é disponibilizado como building block oficial da plataforma.
+- [ ] A aplicação cliente é capaz de configurar o shell corporativo com menos de 25 linhas de template e zero CSS customizado.
+
+---
+
+## 📌 Issue #38: Descoberta Integral de Recurso e Roteamento Zero-Code no `<praxis-crud>` (`PraxisResourcePage` / Auto-Resource Host)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/crud`, `@praxisui/table`, `praxis-metadata-starter`
+- **Severidade:** 🔴 Alta (Causa raiz da repetição de mais de 10.500 linhas de código distribuídas em 14 páginas de CRUD)
+- **Tipo:** Arquitetura de Plataforma / Paradigma Zero-Code Metadata-Driven
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+No Hero HQ, existem 14 páginas dedicadas a entidades de domínio (Funcionários, Missões, Incidentes, Folha de Pagamento, Equipes, Ameaças, Bases, Contratos, Veículos, Equipamentos, Indicadores, Departamentos, Afastamentos e Pedidos).
+Cada uma dessas páginas contém entre 650 e 1.021 linhas de código TypeScript, templates HTML e SCSS duplicados. Uma inspeção criteriosa revela que **mais de 85% do código dessas 14 páginas é idêntico**:
+1. Declaração manual de `columnProjection` com overrides de títulos, larguras e formatos de coluna que já deveriam vir prontos das anotações Java (`@Schema`, `@UISchema`) em `/schemas/filtered`.
+2. Declaração de objetos RichContent para os cartões de KPI superiores.
+3. Injeção e subscrição de serviços RxJS manuais de estatísticas em `ngOnInit` e `ngOnDestroy`.
+4. Templates repetitivos de botões de filtro tipo "chip" com contadores.
+5. Injeção de componentes de gaveta lateral específica com `@if` e handlers de eventos manuais.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Composição Auto-Suficiente do `<praxis-crud>`:**
+   Evoluir o `<praxis-crud>` para que ele descubra e orquestre 100% da experiência de uma página inteira a partir do path canônico do recurso:
+   ```html
+   <praxis-crud resource="operations/missoes" />
+   ```
+   A partir dessa única linha, o componente:
+   - Consulta `/schemas/filtered` e configura colunas, tipos, larguras e alinhamentos automaticamente.
+   - Consulta metadados de `/stats/summary` e projeta a faixa de KPIs superior (`kpiBand`).
+   - Consulta anotações `@QuickFilter` e renderiza a barra de filtros rápidos (`scopeBar`).
+   - Ao clicar em uma linha, abre a gaveta analítica descrita em `behavior.drawer` do backend, executando as consultas relacionais sem código Angular customizado.
+2. **Componente de Rota Genérico `PraxisResourcePage`:**
+   Permitir que as rotas do Angular declarem apenas:
+   ```typescript
+   {
+     path: 'operacoes/missoes',
+     component: PraxisResourcePage,
+     data: { resource: 'operations/missoes' }
+   }
+   ```
+   Eliminando a necessidade de criar arquivos `*-page.component.ts` individuais para recursos padrão.
+
+### Mitigação Temporária Adotada no Hero HQ
+Criação manual de 14 arquivos de página acumulando mais de 10.500 linhas de boilerplate repetitivo.
+
+### Critérios de Aceite para Resolução
+- [ ] O componente `<praxis-crud>` é capaz de operar de forma auto-contida recebendo apenas a coordenada `resource`.
+- [ ] As 14 páginas de recurso do Hero HQ podem ser reduzidas a simples definições de rota ou componentes com menos de 30 linhas de código.
+
 ---
 
 ## 🏛️ Diagnóstico Arquitetural: Onde o Código Está Concentrado e Plano de Descarbonização de Código (Redução de 80%)
 
 A varredura quantitativa executada na aplicação modelo **Praxis Hero HQ** (`src/app`) identificou a distribuição real das ~20.000 linhas de código do projeto:
 
-| Componente / Arquivo | Linhas de Código | Categoria de Boilerplate | Causa Raiz na Plataforma | Issue(s) de Resolução |
+| Componente / Camada | Linhas de Código | Categoria de Boilerplate | Causa Raiz na Plataforma | Issue(s) de Resolução |
 | :--- | :---: | :--- | :--- | :---: |
-| `incident-analysis-drawer.component.ts` | **1.411** | Gaveta customizada | Falta de gaveta analítica e relações declarativas | **#30**, **#32** |
-| `hero-dossier-drawer.component.ts` | **1.261** | Gaveta customizada | Falta de gaveta analítica, relações e form presentation | **#30**, **#32**, **#36** |
-| `dashboard-page.definition.ts` | **1.221** | Configuração manual | Falta de presets governados de layout no Page Builder | **#18**, **#19** |
-| `hero-app-shell.component.ts` | **1.192** | Shell de navegação | Falta de shell corporativo padrão governado por tokens | **#13** |
-| `mission-briefing-drawer.component.ts` | **1.006** | Gaveta customizada | Falta de gaveta analítica e relações declarativas | **#30**, **#32** |
-| `base-facility-drawer.component.ts` | **938** | Gaveta customizada | Falta de gaveta analítica e form presentation | **#30**, **#32**, **#36** |
-| `dashboard-stats.service.ts` | **855** | Agregação manual RxJS | Falta de banda de KPIs nativa no `<praxis-crud>` | **#33** |
-| `threat-intelligence-drawer.component.ts` | **820** | Gaveta customizada | Falta de gaveta analítica e relações declarativas | **#30**, **#32** |
-| `tactical-data-enrichment.interceptor.ts` | **571** | Enriquecimento ad hoc | Falta de campos calculados declarativos no schema | **#34** |
-| Barras de Filtros Rápidos (14 páginas) | **~2.100** | HTML/SCSS de chips | Falta de componente de escopo nativo governado | **#12** |
+| **14 Páginas de Recursos CRUD** | **~10.500** | Boilerplate de CRUD repetido | Falta de descoberta integral de recurso e auto-crud | **#12**, **#30**, **#33**, **#38** |
+| **5 Gavetas Monolíticas (Drawers)** | **5.436** | Gavetas artesanais em Angular | Falta de gaveta analítica e relações declarativas | **#30**, **#32**, **#36** |
+| `incident-analysis-drawer.component.ts` | 1.411 | Gaveta customizada | Falta de relações declarativas e gaveta analítica | **#30**, **#32** |
+| `hero-dossier-drawer.component.ts` | 1.261 | Gaveta customizada | Falta de relações e ficha técnica editorial | **#30**, **#32**, **#36** |
+| `mission-briefing-drawer.component.ts` | 1.006 | Gaveta customizada | Falta de relações e timeline nativa em gaveta | **#30**, **#32** |
+| `base-facility-drawer.component.ts` | 938 | Gaveta customizada | Falta de relações e apresentação editorial | **#30**, **#32**, **#36** |
+| `threat-intelligence-drawer.component.ts` | 820 | Gaveta customizada | Falta de relações e cards Bento no drawer | **#30**, **#32** |
+| `dashboard-page.definition.ts` + `component.ts` | **1.850** | Configuração estática de dashboard | Falta de carregamento de `WidgetPageDefinition` via API | **#18**, **#19** |
+| `hero-app-shell.component.ts` | **1.192** | Shell e navegação com CSS embutido | Falta de componente de shell corporativo oficial | **#37** |
+| `dashboard-stats.service.ts` | **855** | Agregação manual de métricas RxJS | Falta de banda de KPIs nativa no `<praxis-crud>` | **#33** |
+| `tactical-data-enrichment.interceptor.ts` | **571** | Enriquecimento ad hoc de dados | Falta de campos calculados declarativos no schema | **#34** |
 | DTOs e Interfaces Estáticas (vários) | **~800** | Tipos manuais redundantes | Falta de tipos genéricos dinâmicos orientados a schema | **#35** |
 
 ### 🎯 Meta de Descarbonização de Código
-Com a resolução das Issues **#30, #32, #33, #34, #35 e #36**, a base de código do **Praxis Hero HQ** será reduzida de **~20.000 linhas** para aproximadamente **3.500 linhas** de arquivos de rota e metadados JSON puros — atingindo a diretriz de **menos de 30% de código residual**, tornando o showcase um verdadeiro testemunho da inteligência e governança nativa da Plataforma Praxis.
+Com a resolução das Issues **#12, #30, #32, #33, #34, #35, #36, #37 e #38**, a base de código do **Praxis Hero HQ** será reduzida de **~20.000 linhas** para aproximadamente **3.500 linhas** de arquivos de rota e metadados JSON puros — atingindo a diretriz de **menos de 20% a 30% de código residual**, tornando o showcase um verdadeiro testemunho da inteligência e governança nativa da Plataforma Praxis.
 
 ---
 
