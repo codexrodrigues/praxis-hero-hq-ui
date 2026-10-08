@@ -32,7 +32,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (`PRAXIS_LIST_INSERTION_PRESETS`), `@praxisui/page-builder` (`providePraxisPageBuilderWidgets`) | 2026-10-07 | 13/13 spec list metadata OK, 4/4 spec page-builder OK, build downstream OK |
 | [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/charts`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (chips na toolbar, `queryContextClear`), `@praxisui/charts` (`clearSelection`), `@praxisui/core` (`DynamicWidgetPageComponent.handleQueryContextClear`) | 2026-10-08 | 396/396 testes unitários verdes, build downstream OK |
 | [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/table` (`normalizeExpansionDetailSchemaCandidate`, `getExpansionDetailRichContentContext`, contextMap) | 2026-10-08 | 43/43 spec unitários e de integração verdes, build downstream OK |
-| [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
+| [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartGaugeColorBand`, `buildGaugeColorBands`, mapper bidirecional) | 2026-10-08 | 401/401 testes unitários verdes, build downstream OK |
 | [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
@@ -1499,32 +1499,49 @@ Contudo:
 - **Módulos Afetados:** `@praxisui/charts`, `EchartsOptionBuilderService`
 - **Severidade:** 🟢 Baixa (restrição estética em gráficos analíticos de velocímetro)
 - **Tipo:** Capacidade Analítica / Visualização de Dados
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (`@praxisui/charts`)
 
 ### Diagnóstico Detalhado da Causa Raiz
-No arquivo `projects/praxis-charts/src/lib/adapters/echarts/echarts-option-builder.service.ts` (linhas 41–60):
-- Ao construir a configuração ECharts para `type: 'gauge'`, o serviço aplica uma cor estática única:
-  ```typescript
-  const gaugeColor = gauge.color ?? palette[0];
-  ```
+No arquivo `projects/praxis-charts/src/lib/adapters/echarts/echarts-option-builder.service.ts`:
+- Ao construir a configuração ECharts para `type: 'gauge'`, o serviço aplicava exclusivamente uma cor estática única (`gaugeColor = gauge.color ?? palette[0]`).
 - Em painéis executivos e industriais de monitoramento (como níveis de alerta DEFCON, temperatura de reatores ou risco de crédito), um gráfico velocímetro necessita de **faixas coloridas graduadas no arco** (ex.: 0 a 2 em Verde Sucesso, 2 a 4 em Amarelo Alerta, e 4 a 5 em Vermelho Crítico).
-- O motor Apache ECharts suporta nativamente `axisLine.lineStyle.color: [[0.4, '#10b981'], [0.8, '#f59e0b'], [1, '#ef4444']]`, mas o `PraxisChartConfig` não expõe essa propriedade em seu modelo tipado.
+- O motor Apache ECharts suporta nativamente `axisLine.lineStyle.color: [[0.4, '#10b981'], [0.8, '#f59e0b'], [1, '#ef4444']]`, mas o `PraxisChartConfig` e o contrato canônico `PraxisXUiChartContract` não expunham essa propriedade em seu modelo tipado.
 
-### Solução Canônica Recomendada de Plataforma
-1. No modelo `PraxisChartGaugeConfig`:
-   - Adicionar suporte a `colorBands`:
+### Solução Canônica Implementada de Plataforma
+1. Nos modelos `projects/praxis-charts/src/lib/models/chart-config.model.ts` e `x-ui-chart.model.ts`:
+   - Introduzidos `PraxisChartGaugeTone` e `PraxisChartGaugeColorBand`:
      ```typescript
+     export type PraxisChartGaugeTone = 'success' | 'warning' | 'danger' | 'critical' | 'info' | 'neutral';
+
      export interface PraxisChartGaugeColorBand {
        upTo: number; // Fração de 0 a 1 ou valor na escala
        color?: string;
-       tone?: 'success' | 'warning' | 'danger' | 'critical' | 'info';
+       tone?: PraxisChartGaugeTone;
+     }
+
+     export interface PraxisChartGaugeConfig {
+       scale: PraxisChartGaugeScale;
+       colorBands?: PraxisChartGaugeColorBand[];
+       showProgress?: boolean;
      }
      ```
 2. No `EchartsOptionBuilderService`:
-   - Converter `colorBands` na matriz `axisLine.lineStyle.color` do ECharts, aplicando tokens de cor do Material Design 3.
+   - Implementado método `buildGaugeColorBands`: normaliza valores absolutos na escala (`scale.min..scale.max`) e frações unitárias (`0..1`), converte tons semânticos tokenizados (`success`, `warning`, `danger`, `critical`, `info`, `neutral`) e gera a matriz ascendente `axisLine.lineStyle.color` assegurando cobertura até `1.0`.
+   - Ajustada exibição de `progress`: desativada por padrão quando há `colorBands` (a menos que explicitado `showProgress: true`), permitindo visualização desobstruída dos setores coloridos no arco perimetral.
+   - Ajustada coloração de agulha (`pointer`) e ponto pivô (`anchor`): aplica `color: 'auto'` quando há `colorBands` sem cor explícita no dado, fazendo a agulha assumir a cor da faixa em que o valor está inserido.
+3. No `ChartCanonicalContractMapperService`:
+   - Mapeamento bidirecional completo de `colorBands` e `showProgress` entre `PraxisXUiChartContract` e `PraxisChartConfig`.
+4. No `ChartContractValidationService`:
+   - Validação estrutural de `gauge.colorBands` garantindo arrays bem formados e valores `upTo` finitos.
+5. Cobertura de Testes:
+   - 401/401 testes unitários passando em `@praxisui/charts`, incluindo novos testes dedicados para `colorBands` em escala absoluta e fracionária, resolução de tons, override de `showProgress` e mapeamento canônico.
 
 ### Critérios de Aceite para Resolução
-- [ ] Gráficos do tipo `gauge` aceitam faixas coloridas no arco perimetral de acordo com limites operacionais configurados.
+- [x] Gráficos do tipo `gauge` aceitam faixas coloridas no arco perimetral de acordo com limites operacionais configurados (`colorBands`).
+- [x] Suporte automático a valores de escala absoluta (ex: `0..100`, `1..5`) ou frações normalizadas (`0..1`).
+- [x] Suporte a tons semânticos tokenizados (`success`, `warning`, `danger`, `critical`, `info`, `neutral`) e cores hexadecimais explícitas.
+- [x] Agulha e pivô assumem automaticamente a cor da faixa ativa via `color: 'auto'`.
+- [x] Mapeamento canônico bidirecional preservado e build downstream aprovado no Hero HQ.
 
 ---
 
