@@ -12,6 +12,7 @@ import {
 import { Subscription } from 'rxjs';
 import { type RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import type { RowClickEvent } from '@praxisui/table';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { HeroDossierDrawerComponent, type HeroProfile } from './hero-dossier-drawer.component';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
@@ -780,8 +781,8 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
     this.selectedHero.set(SAMPLE_HERO);
   }
 
-  protected onHeroRowClicked(event: unknown): void {
-    const raw = (event as any)?.row ?? (event as any)?.data ?? event;
+  protected onHeroRowClicked(event: RowClickEvent<HeroProfile> | unknown): void {
+    const raw = (event as RowClickEvent<HeroProfile>)?.row ?? (event as any)?.data ?? event;
     if (!raw || typeof raw !== 'object' || !('id' in raw)) {
       return;
     }
