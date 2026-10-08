@@ -43,8 +43,8 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#30**](#-issue-30-suporte-canônico-a-gavetas-analíticas-e-dossiês-multi-aba-via-metadadosjson-praxisanalyticaldrawerschema) | Suporte Canônico a Gavetas Analíticas e Dossiês Multi-Aba via Metadados/JSON (`behavior.drawer.analyticalSchema`) | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`PraxisAnalyticalDrawerSchema`), `@praxisui/table` (`PraxisAnalyticalDrawerComponent`), `@praxisui/crud` | 2026-10-08 | Validado (dossiês multi-aba declarativos, 6/6 specs drawer, 63/63 specs table events, build downstream OK) |
 | [**#31**](#-issue-31-dimensionamento-inflexível-de-rótulos-de-etapa-no-microchart-processflow-causando-quebras-e-truncamentos) | Dimensionamento Inflexível de Rótulos de Etapa no Microchart `processFlow` Causando Quebras e Truncamentos | `@praxisui/charts`<br>`praxis-micro-visualization.component.ts` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/charts` (`PraxisMicroVisualizationComponent`), `@praxisui/core` (`stepLabelWidth`, `stepLabelLineClamp`) | 2026-10-08 | Validado (variáveis CSS dinâmicas, clamp responsivo, 405/405 specs charts verdes) |
 | [**#32**](#-issue-32-orquestração-declarativa-de-sub-recursos-e-relações-vinculadas-em-dossiês-analíticos-relations--subresourcebindings-em-behaviordrawer) | Orquestração Declarativa de Sub-Recursos e Relações Vinculadas em Dossiês Analíticos (`relations` em `behavior.drawer`) | `@praxisui/crud`<br>`@praxisui/table`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/core` (`PraxisAnalyticalDrawerRelation`), `@praxisui/table` (`interpolateRelationEndpoint`, deduplicação por assinatura), `@praxisui/crud` | 2026-10-08 | Validado (orquestração declarativa de sub-recursos, cache de URL, build downstream OK) |
-| [**#33**](#-issue-33-banda-canônica-declarativa-de-resumo-executivo-e-kpis-no-praxis-crud-behaviorkpiband--praxiskpiband) | Banda Canônica Declarativa de Resumo Executivo e KPIs no `<praxis-crud>` (`behavior.kpiBand`) | `@praxisui/crud`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | — | — | Elimina `DashboardStatsService` (855 linhas) e signals manuais em 14 páginas |
-| [**#34**](#-issue-34-suporte-canônico-a-propriedades-calculadas-e-expressões-de-domínio-no-schema-computedfields--virtualproperties) | Suporte Canônico a Propriedades Calculadas e Expressões de Domínio no Schema (`computedFields`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/dynamic-form`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Elimina `tacticalDataEnrichmentInterceptor` (571 linhas) |
+| [**#33**](#-issue-33-banda-canônica-declarativa-de-resumo-executivo-e-kpis-no-praxis-crud-behaviorkpiband--praxiskpiband) | Banda Canônica Declarativa de Resumo Executivo e KPIs no `<praxis-crud>` (`behavior.kpiBand`) | `@praxisui/crud`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/core`, `@praxisui/crud` (`PraxisKpiBandComponent`, `kpiBand`) | 2026-10-08 | Validado (grid Bento, auto-fetch, 5/5 specs KPI, 81/81 specs crud, build downstream OK) |
+| [**#34**](#-issue-34-suporte-canônico-a-propriedades-calculadas-e-expressões-de-domínio-no-schema-computedfields--virtualproperties) | Suporte Canônico a Propriedades Calculadas e Expressões de Domínio no Schema (`computedFields`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/dynamic-form`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/table` (`applyComputedFieldsToRows`, `computedFields`) | 2026-10-08 | Validado (campos virtuais, compactBRL, 7/7 specs evaluator, build downstream OK) |
 | [**#35**](#-issue-35-eliminação-de-dtos-typescript-estáticos-redundantes-via-contratos-genéricos-dinâmicos-dynamicdatarecord--governança-por-schema) | Eliminação de DTOs TypeScript Estáticos Redundantes via Contratos Genéricos Dinâmicos (`DynamicDataRecord`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Previne acoplamento estático e quebra de tipos com o backend |
 | [**#36**](#-issue-36-modo-de-apresentação-e-ficha-técnica-editorial-para-formulários-dinâmicos-mode-presentation-no-praxisuidynamic-form) | Modo de Apresentação e Ficha Técnica Editorial para Formulários Dinâmicos (`mode: 'presentation'`) | `@praxisui/dynamic-form`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Elimina centenas de linhas de HTML customizado para fichas de leitura |
 | [**#37**](#-issue-37-componente-canônico-de-layout-e-shell-de-aplicação-corporativa-praxisappshell--praxisishell-ou-praxisicore) | Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell`) | `@praxisui/core`<br>`@praxisui/shell` | 🟡 Média | `[ ] Aberta` | — | — | Elimina `hero-app-shell.component.ts` (1.192 linhas de CSS/sidebar manual) |
@@ -2144,53 +2144,22 @@ Construção imperativa dos 5 componentes de gaveta com mais de 5.400 linhas de 
 - **Módulos Afetados:** `@praxisui/crud`, `@praxisui/rich-content`, `praxis-metadata-starter`
 - **Severidade:** 🔴 Alta (Elimina o serviço `DashboardStatsService` de 855 linhas e mais de 1.500 linhas de orquestração manual em 14 telas)
 - **Tipo:** UX / Arquitetura de Apresentação / Dashboarding Embutido
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 15)
 
 ### Diagnóstico Detalhado da Causa Raiz
 Todas as 14 páginas de recursos do Hero HQ (Funcionários, Missões, Incidentes, Folha de Pagamento, Equipes, Ameaças, etc.) exibem cartões Bento de resumo executivo no topo da visualização (ex.: *Total Cadastrado*, *Efetivo Ativo*, *Volume Salarial*, *Casos Críticos*).
-Como o componente `<praxis-crud>` não contempla um slot declarativo nativo para uma faixa de KPIs de recurso:
+Como o componente `<praxis-crud>` não contemplava um slot declarativo nativo para uma faixa de KPIs de recurso:
 1. Criou-se um serviço monolítico [`dashboard-stats.service.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/dashboard/dashboard-stats.service.ts) com 855 linhas disparando dezenas de `http.post` com contadores agregados manuais.
 2. Cada componente de página foi obrigado a injetar o serviço, subscrever requisições em `ngOnInit`, instanciar e gerenciar manualmente `signal<RichContentDocument>`, e posicionar um `<praxis-rich-content [document]="kpiDocument()">` acima do `<praxis-crud>`.
 
-### Solução Canônica Recomendada de Plataforma
-1. **Contrato Declarativo de Banda de KPIs no `@praxisui/crud`:**
-   ```json
-   "kpiBand": {
-     "enabled": true,
-     "source": "/api/human-resources/folhas-pagamento/stats/summary",
-     "layout": "grid",
-     "columns": 4,
-     "gap": "md",
-     "cards": [
-       {
-         "id": "kpi-volume",
-         "label": "Volume Folha Mensal",
-         "valueExpr": "data.volumeMensal",
-         "format": "currency:compactBRL",
-         "footnote": "Competência Vigente",
-         "icon": "payments",
-         "tone": "info"
-       },
-       {
-         "id": "kpi-ciclos",
-         "label": "Registros Consolidados",
-         "valueExpr": "data.totalCiclos",
-         "format": "number",
-         "icon": "receipt_long",
-         "tone": "success"
-       }
-     ]
-   }
-   ```
-2. **Ciclo de Vida Automático no `<praxis-crud>`:**
-   O componente CRUD assume a responsabilidade de consultar a rota de estatísticas (ou extrair metadados agregados do endpoint do recurso), renderizar a barra de cartões Bento com skeletons e reatividade, adaptando-se automaticamente aos modos claro e escuro.
-
-### Mitigação Temporária Adotada no Hero HQ
-Injeção manual de `<praxis-rich-content>` acima de cada `<praxis-crud>`, alimentado por serviços RxJS manuais.
+### Solução Canônica Implementada na Plataforma
+1. **Contratos Canônicos em `@praxisui/core`:** `PraxisKpiBandConfig`, `PraxisKpiBandCard`, integrados em `TableBehaviorConfig.kpiBand`, `TableConfig.kpiBand` e `CrudMetadata.kpiBand`.
+2. **Componente Canônico `<praxis-kpi-band>` em `@praxisui/crud`:** Componente standalone com suporte a auto-fetch via `HttpClient`, grid Bento responsivo, avaliação de expressões (`valueExpr`, `captionExpr`) via `SafeExpressionEvaluator`, formatação executiva (`currency:compactBRL`, `currency:BRL`, `number`, `percent`) e skeletons de loading.
+3. **Projeção Integrada no `<praxis-crud>`:** O CRUD projeta `<praxis-kpi-band>` no topo da visualização e repassa eventos `(kpiCardClick)`.
 
 ### Critérios de Aceite para Resolução
-- [ ] O componente `<praxis-crud>` projeta e gerencia a banda de KPIs nativamente quando a propriedade `kpiBand` estiver presente na configuração.
-- [ ] O serviço `dashboard-stats.service.ts` e as declarações de `signal<RichContentDocument>` locais em páginas de CRUD podem ser 100% extintos.
+- [x] O componente `<praxis-crud>` projeta e gerencia a banda de KPIs nativamente quando a propriedade `kpiBand` estiver presente na configuração.
+- [x] O serviço `dashboard-stats.service.ts` e as declarações de `signal<RichContentDocument>` locais em páginas de CRUD podem ser 100% extintos e substituídos por metadados declarativos.
 
 ---
 
@@ -2200,7 +2169,7 @@ Injeção manual de `<praxis-rich-content>` acima de cada `<praxis-crud>`, alime
 - **Módulos Afetados:** `@praxisui/core`, `@praxisui/table`, `@praxisui/dynamic-form`, `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (Elimina o interceptor `tacticalDataEnrichmentInterceptor` de 571 linhas)
 - **Tipo:** Engenharia de Dados de UI / Expressões Declarativas
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 15)
 
 ### Diagnóstico Detalhado da Causa Raiz
 Na modelagem corporativa, raramente o payload bruto do banco coincide perfeitamente com o que a interface precisa expressar:
@@ -2209,33 +2178,14 @@ Na modelagem corporativa, raramente o payload bruto do banco coincide perfeitame
 - Incidentes: badges e rótulos semânticos compostos.
 Pela ausência de uma funcionalidade canônica no `@praxisui/table` para definir campos virtuais derivados nos metadados, o projeto Hero HQ implementou um `tacticalDataEnrichmentInterceptor` (571 linhas) que intercepta as chamadas HTTP e muta os objetos em trânsito. Isso acopla a aplicação a interceptores artificiais e impede a governança puramente declarativa.
 
-### Solução Canônica Recomendada de Plataforma
-1. **Suporte a `computedFields` no Contrato da Tabela e do Schema (`@praxisui/table`):**
-   ```json
-   "computedFields": {
-     "salarioLiquido": {
-       "type": "number",
-       "expr": "Math.max(0, row.salarioBruto - row.totalDescontos)"
-     },
-     "margemLiquida": {
-       "type": "percentage",
-       "expr": "row.salarioBruto > 0 ? Math.round(((row.salarioBruto - row.totalDescontos) / row.salarioBruto) * 100) : 0"
-     },
-     "prontidaoTone": {
-       "type": "string",
-       "expr": "row.status === 'ATIVA' ? 'success' : row.status === 'EM_MISSAO' ? 'info' : 'warning'"
-     }
-   }
-   ```
-2. **Execução no Ciclo de Ingestão de Dados do `PraxisTable`:**
-   Ao receber os registros da API, o runtime executa a avaliação das expressões e injeta as propriedades virtuais na coleção normalizada, tornando-as indistinguíveis de propriedades reais para renderizadores, microcharts e nós de expansão.
-
-### Mitigação Temporária Adotada no Hero HQ
-Interceptor HTTP Angular manipulando payloads em tempo de execução.
+### Solução Canônica Implementada na Plataforma
+1. **Contratos Canônicos em `@praxisui/core`:** `PraxisComputedFieldDefinition`, `PraxisComputedFieldsConfig`, integrados em `TableConfig.computedFields` e `TableBehaviorConfig.computedFields`.
+2. **Avaliador Puro e Helper `applyComputedFieldsToRows` no `@praxisui/table`:** Função pura que avalia expressões de domínio via `SafeExpressionEvaluator`, com suporte a dependências cumulativas entre campos computados, fallbacks resilientes e formatação automática (`currency:compactBRL`, `currency:BRL`, `percentage`, `date:pt-BR`, `datetime:pt-BR`).
+3. **Ingestão Nativa de Dados no `PraxisTable`:** Integração no pipeline de `dataSubject.subscribe` e `refreshLocalScaffolding`, garantindo que os campos virtuais existam nativamente no objeto de linha em memória para colunas, sorting, filtros, gavetas analíticas e exportação.
 
 ### Critérios de Aceite para Resolução
-- [ ] A tabela resolve e injeta campos declarados em `computedFields` sem intervenção de interceptores externos.
-- [ ] O interceptor `tactical-data-enrichment.interceptor.ts` pode ser removido do Hero HQ sem perda de nenhuma funcionalidade visual ou de negócio.
+- [x] A tabela resolve e injeta campos declarados em `computedFields` sem intervenção de interceptores externos.
+- [x] O interceptor `tactical-data-enrichment.interceptor.ts` pode ser removido do Hero HQ sem perda de nenhuma funcionalidade visual ou de negócio.
 
 ---
 
