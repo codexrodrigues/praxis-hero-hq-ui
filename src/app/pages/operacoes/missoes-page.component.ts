@@ -71,12 +71,11 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
           type: 'microVisualization',
           microVisualization: {
             visualization: {
-              kind: 'bullet',
+              kind: 'radial',
               surface: 'table-cell',
-              valueExpr: '= min(95, max(25, round(row.id * 2.8)))',
-              target: 80,
+              valueExpr: 'row.progressoCalculado',
               total: 100,
-              tone: 'info',
+              toneExpr: 'row.missaoTone',
               fallbackText: 'Prontidão',
             },
           },
@@ -154,17 +153,20 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
           compat: 'semver',
           allowedNodes: [
             'card',
+            'cardGrid',
             'value',
             'stack',
             'text',
             'icon',
             'badge',
+            'metric',
+            'progress',
+            'compose',
             'timeline',
             'list',
             'tabs',
             'tab',
             'mediaBlock',
-            'cardGrid',
           ],
           sanitization: 'strict',
         },
@@ -180,37 +182,106 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
             layout: 'stack',
             items: [
               {
-                type: 'card',
+                type: 'cardGrid',
                 title: 'Briefing Tático Integrado & Parâmetros de Missão',
                 subtitle: 'Visão operacional expandida do teatro de operações e alvos prioritários',
-                content: [
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
                   {
-                    type: 'stack',
-                    items: [
+                    id: 'card-briefing',
+                    title: 'Briefing & Diretrizes Táticas',
+                    subtitle: 'Objetivos e classificação de risco',
+                    content: [
                       {
-                        type: 'value',
-                        label: 'Objetivo Estratégico',
-                        valueField: 'objetivo',
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.prioridadeBadge',
+                            icon: 'crisis_alert',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Objetivo Estratégico',
+                            valueExpr: 'row.objetivo',
+                            icon: 'flag',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Teatro de Operações',
+                            valueExpr: 'row.local',
+                            captionExpr: 'row.janelaOperacional',
+                            icon: 'location_on',
+                          },
+                        ],
                       },
+                    ],
+                  },
+                  {
+                    id: 'card-esquadrao',
+                    title: 'Alvos & Liderança Operacional',
+                    subtitle: 'Comando e engajamento inimigo',
+                    content: [
                       {
-                        type: 'value',
-                        label: 'Ameaça / Inimigo Associado',
-                        valueField: 'ameacaNome',
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Ameaça / Hostil Associado',
+                            valueExpr: 'row.ameacaNome',
+                            icon: 'warning',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Liderança Tática',
+                            valueExpr: 'row.liderancaTatica',
+                            icon: 'military_tech',
+                          },
+                          {
+                            type: 'progress',
+                            label: 'Prontidão Operacional do Esquadrão',
+                            valueExpr: 'row.progressoCalculado',
+                            max: 100,
+                            showPercent: true,
+                          },
+                        ],
                       },
+                    ],
+                  },
+                  {
+                    id: 'card-cronograma',
+                    title: 'Cronograma & Janela de Ação',
+                    subtitle: 'Janelas temporais de execução',
+                    content: [
                       {
-                        type: 'value',
-                        label: 'Teatro de Operações',
-                        valueField: 'local',
-                      },
-                      {
-                        type: 'value',
-                        label: 'Janela Real de Início (Telemetria)',
-                        valueField: 'inicioReal',
-                      },
-                      {
-                        type: 'value',
-                        label: 'Janela Real de Conclusão',
-                        valueField: 'fimReal',
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Início Previsto',
+                            valueExpr: 'row.dataInicioFormatada',
+                            icon: 'calendar_today',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Prazo Limite',
+                            valueExpr: 'row.prazoLimiteFormatado',
+                            icon: 'event_available',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Orçamento Tático Alocado',
+                            valueExpr: 'row.orcamentoFormatado',
+                            icon: 'payments',
+                          },
+                        ],
                       },
                     ],
                   },

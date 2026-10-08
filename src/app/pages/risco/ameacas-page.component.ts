@@ -72,12 +72,11 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
           type: 'microVisualization',
           microVisualization: {
             visualization: {
-              kind: 'bullet',
+              kind: 'radial',
               surface: 'table-cell',
-              valueExpr: '= min(100, max(15, round(row.nivel * 10)))',
-              target: 70,
+              valueExpr: 'row.letalidadeCalculada',
               total: 100,
-              tone: 'danger',
+              toneExpr: 'row.ameacaTone',
               fallbackText: 'Letalidade',
             },
           },
@@ -150,17 +149,20 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
           compat: 'semver',
           allowedNodes: [
             'card',
+            'cardGrid',
             'value',
             'stack',
             'text',
             'icon',
             'badge',
+            'metric',
+            'progress',
+            'compose',
             'timeline',
             'list',
             'tabs',
             'tab',
             'mediaBlock',
-            'cardGrid',
           ],
           sanitization: 'strict',
         },
@@ -176,42 +178,93 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
             layout: 'stack',
             items: [
               {
-                type: 'card',
+                type: 'cardGrid',
                 title: 'Dossiê Forense de Inteligência & Risco Global',
-                subtitle: 'Taxonomia de combate sob governança do Conselho de Segurança Global',
-                content: [
+                subtitle: 'Taxonomia de combate e protocolos sob governança do Conselho de Segurança',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
                   {
-                    type: 'stack',
-                    items: [
+                    id: 'card-dossie',
+                    title: 'Dossiê Biológico & Tático',
+                    subtitle: 'Classificação e teatro de origem',
+                    content: [
                       {
-                        type: 'value',
-                        label: 'Designação do Alvo',
-                        valueField: 'nome',
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.status',
+                            icon: 'radar',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Classe de Ameaça',
+                            valueExpr: 'row.classe',
+                            icon: 'warning',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Origem Planetária',
+                            valueExpr: 'row.planeta',
+                            icon: 'public',
+                          },
+                        ],
                       },
+                    ],
+                  },
+                  {
+                    id: 'card-letalidade',
+                    title: 'Letalidade & Gravidade',
+                    subtitle: 'Escala de destruição e recompensas',
+                    content: [
                       {
-                        type: 'value',
-                        label: 'Classe Tática',
-                        valueField: 'classe',
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Classificação de Gravidade',
+                            valueExpr: 'row.riscoGravidade',
+                            icon: 'emergency',
+                          },
+                          {
+                            type: 'progress',
+                            label: 'Índice Relativo de Letalidade',
+                            valueExpr: 'row.letalidadeCalculada',
+                            max: 100,
+                            showPercent: true,
+                          },
+                        ],
                       },
+                    ],
+                  },
+                  {
+                    id: 'card-contencao',
+                    title: 'Protocolos de Contenção',
+                    subtitle: 'Diretrizes táticas de engajamento',
+                    content: [
                       {
-                        type: 'value',
-                        label: 'Origem Planetária',
-                        valueField: 'planeta',
-                      },
-                      {
-                        type: 'value',
-                        label: 'Nível de Letalidade',
-                        valueField: 'nivel',
-                      },
-                      {
-                        type: 'value',
-                        label: 'Status Operacional',
-                        valueField: 'status',
-                      },
-                      {
-                        type: 'value',
-                        label: 'Recompensa Fixada (R$)',
-                        valueField: 'recompensa',
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Status de Confinamento',
+                            valueExpr: 'row.confinamentoStatus',
+                            icon: 'lock',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Contramedida Recomendada',
+                            valueExpr: 'row.contraMedidaSugerida',
+                            icon: 'shield',
+                          },
+                        ],
                       },
                     ],
                   },

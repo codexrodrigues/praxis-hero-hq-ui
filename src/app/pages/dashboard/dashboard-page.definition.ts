@@ -903,12 +903,11 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                   type: 'microVisualization',
                   microVisualization: {
                     visualization: {
-                      kind: 'bullet',
+                      kind: 'radial',
                       surface: 'table-cell',
-                      valueExpr: '= 100 - (row.danosCivis / 1000)',
-                      target: 85,
+                      valueExpr: '= max(15, 100 - row.indiceDanoCalculado)',
                       total: 100,
-                      tone: 'warning',
+                      toneExpr: 'row.sinistroTone',
                       fallbackText: 'Contenção Tática',
                     },
                   },

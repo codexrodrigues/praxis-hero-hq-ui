@@ -13,6 +13,7 @@ import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
+import { IncidentAnalysisDrawerComponent, type IncidentProfile } from './incident-analysis-drawer.component';
 
 export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -44,24 +45,57 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
       {
         field: 'severidade',
         header: 'Severidade',
-        width: '140px',
+        width: '130px',
         align: 'center',
         sortable: true,
+      },
+      {
+        field: 'indiceSinistro',
+        header: 'Índice de Danos',
+        width: '180px',
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: '= round(min(100, (danosCivis / 4000000) * 100))',
+              total: 100,
+              toneExpr: {
+                if: [
+                  { '==': [{ var: 'severidade' }, 'CRITICA'] },
+                  'danger',
+                  { '==': [{ var: 'severidade' }, 'ALTA'] },
+                  'warning',
+                  'info',
+                ],
+              } as any,
+              fallbackText: 'Índice de Danos',
+            },
+          },
+        },
       },
       {
         field: 'danosCivis',
         header: 'Prejuízo Civil (R$)',
         type: 'currency',
         format: 'BRL',
-        width: '180px',
+        width: '170px',
         align: 'right',
+        sortable: true,
+      },
+      {
+        field: 'feridos',
+        header: 'Feridos',
+        width: '90px',
+        align: 'center',
         sortable: true,
       },
       {
         field: 'ocorridoEm',
         header: 'Data do Ocorrido',
         type: 'date',
-        width: '160px',
+        width: '150px',
         align: 'center',
         sortable: true,
       },
@@ -93,6 +127,153 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
             inline: true,
             alwaysVisibleFields: ['local', 'severidade', 'descricao'],
             useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'cardGrid',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'metric',
+            'progress',
+            'compose',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'Laudo Pericial Tático & Circunstâncias de Campo',
+                subtitle: 'Dossiê preliminar de resposta emergencial, contenção civil e indenizações',
+                columns: 3,
+                minCardWidth: 280,
+                cards: [
+                  {
+                    id: 'card-pericia',
+                    title: 'Perícia & Teatro de Confronto',
+                    subtitle: 'Circunstâncias e narrativa do sinistro',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'row.severidade',
+                            icon: 'emergency',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Teatro do Dano',
+                            valueExpr: 'row.local',
+                            caption: 'Perímetro operacional catalogado',
+                            icon: 'location_on',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Descrição Tática Forense',
+                            valueExpr: 'row.descricao',
+                            icon: 'description',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-financeiro',
+                    title: 'Impacto Financeiro & Indenizações',
+                    subtitle: 'Prejuízo civil apurado e cobertura',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Prejuízo Civil Estimado',
+                            valueExpr: 'row.danosCivis',
+                            caption: 'Fundo Tático de Compensação Civil',
+                            icon: 'payments',
+                          },
+                          {
+                            type: 'progress',
+                            label: 'Índice de Gravidade Relativa',
+                            valueExpr: '= round(min(100, (danosCivis / 4000000) * 100))',
+                            max: 100,
+                            showPercent: true,
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    id: 'card-socorro',
+                    title: 'Socorro Civil & Mobilização',
+                    subtitle: 'Vítimas e protocolo médico',
+                    content: [
+                      {
+                        type: 'compose',
+                        direction: 'column',
+                        gap: 'sm',
+                        items: [
+                          {
+                            type: 'metric',
+                            label: 'Vítimas Feridas Catalogadas',
+                            valueExpr: 'row.feridos',
+                            caption: 'Atendimento de emergência prestado no local',
+                            icon: 'medical_services',
+                          },
+                          {
+                            type: 'metric',
+                            label: 'Fatalidades Confirmadas',
+                            valueExpr: 'row.mortos',
+                            caption: 'Registro pericial S.H.I.E.L.D.',
+                            icon: 'heart_broken',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         },
       },
@@ -154,7 +335,7 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-incidentes-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, IncidentAnalysisDrawerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -242,8 +423,15 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
         <praxis-crud
           crudId="heroes-hq-incidentes-crud"
           [metadata]="activeCrudMetadata()"
+          (rowClick)="onIncidentRowClicked($event)"
         />
       </section>
+
+      <!-- Tactical Incident Investigation Drawer -->
+      <app-incident-analysis-drawer
+        [incident]="selectedIncident()"
+        (closeDrawer)="selectedIncident.set(null)"
+      />
     </div>
   `,
   styles: [`
@@ -306,8 +494,8 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
       padding: 12px 18px;
       border-radius: 14px;
       flex-wrap: wrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(18, 26, 43, 0.6);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 75%, transparent);
       backdrop-filter: blur(12px);
     }
 
@@ -339,8 +527,8 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 60%, transparent);
       color: var(--foreground);
       transition: all 0.2s ease;
 
@@ -349,44 +537,57 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
       .chip-count {
         padding: 2px 7px;
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.08);
+        background: color-mix(in oklab, var(--muted) 80%, transparent);
         font-size: 0.75rem;
         font-weight: 700;
+        color: var(--foreground);
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.22);
+        background: var(--accent);
+        border-color: var(--border);
       }
 
       &.is-active {
         background: color-mix(in oklab, var(--primary) 22%, transparent);
         border-color: var(--primary);
-        color: #fff;
+        color: var(--primary);
         box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
 
         .chip-count {
           background: var(--primary);
-          color: #fff;
+          color: var(--primary-foreground);
         }
       }
 
       &.chip-danger.is-active {
         background: color-mix(in oklab, var(--risk) 22%, transparent);
         border-color: var(--risk);
-        .chip-count { background: var(--risk); }
+        color: var(--risk);
+        .chip-count {
+          background: var(--risk);
+          color: #fff;
+        }
       }
 
       &.chip-warning.is-active {
         background: color-mix(in oklab, var(--warning) 22%, transparent);
         border-color: var(--warning);
-        .chip-count { background: var(--warning); }
+        color: var(--warning);
+        .chip-count {
+          background: var(--warning);
+          color: #fff;
+        }
       }
 
       &.chip-info.is-active {
         background: color-mix(in oklab, var(--operations) 22%, transparent);
         border-color: var(--operations);
-        .chip-count { background: var(--operations); }
+        color: var(--operations);
+        .chip-count {
+          background: var(--operations);
+          color: #fff;
+        }
       }
     }
 
@@ -401,7 +602,7 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
       font-weight: 600;
       color: var(--muted-foreground);
       background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border: 1px dashed var(--border);
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -409,8 +610,8 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
 
       &:hover {
         color: var(--foreground);
-        border-color: rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--muted-foreground);
+        background: var(--accent);
       }
     }
 
@@ -422,6 +623,7 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class IncidentesPageComponent implements OnInit, OnDestroy {
+  protected readonly selectedIncident = signal<IncidentProfile | null>(null);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalIncidentes = signal<number>(74);
   protected readonly criticalIncidentes = signal<number>(18);
@@ -461,6 +663,16 @@ export class IncidentesPageComponent implements OnInit, OnDestroy {
 
   protected setFilter(filterId: string): void {
     this.activeFilterId.set(filterId);
+  }
+
+  protected onIncidentRowClicked(event: unknown): void {
+    const row =
+      (event as { row?: IncidentProfile; data?: IncidentProfile })?.row ||
+      (event as { row?: IncidentProfile; data?: IncidentProfile })?.data ||
+      (event as IncidentProfile);
+    if (row && row.id) {
+      this.selectedIncident.set(row);
+    }
   }
 
   protected onKpiCardClick(event: MouseEvent): void {
