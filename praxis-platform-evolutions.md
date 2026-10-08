@@ -35,10 +35,10 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartGaugeColorBand`, `buildGaugeColorBands`, mapper bidirecional) | 2026-10-08 | 401/401 testes unitários verdes, build downstream OK |
 | [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via `eventActions.crossFilter.mapping` |
-| [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ com fórmulas aritméticas suportadas |
-| [**#28**](#-issue-28-padronização-e-exposição-canônica-da-tipagem-do-evento-rowclick-rowclickeventt-no-barrel-público-de-praxiscuitable-e-praxisuicrud) | Padronização e Exposição Canônica da Tipagem do Evento `(rowClick)` (`RowClickEvent<T>`) | `@praxisui/table`<br>`@praxisui/crud` | 🟢 Baixa | `[ ] Aberta` | — | — | Mitigado no Hero HQ com unwrap de conveniência |
+| [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`applyMicroVisualizationExpression`, fallback seguro) | 2026-10-08 | Validado (guarda contra null, preservação de fallbackText, 11/11 specs) |
+| [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`buildEventFilters`) | 2026-10-08 | Validado (omissão de métricas agregadas sem mapping, 403/403 specs) |
+| [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`SafeExpressionEvaluator`, `warnOnceLog`) | 2026-10-08 | Validado (função `if`, ternários `? :`, 8/8 specs de avaliador) |
+| [**#28**](#-issue-28-padronização-e-exposição-canônica-da-tipagem-do-evento-rowclick-rowclickeventt-no-barrel-público-de-praxiscuitable-e-praxisuicrud) | Padronização e Exposição Canônica da Tipagem do Evento `(rowClick)` (`RowClickEvent<T>`) | `@praxisui/table`<br>`@praxisui/crud` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`RowClickEvent<T>`) | 2026-10-08 | Validado (`public-api`, 61/61 table events specs, 223/223 crud specs) |
 | [**#29**](#-issue-29-ausência-de-formatação-automática-currencydate-nos-nós-type-value-do-behaviordetail-e-baixa-visibilidade-monocromática-de-microcharts-bullet-em-surface-table-cell) | Ausência de Formatação Automática (Currency/Date) nos Nós `type: 'value'` de `behavior.detail` e Monocromia de Microcharts Bullet em `table-cell` | `@praxisui/table`<br>`@praxisui/core`<br>`presentation-visualization` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via Bento `cardGrid`, interceptor de enriquecimento e CSS customizado |
 | [**#30**](#-issue-30-suporte-canônico-a-gavetas-analíticas-e-dossiês-multi-aba-via-metadadosjson-praxisanalyticaldrawerschema) | Suporte Canônico a Gavetas Analíticas e Dossiês Multi-Aba via Metadados/JSON (`behavior.drawer.analyticalSchema`) | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via componente customizado `IncidentAnalysisDrawerComponent` |
 | [**#31**](#-issue-31-dimensionamento-inflexível-de-rótulos-de-etapa-no-microchart-processflow-causando-quebras-e-truncamentos) | Dimensionamento Inflexível de Rótulos de Etapa no Microchart `processFlow` Causando Quebras e Truncamentos | `@praxisui/charts`<br>`praxis-micro-visualization.component.ts` | 🟢 Baixa | `[ ] Aberta` | — | — | Mitigado no Hero HQ via override de estilo no drawer (`inline-size: 80px`) |
@@ -1625,7 +1625,7 @@ Contudo:
 - **Módulos Afetados:** `@praxisui/table`, `PraxisTable`, `rfc-micro-visualization-presentation`
 - **Severidade:** 🟡 Média (falha silenciosa de renderização em microcharts de células de tabela com expressões dinâmicas quando campos remotos contêm nulo ou ausência de chave)
 - **Tipo:** Bug de Runtime / Avaliação de Expressões / Fallback de Apresentação
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 12 / `@praxisui/table`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 A RFC `rfc-micro-visualization-presentation.md` introduziu o suporte canônico a micro-visualizações ultraleves e *cell-safe* em tabelas (`@praxisui/table`), permitindo vincular parâmetros visuais a expressões dinâmicas por linha (`expressions: { value: 'row.contencaoAtual', target: 'row.contencaoMeta', tone: 'row.contencaoTone', fallbackText: 'row.contencaoFallback' }`).
@@ -1664,8 +1664,8 @@ Contudo, durante a implementação no Hero HQ, identificou-se uma falha crítica
    - Se nem o valor dinâmico nem o padrão estiverem presentes, garantir que o `fallbackText` original seja mantido e renderizado como texto puro na célula em vez de deixar a célula vazia.
 
 ### Critérios de Aceite para Resolução
-- [ ] Expressões dinâmicas que retornam `null` ou referenciam campos inexistentes não sobrescrevem propriedades estáticas nem anulam o `fallbackText`.
-- [ ] A célula da tabela degrada com segurança para o texto de fallback ou para a visualização padrão quando a linha contiver `null`.
+- [x] Expressões dinâmicas que retornam `null` ou referenciam campos inexistentes não sobrescrevem propriedades estáticas nem anulam o `fallbackText`.
+- [x] A célula da tabela degrada com segurança para o texto de fallback ou para a visualização padrão quando a linha contiver `null`.
 
 ---
 
@@ -1675,7 +1675,7 @@ Contudo, durante a implementação no Hero HQ, identificou-se uma falha crítica
 - **Módulos Afetados:** `@praxisui/charts`, `praxis-chart.component.ts`, `@praxisui/table`
 - **Severidade:** 🟡 Média (tentativa de filtro em colunas inexistentes de métricas quando tabela é alvo de crossFilter)
 - **Tipo:** Interoperabilidade / Cross-Filtering / Modelos de Eventos Analíticos
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 12 / `@praxisui/charts`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 No arquivo `projects/praxis-charts/src/lib/components/praxis-chart/praxis-chart.component.ts` (linhas 1500–1525):
@@ -1723,6 +1723,11 @@ No arquivo `projects/praxis-charts/src/lib/components/praxis-chart/praxis-chart.
      }
      ```
 
+### Critérios de Aceite para Resolução
+- [x] O payload padrão de `crossFilter` sem `mapping` explícito omite métricas agregadas (`series.metric.field`), preservando unicamente dimensões categóricas.
+- [x] Mapeamentos explícitos continuam honrados normalmente quando o desenvolvedor deseja filtrar por campos métricos.
+- [x] Testes unitários focais em `praxis-chart.component.spec.ts` validando o comportamento com 403/403 testes aprovados.
+
 ---
 
 ## 📌 Issue #27: Falha Silenciosa de Renderização de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) Não Suportadas pelo `SafeExpressionEvaluator`
@@ -1731,7 +1736,7 @@ No arquivo `projects/praxis-charts/src/lib/components/praxis-chart/praxis-chart.
 - **Módulos Afetados:** `@praxisui/table`, `SafeExpressionEvaluator`, `@praxisui/core`
 - **Severidade:** 🟡 Média (bloqueia mapeamento dinâmico de status categóricos para valores percentuais em microcharts sem acusar advertência ao desenvolvedor)
 - **Tipo:** Sintaxe / Avaliador de Expressões / Diagnóstico em Desenvolvimento
-- **Status:** `[ ] Aberta` (mitigada no Hero HQ utilizando fórmulas aritméticas canônicas suportadas)
+- **Status:** `[x] Resolvida` (Batch 12 / `@praxisui/table`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 Ao configurar uma coluna de tabela com `renderer: { type: 'microVisualization' }` onde o valor do microchart depende de um status categórico (ex.: `status === 'CONCLUIDA' ? 100 : status === 'EM_ANDAMENTO' ? 70 : 25`), é intuitivo para o desenvolvedor ou analista de produto utilizar a sintaxe convencional de ternário JavaScript precedida por `=`:
@@ -1798,8 +1803,8 @@ valueExpr: '= min(95, max(25, round(row.id * 2.8)))'
 Essa fórmula avalia perfeitamente a telemetria do registro, renderizando a barra bullet dinâmica em 100% das linhas.
 
 ### Critérios de Aceite para Resolução
-- [ ] O `SafeExpressionEvaluator` aceita a função condicional `if(cond, a, b)` ou o operador ternário `? :`.
-- [ ] Fórmulas inválidas em tempo de desenvolvimento emitem `warn` no console com a causa do erro em vez de falharem silenciosamente.
+- [x] O `SafeExpressionEvaluator` aceita a função condicional `if(cond, a, b)` ou o operador ternário `? :`.
+- [x] Fórmulas inválidas em tempo de desenvolvimento emitem `warn` no console com a causa do erro em vez de falharem silenciosamente.
 
 ---
 
@@ -1809,7 +1814,7 @@ Essa fórmula avalia perfeitamente a telemetria do registro, renderizando a barr
 - **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`
 - **Severidade:** 🟢 Baixa (Ergonomia e Type Safety de Developer Experience)
 - **Tipo:** DX / Contrato de Eventos Públicos de Componente
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 12 / `@praxisui/table`, `@praxisui/crud`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 Na composição de aplicações corporativas complexas (como no **Praxis Hero HQ**), é prática comum integrar o `<praxis-crud>` com painéis laterais de contexto tático (drawers ou dossiês) acionados pelo clique do usuário na linha da tabela via `(rowClick)="onRowClicked($event)"`.
@@ -1853,9 +1858,9 @@ No entanto, a assinatura de saída do `@Output() rowClick`:
 Nas páginas `missoes-page.component.ts`, `ameacas-page.component.ts`, `incidentes-page.component.ts` e `bases-page.component.ts`, foi implementada função helper de unwrap seguro que normaliza o payload do evento em runtime de forma tolerante.
 
 ### Critérios de Aceite para Resolução
-- [ ] Interface genérica `RowClickEvent<T>` exportada no `public-api.ts` de `@praxisui/table` e `@praxisui/crud`.
-- [ ] `@Output() rowClick` de ambos os componentes emite payload padronizado no formato `{ row, index, originalEvent }`.
-- [ ] Type-checking estrito em templates Angular habilitado sem necessidade de casting `unknown`.
+- [x] Interface genérica `RowClickEvent<T>` exportada no `public-api.ts` de `@praxisui/table` e `@praxisui/crud`.
+- [x] `@Output() rowClick` de ambos os componentes emite payload padronizado no formato `{ row, index, originalEvent }`.
+- [x] Type-checking estrito em templates Angular habilitado sem necessidade de casting `unknown`.
 
 ---
 
