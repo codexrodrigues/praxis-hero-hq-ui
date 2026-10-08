@@ -12,7 +12,7 @@ import {
 import { Subscription } from 'rxjs';
 import { type RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
-import type { RowClickEvent } from '@praxisui/table';
+import { PraxisScopeBarComponent, type PraxisScopeBarItem, type RowClickEvent } from '@praxisui/table';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { HeroDossierDrawerComponent, type HeroProfile } from './hero-dossier-drawer.component';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
@@ -217,6 +217,7 @@ const SAMPLE_HERO: HeroProfile = {
     CommonModule,
     PraxisCrudComponent,
     PraxisRichContent,
+    PraxisScopeBarComponent,
     HeroDossierDrawerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -261,59 +262,21 @@ const SAMPLE_HERO: HeroProfile = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Filtro e Escopo Rápido -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="filter-bar-lead">
-          <span class="material-symbols-outlined filter-icon">filter_alt</span>
-          <span class="filter-lead-label">Filtro de Escopo:</span>
-        </div>
-
-        <div class="filter-chips-track">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">group</span>
-            <span>Todos os Heróis</span>
-            <span class="chip-count">{{ totalCount() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-ready"
-            [class.is-active]="activeFilterId() === 'ativos'"
-            (click)="setFilter('ativos')"
-          >
-            <span class="material-symbols-outlined">verified_user</span>
-            <span>Em Prontidão Ativa</span>
-            <span class="chip-count">{{ activeCount() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-warning"
-            [class.is-active]="activeFilterId() === 'inativos'"
-            (click)="setFilter('inativos')"
-          >
-            <span class="material-symbols-outlined">person_off</span>
-            <span>Em Reserva / Licença</span>
-            <span class="chip-count">{{ inactiveCount() }}</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Tática Canônica Governada (PraxisScopeBar - Issue #12) -->
+      <praxis-scope-bar
+        #scopeBar
+        [items]="scopeBarItems()"
+        [activeId]="activeFilterId()"
+        (activeIdChange)="onScopeIdChanged($event)"
+        (scopeChange)="onScopeItemChanged($event)"
+        (searchChange)="onOmniboxSearch($event)"
+        [target]="heroesCrud"
+      />
 
       <!-- Canonical Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
         <praxis-crud
+          #heroesCrud
           crudId="heroes-hq-funcionarios-crud"
           [metadata]="activeCrudMetadata()"
           (rowClick)="onHeroRowClicked($event)"
@@ -418,129 +381,7 @@ const SAMPLE_HERO: HeroProfile = {
       span { font-size: 18px; }
     }
 
-    /* Tactical Scope Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 10px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-    }
 
-    .filter-bar-lead {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted-foreground);
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-
-      .filter-icon {
-        font-size: 18px;
-        color: var(--primary);
-      }
-    }
-
-    .filter-chips-track {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 34px;
-      padding: 0 14px;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 70%, transparent);
-      color: var(--muted-foreground);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-      span.material-symbols-outlined {
-        font-size: 16px;
-      }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 9999px;
-        font-size: 0.72rem;
-        background: color-mix(in oklab, var(--muted) 80%, transparent);
-        color: var(--foreground);
-      }
-
-      &:hover {
-        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-        color: var(--foreground);
-        transform: translateY(-1px);
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 15%, var(--card));
-        border-color: var(--primary);
-        color: var(--foreground);
-        box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent);
-
-        .chip-count {
-          background: var(--primary);
-          color: var(--primary-foreground);
-        }
-      }
-
-      &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 15%, var(--card));
-        border-color: var(--ready);
-
-        .chip-count {
-          background: var(--ready);
-          color: #fff;
-        }
-      }
-
-      &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 15%, var(--card));
-        border-color: var(--warning);
-
-        .chip-count {
-          background: var(--warning);
-          color: #fff;
-        }
-      }
-    }
-
-    .clear-scope-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      height: 32px;
-      padding: 0 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px dashed var(--border);
-      background: transparent;
-      color: var(--muted-foreground);
-      transition: all 0.15s ease;
-
-      span { font-size: 15px; }
-
-      &:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-        background: color-mix(in oklab, var(--primary) 8%, transparent);
-      }
-    }
 
     /* KPI Grid Enhancements */
     ::ng-deep {
@@ -644,6 +485,33 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
   protected readonly totalCount = signal<number>(24);
   protected readonly activeCount = signal<number>(21);
   protected readonly inactiveCount = signal<number>(3);
+
+  protected readonly scopeBarItems = computed<PraxisScopeBarItem[]>(() => [
+    {
+      id: 'all',
+      label: 'Todos os Heróis',
+      icon: 'group',
+      filter: {},
+      count: this.totalCount(),
+      isDefault: true,
+    },
+    {
+      id: 'ativos',
+      label: 'Em Prontidão Ativa',
+      icon: 'verified_user',
+      filter: 'ativo=true',
+      count: this.activeCount(),
+      tone: 'ready',
+    },
+    {
+      id: 'inativos',
+      label: 'Em Reserva / Licença',
+      icon: 'person_off',
+      filter: 'ativo=false',
+      count: this.inactiveCount(),
+      tone: 'warning',
+    },
+  ]);
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -775,6 +643,24 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
       inativos: 'Filtro tático ativado: Exibindo somente colaboradores em Reserva ou Licença.',
     };
     this.showNotice(messages[filterId]);
+  }
+
+  protected onScopeIdChanged(id: string): void {
+    if (id === 'all' || id === 'ativos' || id === 'inativos') {
+      this.setFilter(id);
+    }
+  }
+
+  protected onScopeItemChanged(item: PraxisScopeBarItem): void {
+    if (item.id === 'all' || item.id === 'ativos' || item.id === 'inativos') {
+      this.setFilter(item.id);
+    }
+  }
+
+  protected onOmniboxSearch(query: string): void {
+    if (query) {
+      this.showNotice(`Busca rápida: filtrando registros contendo "${query}"...`);
+    }
   }
 
   protected openSampleDossier(): void {

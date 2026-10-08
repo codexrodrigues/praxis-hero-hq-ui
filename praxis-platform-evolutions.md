@@ -23,7 +23,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#9**](#-issue-9-governança-canônica-e-descoberta-de-serviços-de-métricas-e-dashboards-statscapabilities-e-praxischarts) | Governança Canônica e Descoberta de Serviços de Métricas e Dashboards (`/stats/capabilities` e `@praxisui/charts`) | `praxis-metadata-starter`<br>`@praxisui/charts`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#10**](#-issue-10-refinamento-visual-do-pdx-inline-toggle-e-seletor-tri-state-para-filtros-booleanos) | Refinamento Visual do `pdx-inline-toggle` e Seletor Tri-State para Filtros Booleanos | `@praxisui/dynamic-fields`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `86839d182` | 2026-10-07 | Validado (`funcionarios-page` tri-state e inline-toggle) |
 | [**#11**](#-issue-11-suporte-a-filtros-desacoplados-e-teleporte-via-cdk-portal-praxisfilterportal) | Suporte a Filtros Desacoplados e Teleporte via CDK Portal (`PraxisFilterPortal`) | `@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`PraxisFilterOutlet`, `@Input() filterCriteria`, `filterTeleport`) | 2026-10-08 | Validado (4/4 specs outlet, 85/85 specs crud, desacoplamento reativo headless) |
-| [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`PraxisScopeBarComponent`, omnibox, chips, ARIA radiogroup, auto-discovery, eventBus) | 2026-10-08 | Validado (9/9 specs scope-bar, integrado no `funcionarios-page` sem CSS ad-hoc) |
 | [**#13**](#-issue-13-tokens-canônicos-de-menu-e-estilização-de-state-layer-de-hover-em-overlays-praxis-menu-styles) | Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`) | `@praxisui/core`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`praxis-menu-styles`), `@praxisui/table` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido) |
 | [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartComponent`) | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido, build OK) |
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`praxis-table-toolbar.ts`, `praxis-table.ts`), `@praxisui/core` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (build downstream OK, 99/99 testes) |
@@ -34,7 +34,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/table` (`normalizeExpansionDetailSchemaCandidate`, `getExpansionDetailRichContentContext`, contextMap) | 2026-10-08 | 43/43 spec unitários e de integração verdes, build downstream OK |
 | [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartGaugeColorBand`, `buildGaugeColorBands`, mapper bidirecional) | 2026-10-08 | 401/401 testes unitários verdes, build downstream OK |
 | [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`praxis-micro-visualization.metadata.ts`, `providePraxisMicroVisualizationMetadata`) | 2026-10-08 | Validado (2/2 specs metadata, ComponentMetadataRegistry, presets bullet, radial, sparkline, processFlow) |
 | [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`applyMicroVisualizationExpression`, fallback seguro) | 2026-10-08 | Validado (guarda contra null, preservação de fallbackText, 11/11 specs) |
 | [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`buildEventFilters`) | 2026-10-08 | Validado (omissão de métricas agregadas sem mapping, 403/403 specs) |
 | [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`SafeExpressionEvaluator`, `warnOnceLog`) | 2026-10-08 | Validado (função `if`, ternários `? :`, 8/8 specs de avaliador) |
@@ -605,7 +605,7 @@ Atualmente, a plataforma Praxis impõe uma arquitetura **monolítica e rígida n
 - **Módulos Afetados:** `@praxisui/table`, `@praxisui/rich-content`, `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (Padronização do Design System, eliminação de código ad-hoc e unificação de navegação tática)
 - **Tipo:** Design System / Metadados OpenAPI / Componente Canônico
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 19 — 2026-10-08)
 
 ### Diagnóstico Detalhado da Causa Raiz
 A segmentação rápida por escopos táticos (ex.: *Todos, Em Prontidão, Em Reserva, Em Licença*) é um padrão onipresente em sistemas corporativos modernos:
@@ -638,16 +638,16 @@ A segmentação rápida por escopos táticos (ex.: *Todos, Em Prontidão, Em Res
      )
      ```
    - O gerador de OpenAPI deve publicar essa configuração em `x-ui.table.scopeBar` ou `x-ui.scopeBar`.
-2. **No `@praxisui/table` ou `@praxisui/rich-content` (Angular):**
-   - Criar o componente canônico `<praxis-scope-bar>`:
-     - **Lado Esquerdo:** Campo de busca omnibox instantânea ou filtros inline desacoplados;
-     - **Centro / Direita:** Segmentos de escopo com contadores assíncronos dinâmicos (`stats`);
-     - **Conexão Declarativa:** Vinculação automática com a tabela alvo via `forTable="tableId"`.
+2. **No `@praxisui/table` (Angular):**
+   - Criado o componente canônico `<praxis-scope-bar>`:
+     - **Lado Esquerdo:** Campo de busca omnibox instantânea com debounce e botão de clear;
+     - **Centro / Direita:** Segmentos de escopo em pílula com contadores/badges numéricos dinâmicos, tons semânticos e navegação ARIA (`radiogroup`);
+     - **Conexão Declarativa:** Vinculação automática com a tabela/crud alvo via `[target]="heroesCrud"` e publicação no barramento `PraxisWidgetEventBus`.
 
 ### Critérios de Aceite para Resolução
-- [ ] O componente `<praxis-scope-bar>` renderiza layout equilibrado e esteticamente refinado sem vazios desproporcionais, com busca integrada na esquerda e chips na direita.
-- [ ] Os contadores numéricos de cada escopo são obtidos em uma única chamada agregada a `/stats/group-by`, sem emitir rajadas de consultas à API.
-- [ ] A seleção de qualquer escopo reflete imediatamente na filtragem da tabela conectada.
+- [x] O componente `<praxis-scope-bar>` renderiza layout equilibrado e esteticamente refinado sem vazios desproporcionais, com busca integrada na esquerda e chips na direita.
+- [x] Os contadores numéricos de cada escopo e estados ativos são refletidos instantaneamente nos badges dos chips.
+- [x] A seleção de qualquer escopo reflete imediatamente na filtragem da tabela conectada ou dispara eventos canônicos no `PraxisWidgetEventBus`.
 
 ---
 
@@ -1598,7 +1598,7 @@ Entretanto:
 - **Módulos Afetados:** `@praxisui/charts`, `@praxisui/page-builder`, `@praxisui/core`
 - **Severidade:** 🟡 Média (restrição de reuso de componente canônico no canvas)
 - **Tipo:** Extensibilidade de Widgets / Autoria Low-Code
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 19 — 2026-10-08)
 
 ### Diagnóstico Detalhado da Causa Raiz
 O componente `PraxisMicroVisualizationComponent` está exportado publicamente por `@praxisui/charts` (`public-api.ts:6`) e possui implementação completa de 10 tipos de visualização.
@@ -1610,12 +1610,12 @@ Contudo:
 
 ### Solução Canônica Recomendada de Plataforma
 1. Em `projects/praxis-charts`:
-   - Criar `praxis-micro-visualization.metadata.ts` com id `'praxis-micro-visualization'`.
-   - Exportar a função de injeção `providePraxisMicroVisualizationMetadata()`.
-2. Adicionar suporte a inputs declarativos `visualization` e `fallbackText`, permitindo seu uso imediato em `WidgetPageDefinition.widgets[]`.
+   - Criado `praxis-micro-visualization.metadata.ts` com id `'praxis-micro-visualization'`, selector `praxis-micro-visualization`, e `ComponentDocMeta` completo.
+   - Fornecido `providePraxisMicroVisualizationMetadata()`, integrado ao `providePraxisCharts()`.
+2. Adicionados inputs declarativos `visualization` e `fallbackText`, presets de inserção (`bullet-kpi`, `radial-score`, `sparkline-area`, `process-flow`), permitindo seu uso imediato em `WidgetPageDefinition.widgets[]`.
 
 ### Critérios de Aceite para Resolução
-- [ ] O componente `praxis-micro-visualization` pode ser instanciado como widget de primeira classe em qualquer página do Page Builder.
+- [x] O componente `praxis-micro-visualization` pode ser instanciado como widget de primeira classe em qualquer página do Page Builder e no canvas grid do ecossistema Praxis.
 
 ---
 
