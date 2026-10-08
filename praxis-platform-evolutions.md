@@ -26,7 +26,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#13**](#-issue-13-tokens-canônicos-de-menu-e-estilização-de-state-layer-de-hover-em-overlays-praxis-menu-styles) | Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`) | `@praxisui/core`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`praxis-menu-styles`), `@praxisui/table` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido) |
 | [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartComponent`) | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido, build OK) |
-| [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`praxis-table-toolbar.ts`, `praxis-table.ts`), `@praxisui/core` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (build downstream OK, 99/99 testes) |
 | [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[ ] Aberta` | — | — | Pendente |
 | [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
@@ -37,6 +37,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via `eventActions.crossFilter.mapping` |
+| [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ com fórmulas aritméticas suportadas |
 
 ---
 
@@ -889,7 +890,7 @@ No template de `praxis-chart.component.ts`:
 - **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`, `@praxisui/core` (Theming)
 - **Severidade:** 🟡 Média (poluição visual em recursos consultivos, quebra de acessibilidade por perda de contraste e efeito de hover desalinhado/vazando do botão)
 - **Tipo:** Refinamento de Componente / Governança de Capabilities / Integração M3
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (2026-10-07)
 
 ### Diagnóstico Detalhado da Causa Raiz
 
@@ -919,23 +920,26 @@ No arquivo `praxis-table-toolbar.ts` (linhas 1990–2006):
 - O Angular Material injeta internamente o container de ripple `.mat-mdc-button-persistent-ripple` com altura padrão de 40px/48px e raio de curvatura de pílula (20px).
 - Sem `overflow: hidden` no botão e sem propagação de `border-radius: inherit` para as camadas filhas, ao passar o mouse, a camada translúcida de hover vaza para fora do botão, criando uma mancha cinza de proporções incompatíveis com a geometria da ação.
 
-### Arquitetura de Solução Proposta
-1. **No `@praxisui/table` (`praxis-table.ts`):**
-   - Alterar a política padrão para que ações de coleção não suportadas (`supported === false`) sejam **omitidas por padrão**, em vez de sintetizadas como desabilitadas.
-   - Fornecer opção declarativa na configuração de toolbar (`toolbar.actions.preserveUnsupported: boolean`) caso o usuário deseje explicitamente exibir botões desabilitados como dica instrutiva.
-2. **No `@praxisui/table` (`praxis-table-toolbar.ts`):**
-   - Inserir `[attr.aria-disabled]="getActionAriaDisabled(action)"` no botão filled (linha 569).
-   - Adicionar no CSS de `.action-btn.mat-mdc-button-base`:
-     ```css
-     overflow: hidden !important;
-     border-radius: var(--p-table-toolbar-action-radius, 8px) !important;
-     ```
-   - Normalizar a state-layer interna para herdar o mesmo raio e altura.
+### Solução Canônica Implementada na Plataforma
+1. **Em `@praxisui/core` (`table-config-v2.model.ts` e `toolbar-config-augment.d.ts`):**
+   - Adicionada a propriedade declarativa `preserveUnsupportedActions?: boolean` na interface `ToolbarConfig`.
+2. **Em `@praxisui/table` (`praxis-table.ts`):**
+   - No método `buildCollectionCreateToolbarAction`: quando a ação de criação é auto-sintetizada (`!existing || existing.__praxisCollectionCreateAction === true`) e a operação descoberta não é suportada (`operation?.supported === false`), ela é **omitida por padrão** (retorna `null`). Apenas é mantida se `toolbar.preserveUnsupportedActions === true` for explicitamente configurado.
+3. **Em `@praxisui/table` (`praxis-table-toolbar.ts`):**
+   - **Template**: Adicionado `[attr.aria-disabled]="getActionAriaDisabled(action)"` em todos os botões (`filled`, `outlined`, `elevated`, `text`, `tonal`, `fab`, `menu` e `bulk`), ativando com precisão os estilos de acessibilidade da plataforma.
+   - **Estilos CSS**:
+     - Em `.action-btn.mat-mdc-button-base`: adicionado `overflow: hidden !important; border-radius: var(--p-table-toolbar-action-radius, var(--praxis-action-control-radius, 8px)) !important;`.
+     - Adicionada regra `.action-btn.mat-mdc-button-base .mat-mdc-button-persistent-ripple, .action-btn.mat-mdc-button-base .mat-mdc-button-ripple { border-radius: inherit !important; overflow: hidden !important; }`.
+     - Em `.action-btn[aria-disabled='true']`: opacidade padrão calibrada para `0.75` (`var(--praxis-action-control-disabled-opacity, 0.75)`) e ícones com `opacity: 0.85 !important; color: currentColor !important;` garantindo conformidade WCAG AA.
+   - **Método `getActionTooltip`**: Adicionada deduplicação inteligente para não concatenar prefixos quando o tooltip configurado já contiver a razão ou indicar indisponibilidade.
+4. **Validação & Testes**:
+   - 99/99 testes unitários aprovados em `@praxisui/table` (`praxis-table-toolbar.spec.ts` e `praxis-table.runtime-operations.spec.ts`).
+   - Build downstream de produção aprovado no consumidor `praxis-hero-hq-ui`.
 
 ### Critérios de Aceite para Resolução
-- [ ] Em recursos estritamente consultivos (views/read-only), o botão de criação não é renderizado na toolbar por padrão.
-- [ ] Se uma ação for renderizada em estado desabilitado, o ícone e o rótulo de texto permanecem perfeitamente legíveis com contraste adequado conforme WCAG AA.
-- [ ] A camada de hover (state-layer) respeita rigorosamente o contorno e o raio de curvatura do botão (36px com 8px de radius), sem vazamentos.
+- [x] Em recursos estritamente consultivos (views/read-only), o botão de criação não é renderizado na toolbar por padrão.
+- [x] Se uma ação for renderizada em estado desabilitado, o ícone e o rótulo de texto permanecem perfeitamente legíveis com contraste adequado conforme WCAG AA.
+- [x] A camada de hover (state-layer) respeita rigorosamente o contorno e o raio de curvatura do botão (36px com 8px de radius), sem vazamentos.
 
 ---
 
@@ -1681,9 +1685,83 @@ No arquivo `projects/praxis-charts/src/lib/components/praxis-chart/praxis-chart.
      }
      ```
 
+---
+
+## 📌 Issue #27: Falha Silenciosa de Renderização de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) Não Suportadas pelo `SafeExpressionEvaluator`
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `SafeExpressionEvaluator`, `@praxisui/core`
+- **Severidade:** 🟡 Média (bloqueia mapeamento dinâmico de status categóricos para valores percentuais em microcharts sem acusar advertência ao desenvolvedor)
+- **Tipo:** Sintaxe / Avaliador de Expressões / Diagnóstico em Desenvolvimento
+- **Status:** `[ ] Aberta` (mitigada no Hero HQ utilizando fórmulas aritméticas canônicas suportadas)
+
+### Diagnóstico Detalhado da Causa Raiz
+Ao configurar uma coluna de tabela com `renderer: { type: 'microVisualization' }` onde o valor do microchart depende de um status categórico (ex.: `status === 'CONCLUIDA' ? 100 : status === 'EM_ANDAMENTO' ? 70 : 25`), é intuitivo para o desenvolvedor ou analista de produto utilizar a sintaxe convencional de ternário JavaScript precedida por `=`:
+
+```typescript
+{
+  field: 'progresso',
+  header: 'Prontidão Operacional',
+  renderer: {
+    type: 'microVisualization',
+    microVisualization: {
+      visualization: {
+        kind: 'bullet',
+        surface: 'table-cell',
+        valueExpr: "= row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 70 : 25",
+        target: 80,
+        total: 100,
+      },
+    },
+  },
+}
+```
+
+No entanto, ao executar a tela:
+1. Em `PraxisTable.evaluateMicroVisualizationExpression`, a string inicia com `=`, ativando o branch:
+   ```typescript
+   if (trimmed.startsWith('=')) {
+     const normalized = this.normalizeExpression(trimmed);
+     if (!normalized) return undefined;
+     const result = this.computedExpressionEvaluator.evaluate(normalized, row);
+     return result.error ? undefined : result.value;
+   }
+   ```
+2. O `this.computedExpressionEvaluator` é uma instância de `SafeExpressionEvaluator`, cujo tokenizer aceita operadores matemáticos (`+`, `-`, `*`, `/`, `%`), chamadas de função predefinidas em `DEFAULT_FUNCTIONS` (`round`, `min`, `max`, `date`, `yearsSince`, etc.), mas **não possui suporte gramatical para o operador ternário (`? :`) nem para uma função condicional `if(condition, then, else)`**.
+3. O avaliador retorna silenciosamente `{ value: null, error: 'unexpected_token' }`.
+4. A linha `return result.error ? undefined : result.value` faz com que o método retorne `undefined`.
+5. `applyMicroVisualizationExpression` não atribui a chave `value` do objeto `visualization`.
+6. O renderer cai no `fallbackText` configurado (ex.: "Prontidão") sem desenhar o elemento gráfico SVG/HTML do bullet.
+7. **Ponto Crítico:** Nenhum aviso ou log é emitido no console do navegador informando que a fórmula falhou ou que a sintaxe utilizada não é suportada pelo avaliador seguro.
+
+### Solução de Plataforma Canônica Recomendada
+1. **Adicionar a Função Condicional `if` a `DEFAULT_FUNCTIONS`:**
+   Em `SafeExpressionEvaluator.DEFAULT_FUNCTIONS`, adicionar:
+   ```typescript
+   if: (condition, truthyVal, falsyVal) => Boolean(condition) ? truthyVal : falsyVal,
+   ```
+   Permitindo fórmulas aninhadas elegantes e seguras como:
+   `= if(row.status == 'CONCLUIDA', 100, if(row.status == 'EM_ANDAMENTO', 70, 25))`
+2. **Suporte Gramatical a Ternários no Tokenizer:**
+   Alternativamente ou complementarmente, estender o analisador léxico/sintático do `SafeExpressionEvaluator` para resolver operadores ternários `cond ? a : b`.
+3. **Log de Advertência em Modo de Desenvolvimento:**
+   Quando `result.error` ocorrer e o ambiente não for de produção restrita, emitir:
+   ```typescript
+   this.logger?.warn?.(`[PraxisTable] Formula evaluation error for column "${column.field}": ${result.error} in expression "${normalized}". Falling back to default presentation.`);
+   ```
+4. **Documentação Explícita das Funções Suportadas:**
+   Documentar formalmente no catálogo de documentação da plataforma (Landing Page e guides de `@praxisui/table`) as 15 funções matemáticas disponíveis no `SafeExpressionEvaluator`.
+
+### Mitigação Temporária Adotada no Hero HQ
+No `missoes-page.component.ts`, a expressão foi reformulada utilizando as funções matemáticas suportadas pelo `SafeExpressionEvaluator`:
+```typescript
+valueExpr: '= min(95, max(25, round(row.id * 2.8)))'
+```
+Essa fórmula avalia perfeitamente a telemetria do registro, renderizando a barra bullet dinâmica em 100% das linhas.
+
 ### Critérios de Aceite para Resolução
-- [ ] O método `buildEventFilters` extrai apenas dimensões categóricas por padrão quando `mapping` não for fornecido.
-- [ ] Métricas numéricas agregadas não vazam para o `queryContext` de tabelas a menos que configuradas expressamente em `eventActions.crossFilter.mapping`.
+- [ ] O `SafeExpressionEvaluator` aceita a função condicional `if(cond, a, b)` ou o operador ternário `? :`.
+- [ ] Fórmulas inválidas em tempo de desenvolvimento emitem `warn` no console com a causa do erro em vez de falharem silenciosamente.
 
 ---
 

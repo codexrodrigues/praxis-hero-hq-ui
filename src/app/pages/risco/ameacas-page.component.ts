@@ -13,6 +13,10 @@ import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
+import {
+  ThreatIntelligenceDrawerComponent,
+  type ThreatProfile,
+} from './threat-intelligence-drawer.component';
 
 export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -24,7 +28,7 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
     columns: [
       {
         field: 'id',
-        header: 'ID',
+        header: 'Cód.',
         width: '80px',
         align: 'center',
         sortable: true,
@@ -34,43 +38,68 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
         header: 'Designação da Ameaça',
         width: '220px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'classe',
         header: 'Classe Tática',
-        width: '150px',
+        width: '130px',
         align: 'center',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'planeta',
         header: 'Origem Planetária',
-        width: '160px',
+        width: '140px',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'nivel',
-        header: 'Nível de Perigo',
+        header: 'Nível',
         type: 'number',
-        width: '130px',
+        width: '80px',
         align: 'center',
         sortable: true,
+        filterable: true,
+      },
+      {
+        field: 'indicePerigo',
+        header: 'Índice de Letalidade',
+        width: '180px',
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'bullet',
+              surface: 'table-cell',
+              valueExpr: '= min(100, max(15, round(row.nivel * 10)))',
+              target: 70,
+              total: 100,
+              tone: 'danger',
+              fallbackText: 'Letalidade',
+            },
+          },
+        },
       },
       {
         field: 'status',
         header: 'Status de Contenção',
-        width: '160px',
+        width: '150px',
         align: 'center',
         sortable: true,
+        filterable: true,
       },
       {
         field: 'recompensa',
         header: 'Recompensa Fixada',
         type: 'currency',
         format: 'BRL',
-        width: '180px',
+        width: '160px',
         align: 'right',
         sortable: true,
+        filterable: true,
       },
     ],
     toolbar: {
@@ -100,6 +129,95 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
             inline: true,
             alwaysVisibleFields: ['nome', 'classe', 'status', 'nivel'],
             useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: { rowKeySource: 'table.idField', requireStableIdField: true },
+        state: { mode: 'uncontrolled' },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: { allowMultiple: false, maxExpandedRows: 1, onOverflow: 'collapseOldest' },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: [
+            'card',
+            'value',
+            'stack',
+            'text',
+            'icon',
+            'badge',
+            'timeline',
+            'list',
+            'tabs',
+            'tab',
+            'mediaBlock',
+            'cardGrid',
+          ],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          rendererVersion: '1.0.0',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'card',
+                title: 'Dossiê Forense de Inteligência & Risco Global',
+                subtitle: 'Taxonomia de combate sob governança do Conselho de Segurança Global',
+                content: [
+                  {
+                    type: 'stack',
+                    items: [
+                      {
+                        type: 'value',
+                        label: 'Designação do Alvo',
+                        valueField: 'nome',
+                      },
+                      {
+                        type: 'value',
+                        label: 'Classe Tática',
+                        valueField: 'classe',
+                      },
+                      {
+                        type: 'value',
+                        label: 'Origem Planetária',
+                        valueField: 'planeta',
+                      },
+                      {
+                        type: 'value',
+                        label: 'Nível de Letalidade',
+                        valueField: 'nivel',
+                      },
+                      {
+                        type: 'value',
+                        label: 'Status Operacional',
+                        valueField: 'status',
+                      },
+                      {
+                        type: 'value',
+                        label: 'Recompensa Fixada (R$)',
+                        valueField: 'recompensa',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         },
       },
@@ -161,7 +279,12 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-ameacas-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
+  imports: [
+    CommonModule,
+    PraxisCrudComponent,
+    PraxisRichContent,
+    ThreatIntelligenceDrawerComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -249,8 +372,15 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
         <praxis-crud
           crudId="heroes-hq-ameacas-crud"
           [metadata]="activeCrudMetadata()"
+          (rowClick)="onThreatRowClicked($event)"
         />
       </section>
+
+      <!-- Threat Intelligence Drawer -->
+      <app-threat-intelligence-drawer
+        [threat]="selectedThreat()"
+        (close)="selectedThreat.set(null)"
+      />
     </div>
   `,
   styles: [`
@@ -545,5 +675,24 @@ export class AmeacasPageComponent implements OnInit, OnDestroy {
         ],
       });
     });
+  }
+
+  protected readonly selectedThreat = signal<ThreatProfile | null>(null);
+
+  protected onThreatRowClicked(event: unknown): void {
+    const raw = (event as any)?.row ?? (event as any)?.data ?? event;
+    if (!raw || typeof raw !== 'object' || !('id' in raw)) {
+      return;
+    }
+    const threat: ThreatProfile = {
+      id: raw.id,
+      nome: raw.nome || 'Alvo Não Identificado',
+      classe: raw.classe || 'ENTIDADE',
+      planeta: raw.planeta || 'Desconhecido',
+      nivel: typeof raw.nivel === 'number' ? raw.nivel : 5,
+      status: raw.status || 'EM_OBSERVACAO',
+      recompensa: typeof raw.recompensa === 'number' ? raw.recompensa : 0,
+    };
+    this.selectedThreat.set(threat);
   }
 }

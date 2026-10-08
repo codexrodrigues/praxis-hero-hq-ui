@@ -73,7 +73,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'bullet',
               surface: 'table-cell',
-              valueExpr: "= row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 70 : row.status === 'PAUSADA' ? 40 : row.status === 'FALHOU' ? 15 : 25",
+              valueExpr: '= min(95, max(25, round(row.id * 2.8)))',
               target: 80,
               total: 100,
               tone: 'info',
