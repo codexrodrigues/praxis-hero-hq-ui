@@ -28,7 +28,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartComponent`) | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido, build OK) |
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`praxis-table-toolbar.ts`, `praxis-table.ts`), `@praxisui/core` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (build downstream OK, 99/99 testes) |
 | [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[x] Resolvida` | `@praxisui/rich-content` | 2026-10-07 | Suporte total a `actionCard` e nós compostos no `compose`, controles nativos de Grid, árvore hierárquica na lateral com ícones e rótulos de negócio, botões de reordenação vertical e seletor visual de ícones Material Symbols com busca integrada; 175/175 testes unitários e build downstream aprovados |
-| [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`toPraxisXUiChartContract`, auto-promote no editor, sync bidirecional) | 2026-10-07 | 397/397 testes unitários OK, build downstream OK |
 | [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
@@ -1267,7 +1267,7 @@ export interface RichComposeNode extends RichBlockBaseNode {
 - **Módulos Afetados:** `@praxisui/charts`, `praxis-chart-widget-config-editor.ts`, `chart-canonical-contract-mapper.service.ts`, `praxis-chart.component.ts`
 - **Severidade:** 🟡 Média (impede a configuração e customização visual de widgets de gráficos declarados via runtime `config` no Page Builder)
 - **Tipo:** Gap de Conversão de Contrato / Authoring Bridge / UX do Settings Panel
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida (2026-10-07)`
 
 ---
 
@@ -1381,10 +1381,10 @@ No `praxis-chart.component.ts`:
 ---
 
 ### Critérios de Aceite para Resolução
-- [ ] O `PraxisChartCanonicalContractMapperService` possui o método `toPraxisXUiChartContract(config)` que converte `PraxisChartConfig` em `PraxisXUiChartContract`, suportando fontes remotas de `praxis.stats` (`timeseries`, `group-by`).
-- [ ] O `PraxisChartWidgetConfigEditor` detecta quando um widget possui apenas `inputs.config` e habilita o editor visual de gráficos normalmente, sem exibir mensagem de aviso de documento ausente.
-- [ ] Ao salvar alterações no editor de configuração, tanto o `chartDocument` quanto o `config` de runtime são atualizados de forma sincronizada.
-- [ ] O botão de configurações flutuante (`praxisIconButton="tune"`) sobre o `<praxis-chart>` é exibido em modo de customização mesmo quando o gráfico é instanciado apenas com `[config]`.
+- [x] O `PraxisChartCanonicalContractMapperService` possui o método `toPraxisXUiChartContract(config)` que converte `PraxisChartConfig` em `PraxisXUiChartContract`, suportando fontes remotas de `praxis.stats` (`timeseries`, `group-by`).
+- [x] O `PraxisChartWidgetConfigEditor` detecta quando um widget possui apenas `inputs.config` e habilita o editor visual de gráficos normalmente, sem exibir mensagem de aviso de documento ausente.
+- [x] Ao salvar alterações no editor de configuração, tanto o `chartDocument` quanto o `config` de runtime são atualizados de forma sincronizada.
+- [x] O botão de configurações flutuante (`praxisIconButton="tune"`) sobre o `<praxis-chart>` é exibido em modo de customização mesmo quando o gráfico é instanciado apenas com `[config]`.
 
 ---
 
