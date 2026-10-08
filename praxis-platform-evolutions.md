@@ -21,9 +21,10 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#7**](#-issue-7-normalização-robusta-de-parâmetros-de-path-em-schemasfiltered) | Normalização Robusta de Parâmetros de Path em `/schemas/filtered` | `praxis-metadata-starter`<br>`ApiDocsController` | 🟢 Baixa | `[x] Resolvida` | PR #240 (`d59641bf9e`) | 2026-10-07 | Validado (testes unitários) |
 | [**#8**](#-issue-8-hierarquia-visual-de-seções-e-densidade-de-enquadramento-em-dossiêsdrawers-caixa-dentro-de-caixa-vs-seções-plaindivider) | Hierarquia Visual de Seções e Densidade de Enquadramento em Dossiês/Drawers ("Caixa Dentro de Caixa" vs Seções Plain/Divider) | `@praxisui/dynamic-form`<br>`Design System`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#9**](#-issue-9-governança-canônica-e-descoberta-de-serviços-de-métricas-e-dashboards-statscapabilities-e-praxischarts) | Governança Canônica e Descoberta de Serviços de Métricas e Dashboards (`/stats/capabilities` e `@praxisui/charts`) | `praxis-metadata-starter`<br>`@praxisui/charts`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
-| [**#10**](#-issue-10-refinamento-visual-do-pdx-inline-toggle-e-seletor-tri-state-para-filtros-booleanos) | Refinamento Visual do `pdx-inline-toggle` e Seletor Tri-State para Filtros Booleanos | `@praxisui/dynamic-fields`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#10**](#-issue-10-refinamento-visual-do-pdx-inline-toggle-e-seletor-tri-state-para-filtros-booleanos) | Refinamento Visual do `pdx-inline-toggle` e Seletor Tri-State para Filtros Booleanos | `@praxisui/dynamic-fields`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `86839d182` | 2026-10-07 | Validado (`funcionarios-page` tri-state e inline-toggle) |
 | [**#11**](#-issue-11-suporte-a-filtros-desacoplados-e-teleporte-via-cdk-portal-praxisfilterportal) | Suporte a Filtros Desacoplados e Teleporte via CDK Portal (`PraxisFilterPortal`) | `@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#13**](#-issue-13-tokens-canônicos-de-menu-e-estilização-de-state-layer-de-hover-em-overlays-praxis-menu-styles) | Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`) | `@praxisui/core`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`praxis-menu-styles`), `@praxisui/table` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido) |
 | [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[ ] Aberta` | — | — | Pendente |
@@ -35,6 +36,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via `eventActions.crossFilter.mapping` |
 
 ---
 
@@ -641,7 +643,7 @@ A segmentação rápida por escopos táticos (ex.: *Todos, Em Prontidão, Em Res
 - **Módulos Afetados:** `@praxisui/core`, `@praxisui/table`, `@praxisui/crud`, Design System da Plataforma
 - **Severidade:** 🟡 Média (Percepção de interface congelada/inerte, ausência de feedback de cursor no menu de ações de linhas)
 - **Tipo:** Design System / Tokens M3 / State Layers / CDK Overlay
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 Ao abrir o menu de overflow de ações em qualquer linha da tabela (`praxis-table`) ou em menus acionados por botões (`mat-menu`), os itens da lista não respondem ao evento de `hover` do mouse, não oferecem animação, transição de cor ou camada de realce (*State Layer*):
@@ -714,16 +716,16 @@ Ao abrir o menu de overflow de ações em qualquer linha da tabela (`praxis-tabl
    - Invocar `@include praxis-menu-styles()` automaticamente dentro de `@mixin praxis-theme-bundle()`.
 
 2. **No `@praxisui/table` (`praxis-table.html`):**
-   - Adicionar `class="praxis-row-menu-panel"` no `<mat-menu #rowMoreMenuV="matMenu">` para governança e estilização previsível.
+   - Adicionado `panelClass="praxis-table-row-menu"` nos `<mat-menu>` de overflow de linha (`#rowMoreMenu` e `#rowMoreMenuV`) para governança e estilização previsível.
 
-### Mitigação Temporária Aplicada no Hero HQ
-- Foi inserido no tema do host (`src/styles/theme-praxis.scss`) o bloco de estilização global para `.mat-mdc-menu-panel` e `.mat-mdc-menu-item:hover:not([disabled])`, garantindo micro-transição fluida, iluminação de ícones e elevação em overlay enquanto a plataforma prepara o mixin oficial.
+3. **No Hero HQ:**
+   - Removida a mitigação ad-hoc local de 60 linhas e adotado `@include praxis.praxis-menu-styles();` canônico.
 
 ### Critérios de Aceite para Resolução
-- [ ] Ao mover o cursor sobre qualquer item ativo do menu de overflow na tabela, o item exibe background suave de destaque, ícone colorido na cor primária e micro-deslocamento animado.
-- [ ] O card do menu em overlay possui bordas nítidas, arredondamento padrão do Design System e efeito de desfoque/vidro (*backdrop-filter*).
-- [ ] Itens desabilitados preservam estado neutro, opacidade reduzida e jamais respondem ao hover.
-- [ ] O mixin `@mixin praxis-menu-styles()` é exportado por `@praxisui/core/theming` e ativado pelo `praxis-theme-bundle()`.
+- [x] Ao mover o cursor sobre qualquer item ativo do menu de overflow na tabela, o item exibe background suave de destaque, ícone colorido na cor primária e micro-deslocamento animado.
+- [x] O card do menu em overlay possui bordas nítidas, arredondamento padrão do Design System e efeito de desfoque/vidro (*backdrop-filter*).
+- [x] Itens desabilitados preservam estado neutro, opacidade reduzida e jamais respondem ao hover.
+- [x] O mixin `@mixin praxis-menu-styles()` é exportado por `@praxisui/core/theming` e ativado pelo `praxis-theme-bundle()`.
 
 ---
 
@@ -1677,6 +1679,66 @@ Contudo, durante a implementação no Hero HQ, identificou-se uma falha crítica
 ### Critérios de Aceite para Resolução
 - [ ] Expressões dinâmicas que retornam `null` ou referenciam campos inexistentes não sobrescrevem propriedades estáticas nem anulam o `fallbackText`.
 - [ ] A célula da tabela degrada com segurança para o texto de fallback ou para a visualização padrão quando a linha contiver `null`.
+
+---
+
+## 📌 Issue #26: Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/charts`, `praxis-chart.component.ts`, `@praxisui/table`
+- **Severidade:** 🟡 Média (tentativa de filtro em colunas inexistentes de métricas quando tabela é alvo de crossFilter)
+- **Tipo:** Interoperabilidade / Cross-Filtering / Modelos de Eventos Analíticos
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+No arquivo `projects/praxis-charts/src/lib/components/praxis-chart/praxis-chart.component.ts` (linhas 1500–1525):
+1. O método auxiliar `extractPointSourceValues` extrai tanto dimensões categóricas (`severidade`) quanto métricas numéricas agregadas (`total = 8`) a partir do ponto clicado no ECharts:
+   ```typescript
+   const series = config.series.find((candidate) => candidate.id === event.seriesId)
+     ?? config.series.find((candidate) => candidate.name === event.seriesName)
+     ?? config.series[0];
+   const metricField = series?.metric?.field;
+   if (metricField && values[metricField] === undefined && event.value !== undefined) {
+     values[metricField] = this.extractPointMetricValue(event.value);
+   }
+   ```
+2. Quando o autor do dashboard declara `interactions: { selection: true, crossFilter: true }` sem especificar um mapeamento explícito em `eventActions.crossFilter.mapping`, o método `buildEventFilters(config, event, action?.mapping)` executa a ramificação:
+   ```typescript
+   if (!mapping || !Object.keys(mapping).length) {
+     return sourceValues;
+   }
+   ```
+3. Consequentemente, o evento `crossFilter` emite como filtros todos os valores brutos: `{ severidade: 'CRITICA', total: 8 }`.
+4. Ao propagar esse payload via link de composição (`composition.links`) para o input `queryContext` de uma tabela vinculada (`operations/incidentes`), a tabela injeta esses filtros diretamente no payload de busca remota (`POST /api/operations/incidentes/search`).
+5. Como `total` é um alias computado da métrica da query agregada do gráfico e **não existe como coluna ou atributo no DTO/entidade `Incidente` no backend Java**, a API responde com erro HTTP 400 (Bad Request / Unknown Property) ou filtra 0 registros silenciosamente caso o backend não reconheça o critério.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Gráficos Multi-Métricas:** Gráficos de barras agrupadas ou combo charts emitindo múltiplos campos de métricas (`valorLiquido`, `valorBruto`, `contagem`) no payload de crossFilter, quebrando consultas em tabelas operacionais associadas.
+2. **Pipelines de Transformação do Page Builder:** Se o link possuir uma etapa de `transform`, o payload poluído pode passar despercebido até atingir a camada de persistência.
+3. **Consumo por Widgets Analíticos de Terceiros:** Widgets externos que esperem receber apenas as dimensões de particionamento recebem dados acidentais de métricas pontuais.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Em `@praxisui/charts` (`praxis-chart.component.ts`):**
+   - Refinar `buildEventFilters` para que, na ausência de `mapping` explícito, filtre exclusivamente campos de dimensão (`categoryField` ou `axes.x.field`).
+   - Métricas agregadas só devem ser incluídas no `filters` de saída caso o desenvolvedor declare expressamente no `mapping` a correspondência de campos (ex.: `mapping: { total: 'metaMinima' }`).
+2. **No Hero HQ:**
+   - Adotada a governança canônica via declaração explícita de `mapping` no gráfico:
+     ```typescript
+     interactions: {
+       selection: true,
+       crossFilter: true,
+       eventActions: {
+         crossFilter: {
+           action: 'emit',
+           mapping: { severidade: 'severidade' },
+         },
+       },
+     }
+     ```
+
+### Critérios de Aceite para Resolução
+- [ ] O método `buildEventFilters` extrai apenas dimensões categóricas por padrão quando `mapping` não for fornecido.
+- [ ] Métricas numéricas agregadas não vazam para o `queryContext` de tabelas a menos que configuradas expressamente em `eventActions.crossFilter.mapping`.
 
 ---
 

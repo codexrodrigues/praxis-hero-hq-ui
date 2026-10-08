@@ -6,6 +6,18 @@ export const INCIDENT_SEVERITY_DONUT_CONFIG: PraxisChartConfig = {
   id: 'hero-incident-severity-donut-chart',
   type: 'donut',
   sizing: { mode: 'fixed', height: 280 },
+  interactions: {
+    selection: true,
+    crossFilter: true,
+    eventActions: {
+      crossFilter: {
+        action: 'emit',
+        mapping: {
+          severidade: 'severidade',
+        },
+      },
+    },
+  },
   dataSource: {
     kind: 'remote',
     resourcePath: 'risk-intelligence/vw-indicadores-incidentes',
@@ -893,11 +905,11 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                     visualization: {
                       kind: 'bullet',
                       surface: 'table-cell',
-                      value: 78,
+                      valueExpr: '= 100 - (row.danosCivis / 1000)',
                       target: 85,
                       total: 100,
                       tone: 'warning',
-                      fallbackText: 'Contenção Tática: 78%',
+                      fallbackText: 'Contenção Tática',
                     },
                   },
                 },
