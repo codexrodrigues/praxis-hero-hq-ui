@@ -50,6 +50,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#36**](#-issue-36-modo-de-apresentação-e-ficha-técnica-editorial-para-formulários-dinâmicos-mode-presentation-no-praxisuidynamic-form) | Modo de Apresentação e Ficha Técnica Editorial para Formulários Dinâmicos (`mode: 'presentation'`) | `@praxisui/dynamic-form`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/dynamic-form`, `@praxisui/core` (`mode: 'presentation'`, `mode: 'dossier'`) | 2026-10-08 | Validado (220 specs aprovados, renderização editorial sem inputs desativados) |
 | [**#37**](#-issue-37-componente-canônico-de-layout-e-shell-de-aplicação-corporativa-praxisappshell--praxisishell-ou-praxisicore) | Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell`) | `@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`PraxisAppShell`, `shell.models.ts`) | 2026-10-08 | Validado (10/10 specs unitários, build downstream OK, eliminação de CSS manual) |
 | [**#38**](#-issue-38-descoberta-integral-de-recurso-e-roteamento-zero-code-no-praxis-crud-praxisresourcepage--auto-resource-host) | Descoberta Integral de Recurso e Roteamento Zero-Code no `<praxis-crud>` (`PraxisResourcePage`) | `@praxisui/crud`<br>`@praxisui/table` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (`PraxisResourcePage`, auto-resource `<praxis-crud resource="...">`) | 2026-10-08 | Validado (5/5 specs de rota, 238/238 specs de crud, build downstream OK) |
+| [**#39**](#-issue-39-auto-hidratação-e-descoberta-de-gavetas-analíticas-drawers-via-resourcepath-e-metadados-openapi-schemasurfaces--behaviordrawer) | Auto-Hidratação e Descoberta de Gavetas Analíticas (Drawers) via `resourcePath` e Metadados OpenAPI (`/schemas/surfaces` / `behavior.drawer`) | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | - | - | Pendente de implementação |
 
 
 
@@ -2352,6 +2353,145 @@ Cada uma dessas páginas contém entre 650 e 1.021 linhas de código TypeScript,
 
 ---
 
+## 📌 Issue #39: Auto-Hidratação e Descoberta de Gavetas Analíticas (Drawers) via `resourcePath` e Metadados OpenAPI (`/schemas/surfaces` / `behavior.drawer`)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`, `@praxisui/core`, `praxis-metadata-starter`
+- **Severidade:** 🔴 Alta (Elimina mais de 550 linhas de arquivos estáticos `*-drawer.config.ts`, centenas de linhas de código de cola nos componentes hospedeiros e orquestra a gaveta de forma 100% metadata-driven)
+- **Tipo:** Paradigma Zero-Code Metadata-Driven / Descoberta de Superfícies / Gaveta Analítica
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+A implementação da Issue #30 introduziu com sucesso o `PraxisAnalyticalDrawerComponent` e o schema `PraxisAnalyticalDrawerConfig`. Essa infraestrutura canônica permitiu desmantelar e apagar completamente as gavetas monolíticas artesanais que ultrapassavam 1.400 linhas de código TypeScript e HTML (`incident-analysis-drawer.component.ts`, `hero-dossier-drawer.component.ts`, `mission-briefing-drawer.component.ts`, `base-facility-drawer.component.ts` e `threat-intelligence-drawer.component.ts` — totalizando 5.436 linhas removidas).
+
+No entanto, uma inspeção criteriosa nas páginas de recursos do showcase (`incidentes-page`, `missoes-page`, `ameacas-page`, `bases-page`, `funcionarios-page`) revela um débito remanescente de acoplamento imperativo:
+1. **Proliferação de Arquivos de Configuração Estática:** A aplicação ainda é obrigada a declarar e manter 5 arquivos de configuração TypeScript dedicados (`incident-drawer.config.ts`, `mission-drawer.config.ts`, `threat-drawer.config.ts`, `hero-drawer.config.ts`, `base-facility-drawer.config.ts`), somando mais de 550 linhas de estruturas JSON declaradas em código cliente.
+2. **Código de Cola em Cada Página Hospedeira:** Cada componente de página que utiliza gaveta analítica precisa manter:
+   ```typescript
+   protected readonly incidentDrawerConfig = INCIDENT_ANALYTICAL_DRAWER_CONFIG;
+   protected readonly selectedIncident = signal<Record<string, unknown> | null>(null);
+
+   protected onIncidentRowClicked(event: unknown): void {
+     // Extração manual de row/data do evento
+     this.selectedIncident.set(row);
+   }
+   ```
+   E no template HTML:
+   ```html
+   <praxis-analytical-drawer
+     [isOpen]="!!selectedIncident()"
+     [row]="selectedIncident()"
+     [drawerConfig]="incidentDrawerConfig"
+     (closeDrawer)="selectedIncident.set(null)"
+   />
+   ```
+3. **Causa Raiz Estrutural na Plataforma:**
+   - O `PraxisAnalyticalDrawerComponent` opera exclusivamente em modo em memória: exige `@Input() drawerConfig: PraxisAnalyticalDrawerConfig`. Ele **não possui** `@Input() resourcePath?: string`, impedindo que se conecte ao pipeline de metadados da plataforma.
+   - O endpoint canônico `/schemas/surfaces?path=/api/{resourcePath}&surface=drawer` (ou `/schemas/filtered` com `behavior.drawer.analyticalSchema`) já faz parte da arquitetura canônica da plataforma (`praxis-metadata-starter`), mas o componente frontend não consome essa superfície de forma autônoma.
+   - O `<praxis-crud>` não possui orquestração interna para abrir a gaveta analítica automaticamente quando `openMode: 'drawer'`, obrigando o consumidor a gerenciar sinais de visibilidade e instanciar o drawer manualmente no seu próprio template.
+
+---
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+
+1. **Auto-Hidratação Autônoma do Drawer:**
+   O componente `<praxis-analytical-drawer>` deve poder ser instanciado de forma autônoma declarando apenas a coordenada operacional REST:
+   ```html
+   <praxis-analytical-drawer
+     [isOpen]="!!selectedRow()"
+     [row]="selectedRow()"
+     [resourcePath]="'operations/incidentes'"
+     (closeDrawer)="selectedRow.set(null)"
+   />
+   ```
+   Quando `drawerConfig` for omitido, o drawer consulta `/schemas/surfaces?path=/api/operations/incidentes&surface=drawer` ou `/schemas/filtered` e projeta dinamicamente:
+   - **Header:** `titleExpr`, `subtitleExpr`, `badge`, `avatar`.
+   - **Abas:** Abas contextuais inferidas do schema (ex.: Dossiê Geral, Telemetria, Auditoria).
+   - **Conteúdo de Abas:** Grids Bento (`cardGrid`), métricas (`metric`), badges e barras de progresso.
+   - **Relações Vinculadas (`relations`):** Endpoints de sub-recursos filhos vinculados ao ID da entidade.
+
+2. **Orquestração Nativamente Integrada no `<praxis-crud>` (Zero-Code):**
+   Ao declarar:
+   ```html
+   <praxis-crud resource="operations/incidentes" />
+   ```
+   Quando o usuário clica em uma linha e o recurso possui `behavior.drawer` habilitado:
+   - O `<praxis-crud>` abre a gaveta analítica **internamente**, repassando o registro clicado.
+   - O evento `(drawerClose)` é gerenciado internamente pelo CRUD.
+   - O desenvolvedor da aplicação não precisa escrever nem uma linha de TypeScript ou HTML para ter a experiência completa de tabela + gaveta analítica!
+
+3. **Backend `praxis-metadata-starter` — Superfície OpenAPI `x-ui.surfaces.drawer`:**
+   O backend Spring Java deve serializar a definição de gaveta analítica em `/schemas/surfaces` e no envelope `x-ui` de `/schemas/filtered`. Anotações no `@ApiResource` ou nos DTOs de domínio devem permitir governar abas, seções de auditoria e métricas sem intervenção no cliente frontend.
+
+4. **Mesclagem Profunda de Overrides Locais:**
+   Se uma tela específica necessitar de uma ação customizada ou um card adicional na gaveta analítica, o `@Input() drawerConfig` deve atuar como uma camada de override que se funde com os metadados governados de `/schemas/surfaces`, sem descartar a configuração de fábrica.
+
+---
+
+### Solução Canônica Recomendada de Plataforma
+
+#### 1. No `@praxisui/table` (`praxis-analytical-drawer.component.ts`):
+- Adicionar `@Input() resourcePath?: string;`.
+- Adicionar `@Input() surfaceName?: string = 'drawer';`.
+- Injetar o resolvedor canônico de esquemas (`SchemaDiscoveryService` ou HTTP client nativo).
+- Implementar pipeline reativo (`toSignal` / `computed`) que:
+  - Se `drawerConfig` for fornecido: utiliza-o diretamente (ou mescla com o schema remoto).
+  - Se `drawerConfig` for nulo/indefinido e `resourcePath` estiver presente: busca a definição em `/schemas/surfaces?path=/api/${resourcePath}&surface=${surfaceName}` ou `behavior.drawer.analyticalSchema` em `/schemas/filtered?path=/api/${resourcePath}`.
+  - Exibe skeleton de carregamento contextual durante o fetch do schema (se a gaveta for aberta antes da conclusão do cache).
+
+#### 2. No `@praxisui/crud` (`praxis-crud.component.ts` e template):
+- Incorporar internamente o `<praxis-analytical-drawer>` no template do CRUD:
+  ```html
+  @if (isInternalDrawerOpen() && internalDrawerRow()) {
+    <praxis-analytical-drawer
+      [isOpen]="isInternalDrawerOpen()"
+      [row]="internalDrawerRow()"
+      [resourcePath]="effectiveResourcePath()"
+      [drawerConfig]="effectiveDrawerConfig()"
+      (closeDrawer)="closeInternalDrawer()"
+    />
+  }
+  ```
+- Quando a tabela emitir `rowClick`, se `effectiveOpenMode === 'drawer'` (ou `behavior.drawer.enabled === true`), atualizar `internalDrawerRow` e abrir a gaveta automaticamente.
+- Fornecer `@Input() disableAutoDrawer: boolean = false` para cenários legados de opt-out.
+
+#### 3. No `praxis-metadata-starter` (Java Spring):
+- Estender `CustomOpenApiResolver` e `ApiDocsController` para suportar `/schemas/surfaces` com o tipo `surface=drawer`.
+- Mapear a extensão `x-ui.surfaces.drawer` a partir das anotações de domínio ou inferência estrutural de grupos de campos e sub-recursos.
+
+---
+
+### Plano de Implementação para o Agente Executor
+
+1. **Passo 1 (Frontend `@praxisui/table`):**
+   - Atualizar `PraxisAnalyticalDrawerComponent` para receber `@Input() resourcePath?: string;`.
+   - Implementar método `resolveDrawerMetadata(resourcePath: string): Observable<PraxisAnalyticalDrawerConfig>`.
+   - Adicionar testes unitários em `praxis-analytical-drawer.component.spec.ts` validando o carregamento remoto via `resourcePath`.
+
+2. **Passo 2 (Frontend `@praxisui/crud`):**
+   - No `PraxisCrudComponent`, vincular a gaveta analítica embutida ao evento de clique de linha quando `openMode === 'drawer'`.
+   - Validar que o CRUD pode operar com `openMode: 'drawer'` sem que o consumidor declare o componente de gaveta no seu próprio HTML.
+   - Adicionar specs em `praxis-crud.component.spec.ts`.
+
+3. **Passo 3 (Backend `praxis-metadata-starter`):**
+   - Garantir que `/schemas/surfaces?path=...&surface=drawer` responda com o payload compatível com `PraxisAnalyticalDrawerConfig`.
+   - Validar no endpoint `/schemas/filtered` a presença de `behavior.drawer.analyticalSchema`.
+
+4. **Passo 4 (Validação Downstream no `praxis-hero-hq-ui`):**
+   - Remover os 5 arquivos de configuração `*-drawer.config.ts`.
+   - Remover as declarações manuais de `<praxis-analytical-drawer>` dos templates de página.
+   - Executar bateria completa de testes e build de produção (`npm run build`).
+
+---
+
+### Critérios de Aceite para Resolução
+- [ ] `<praxis-analytical-drawer [resourcePath]="'operations/incidentes'" [row]="selectedRow">` descobre e renderiza automaticamente o dossiê analítico sem necessidade de `drawerConfig` estático no cliente.
+- [ ] `<praxis-crud [resourcePath]="'operations/incidentes'">` abre a gaveta analítica nativamente ao clicar em um registro quando `openMode: 'drawer'`.
+- [ ] Eliminação de 100% dos arquivos `*-drawer.config.ts` na aplicação modelo `praxis-hero-hq-ui` com zero regressão visual e funcional.
+- [ ] 100% dos testes unitários e de integração de `@praxisui/table` e `@praxisui/crud` aprovados no ChromeHeadless.
+
+---
+
 ## 🏛️ Diagnóstico Arquitetural: Onde o Código Está Concentrado e Plano de Descarbonização de Código (Redução de 80%)
 
 A varredura quantitativa executada na aplicação modelo **Praxis Hero HQ** (`src/app`) identificou a distribuição real das ~20.000 linhas de código do projeto:
@@ -2359,12 +2499,12 @@ A varredura quantitativa executada na aplicação modelo **Praxis Hero HQ** (`sr
 | Componente / Camada | Linhas de Código | Categoria de Boilerplate | Causa Raiz na Plataforma | Issue(s) de Resolução |
 | :--- | :---: | :--- | :--- | :---: |
 | **14 Páginas de Recursos CRUD** | **~10.500** | Boilerplate de CRUD repetido | Falta de descoberta integral de recurso e auto-crud | **#12**, **#30**, **#33**, **#38** |
-| **5 Gavetas Monolíticas (Drawers)** | **5.436** | Gavetas artesanais em Angular | Falta de gaveta analítica e relações declarativas | **#30**, **#32**, **#36** |
-| `incident-analysis-drawer.component.ts` | 1.411 | Gaveta customizada | Falta de relações declarativas e gaveta analítica | **#30**, **#32** |
-| `hero-dossier-drawer.component.ts` | 1.261 | Gaveta customizada | Falta de relações e ficha técnica editorial | **#30**, **#32**, **#36** |
-| `mission-briefing-drawer.component.ts` | 1.006 | Gaveta customizada | Falta de relações e timeline nativa em gaveta | **#30**, **#32** |
-| `base-facility-drawer.component.ts` | 938 | Gaveta customizada | Falta de relações e apresentação editorial | **#30**, **#32**, **#36** |
-| `threat-intelligence-drawer.component.ts` | 820 | Gaveta customizada | Falta de relações e cards Bento no drawer | **#30**, **#32** |
+| **5 Gavetas Monolíticas (Drawers)** | **5.436** | Gavetas artesanais em Angular | Falta de gaveta analítica e relações declarativas | **#30**, **#32**, **#36**, **#39** |
+| `incident-analysis-drawer.component.ts` | 1.411 | Gaveta customizada | Falta de relações declarativas e gaveta analítica | **#30**, **#32**, **#39** |
+| `hero-dossier-drawer.component.ts` | 1.261 | Gaveta customizada | Falta de relações e ficha técnica editorial | **#30**, **#32**, **#36**, **#39** |
+| `mission-briefing-drawer.component.ts` | 1.006 | Gaveta customizada | Falta de relações e timeline nativa em gaveta | **#30**, **#32**, **#39** |
+| `base-facility-drawer.component.ts` | 938 | Gaveta customizada | Falta de relações e apresentação editorial | **#30**, **#32**, **#36**, **#39** |
+| `threat-intelligence-drawer.component.ts` | 820 | Gaveta customizada | Falta de relações e cards Bento no drawer | **#30**, **#32**, **#39** |
 | `dashboard-page.definition.ts` + `component.ts` | **1.850** | Configuração estática de dashboard | Falta de carregamento de `WidgetPageDefinition` via API | **#18**, **#19** |
 | `hero-app-shell.component.ts` | **1.192** | Shell e navegação com CSS embutido | Falta de componente de shell corporativo oficial | **#37** |
 | `dashboard-stats.service.ts` | **855** | Agregação manual de métricas RxJS | Falta de banda de KPIs nativa no `<praxis-crud>` | **#33** |
@@ -2372,7 +2512,7 @@ A varredura quantitativa executada na aplicação modelo **Praxis Hero HQ** (`sr
 | DTOs e Interfaces Estáticas (vários) | **~800** | Tipos manuais redundantes | Falta de tipos genéricos dinâmicos orientados a schema | **#35** |
 
 ### 🎯 Meta de Descarbonização de Código
-Com a resolução das Issues **#12, #30, #32, #33, #34, #35, #36, #37 e #38**, a base de código do **Praxis Hero HQ** será reduzida de **~20.000 linhas** para aproximadamente **3.500 linhas** de arquivos de rota e metadados JSON puros — atingindo a diretriz de **menos de 20% a 30% de código residual**, tornando o showcase um verdadeiro testemunho da inteligência e governança nativa da Plataforma Praxis.
+Com a resolução das Issues **#12, #30, #32, #33, #34, #35, #36, #37, #38 e #39**, a base de código do **Praxis Hero HQ** será reduzida de **~20.000 linhas** para aproximadamente **3.500 linhas** de arquivos de rota e metadados JSON puros — atingindo a diretriz de **menos de 20% a 30% de código residual**, tornando o showcase um verdadeiro testemunho da inteligência e governança nativa da Plataforma Praxis.
 
 ---
 
