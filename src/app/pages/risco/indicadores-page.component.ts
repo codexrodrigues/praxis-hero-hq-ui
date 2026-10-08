@@ -14,9 +14,11 @@ import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import {
-  IncidentAnalysisDrawerComponent,
-  type IncidentProfile,
-} from '../operacoes/incident-analysis-drawer.component';
+  PraxisAnalyticalDrawerComponent,
+  PraxisScopeBarComponent,
+  type PraxisScopeBarItem,
+} from '@praxisui/table';
+import { INCIDENT_ANALYTICAL_DRAWER_CONFIG } from '../operacoes/incident-drawer.config';
 
 export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -364,7 +366,13 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-indicadores-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, IncidentAnalysisDrawerComponent],
+  imports: [
+    CommonModule,
+    PraxisCrudComponent,
+    PraxisRichContent,
+    PraxisAnalyticalDrawerComponent,
+    PraxisScopeBarComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -386,66 +394,17 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Escopo e Filtros Rápidos -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="scope-label">
-          <span class="material-symbols-outlined">tune</span>
-          <span>Status do Passivo:</span>
-        </div>
-
-        <div class="scope-chips">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">account_balance</span>
-            <span>Todos os Casos</span>
-            <span class="chip-count">74</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-danger"
-            [class.is-active]="activeFilterId() === 'critico'"
-            (click)="setFilter('critico')"
-          >
-            <span class="material-symbols-outlined">warning</span>
-            <span>Passivo Crítico</span>
-            <span class="chip-count">18</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-warning"
-            [class.is-active]="activeFilterId() === 'pendente'"
-            (click)="setFilter('pendente')"
-          >
-            <span class="material-symbols-outlined">pending</span>
-            <span>Saldo em Aberto</span>
-            <span class="chip-count">56</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-success"
-            [class.is-active]="activeFilterId() === 'homologado'"
-            (click)="setFilter('homologado')"
-          >
-            <span class="material-symbols-outlined">verified</span>
-            <span>100% Homologado</span>
-            <span class="chip-count">18</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Tática de Escopo e Filtros Rápidos (Canonical PraxisScopeBar) -->
+      <praxis-scope-bar
+        [items]="scopeItems"
+        [activeId]="activeFilterId()"
+        leadLabel="Status do Passivo:"
+        leadIcon="tune"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="onScopeChange($event)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
@@ -456,9 +415,11 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
         />
       </section>
 
-      <!-- Tactical Incident Investigation Drawer -->
-      <app-incident-analysis-drawer
-        [incident]="selectedIncident()"
+      <!-- Tactical Incident Investigation Drawer (Canonical PraxisAnalyticalDrawer) -->
+      <praxis-analytical-drawer
+        [isOpen]="!!selectedIncident()"
+        [row]="selectedIncident()"
+        [drawerConfig]="incidentDrawerConfig"
         (closeDrawer)="selectedIncident.set(null)"
       />
     </div>
@@ -509,132 +470,6 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-    }
-
-    .scope-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--muted-foreground);
-      span.material-symbols-outlined { font-size: 18px; color: var(--primary); }
-    }
-
-    .scope-chips {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 60%, transparent);
-      color: var(--foreground);
-      transition: all 0.2s ease;
-
-      span.material-symbols-outlined { font-size: 16px; }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 10px;
-        background: color-mix(in oklab, var(--muted) 80%, transparent);
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--foreground);
-      }
-
-      &:hover {
-        background: var(--accent);
-        border-color: var(--border);
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
-        border-color: var(--primary);
-        color: var(--primary);
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
-
-        .chip-count {
-          background: var(--primary);
-          color: var(--primary-foreground);
-        }
-      }
-
-      &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 22%, transparent);
-        border-color: var(--risk);
-        color: var(--risk);
-        .chip-count {
-          background: var(--risk);
-          color: #fff;
-        }
-      }
-
-      &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 22%, transparent);
-        border-color: var(--warning);
-        color: var(--warning);
-        .chip-count {
-          background: var(--warning);
-          color: #fff;
-        }
-      }
-
-      &.chip-success.is-active {
-        background: color-mix(in oklab, var(--ready) 22%, transparent);
-        border-color: var(--ready);
-        color: var(--ready);
-        .chip-count {
-          background: var(--ready);
-          color: #fff;
-        }
-      }
-    }
-
-    .clear-scope-btn {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      background: transparent;
-      border: 1px dashed var(--border);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      span { font-size: 16px; }
-
-      &:hover {
-        color: var(--foreground);
-        border-color: var(--muted-foreground);
-        background: var(--accent);
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -643,8 +478,16 @@ export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class IndicadoresPageComponent implements OnInit, OnDestroy {
-  protected readonly selectedIncident = signal<IncidentProfile | null>(null);
+  protected readonly incidentDrawerConfig = INCIDENT_ANALYTICAL_DRAWER_CONFIG;
+  protected readonly selectedIncident = signal<Record<string, unknown> | null>(null);
   protected readonly activeFilterId = signal<string>('all');
+  protected readonly scopeItems: PraxisScopeBarItem[] = [
+    { id: 'all', label: 'Todos os Casos', count: 74, icon: 'account_balance', tone: 'default', isDefault: true },
+    { id: 'critico', label: 'Passivo Crítico', count: 18, icon: 'warning', tone: 'danger', filter: { severidade: 'CRITICA' } },
+    { id: 'pendente', label: 'Saldo em Aberto', count: 56, icon: 'pending', tone: 'warning' },
+    { id: 'homologado', label: '100% Homologado', count: 18, icon: 'verified', tone: 'success' },
+  ];
+
   protected readonly kpiDocument = signal<RichContentDocument>(INDICADORES_KPI_DOCUMENT);
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
@@ -680,6 +523,10 @@ export class IndicadoresPageComponent implements OnInit, OnDestroy {
     this.activeFilterId.set(filterId);
   }
 
+  protected onScopeChange(item: PraxisScopeBarItem): void {
+    this.setFilter(item.id);
+  }
+
   protected onIncidentRowClicked(event: unknown): void {
     const row =
       (event as { row?: any; data?: any })?.row ||
@@ -687,18 +534,10 @@ export class IndicadoresPageComponent implements OnInit, OnDestroy {
       (event as any);
 
     if (row) {
-      const incidentProfile: IncidentProfile = {
+      this.selectedIncident.set({
+        ...row,
         id: Number(row.incidenteId ?? row.id ?? 1),
-        descricao: row.descricao || 'Incidente tático catalogado',
-        local: row.local || 'Teatro operacional',
-        severidade: row.severidade || 'MEDIA',
-        danosCivis: Number(row.danosCivis ?? 0),
-        feridos: Number(row.feridos ?? 0),
-        mortos: Number(row.mortos ?? 0),
-        ocorridoEm: row.ocorridoEm,
-        missaoId: row.missaoId,
-      };
-      this.selectedIncident.set(incidentProfile);
+      });
     }
   }
 

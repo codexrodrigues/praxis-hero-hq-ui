@@ -13,7 +13,12 @@ import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
-import { IncidentAnalysisDrawerComponent, type IncidentProfile } from './incident-analysis-drawer.component';
+import {
+  PraxisAnalyticalDrawerComponent,
+  PraxisScopeBarComponent,
+  type PraxisScopeBarItem,
+} from '@praxisui/table';
+import { INCIDENT_ANALYTICAL_DRAWER_CONFIG } from './incident-drawer.config';
 
 export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -335,7 +340,13 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-incidentes-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, IncidentAnalysisDrawerComponent],
+  imports: [
+    CommonModule,
+    PraxisCrudComponent,
+    PraxisRichContent,
+    PraxisAnalyticalDrawerComponent,
+    PraxisScopeBarComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -357,66 +368,17 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Escopo e Filtros Rápidos -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="scope-label">
-          <span class="material-symbols-outlined">tune</span>
-          <span>Severidade do Sinistro:</span>
-        </div>
-
-        <div class="scope-chips">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">report</span>
-            <span>Todas as Ocorrências</span>
-            <span class="chip-count">{{ totalIncidentes() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-danger"
-            [class.is-active]="activeFilterId() === 'critico'"
-            (click)="setFilter('critico')"
-          >
-            <span class="material-symbols-outlined">warning</span>
-            <span>Severidade Crítica</span>
-            <span class="chip-count">{{ criticalIncidentes() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-warning"
-            [class.is-active]="activeFilterId() === 'alta'"
-            (click)="setFilter('alta')"
-          >
-            <span class="material-symbols-outlined">crisis_alert</span>
-            <span>Alta Severidade</span>
-            <span class="chip-count">14</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-info"
-            [class.is-active]="activeFilterId() === 'media'"
-            (click)="setFilter('media')"
-          >
-            <span class="material-symbols-outlined">info</span>
-            <span>Moderados</span>
-            <span class="chip-count">42</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Tática de Escopo e Filtros Rápidos (Canonical PraxisScopeBar) -->
+      <praxis-scope-bar
+        [items]="scopeItems"
+        [activeId]="activeFilterId()"
+        leadLabel="Severidade:"
+        leadIcon="crisis_alert"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="onScopeChange($event)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
@@ -427,9 +389,11 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
         />
       </section>
 
-      <!-- Tactical Incident Investigation Drawer -->
-      <app-incident-analysis-drawer
-        [incident]="selectedIncident()"
+      <!-- Tactical Incident Investigation Drawer (Canonical PraxisAnalyticalDrawer) -->
+      <praxis-analytical-drawer
+        [isOpen]="!!selectedIncident()"
+        [row]="selectedIncident()"
+        [drawerConfig]="incidentDrawerConfig"
         (closeDrawer)="selectedIncident.set(null)"
       />
     </div>
@@ -486,135 +450,6 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
       cursor: pointer;
     }
 
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 75%, transparent);
-      backdrop-filter: blur(12px);
-    }
-
-    .scope-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted-foreground);
-      span.material-symbols-outlined { font-size: 18px; color: var(--primary); }
-    }
-
-    .scope-chips {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 60%, transparent);
-      color: var(--foreground);
-      transition: all 0.2s ease;
-
-      span.material-symbols-outlined { font-size: 16px; }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 10px;
-        background: color-mix(in oklab, var(--muted) 80%, transparent);
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--foreground);
-      }
-
-      &:hover {
-        background: var(--accent);
-        border-color: var(--border);
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
-        border-color: var(--primary);
-        color: var(--primary);
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
-
-        .chip-count {
-          background: var(--primary);
-          color: var(--primary-foreground);
-        }
-      }
-
-      &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 22%, transparent);
-        border-color: var(--risk);
-        color: var(--risk);
-        .chip-count {
-          background: var(--risk);
-          color: #fff;
-        }
-      }
-
-      &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 22%, transparent);
-        border-color: var(--warning);
-        color: var(--warning);
-        .chip-count {
-          background: var(--warning);
-          color: #fff;
-        }
-      }
-
-      &.chip-info.is-active {
-        background: color-mix(in oklab, var(--operations) 22%, transparent);
-        border-color: var(--operations);
-        color: var(--operations);
-        .chip-count {
-          background: var(--operations);
-          color: #fff;
-        }
-      }
-    }
-
-    .clear-scope-btn {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      background: transparent;
-      border: 1px dashed var(--border);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      span { font-size: 16px; }
-
-      &:hover {
-        color: var(--foreground);
-        border-color: var(--muted-foreground);
-        background: var(--accent);
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -623,12 +458,20 @@ export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class IncidentesPageComponent implements OnInit, OnDestroy {
-  protected readonly selectedIncident = signal<IncidentProfile | null>(null);
+  protected readonly incidentDrawerConfig = INCIDENT_ANALYTICAL_DRAWER_CONFIG;
+  protected readonly selectedIncident = signal<Record<string, unknown> | null>(null);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalIncidentes = signal<number>(74);
   protected readonly criticalIncidentes = signal<number>(18);
   protected readonly totalCivilDamages = signal<number>(154426000);
   protected readonly mitigationRate = signal<number>(96.2);
+
+  protected readonly scopeItems: PraxisScopeBarItem[] = [
+    { id: 'all', label: 'Todas as Ocorrências', count: 74, icon: 'report', tone: 'default', isDefault: true },
+    { id: 'critico', label: 'Severidade Crítica', count: 18, icon: 'warning', tone: 'danger', filter: { severidade: 'CRITICA' } },
+    { id: 'alta', label: 'Alta Severidade', count: 14, icon: 'crisis_alert', tone: 'warning', filter: { severidade: 'ALTA' } },
+    { id: 'media', label: 'Moderados', count: 42, icon: 'info', tone: 'info', filter: { severidade: 'MEDIA' } },
+  ];
 
   protected readonly kpiDocument = signal<RichContentDocument>(INCIDENTES_KPI_DOCUMENT);
 
@@ -665,12 +508,16 @@ export class IncidentesPageComponent implements OnInit, OnDestroy {
     this.activeFilterId.set(filterId);
   }
 
+  protected onScopeChange(item: PraxisScopeBarItem): void {
+    this.setFilter(item.id);
+  }
+
   protected onIncidentRowClicked(event: unknown): void {
     const row =
-      (event as { row?: IncidentProfile; data?: IncidentProfile })?.row ||
-      (event as { row?: IncidentProfile; data?: IncidentProfile })?.data ||
-      (event as IncidentProfile);
-    if (row && row.id) {
+      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.row ||
+      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.data ||
+      (event as Record<string, unknown>);
+    if (row && (row['id'] != null || row['incidenteId'] != null)) {
       this.selectedIncident.set(row);
     }
   }

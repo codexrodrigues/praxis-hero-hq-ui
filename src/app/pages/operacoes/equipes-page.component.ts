@@ -13,6 +13,7 @@ import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
+import { PraxisScopeBarComponent, type PraxisScopeBarItem } from '@praxisui/table';
 
 export const EQUIPES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -319,7 +320,7 @@ export const EQUIPES_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-equipes-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, PraxisScopeBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -341,55 +342,17 @@ export const EQUIPES_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Escopo e Filtros Rápidos -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="scope-label">
-          <span class="material-symbols-outlined">tune</span>
-          <span>Status Tático:</span>
-        </div>
-
-        <div class="scope-chips">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">diversity_3</span>
-            <span>Todos os Esquadrões</span>
-            <span class="chip-count">{{ totalEquipes() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-ready"
-            [class.is-active]="activeFilterId() === 'ativa'"
-            (click)="setFilter('ativa')"
-          >
-            <span class="material-symbols-outlined">verified_user</span>
-            <span>Prontidão Máxima</span>
-            <span class="chip-count">{{ activeEquipes() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-warning"
-            [class.is-active]="activeFilterId() === 'reserva'"
-            (click)="setFilter('reserva')"
-          >
-            <span class="material-symbols-outlined">shield</span>
-            <span>Reserva / Standby</span>
-            <span class="chip-count">{{ reserveEquipes() }}</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Canônica de Escopo Tático -->
+      <praxis-scope-bar
+        leadLabel="Status Tático:"
+        leadIcon="tune"
+        [items]="scopeItems()"
+        [activeId]="activeFilterId()"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="setFilter($event.id)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
@@ -452,122 +415,6 @@ export const EQUIPES_KPI_DOCUMENT: RichContentDocument = {
       cursor: pointer;
     }
 
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 70%, transparent);
-      backdrop-filter: blur(12px);
-    }
-
-    .scope-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted-foreground);
-      span.material-symbols-outlined { font-size: 18px; color: var(--primary); }
-    }
-
-    .scope-chips {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 40%, transparent);
-      color: var(--foreground);
-      transition: all 0.2s ease;
-
-      span.material-symbols-outlined { font-size: 16px; }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 10px;
-        background: color-mix(in oklab, var(--muted) 80%, transparent);
-        font-size: 0.75rem;
-        font-weight: 700;
-      }
-
-      &:hover {
-        background: color-mix(in oklab, var(--muted) 50%, transparent);
-        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
-        border-color: var(--primary);
-        color: var(--foreground);
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
-
-        .chip-count {
-          background: var(--primary);
-          color: #fff;
-        }
-      }
-
-      &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 22%, transparent);
-        border-color: var(--risk);
-        .chip-count { background: var(--risk); color: #fff; }
-      }
-
-      &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 22%, transparent);
-        border-color: var(--warning);
-        .chip-count { background: var(--warning); color: #fff; }
-      }
-
-      &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 22%, transparent);
-        border-color: var(--ready);
-        .chip-count { background: var(--ready); color: #fff; }
-      }
-    }
-
-    .clear-scope-btn {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      background: transparent;
-      border: 1px dashed var(--border);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      span { font-size: 16px; }
-
-      &:hover {
-        color: var(--foreground);
-        border-color: var(--primary);
-        background: color-mix(in oklab, var(--primary) 8%, transparent);
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -581,6 +428,29 @@ export class EquipesPageComponent implements OnInit, OnDestroy {
   protected readonly activeEquipes = signal<number>(4);
   protected readonly reserveEquipes = signal<number>(1);
   protected readonly linkedBases = signal<number>(5);
+
+  protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
+    {
+      id: 'all',
+      label: 'Todos os Esquadrões',
+      icon: 'diversity_3',
+      count: this.totalEquipes(),
+    },
+    {
+      id: 'ativa',
+      label: 'Prontidão Máxima',
+      icon: 'verified_user',
+      tone: 'ready',
+      count: this.activeEquipes(),
+    },
+    {
+      id: 'reserva',
+      label: 'Reserva / Standby',
+      icon: 'shield',
+      tone: 'warning',
+      count: this.reserveEquipes(),
+    },
+  ]);
 
   protected readonly kpiDocument = signal<RichContentDocument>(EQUIPES_KPI_DOCUMENT);
 

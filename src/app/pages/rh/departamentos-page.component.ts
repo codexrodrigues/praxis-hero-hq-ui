@@ -11,6 +11,7 @@ import {
 import { Subscription } from 'rxjs';
 import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
+import { PraxisScopeBarComponent, type PraxisScopeBarItem } from '@praxisui/table';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
@@ -304,7 +305,7 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-departamentos-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, PraxisScopeBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -326,55 +327,17 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Escopo e Filtros Rápidos -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="scope-label">
-          <span class="material-symbols-outlined">tune</span>
-          <span>Estrutura:</span>
-        </div>
-
-        <div class="scope-chips">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">corporate_fare</span>
-            <span>Todas as Divisões</span>
-            <span class="chip-count">{{ totalDepartamentos() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-ready"
-            [class.is-active]="activeFilterId() === 'liderancas'"
-            (click)="setFilter('liderancas')"
-          >
-            <span class="material-symbols-outlined">military_tech</span>
-            <span>Lideranças Ativas</span>
-            <span class="chip-count">96,4%</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-info"
-            [class.is-active]="activeFilterId() === 'cargos'"
-            (click)="setFilter('cargos')"
-          >
-            <span class="material-symbols-outlined">account_tree</span>
-            <span>Funções Mapeadas</span>
-            <span class="chip-count">{{ totalCargos() }}</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Scope Bar Canônico da Plataforma Praxis -->
+      <praxis-scope-bar
+        leadLabel="Estrutura"
+        leadIcon="tune"
+        [items]="scopeBarItems()"
+        [activeId]="activeFilterId()"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="setFilter($event.id)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Tabela CRUD Governança Canônica -->
       <section class="glass-panel crud-surface">
@@ -440,116 +403,6 @@ export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       cursor: pointer;
     }
 
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 70%, transparent);
-      backdrop-filter: blur(12px);
-    }
-
-    .scope-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted-foreground);
-      span.material-symbols-outlined { font-size: 18px; color: var(--primary); }
-    }
-
-    .scope-chips {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 40%, transparent);
-      color: var(--foreground);
-      transition: all 0.2s ease;
-
-      span.material-symbols-outlined { font-size: 16px; }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 10px;
-        background: color-mix(in oklab, var(--muted) 80%, transparent);
-        font-size: 0.75rem;
-        font-weight: 700;
-      }
-
-      &:hover {
-        background: color-mix(in oklab, var(--muted) 50%, transparent);
-        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
-        border-color: var(--primary);
-        color: var(--foreground);
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
-
-        .chip-count {
-          background: var(--primary);
-          color: #fff;
-        }
-      }
-
-      &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 22%, transparent);
-        border-color: var(--ready);
-        .chip-count { background: var(--ready); color: #fff; }
-      }
-
-      &.chip-info.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
-        border-color: var(--primary);
-        .chip-count { background: var(--primary); color: #fff; }
-      }
-    }
-
-    .clear-scope-btn {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      background: transparent;
-      border: 1px dashed var(--border);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      span { font-size: 16px; }
-
-      &:hover {
-        color: var(--foreground);
-        border-color: var(--primary);
-        background: color-mix(in oklab, var(--primary) 8%, transparent);
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -561,6 +414,33 @@ export class DepartamentosPageComponent implements OnInit, OnDestroy {
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalDepartamentos = signal<number>(28);
   protected readonly totalCargos = signal<number>(15);
+
+  protected readonly scopeBarItems = computed<PraxisScopeBarItem[]>(() => [
+    {
+      id: 'all',
+      label: 'Todas as Divisões',
+      icon: 'corporate_fare',
+      filter: {},
+      count: this.totalDepartamentos(),
+      isDefault: true,
+    },
+    {
+      id: 'liderancas',
+      label: 'Lideranças Ativas',
+      icon: 'military_tech',
+      filter: {},
+      badge: '96,4%',
+      tone: 'ready',
+    },
+    {
+      id: 'cargos',
+      label: 'Funções Mapeadas',
+      icon: 'account_tree',
+      filter: {},
+      count: this.totalCargos(),
+      tone: 'info',
+    },
+  ]);
 
   protected readonly kpiDocument = signal<RichContentDocument>(DEPARTAMENTOS_KPI_DOCUMENT);
 

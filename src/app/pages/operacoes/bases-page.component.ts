@@ -13,7 +13,12 @@ import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
-import { BaseFacilityDrawerComponent, type BaseFacilityProfile } from './base-facility-drawer.component';
+import {
+  PraxisAnalyticalDrawerComponent,
+  PraxisScopeBarComponent,
+  type PraxisScopeBarItem,
+} from '@praxisui/table';
+import { BASE_FACILITY_ANALYTICAL_DRAWER_CONFIG } from './base-facility-drawer.config';
 
 export const BASES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -313,7 +318,7 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-bases-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, BaseFacilityDrawerComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, PraxisAnalyticalDrawerComponent, PraxisScopeBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -335,66 +340,17 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Escopo e Filtros Rápidos -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="scope-label">
-          <span class="material-symbols-outlined">tune</span>
-          <span>Escopo Tático:</span>
-        </div>
-
-        <div class="scope-chips">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">hub</span>
-            <span>Todas as Bases</span>
-            <span class="chip-count">{{ totalBases() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-danger"
-            [class.is-active]="activeFilterId() === 'sigilo'"
-            (click)="setFilter('sigilo')"
-          >
-            <span class="material-symbols-outlined">security</span>
-            <span>Segurança Máxima</span>
-            <span class="chip-count">{{ highSecurityBases() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-info"
-            [class.is-active]="activeFilterId() === 'terra'"
-            (click)="setFilter('terra')"
-          >
-            <span class="material-symbols-outlined">public</span>
-            <span>Bases Terrestres</span>
-            <span class="chip-count">{{ theaters() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-ready"
-            [class.is-active]="activeFilterId() === 'espaco'"
-            (click)="setFilter('espaco')"
-          >
-            <span class="material-symbols-outlined">satellite_alt</span>
-            <span>Órbita / Espaço</span>
-            <span class="chip-count">1</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Canônica de Escopo Tático -->
+      <praxis-scope-bar
+        leadLabel="Escopo Tático:"
+        leadIcon="tune"
+        [items]="scopeItems()"
+        [activeId]="activeFilterId()"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="setFilter($event.id)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Tabela CRUD Governança Canônica -->
       <section class="glass-panel crud-surface">
@@ -405,9 +361,11 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
         />
       </section>
 
-      <!-- Base Facility Tactical Drawer -->
-      <app-base-facility-drawer
-        [facility]="selectedFacility()"
+      <!-- Base Facility Tactical Drawer Governed via Canonical Schema -->
+      <praxis-analytical-drawer
+        [isOpen]="!!selectedFacility()"
+        [row]="selectedFacility()"
+        [drawerConfig]="facilityDrawerConfig"
         (closeDrawer)="selectedFacility.set(null)"
       />
     </div>
@@ -468,122 +426,6 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
       cursor: pointer;
     }
 
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(18, 26, 43, 0.6);
-      backdrop-filter: blur(12px);
-    }
-
-    .scope-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted-foreground);
-      span.material-symbols-outlined { font-size: 18px; color: var(--primary); }
-    }
-
-    .scope-chips {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--foreground);
-      transition: all 0.2s ease;
-
-      span.material-symbols-outlined { font-size: 16px; }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.08);
-        font-size: 0.75rem;
-        font-weight: 700;
-      }
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.22);
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
-        border-color: var(--primary);
-        color: #fff;
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
-
-        .chip-count {
-          background: var(--primary);
-          color: #fff;
-        }
-      }
-
-      &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 22%, transparent);
-        border-color: var(--risk);
-        .chip-count { background: var(--risk); }
-      }
-
-      &.chip-info.is-active {
-        background: color-mix(in oklab, var(--operations) 22%, transparent);
-        border-color: var(--operations);
-        .chip-count { background: var(--operations); }
-      }
-
-      &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 22%, transparent);
-        border-color: var(--ready);
-        .chip-count { background: var(--ready); }
-      }
-    }
-
-    .clear-scope-btn {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      span { font-size: 16px; }
-
-      &:hover {
-        color: var(--foreground);
-        border-color: rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.04);
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -592,7 +434,8 @@ export const BASES_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class BasesPageComponent implements OnInit, OnDestroy {
-  protected readonly selectedFacility = signal<BaseFacilityProfile | null>(null);
+  protected readonly facilityDrawerConfig = BASE_FACILITY_ANALYTICAL_DRAWER_CONFIG;
+  protected readonly selectedFacility = signal<Record<string, unknown> | null>(null);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalBases = signal<number>(7);
   protected readonly highSecurityBases = signal<number>(4);
@@ -600,6 +443,36 @@ export class BasesPageComponent implements OnInit, OnDestroy {
   protected readonly readinessRate = signal<number>(100);
 
   protected readonly kpiDocument = signal<RichContentDocument>(BASES_KPI_DOCUMENT);
+
+  protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
+    {
+      id: 'all',
+      label: 'Todas as Bases',
+      icon: 'hub',
+      count: this.totalBases(),
+    },
+    {
+      id: 'sigilo',
+      label: 'Segurança Máxima',
+      icon: 'security',
+      tone: 'danger',
+      count: this.highSecurityBases(),
+    },
+    {
+      id: 'terra',
+      label: 'Bases Terrestres',
+      icon: 'public',
+      tone: 'info',
+      count: this.theaters(),
+    },
+    {
+      id: 'espaco',
+      label: 'Órbita / Espaço',
+      icon: 'satellite_alt',
+      tone: 'ready',
+      count: 1,
+    },
+  ]);
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -636,10 +509,10 @@ export class BasesPageComponent implements OnInit, OnDestroy {
 
   protected onFacilityRowClicked(event: unknown): void {
     const row =
-      (event as { row?: BaseFacilityProfile; data?: BaseFacilityProfile })?.row ||
-      (event as { row?: BaseFacilityProfile; data?: BaseFacilityProfile })?.data ||
-      (event as BaseFacilityProfile);
-    if (row && row.id) {
+      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.row ||
+      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.data ||
+      (event as Record<string, unknown>);
+    if (row && row['id']) {
       this.selectedFacility.set(row);
     }
   }

@@ -12,9 +12,13 @@ import {
 import { Subscription } from 'rxjs';
 import { type RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
-import { PraxisScopeBarComponent, type PraxisScopeBarItem, type RowClickEvent } from '@praxisui/table';
+import {
+  PraxisAnalyticalDrawerComponent,
+  PraxisScopeBarComponent,
+  type PraxisScopeBarItem,
+} from '@praxisui/table';
 import { PraxisRichContent } from '@praxisui/rich-content';
-import { HeroDossierDrawerComponent, type HeroProfile } from './hero-dossier-drawer.component';
+import { HERO_ANALYTICAL_DRAWER_CONFIG } from './hero-drawer.config';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
@@ -191,7 +195,7 @@ export const HEROES_KPI_DOCUMENT: RichContentDocument = {
   ],
 };
 
-const SAMPLE_HERO: HeroProfile = {
+const SAMPLE_HERO: Record<string, unknown> = {
   id: 1,
   nomeCompleto: 'Anthony Edward Stark',
   codinome: 'Homem de Ferro',
@@ -218,7 +222,7 @@ const SAMPLE_HERO: HeroProfile = {
     PraxisCrudComponent,
     PraxisRichContent,
     PraxisScopeBarComponent,
-    HeroDossierDrawerComponent,
+    PraxisAnalyticalDrawerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -283,12 +287,12 @@ const SAMPLE_HERO: HeroProfile = {
         />
       </section>
 
-      <!-- Dossiê 360 Slide-over Drawer (praxis-rich-content inside) -->
-      <app-hero-dossier-drawer
-        [hero]="selectedHero()"
-        [isTransitioning]="isTransitioning()"
-        (close)="selectedHero.set(null)"
-        (toggleStatus)="onToggleStatus($event)"
+      <!-- Dossiê 360 Slide-over Drawer (Canonical PraxisAnalyticalDrawer) -->
+      <praxis-analytical-drawer
+        [isOpen]="!!selectedHero()"
+        [row]="selectedHero()"
+        [drawerConfig]="heroDrawerConfig"
+        (closeDrawer)="selectedHero.set(null)"
       />
     </div>
   `,
@@ -527,8 +531,9 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
     };
   });
 
+  protected readonly heroDrawerConfig = HERO_ANALYTICAL_DRAWER_CONFIG;
   protected readonly kpiDocument = signal<RichContentDocument>(HEROES_KPI_DOCUMENT);
-  protected readonly selectedHero = signal<HeroProfile | null>(null);
+  protected readonly selectedHero = signal<Record<string, unknown> | null>(null);
   protected readonly isTransitioning = signal(false);
   protected readonly notice = signal<string | null>(null);
 
@@ -667,76 +672,58 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
     this.selectedHero.set(SAMPLE_HERO);
   }
 
-  protected onHeroRowClicked(event: RowClickEvent<HeroProfile> | unknown): void {
-    const raw = (event as RowClickEvent<HeroProfile>)?.row ?? (event as any)?.data ?? event;
+  protected onHeroRowClicked(event: unknown): void {
+    const raw = (event as any)?.row ?? (event as any)?.data ?? event;
     if (!raw || typeof raw !== 'object' || !('id' in raw)) {
       return;
     }
-    const hero: HeroProfile = {
-      id: raw.id,
-      nomeCompleto: raw.nomeCompleto || 'Colaborador',
-      codinome: raw.codinome || (raw.nomeCompleto ? String(raw.nomeCompleto).split(' ')[0] : 'Herói'),
-      cargoNome: raw.cargoNome || 'Especialista Operacional',
-      departamentoNome: raw.departamentoNome || 'Divisão Tática',
-      universo: raw.universo || 'Terra-616',
-      ativo: Boolean(raw.ativo),
-      salario: raw.salario || 0,
-      cpf: raw.cpf || '***.***.***-**',
-      telefone: raw.telefone || '+55 (11) 98888-0000',
-      email: raw.email || 'confidencial@praxis.org',
-      avatarUrl: raw.avatarUrl || raw.fotoPerfilUrl,
-      fotoPerfilUrl: raw.fotoPerfilUrl || raw.avatarUrl,
-      scorePublico: raw.scorePublico || 94,
-      scoreGovernamental: raw.scoreGovernamental || 88,
-      dataAdmissao: raw.dataAdmissao,
-      resourceVersion: raw.resourceVersion,
-    };
-    this.selectedHero.set(hero);
+    this.selectedHero.set(raw);
   }
 
-  protected onToggleStatus(hero: HeroProfile): void {
+  protected onToggleStatus(hero: Record<string, unknown>): void {
     if (this.isTransitioning()) return;
 
     this.isTransitioning.set(true);
-    const action = hero.ativo ? 'deactivate' : 'reactivate';
+    const isAtivo = Boolean(hero['ativo']);
+    const action = isAtivo ? 'deactivate' : 'reactivate';
     const payload = {
       effectiveAt: new Date().toISOString().substring(0, 10),
-      reasonCode: hero.ativo ? 'RESERVA_OPERACIONAL' : 'REATIVACAO_QUADRO',
+      reasonCode: isAtivo ? 'RESERVA_OPERACIONAL' : 'REATIVACAO_QUADRO',
       comment: 'Transição de prontidão tática executada via Dossiê 360 do Centro de Comando.',
     };
 
     const headers: Record<string, string> = {};
-    if (hero.resourceVersion) {
-      headers['If-Match'] = hero.resourceVersion;
+    if (hero['resourceVersion']) {
+      headers['If-Match'] = String(hero['resourceVersion']);
     }
 
     this.http
       .post(
-        `${PRAXIS_API_BASE_URL}/human-resources/funcionarios/${hero.id}/actions/${action}`,
+        `${PRAXIS_API_BASE_URL}/human-resources/funcionarios/${hero['id']}/actions/${action}`,
         payload,
         { headers }
       )
       .subscribe({
         next: () => {
           this.isTransitioning.set(false);
-          const updated: HeroProfile = { ...hero, ativo: !hero.ativo };
+          const updated = { ...hero, ativo: !isAtivo };
           this.selectedHero.set(updated);
           this.loadKpis();
           this.showNotice(
             updated.ativo
-              ? `Colaborador ${hero.nomeCompleto} reativado na força ativa com sucesso!`
-              : `Colaborador ${hero.nomeCompleto} movido para a reserva com sucesso!`
+              ? `Colaborador ${hero['nomeCompleto']} reativado na força ativa com sucesso!`
+              : `Colaborador ${hero['nomeCompleto']} movido para a reserva com sucesso!`
           );
         },
         error: () => {
           this.isTransitioning.set(false);
-          const updated: HeroProfile = { ...hero, ativo: !hero.ativo };
+          const updated = { ...hero, ativo: !isAtivo };
           this.selectedHero.set(updated);
           this.loadKpis();
           this.showNotice(
             updated.ativo
-              ? `Colaborador ${hero.nomeCompleto} reativado na força ativa (local)!`
-              : `Colaborador ${hero.nomeCompleto} movido para a reserva (local)!`
+              ? `Colaborador ${hero['nomeCompleto']} reativado na força ativa (local)!`
+              : `Colaborador ${hero['nomeCompleto']} movido para a reserva (local)!`
           );
         },
       });

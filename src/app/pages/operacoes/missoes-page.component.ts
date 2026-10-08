@@ -13,9 +13,11 @@ import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import {
-  MissionBriefingDrawerComponent,
-  type MissionProfile,
-} from './mission-briefing-drawer.component';
+  PraxisAnalyticalDrawerComponent,
+  PraxisScopeBarComponent,
+  type PraxisScopeBarItem,
+} from '@praxisui/table';
+import { MISSION_ANALYTICAL_DRAWER_CONFIG } from './mission-drawer.config';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
 export const MISSOES_CRUD_METADATA: CrudMetadata = {
@@ -371,7 +373,8 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
     CommonModule,
     PraxisCrudComponent,
     PraxisRichContent,
-    MissionBriefingDrawerComponent,
+    PraxisAnalyticalDrawerComponent,
+    PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -399,76 +402,17 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Filtro e Escopo de Missões -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="filter-bar-lead">
-          <span class="material-symbols-outlined filter-icon">filter_alt</span>
-          <span class="filter-lead-label">Status da Operação:</span>
-        </div>
-
-        <div class="filter-chips-track">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">military_tech</span>
-            <span>Todas as Missões</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-ready"
-            [class.is-active]="activeFilterId() === 'ativas'"
-            (click)="setFilter('ativas')"
-          >
-            <span class="material-symbols-outlined">flight_takeoff</span>
-            <span>Em Andamento</span>
-            <span class="chip-count">{{ activeCount() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-danger"
-            [class.is-active]="activeFilterId() === 'omega'"
-            (click)="setFilter('omega')"
-          >
-            <span class="material-symbols-outlined">crisis_alert</span>
-            <span>Prioridade Ômega</span>
-            <span class="chip-count">{{ criticalCount() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-warning"
-            [class.is-active]="activeFilterId() === 'planejamento'"
-            (click)="setFilter('planejamento')"
-          >
-            <span class="material-symbols-outlined">schedule</span>
-            <span>Em Planejamento</span>
-            <span class="chip-count">{{ plannedCount() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-success"
-            [class.is-active]="activeFilterId() === 'concluidas'"
-            (click)="setFilter('concluidas')"
-          >
-            <span class="material-symbols-outlined">task_alt</span>
-            <span>Concluídas</span>
-            <span class="chip-count">{{ completedCount() }}</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Tática de Filtro e Escopo de Missões (Canonical PraxisScopeBar) -->
+      <praxis-scope-bar
+        [items]="scopeItems()"
+        [activeId]="activeFilterId()"
+        leadLabel="Status da Operação:"
+        leadIcon="filter_alt"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="onScopeChange($event)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
@@ -479,10 +423,12 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
         />
       </section>
 
-      <!-- Mission Briefing Drawer -->
-      <app-mission-briefing-drawer
-        [mission]="selectedMission()"
-        (close)="selectedMission.set(null)"
+      <!-- Mission Briefing Drawer (Canonical PraxisAnalyticalDrawer) -->
+      <praxis-analytical-drawer
+        [isOpen]="!!selectedMission()"
+        [row]="selectedMission()"
+        [drawerConfig]="missionDrawerConfig"
+        (closeDrawer)="selectedMission.set(null)"
       />
     </div>
   `,
@@ -535,150 +481,6 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
     .tone-ready { color: var(--ready); background: color-mix(in oklab, var(--ready) 14%, transparent); }
     .tone-warning { color: var(--warning); background: color-mix(in oklab, var(--warning) 14%, transparent); }
     .tone-risk { color: var(--risk); background: color-mix(in oklab, var(--risk) 14%, transparent); }
-
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 10px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-    }
-
-    .filter-bar-lead {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted-foreground);
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-
-      .filter-icon {
-        font-size: 18px;
-        color: var(--operations);
-      }
-    }
-
-    .filter-chips-track {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 34px;
-      padding: 0 14px;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 70%, transparent);
-      color: var(--muted-foreground);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-      span.material-symbols-outlined {
-        font-size: 16px;
-      }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 9999px;
-        font-size: 0.72rem;
-        background: color-mix(in oklab, var(--muted) 80%, transparent);
-        color: var(--foreground);
-      }
-
-      &:hover {
-        border-color: color-mix(in oklab, var(--operations) 40%, var(--border));
-        color: var(--foreground);
-        transform: translateY(-1px);
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--operations) 15%, var(--card));
-        border-color: var(--operations);
-        color: var(--foreground);
-        box-shadow: 0 0 0 1px color-mix(in oklab, var(--operations) 40%, transparent);
-
-        .chip-count {
-          background: var(--operations);
-          color: #fff;
-        }
-      }
-
-      &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 15%, var(--card));
-        border-color: var(--ready);
-
-        .chip-count {
-          background: var(--ready);
-          color: #fff;
-        }
-      }
-
-      &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 15%, var(--card));
-        border-color: var(--risk);
-
-        .chip-count {
-          background: var(--risk);
-          color: #fff;
-        }
-      }
-
-      &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 15%, var(--card));
-        border-color: var(--warning);
-
-        .chip-count {
-          background: var(--warning);
-          color: #fff;
-        }
-      }
-
-      &.chip-success.is-active {
-        background: color-mix(in oklab, #10b981 15%, var(--card));
-        border-color: #10b981;
-
-        .chip-count {
-          background: #10b981;
-          color: #fff;
-        }
-      }
-    }
-
-    .clear-scope-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      height: 32px;
-      padding: 0 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px dashed var(--border);
-      background: transparent;
-      color: var(--muted-foreground);
-      transition: all 0.15s ease;
-
-      span { font-size: 15px; }
-
-      &:hover {
-        border-color: var(--operations);
-        color: var(--operations);
-        background: color-mix(in oklab, var(--operations) 8%, transparent);
-      }
-    }
 
     /* KPI Bento Grid Styling */
     ::ng-deep {
@@ -757,11 +559,20 @@ export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class MissoesPageComponent implements OnInit, OnDestroy {
+  protected readonly missionDrawerConfig = MISSION_ANALYTICAL_DRAWER_CONFIG;
   protected readonly activeFilterId = signal<'all' | 'ativas' | 'concluidas' | 'planejamento' | 'omega'>('all');
   protected readonly activeCount = signal<number>(6);
   protected readonly completedCount = signal<number>(4);
   protected readonly plannedCount = signal<number>(10);
   protected readonly criticalCount = signal<number>(10);
+
+  protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
+    { id: 'all', label: 'Todas as Missões', icon: 'military_tech', tone: 'default', isDefault: true },
+    { id: 'ativas', label: 'Em Andamento', count: this.activeCount(), icon: 'flight_takeoff', tone: 'info', filter: { status: 'EM_ANDAMENTO' } },
+    { id: 'omega', label: 'Prioridade Ômega', count: this.criticalCount(), icon: 'crisis_alert', tone: 'danger', filter: { prioridade: 'CRITICA' } },
+    { id: 'planejamento', label: 'Em Planejamento', count: this.plannedCount(), icon: 'schedule', tone: 'warning', filter: { status: 'PLANEJADA' } },
+    { id: 'concluidas', label: 'Concluídas', count: this.completedCount(), icon: 'task_alt', tone: 'success', filter: { status: 'CONCLUIDA' } },
+  ]);
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -782,7 +593,7 @@ export class MissoesPageComponent implements OnInit, OnDestroy {
   });
 
   protected readonly kpiDocument = signal<RichContentDocument>(MISSIONS_KPI_DOCUMENT);
-  protected readonly selectedMission = signal<MissionProfile | null>(null);
+  protected readonly selectedMission = signal<Record<string, unknown> | null>(null);
 
   private readonly dashboardStats = inject(DashboardStatsService);
   private kpiSub: Subscription | null = null;
@@ -793,6 +604,10 @@ export class MissoesPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.kpiSub?.unsubscribe();
+  }
+
+  protected onScopeChange(item: PraxisScopeBarItem): void {
+    this.setFilter(item.id as any);
   }
 
   protected onKpiSectionClicked(event: MouseEvent): void {
@@ -889,24 +704,6 @@ export class MissoesPageComponent implements OnInit, OnDestroy {
     if (!raw || typeof raw !== 'object' || !('id' in raw)) {
       return;
     }
-    const mission: MissionProfile = {
-      id: raw.id,
-      titulo: raw.titulo || 'Operação Tática',
-      objetivo: raw.objetivo || raw.descricao || 'Operação tática autorizada pelo Comando Central.',
-      descricao: raw.objetivo || raw.descricao,
-      prioridade: raw.prioridade || 'MEDIA',
-      status: raw.status || 'EM_ANDAMENTO',
-      local: raw.local || raw.localizacao || 'Setor Global',
-      localizacao: raw.local || raw.localizacao || 'Setor Global',
-      ameacaId: raw.ameacaId,
-      ameacaNome: raw.ameacaNome,
-      inicioPrev: raw.inicioPrev,
-      fimPrev: raw.fimPrev,
-      inicioReal: raw.inicioReal,
-      fimReal: raw.fimReal,
-      dataInicioPrevista: raw.inicioPrev || raw.dataInicioPrevista,
-      dataFimPrevista: raw.fimPrev || raw.dataFimPrevista,
-    };
-    this.selectedMission.set(mission);
+    this.selectedMission.set(raw);
   }
 }

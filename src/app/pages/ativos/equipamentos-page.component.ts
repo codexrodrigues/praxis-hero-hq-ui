@@ -13,6 +13,7 @@ import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
+import { PraxisScopeBarComponent, type PraxisScopeBarItem } from '@praxisui/table';
 
 export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -323,7 +324,7 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-equipamentos-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, PraxisScopeBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -350,66 +351,17 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Filtro e Escopo de Custódia -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="filter-bar-lead">
-          <span class="material-symbols-outlined filter-icon">filter_alt</span>
-          <span class="filter-lead-label">Status de Custódia:</span>
-        </div>
-
-        <div class="filter-chips-track">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">inventory_2</span>
-            <span>Todos os Itens</span>
-            <span class="chip-count">{{ totalCount() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-ready"
-            [class.is-active]="activeFilterId() === 'custodia'"
-            (click)="setFilter('custodia')"
-          >
-            <span class="material-symbols-outlined">verified_user</span>
-            <span>Em Custódia / Ativo</span>
-            <span class="chip-count">{{ inUseCount() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-warning"
-            [class.is-active]="activeFilterId() === 'manutencao'"
-            (click)="setFilter('manutencao')"
-          >
-            <span class="material-symbols-outlined">build</span>
-            <span>Em Manutenção</span>
-            <span class="chip-count">{{ maintenanceCount() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-stock"
-            [class.is-active]="activeFilterId() === 'estoque'"
-            (click)="setFilter('estoque')"
-          >
-            <span class="material-symbols-outlined">shelves</span>
-            <span>Reserva no Arsenal</span>
-            <span class="chip-count">{{ stockCount() }}</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Canônica de Escopo Tático -->
+      <praxis-scope-bar
+        leadLabel="Status de Custódia:"
+        leadIcon="tune"
+        [items]="scopeItems()"
+        [activeId]="activeFilterId()"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="setFilter($event.id)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
@@ -466,130 +418,6 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
       max-width: 720px;
     }
 
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 10px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-    }
-
-    .filter-bar-lead {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted-foreground);
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-
-      .filter-icon {
-        font-size: 18px;
-        color: var(--assets);
-      }
-    }
-
-    .filter-chips-track {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 34px;
-      padding: 0 14px;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 70%, transparent);
-      color: var(--muted-foreground);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-
-      span.material-symbols-outlined {
-        font-size: 16px;
-      }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 9999px;
-        font-size: 0.72rem;
-        background: color-mix(in oklab, var(--muted) 80%, transparent);
-        color: var(--foreground);
-      }
-
-      &:hover {
-        border-color: color-mix(in oklab, var(--assets) 40%, var(--border));
-        color: var(--foreground);
-        transform: translateY(-1px);
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--assets) 15%, var(--card));
-        border-color: var(--assets);
-        color: var(--foreground);
-        box-shadow: 0 0 0 1px color-mix(in oklab, var(--assets) 40%, transparent);
-
-        .chip-count {
-          background: var(--assets);
-          color: #fff;
-        }
-      }
-
-      &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 15%, var(--card));
-        border-color: var(--ready);
-
-        .chip-count {
-          background: var(--ready);
-          color: #fff;
-        }
-      }
-
-      &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 15%, var(--card));
-        border-color: var(--warning);
-
-        .chip-count {
-          background: var(--warning);
-          color: #fff;
-        }
-      }
-    }
-
-    .clear-scope-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      height: 32px;
-      padding: 0 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px dashed var(--border);
-      background: transparent;
-      color: var(--muted-foreground);
-      transition: all 0.15s ease;
-
-      span { font-size: 15px; }
-
-      &:hover {
-        border-color: var(--assets);
-        color: var(--assets);
-        background: color-mix(in oklab, var(--assets) 8%, transparent);
-      }
-    }
-
     ::ng-deep {
       .equipamentos-kpi-grid {
         display: grid;
@@ -632,11 +460,41 @@ export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class EquipamentosPageComponent implements OnInit, OnDestroy {
-  protected readonly activeFilterId = signal<'all' | 'custodia' | 'manutencao' | 'estoque'>('all');
+  protected readonly activeFilterId = signal<string>('all');
   protected readonly totalCount = signal<number>(62);
   protected readonly inUseCount = signal<number>(56);
   protected readonly maintenanceCount = signal<number>(2);
   protected readonly stockCount = signal<number>(4);
+
+  protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
+    {
+      id: 'all',
+      label: 'Todos os Itens',
+      icon: 'inventory_2',
+      count: this.totalCount(),
+    },
+    {
+      id: 'custodia',
+      label: 'Em Custódia / Ativo',
+      icon: 'verified_user',
+      tone: 'ready',
+      count: this.inUseCount(),
+    },
+    {
+      id: 'manutencao',
+      label: 'Em Manutenção',
+      icon: 'build',
+      tone: 'warning',
+      count: this.maintenanceCount(),
+    },
+    {
+      id: 'estoque',
+      label: 'Reserva no Arsenal',
+      icon: 'shelves',
+      tone: 'default',
+      count: this.stockCount(),
+    },
+  ]);
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -688,7 +546,7 @@ export class EquipamentosPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected setFilter(filterId: 'all' | 'custodia' | 'manutencao' | 'estoque'): void {
+  protected setFilter(filterId: string): void {
     if (this.activeFilterId() === filterId) return;
     this.activeFilterId.set(filterId);
   }

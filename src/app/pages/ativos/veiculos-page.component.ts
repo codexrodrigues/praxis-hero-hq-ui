@@ -13,6 +13,7 @@ import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
+import { PraxisScopeBarComponent, type PraxisScopeBarItem } from '@praxisui/table';
 
 export const VEICULOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -326,7 +327,7 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
 @Component({
   selector: 'app-veiculos-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, PraxisScopeBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -348,55 +349,17 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Escopo e Filtros Rápidos -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="scope-label">
-          <span class="material-symbols-outlined">tune</span>
-          <span>Disponibilidade:</span>
-        </div>
-
-        <div class="scope-chips">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">rocket_launch</span>
-            <span>Toda a Frota</span>
-            <span class="chip-count">{{ totalVeiculos() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-ready"
-            [class.is-active]="activeFilterId() === 'operacional'"
-            (click)="setFilter('operacional')"
-          >
-            <span class="material-symbols-outlined">verified</span>
-            <span>Em Operação</span>
-            <span class="chip-count">{{ operational() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-warning"
-            [class.is-active]="activeFilterId() === 'manutencao'"
-            (click)="setFilter('manutencao')"
-          >
-            <span class="material-symbols-outlined">build</span>
-            <span>Em Revisão</span>
-            <span class="chip-count">{{ maintenance() }}</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Canônica de Escopo Tático -->
+      <praxis-scope-bar
+        leadLabel="Disponibilidade:"
+        leadIcon="tune"
+        [items]="scopeItems()"
+        [activeId]="activeFilterId()"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="setFilter($event.id)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
@@ -459,126 +422,6 @@ export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
       cursor: pointer;
     }
 
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 70%, transparent);
-      backdrop-filter: blur(12px);
-    }
-
-    .scope-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted-foreground);
-      span.material-symbols-outlined { font-size: 18px; color: var(--primary); }
-    }
-
-    .scope-chips {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 60%, transparent);
-      color: var(--foreground);
-      transition: all 0.2s ease;
-
-      span.material-symbols-outlined { font-size: 16px; }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 10px;
-        background: color-mix(in oklab, var(--muted) 80%, transparent);
-        color: var(--foreground);
-        font-size: 0.75rem;
-        font-weight: 700;
-      }
-
-      &:hover {
-        background: color-mix(in oklab, var(--card) 90%, transparent);
-        border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 18%, var(--card));
-        border-color: var(--primary);
-        color: var(--foreground);
-        box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent);
-
-        .chip-count {
-          background: var(--primary);
-          color: #fff;
-        }
-      }
-
-      &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 18%, var(--card));
-        border-color: var(--risk);
-        box-shadow: 0 0 0 1px color-mix(in oklab, var(--risk) 35%, transparent);
-        .chip-count { background: var(--risk); color: #fff; }
-      }
-
-      &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 18%, var(--card));
-        border-color: var(--warning);
-        box-shadow: 0 0 0 1px color-mix(in oklab, var(--warning) 35%, transparent);
-        .chip-count { background: var(--warning); color: #fff; }
-      }
-
-      &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 18%, var(--card));
-        border-color: var(--ready);
-        box-shadow: 0 0 0 1px color-mix(in oklab, var(--ready) 35%, transparent);
-        .chip-count { background: var(--ready); color: #fff; }
-      }
-    }
-
-    .clear-scope-btn {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      background: transparent;
-      border: 1px dashed var(--border);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      span { font-size: 16px; }
-
-      &:hover {
-        color: var(--foreground);
-        border-color: var(--primary);
-        background: color-mix(in oklab, var(--primary) 8%, transparent);
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -592,6 +435,29 @@ export class VeiculosPageComponent implements OnInit, OnDestroy {
   protected readonly operational = signal<number>(5);
   protected readonly maintenance = signal<number>(2);
   protected readonly readinessRate = signal<number>(62.5);
+
+  protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
+    {
+      id: 'all',
+      label: 'Toda a Frota',
+      icon: 'rocket_launch',
+      count: this.totalVeiculos(),
+    },
+    {
+      id: 'operacional',
+      label: 'Em Operação',
+      icon: 'verified',
+      tone: 'ready',
+      count: this.operational(),
+    },
+    {
+      id: 'manutencao',
+      label: 'Em Revisão',
+      icon: 'build',
+      tone: 'warning',
+      count: this.maintenance(),
+    },
+  ]);
 
   protected readonly kpiDocument = signal<RichContentDocument>(VEICULOS_KPI_DOCUMENT);
 

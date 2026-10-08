@@ -14,9 +14,11 @@ import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import {
-  ThreatIntelligenceDrawerComponent,
-  type ThreatProfile,
-} from './threat-intelligence-drawer.component';
+  PraxisAnalyticalDrawerComponent,
+  PraxisScopeBarComponent,
+  type PraxisScopeBarItem,
+} from '@praxisui/table';
+import { THREAT_ANALYTICAL_DRAWER_CONFIG } from './threat-drawer.config';
 
 export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -336,7 +338,8 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
     CommonModule,
     PraxisCrudComponent,
     PraxisRichContent,
-    ThreatIntelligenceDrawerComponent,
+    PraxisAnalyticalDrawerComponent,
+    PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -359,66 +362,17 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
         <praxis-rich-content [document]="kpiDocument()" />
       </section>
 
-      <!-- Barra Tática de Escopo e Filtros Rápidos -->
-      <div class="tactical-filter-bar glass-panel">
-        <div class="scope-label">
-          <span class="material-symbols-outlined">tune</span>
-          <span>Radar Tático:</span>
-        </div>
-
-        <div class="scope-chips">
-          <button
-            type="button"
-            class="scope-chip"
-            [class.is-active]="activeFilterId() === 'all'"
-            (click)="setFilter('all')"
-          >
-            <span class="material-symbols-outlined">radar</span>
-            <span>Todos os Alvos</span>
-            <span class="chip-count">{{ totalAmeacas() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-warning"
-            [class.is-active]="activeFilterId() === 'confronto'"
-            (click)="setFilter('confronto')"
-          >
-            <span class="material-symbols-outlined">crisis_alert</span>
-            <span>Em Confronto</span>
-            <span class="chip-count">{{ confrontation() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-ready"
-            [class.is-active]="activeFilterId() === 'contidos'"
-            (click)="setFilter('contidos')"
-          >
-            <span class="material-symbols-outlined">lock</span>
-            <span>Neutralizados / Raft</span>
-            <span class="chip-count">{{ contained() }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="scope-chip chip-danger"
-            [class.is-active]="activeFilterId() === 'critico'"
-            (click)="setFilter('critico')"
-          >
-            <span class="material-symbols-outlined">warning</span>
-            <span>Nível Ômega (5+)</span>
-            <span class="chip-count">4</span>
-          </button>
-        </div>
-
-        @if (activeFilterId() !== 'all') {
-          <button type="button" class="clear-scope-btn" (click)="setFilter('all')">
-            <span class="material-symbols-outlined">restart_alt</span>
-            <span>Limpar Filtro</span>
-          </button>
-        }
-      </div>
+      <!-- Barra Canônica de Escopo Tático -->
+      <praxis-scope-bar
+        leadLabel="Radar Tático:"
+        leadIcon="tune"
+        [items]="scopeItems()"
+        [activeId]="activeFilterId()"
+        [showClearButton]="activeFilterId() !== 'all'"
+        [showOmnibox]="false"
+        (scopeChange)="setFilter($event.id)"
+        (clear)="setFilter('all')"
+      />
 
       <!-- Metadata-Driven CRUD Runtime -->
       <section class="glass-panel crud-surface">
@@ -429,10 +383,12 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
         />
       </section>
 
-      <!-- Threat Intelligence Drawer -->
-      <app-threat-intelligence-drawer
-        [threat]="selectedThreat()"
-        (close)="selectedThreat.set(null)"
+      <!-- Threat Intelligence Drawer Governed via Canonical Schema -->
+      <praxis-analytical-drawer
+        [isOpen]="!!selectedThreat()"
+        [row]="selectedThreat()"
+        [drawerConfig]="threatDrawerConfig"
+        (closeDrawer)="selectedThreat.set(null)"
       />
     </div>
   `,
@@ -488,122 +444,6 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
       cursor: pointer;
     }
 
-    /* Tactical Filter Bar */
-    .tactical-filter-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      flex-wrap: wrap;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(18, 26, 43, 0.6);
-      backdrop-filter: blur(12px);
-    }
-
-    .scope-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted-foreground);
-      span.material-symbols-outlined { font-size: 18px; color: var(--primary); }
-    }
-
-    .scope-chips {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .scope-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--foreground);
-      transition: all 0.2s ease;
-
-      span.material-symbols-outlined { font-size: 16px; }
-
-      .chip-count {
-        padding: 2px 7px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.08);
-        font-size: 0.75rem;
-        font-weight: 700;
-      }
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.22);
-      }
-
-      &.is-active {
-        background: color-mix(in oklab, var(--primary) 22%, transparent);
-        border-color: var(--primary);
-        color: #fff;
-        box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 30%, transparent);
-
-        .chip-count {
-          background: var(--primary);
-          color: #fff;
-        }
-      }
-
-      &.chip-danger.is-active {
-        background: color-mix(in oklab, var(--risk) 22%, transparent);
-        border-color: var(--risk);
-        .chip-count { background: var(--risk); }
-      }
-
-      &.chip-warning.is-active {
-        background: color-mix(in oklab, var(--warning) 22%, transparent);
-        border-color: var(--warning);
-        .chip-count { background: var(--warning); }
-      }
-
-      &.chip-ready.is-active {
-        background: color-mix(in oklab, var(--ready) 22%, transparent);
-        border-color: var(--ready);
-        .chip-count { background: var(--ready); }
-      }
-    }
-
-    .clear-scope-btn {
-      margin-left: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      span { font-size: 16px; }
-
-      &:hover {
-        color: var(--foreground);
-        border-color: rgba(255, 255, 255, 0.35);
-        background: rgba(255, 255, 255, 0.04);
-      }
-    }
-
     .crud-surface {
       border-radius: 18px;
       padding: 20px;
@@ -612,6 +452,8 @@ export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
   `],
 })
 export class AmeacasPageComponent implements OnInit, OnDestroy {
+  protected readonly threatDrawerConfig = THREAT_ANALYTICAL_DRAWER_CONFIG;
+  protected readonly selectedThreat = signal<Record<string, unknown> | null>(null);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalAmeacas = signal<number>(16);
   protected readonly confrontation = signal<number>(6);
@@ -620,6 +462,36 @@ export class AmeacasPageComponent implements OnInit, OnDestroy {
   protected readonly totalBountyMillion = signal<number>(12.1);
 
   protected readonly kpiDocument = signal<RichContentDocument>(AMEACAS_KPI_DOCUMENT);
+
+  protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
+    {
+      id: 'all',
+      label: 'Todos os Alvos',
+      icon: 'radar',
+      count: this.totalAmeacas(),
+    },
+    {
+      id: 'confronto',
+      label: 'Em Confronto',
+      icon: 'crisis_alert',
+      tone: 'warning',
+      count: this.confrontation(),
+    },
+    {
+      id: 'contidos',
+      label: 'Neutralizados / Raft',
+      icon: 'lock',
+      tone: 'ready',
+      count: this.contained(),
+    },
+    {
+      id: 'critico',
+      label: 'Nível Ômega (5+)',
+      icon: 'warning',
+      tone: 'danger',
+      count: 4,
+    },
+  ]);
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -730,22 +602,10 @@ export class AmeacasPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected readonly selectedThreat = signal<ThreatProfile | null>(null);
-
   protected onThreatRowClicked(event: unknown): void {
     const raw = (event as any)?.row ?? (event as any)?.data ?? event;
-    if (!raw || typeof raw !== 'object' || !('id' in raw)) {
-      return;
+    if (raw && typeof raw === 'object' && 'id' in raw) {
+      this.selectedThreat.set(raw as Record<string, unknown>);
     }
-    const threat: ThreatProfile = {
-      id: raw.id,
-      nome: raw.nome || 'Alvo Não Identificado',
-      classe: raw.classe || 'ENTIDADE',
-      planeta: raw.planeta || 'Desconhecido',
-      nivel: typeof raw.nivel === 'number' ? raw.nivel : 5,
-      status: raw.status || 'EM_OBSERVACAO',
-      recompensa: typeof raw.recompensa === 'number' ? raw.recompensa : 0,
-    };
-    this.selectedThreat.set(threat);
   }
 }
