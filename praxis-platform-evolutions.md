@@ -27,6 +27,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#13**](#-issue-13-tokens-canônicos-de-menu-e-estilização-de-state-layer-de-hover-em-overlays-praxis-menu-styles) | Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`) | `@praxisui/core`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`praxis-menu-styles`), `@praxisui/table` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido) |
 | [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartComponent`) | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido, build OK) |
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`praxis-table-toolbar.ts`, `praxis-table.ts`), `@praxisui/core` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (build downstream OK, 99/99 testes) |
+| [**#16**](#-issue-16-ux-e-animação-de-troca-de-widgets-swap-collision-policy-no-page-builder-live-shift-colisões-assimétricas-e-redesenho-do-snap-preview-inválido) | UX e Animação de Troca de Widgets (`swap` Collision Policy) no Page Builder: Live Shift, Colisões Assimétricas e Redesenho do Snap Preview Inválido | `@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/page-builder`, `@praxisui/core` (`push-down`, live shift, micro-badge contextual de bloqueio) | 2026-10-07 | Validado no `dashboard-page` (interações fluidas de grade) |
 | [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[x] Resolvida` | `@praxisui/rich-content` | 2026-10-07 | Suporte total a `actionCard` e nós compostos no `compose`, controles nativos de Grid, árvore hierárquica na lateral com ícones e rótulos de negócio, botões de reordenação vertical e seletor visual de ícones Material Symbols com busca integrada; 175/175 testes unitários e build downstream aprovados |
 | [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`toPraxisXUiChartContract`, auto-promote no editor, sync bidirecional) | 2026-10-07 | 397/397 testes unitários OK, build downstream OK |
 | [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (`PRAXIS_LIST_INSERTION_PRESETS`), `@praxisui/page-builder` (`providePraxisPageBuilderWidgets`) | 2026-10-07 | 13/13 spec list metadata OK, 4/4 spec page-builder OK, build downstream OK |
@@ -221,9 +222,9 @@ O agente executor deve considerar que essa comunicação precisa ser bidireciona
 - **Validação E2E Playwright:** Navegação confirmada nos botões do banner e nos cards do Domain Hub (`/rh/funcionarios` e `/operacoes/missoes`) e alternância de customização do Page Builder validada com 100% de sucesso.
 
 ### Critérios de Aceite para Resolução Definitiva na Plataforma
-- [ ] Possibilidade de vincular um card do `PraxisRichContent` a um filtro de tabela via configuração declarativa no Page Builder, sem necessidade de métodos TypeScript manuais no host.
-- [ ] Suporte a interoperabilidade com eventos emitidos por cliques em fatias e barras de `PraxisCharts`.
-- [ ] Teste unitário validando isolamento de eventos entre instâncias hierárquicas de `PraxisWidgetEventBus`.
+- [x] Possibilidade de vincular um card do `PraxisRichContent` a um filtro de tabela via configuração declarativa no Page Builder, sem necessidade de métodos TypeScript manuais no host.
+- [x] Suporte a interoperabilidade com eventos emitidos por cliques em fatias e barras de `PraxisCharts`.
+- [x] Teste unitário validando isolamento de eventos entre instâncias hierárquicas de `PraxisWidgetEventBus`.
 
 ---
 
@@ -584,9 +585,9 @@ Atualmente, a plataforma Praxis impõe uma arquitetura **monolítica e rígida n
    - Fornecer uma ponte reativa para que componentes standalone consigam ler o schema de filtros e despachar critérios de busca para a tabela associada via Signals / Observables.
 
 ### Critérios de Aceite para Resolução
-- [ ] É possível projetar e renderizar os filtros inline governados por metadados em qualquer card ou container HTML fora do corpo da tabela.
-- [ ] O componente `<praxis-crud>` aceita `@Input() filterCriteria` reativo e reflete mutações imediatamente na consulta `POST /filter` sem piscar a tela e sem duplo carregamento.
-- [ ] Debounce, tags salvas e chips de filtros continuam sincronizados perfeitamente no container desacoplado.
+- [x] É possível projetar e renderizar os filtros inline governados por metadados em qualquer card ou container HTML fora do corpo da tabela.
+- [x] O componente `<praxis-crud>` aceita `@Input() filterCriteria` reativo e reflete mutações imediatamente na consulta `POST /filter` sem piscar a tela e sem duplo carregamento.
+- [x] Debounce, tags salvas e chips de filtros continuam sincronizados perfeitamente no container desacoplado.
 
 ---
 
