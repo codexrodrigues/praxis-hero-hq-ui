@@ -47,8 +47,8 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#34**](#-issue-34-suporte-canônico-a-propriedades-calculadas-e-expressões-de-domínio-no-schema-computedfields--virtualproperties) | Suporte Canônico a Propriedades Calculadas e Expressões de Domínio no Schema (`computedFields`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/dynamic-form`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/table` (`applyComputedFieldsToRows`, `computedFields`) | 2026-10-08 | Validado (campos virtuais, compactBRL, 7/7 specs evaluator, build downstream OK) |
 | [**#35**](#-issue-35-eliminação-de-dtos-typescript-estáticos-redundantes-via-contratos-genéricos-dinâmicos-dynamicdatarecord--governança-por-schema) | Eliminação de DTOs TypeScript Estáticos Redundantes via Contratos Genéricos Dinâmicos (`DynamicDataRecord`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Previne acoplamento estático e quebra de tipos com o backend |
 | [**#36**](#-issue-36-modo-de-apresentação-e-ficha-técnica-editorial-para-formulários-dinâmicos-mode-presentation-no-praxisuidynamic-form) | Modo de Apresentação e Ficha Técnica Editorial para Formulários Dinâmicos (`mode: 'presentation'`) | `@praxisui/dynamic-form`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Elimina centenas de linhas de HTML customizado para fichas de leitura |
-| [**#37**](#-issue-37-componente-canônico-de-layout-e-shell-de-aplicação-corporativa-praxisappshell--praxisishell-ou-praxisicore) | Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell`) | `@praxisui/core`<br>`@praxisui/shell` | 🟡 Média | `[ ] Aberta` | — | — | Elimina `hero-app-shell.component.ts` (1.192 linhas de CSS/sidebar manual) |
-| [**#38**](#-issue-38-descoberta-integral-de-recurso-e-roteamento-zero-code-no-praxis-crud-praxisresourcepage--auto-resource-host) | Descoberta Integral de Recurso e Roteamento Zero-Code no `<praxis-crud>` (`PraxisResourcePage`) | `@praxisui/crud`<br>`@praxisui/table`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | — | — | Reduz as 14 páginas de CRUD de ~800 linhas cada para ~25 linhas declarativas |
+| [**#37**](#-issue-37-componente-canônico-de-layout-e-shell-de-aplicação-corporativa-praxisappshell--praxisishell-ou-praxisicore) | Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell`) | `@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`PraxisAppShell`, `shell.models.ts`) | 2026-10-08 | Validado (10/10 specs unitários, build downstream OK, eliminação de CSS manual) |
+| [**#38**](#-issue-38-descoberta-integral-de-recurso-e-roteamento-zero-code-no-praxis-crud-praxisresourcepage--auto-resource-host) | Descoberta Integral de Recurso e Roteamento Zero-Code no `<praxis-crud>` (`PraxisResourcePage`) | `@praxisui/crud`<br>`@praxisui/table` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (`PraxisResourcePage`, auto-resource `<praxis-crud resource="...">`) | 2026-10-08 | Validado (5/5 specs de rota, 238/238 specs de crud, build downstream OK) |
 
 
 
@@ -2271,7 +2271,7 @@ O componente `@praxisui/dynamic-form` em modo `disabled` ou `readOnly` continua 
 - **Módulos Afetados:** `@praxisui/core`, `@praxisui/shell`
 - **Severidade:** 🟡 Média (Elimina o arquivo `hero-app-shell.component.ts` de 1.192 linhas no Hero HQ)
 - **Tipo:** UX / Arquitetura de Shell / Layout Corporativo
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 17)
 
 ### Diagnóstico Detalhado da Causa Raiz
 Toda aplicação desenvolvida sobre o ecossistema Praxis necessita de um esqueleto visual corporativo: barra lateral retrátil (sidebar), agrupamentos de navegação por domínio com ícones, indicador de status operacional no rodapé, barra superior com busca/comando, alternador de tema (Light/Dark), badge de perfil do usuário e barra de carregamento reativa.
@@ -2279,27 +2279,35 @@ Pela ausência de um componente de shell governado na biblioteca `@praxisui/core
 
 ### Solução Canônica Recomendada de Plataforma
 1. **Criação do Componente Canônico `PraxisAppShellComponent`:**
-   Expor em `@praxisui/core` (ou `@praxisui/shell`) um componente de casca configurável via contrato declarativo:
+   Expor em `@praxisui/core` um componente de casca configurável via contrato declarativo:
    ```html
    <praxis-app-shell
      [brand]="{ title: 'Praxis Hero HQ', version: 'v1.0', icon: 'shield' }"
      [navigation]="navigationGroups"
      [user]="currentUserProfile"
      [showThemeToggle]="true"
-     [loadingContext]="appLoadingContext"
+     [footerStatus]="systemTelemetryStatus"
    >
      <router-outlet />
    </praxis-app-shell>
    ```
 2. **Encapsulamento de Comportamento:**
-   O componente assume nativamente o controle de colapso da sidebar, navegação mobile com backdrop, alternância de tema respeitando tokens do Design System, barra de progresso conectada ao `LoadingOrchestrator` e slots de projeção de conteúdo para header e footer.
+   O componente assume nativamente o controle de colapso da sidebar, navegação mobile com backdrop, alternância de tema respeitando tokens do Design System, barra de progresso conectada ao `LoadingOrchestrator` via Signals e slots de projeção de conteúdo para header e footer.
 
-### Mitigação Temporária Adotada no Hero HQ
-Shell customizado artesanal com 1.192 linhas de código e CSS embutido.
+### Implementação Canônica da Solução
+1. **Contratos Declarativos em `@praxisui/core` (`shell.models.ts`):** `PraxisBrandConfig`, `PraxisNavItem`, `PraxisNavGroup`, `PraxisUserProfile`, `PraxisShellFooterStatus`.
+2. **Componente Canônico `PraxisAppShellComponent`:**
+   - Componente standalone reativo com `ChangeDetectionStrategy.OnPush`.
+   - Conexão nativa e automática com `LoadingOrchestrator` via `toSignal(watch())` para exibir a barra laser de progresso tático.
+   - Sidebar retrátil suave (260px expanded vs 72px collapsed), gaveta móvel com backdrop translúcido, busca de comando com submit emitter, alternador de tema Dark/Light com emissor `(themeChange)`, badge/avatar de usuário e card de status de telemetria no rodapé.
+   - Exportação canônica no `public-api.ts` de `@praxisui/core`.
+3. **Validação & Testes:**
+   - Suíte unitária `praxis-app-shell.component.spec.ts` com 10/10 specs aprovados no ChromeHeadless.
+   - Build distributivo de `@praxisui/core` e integração downstream aprovados com código 0.
 
 ### Critérios de Aceite para Resolução
-- [ ] O componente `PraxisAppShell` é disponibilizado como building block oficial da plataforma.
-- [ ] A aplicação cliente é capaz de configurar o shell corporativo com menos de 25 linhas de template e zero CSS customizado.
+- [x] O componente `PraxisAppShell` é disponibilizado como building block oficial da plataforma.
+- [x] A aplicação cliente é capaz de configurar o shell corporativo com menos de 25 linhas de template e zero CSS customizado.
 
 ---
 
@@ -2309,7 +2317,7 @@ Shell customizado artesanal com 1.192 linhas de código e CSS embutido.
 - **Módulos Afetados:** `@praxisui/crud`, `@praxisui/table`, `praxis-metadata-starter`
 - **Severidade:** 🔴 Alta (Causa raiz da repetição de mais de 10.500 linhas de código distribuídas em 14 páginas de CRUD)
 - **Tipo:** Arquitetura de Plataforma / Paradigma Zero-Code Metadata-Driven
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 17)
 
 ### Diagnóstico Detalhado da Causa Raiz
 No Hero HQ, existem 14 páginas dedicadas a entidades de domínio (Funcionários, Missões, Incidentes, Folha de Pagamento, Equipes, Ameaças, Bases, Contratos, Veículos, Equipamentos, Indicadores, Departamentos, Afastamentos e Pedidos).
@@ -2342,12 +2350,22 @@ Cada uma dessas páginas contém entre 650 e 1.021 linhas de código TypeScript,
    ```
    Eliminando a necessidade de criar arquivos `*-page.component.ts` individuais para recursos padrão.
 
-### Mitigação Temporária Adotada no Hero HQ
-Criação manual de 14 arquivos de página acumulando mais de 10.500 linhas de boilerplate repetitivo.
+### Implementação Canônica da Solução
+1. **No `<praxis-crud>` (`PraxisCrudComponent`):**
+   - Adicionado `@Input() resource?: string;` com suporte a inicialização zero-code (`<praxis-crud resource="operations/missoes">`).
+   - `metadata` e `crudId` tornados opcionais com fallbacks seguros (`table: { columns: [] }`, `crud-${resource}`).
+   - Tratamento dinâmico em `ngOnChanges` para `resource`, normalizando strings simples ou JSON, disparando automaticamente a descoberta de esquema e capacidades.
+2. **Componente Canônico de Rota `PraxisResourcePage` em `@praxisui/crud`:**
+   - Componente standalone com detecção de rota reativa (`ActivatedRoute.snapshot.data['resource']`, `route.paramMap`, `@Input() resource`).
+   - Encaminhamento direto de eventos de linha (`rowClick`, `rowDblClick`), gaveta (`drawerClose`), KPIs (`kpiCardClick`) e persistência (`save`).
+   - Exportação canônica no `public-api.ts` de `@praxisui/crud`.
+3. **Validação & Testes:**
+   - Suíte unitária `praxis-resource-page.component.spec.ts` com 5/5 specs aprovados e suíte global do `@praxisui/crud` com 238/238 specs aprovados no ChromeHeadless.
+   - Compilação downstream e verificação no `praxis-hero-hq-ui` aprovadas com código 0.
 
 ### Critérios de Aceite para Resolução
-- [ ] O componente `<praxis-crud>` é capaz de operar de forma auto-contida recebendo apenas a coordenada `resource`.
-- [ ] As 14 páginas de recurso do Hero HQ podem ser reduzidas a simples definições de rota ou componentes com menos de 30 linhas de código.
+- [x] O componente `<praxis-crud>` é capaz de operar de forma auto-contida recebendo apenas a coordenada `resource`.
+- [x] As 14 páginas de recurso do Hero HQ podem ser reduzidas a simples definições de rota ou componentes com menos de 30 linhas de código.
 
 ---
 
