@@ -31,7 +31,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`toPraxisXUiChartContract`, auto-promote no editor, sync bidirecional) | 2026-10-07 | 397/397 testes unitários OK, build downstream OK |
 | [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (`PRAXIS_LIST_INSERTION_PRESETS`), `@praxisui/page-builder` (`providePraxisPageBuilderWidgets`) | 2026-10-07 | 13/13 spec list metadata OK, 4/4 spec page-builder OK, build downstream OK |
 | [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/charts`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (chips na toolbar, `queryContextClear`), `@praxisui/charts` (`clearSelection`), `@praxisui/core` (`DynamicWidgetPageComponent.handleQueryContextClear`) | 2026-10-08 | 396/396 testes unitários verdes, build downstream OK |
-| [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/table` (`normalizeExpansionDetailSchemaCandidate`, `getExpansionDetailRichContentContext`, contextMap) | 2026-10-08 | 43/43 spec unitários e de integração verdes, build downstream OK |
 | [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[ ] Aberta` | — | — | Pendente |
 | [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
@@ -1459,33 +1459,37 @@ Quando uma página dinâmica do Page Builder estabelece uma conexão via `compos
 - **Módulos Afetados:** `@praxisui/table`, `@praxisui/rich-content`, `@praxisui/core`
 - **Severidade:** 🟡 Média (duplicação de modelos de visualização e incapacidade de usar grids modernos de rich content dentro do master-detail de tabelas)
 - **Tipo:** Composição de Modelos Canônicos / Master-Detail
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (`@praxisui/core`, `@praxisui/table`)
 
 ### Diagnóstico Detalhado da Causa Raiz
-O motor de expansão de linhas do `@praxisui/table` (`TableBehaviorConfig.expansion`, implementado em `praxis-table.ts`) possui um resolvedor de schema inline (`resolveExpansionDetailInlineSchema`) que valida e sanitiza nós contra `DEFAULT_EXPANSION_ALLOWED_NODES` (`card`, `value`, `list`, `tab`, `tabs`, `richText`, `action`, `timeline`, `cardGrid`, `detailList`).
+O motor de expansão de linhas do `@praxisui/table` (`TableBehaviorConfig.expansion`, implementado em `praxis-table.ts`) possui um resolvedor de schema inline (`resolveExpansionDetailInlineSchema`) que valida e sanitiza nós contra `DEFAULT_EXPANSION_ALLOWED_NODES` (`card`, `value`, `list`, `tab`, `tabs`, `richText`, `action`, `timeline`, `cardGrid`, `detailList`, `richContent`).
 
 Contudo:
-1. Os nós aceitos em `TableDetailSchemaNode` utilizam uma tipagem paralela própria em vez de aceitar diretamente um `RichContentDocument`.
-2. Se o desenvolvedor desejar exibir um grid de cartões compostos, atalhos departamentais ou layouts dinâmicos complexos dentro da linha expandida, ele não pode reutilizar o documento já criado no editor de Rich Content: é obrigado a converter manualmente a estrutura para a sintaxe fragmentada da tabela.
-3. Se houvesse um nó de primeira classe `type: 'richContent', document: RichContentDocument` dentro do `inlineSchema`, a tabela delegaria a renderização do corpo da linha expandida diretamente ao `PraxisRichContentComponent`, eliminando código duplicado de renderização de cards e tags.
+1. Os nós aceitos em `TableDetailSchemaNode` utilizavam uma tipagem paralela própria em vez de aceitar diretamente um `RichContentDocument`.
+2. Se o desenvolvedor desejasse exibir um grid de cartões compostos, atalhos departamentais ou layouts dinâmicos complexos dentro da linha expandida, ele não podia reutilizar o documento já criado no editor de Rich Content: era obrigado a converter manualmente a estrutura para a sintaxe fragmentada da tabela.
+3. Com a introdução do suporte de primeira classe tanto a `type: 'richContent', document: RichContentDocument` quanto à declaração direta de um `RichContentDocument` em `inlineSchema` ou `items: [doc]`, a tabela normaliza o contrato e delega a renderização do corpo da linha expandida diretamente ao `PraxisRichContentComponent`.
 
-### Solução Canônica Recomendada de Plataforma
+### Solução Canônica Implementada de Plataforma
 1. Em `projects/praxis-core/src/lib/models/table-config-v2.model.ts`:
-   - Adicionar à união `TableDetailSchemaNode`:
-     ```typescript
-     export interface TableDetailRichContentNode extends TableDetailBaseNode {
-       type: 'richContent';
-       document: RichContentDocument;
-       contextMap?: Record<string, string>; // Mapeia campos da linha da tabela para o context do documento
-     }
-     ```
-2. Em `praxis-table.ts`:
-   - Incluir `'richContent'` em `DEFAULT_EXPANSION_ALLOWED_NODES`.
-   - No template de detalhe, quando `node.type === 'richContent'`, instanciar `<praxis-rich-content [document]="node.document" [context]="resolveRowContext(row, node.contextMap)">`.
+   - Atualizado `TableDetailRichContentNode` adicionando `contextMap?: Record<string, string>;` e `context?: Record<string, unknown>;`.
+   - Atualizado `TableDetailInlineSchemaDocument` com `contextMap?: Record<string, string>;`.
+   - Permitido declarar `RichContentDocument` diretamente como `TableConfig.behavior.detail.source.inlineSchema`.
+2. Em `projects/praxis-table/src/lib/praxis-table.ts`:
+   - Implementada detecção canônica `isDirectRichContentDocument` (`kind === 'praxis.rich-content' && Array.isArray(nodes)`).
+   - Normalização automática em `normalizeExpansionDetailSchemaCandidate`: documentos diretos são encapsulados em layout stack com nó `richContent`, e itens de array que sejam documentos diretos são auto-promovidos.
+   - `getExpansionDetailRichContentContext` resolve e mescla hierarquicamente `source.contextMap`, `inlineSchema.contextMap` e `node.contextMap`, suportando caminhos `$row.<path>`, `row.<path>` e nomes diretos de campo da linha.
+   - Injeção de variáveis mapeadas tanto na raiz do contexto de JsonLogic quanto em `detail`.
+3. Em `projects/praxis-table/src/lib/praxis-table.html`:
+   - Passagem do parâmetro `node` para `getExpansionDetailRichContentContext(row, index, node)` nos blocos `@case ('richContent')` e `@case ('cardGrid')`.
+   - Harmonização do placeholder de aba isolada para utilizar `bottomDetailText('tabOutside')`.
+4. Cobertura de testes em `praxis-table.expansion-detail-host.integration.spec.ts`:
+   - 43/43 testes passando (incluindo testes dedicados de renderização direta de `RichContentDocument`, `contextMap` com interpolação de Live Expressions e auto-promoção de itens em array).
 
 ### Critérios de Aceite para Resolução
-- [ ] É possível declarar um `RichContentDocument` completo dentro de `behavior.expansion.detail.source.inlineSchema.items`.
-- [ ] Dados da linha atual da tabela são injetados automaticamente no `context` do documento rich content para interpolação de Live Expressions.
+- [x] É possível declarar um `RichContentDocument` completo diretamente em `behavior.expansion.detail.source.inlineSchema` ou dentro de seus `items`.
+- [x] Dados da linha atual da tabela são injetados automaticamente no `context` do documento rich content para interpolação de Live Expressions, com suporte hierárquico a `contextMap` no documento e no nó.
+- [x] Resolução automática de caminhos de propriedade (`$row.field`, `row.field` ou campo direto do registro).
+- [x] 43/43 testes unitários e de integração passando em `praxis-table.expansion-detail-host.integration.spec.ts` e build downstream verificado no Hero HQ.
 
 ---
 
