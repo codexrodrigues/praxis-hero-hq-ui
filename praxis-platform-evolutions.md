@@ -40,9 +40,9 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`SafeExpressionEvaluator`, `warnOnceLog`) | 2026-10-08 | Validado (função `if`, ternários `? :`, 8/8 specs de avaliador) |
 | [**#28**](#-issue-28-padronização-e-exposição-canônica-da-tipagem-do-evento-rowclick-rowclickeventt-no-barrel-público-de-praxiscuitable-e-praxisuicrud) | Padronização e Exposição Canônica da Tipagem do Evento `(rowClick)` (`RowClickEvent<T>`) | `@praxisui/table`<br>`@praxisui/crud` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`RowClickEvent<T>`) | 2026-10-08 | Validado (`public-api`, 61/61 table events specs, 223/223 crud specs) |
 | [**#29**](#-issue-29-ausência-de-formatação-automática-currencydate-nos-nós-type-value-do-behaviordetail-e-baixa-visibilidade-monocromática-de-microcharts-bullet-em-surface-table-cell) | Ausência de Formatação Automática (Currency/Date) nos Nós `type: 'value'` de `behavior.detail` e Monocromia de Microcharts Bullet em `table-cell` | `@praxisui/table`<br>`@praxisui/core`<br>`presentation-visualization` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`getExpansionDetailValue`, `DataFormattingService`), `@praxisui/core` (`renderBulletVisualizationHtml`, `compactValue`) | 2026-10-08 | Validado (formatação automática BRL/USD/Data/Escala em nós de expansão, valor compacto em bullet, 35/35 specs table, 11/11 specs viz) |
-| [**#30**](#-issue-30-suporte-canônico-a-gavetas-analíticas-e-dossiês-multi-aba-via-metadadosjson-praxisanalyticaldrawerschema) | Suporte Canônico a Gavetas Analíticas e Dossiês Multi-Aba via Metadados/JSON (`behavior.drawer.analyticalSchema`) | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via componente customizado `IncidentAnalysisDrawerComponent` |
+| [**#30**](#-issue-30-suporte-canônico-a-gavetas-analíticas-e-dossiês-multi-aba-via-metadadosjson-praxisanalyticaldrawerschema) | Suporte Canônico a Gavetas Analíticas e Dossiês Multi-Aba via Metadados/JSON (`behavior.drawer.analyticalSchema`) | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`PraxisAnalyticalDrawerSchema`), `@praxisui/table` (`PraxisAnalyticalDrawerComponent`), `@praxisui/crud` | 2026-10-08 | Validado (dossiês multi-aba declarativos, 6/6 specs drawer, 63/63 specs table events, build downstream OK) |
 | [**#31**](#-issue-31-dimensionamento-inflexível-de-rótulos-de-etapa-no-microchart-processflow-causando-quebras-e-truncamentos) | Dimensionamento Inflexível de Rótulos de Etapa no Microchart `processFlow` Causando Quebras e Truncamentos | `@praxisui/charts`<br>`praxis-micro-visualization.component.ts` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/charts` (`PraxisMicroVisualizationComponent`), `@praxisui/core` (`stepLabelWidth`, `stepLabelLineClamp`) | 2026-10-08 | Validado (variáveis CSS dinâmicas, clamp responsivo, 405/405 specs charts verdes) |
-| [**#32**](#-issue-32-orquestração-declarativa-de-sub-recursos-e-relações-vinculadas-em-dossiês-analíticos-relations--subresourcebindings-em-behaviordrawer) | Orquestração Declarativa de Sub-Recursos e Relações Vinculadas em Dossiês Analíticos (`relations` em `behavior.drawer`) | `@praxisui/crud`<br>`@praxisui/table`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | — | — | Elimina >2.500 linhas de boilerplate nos 5 drawers customizados |
+| [**#32**](#-issue-32-orquestração-declarativa-de-sub-recursos-e-relações-vinculadas-em-dossiês-analíticos-relations--subresourcebindings-em-behaviordrawer) | Orquestração Declarativa de Sub-Recursos e Relações Vinculadas em Dossiês Analíticos (`relations` em `behavior.drawer`) | `@praxisui/crud`<br>`@praxisui/table`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/core` (`PraxisAnalyticalDrawerRelation`), `@praxisui/table` (`interpolateRelationEndpoint`, deduplicação por assinatura), `@praxisui/crud` | 2026-10-08 | Validado (orquestração declarativa de sub-recursos, cache de URL, build downstream OK) |
 | [**#33**](#-issue-33-banda-canônica-declarativa-de-resumo-executivo-e-kpis-no-praxis-crud-behaviorkpiband--praxiskpiband) | Banda Canônica Declarativa de Resumo Executivo e KPIs no `<praxis-crud>` (`behavior.kpiBand`) | `@praxisui/crud`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | — | — | Elimina `DashboardStatsService` (855 linhas) e signals manuais em 14 páginas |
 | [**#34**](#-issue-34-suporte-canônico-a-propriedades-calculadas-e-expressões-de-domínio-no-schema-computedfields--virtualproperties) | Suporte Canônico a Propriedades Calculadas e Expressões de Domínio no Schema (`computedFields`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/dynamic-form`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Elimina `tacticalDataEnrichmentInterceptor` (571 linhas) |
 | [**#35**](#-issue-35-eliminação-de-dtos-typescript-estáticos-redundantes-via-contratos-genéricos-dinâmicos-dynamicdatarecord--governança-por-schema) | Eliminação de DTOs TypeScript Estáticos Redundantes via Contratos Genéricos Dinâmicos (`DynamicDataRecord`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Previne acoplamento estático e quebra de tipos com o backend |
@@ -1935,7 +1935,7 @@ Na evolução das telas corporativas e vitrines da plataforma (como o **Praxis H
 - **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`, `@praxisui/core`, `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (Arquitetura de Apresentação e Governança Zero-Code)
 - **Tipo:** Extensão de Contrato de Metadados / Capacidade de Apresentação
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 Atualmente, no `@praxisui/table` e `@praxisui/crud`, o suporte declarativo a gavetas laterais de detalhe (`openMode: 'drawer'`) é restrito à montagem de formulários de CRUD tradicionais (leitura de registro via schema OpenAPI gerado por `/schemas/filtered` ou edição simples com campos dinâmicos).
@@ -1995,9 +1995,9 @@ No entanto, cenários analíticos corporativos avançados (como o **Dossiê de I
 Criação do componente de vitrine [`IncidentAnalysisDrawerComponent`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/operacoes/incident-analysis-drawer.component.ts), orquestrando o layout Bento, abas com `[hidden]` preservando DOM (conforme Issue #2) e consumindo `PraxisMicroVisualizationComponent` do `@praxisui/charts`.
 
 ### Critérios de Aceite para Resolução
-- [ ] O contrato `TableConfig` suporta `behavior.drawer.analyticalSchema` com abas e nós de apresentação.
-- [ ] A gaveta analítica pode ser configurada 100% via JSON vindo do backend (`praxis-metadata-starter`), sem necessidade de código Angular no consumidor.
-- [ ] Microcharts SVG de `@praxisui/charts` são suportados nativamente nos cartões da gaveta analítica.
+- [x] O contrato `TableConfig` suporta `behavior.drawer.analyticalSchema` com abas e nós de apresentação.
+- [x] A gaveta analítica pode ser configurada 100% via JSON vindo do backend (`praxis-metadata-starter`), sem necessidade de código Angular no consumidor.
+- [x] Microcharts SVG de `@praxisui/charts` são suportados nativamente nos cartões da gaveta analítica.
 
 ---
 
@@ -2057,7 +2057,7 @@ Aplicação de regras de estilo focais no container do drawer (`.flow-chart-wrap
 - **Módulos Afetados:** `@praxisui/crud`, `@praxisui/table`, `@praxisui/core`, `praxis-metadata-starter`
 - **Severidade:** 🔴 Alta (Causa raiz da proliferação de mais de 5.400 linhas de boilerplate distribuídas em 5 gavetas monolíticas no Hero HQ)
 - **Tipo:** Arquitetura de Apresentação / Governança Metadata-Driven de Relações
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 Ao selecionar uma linha em tabelas ricas, a experiência corporativa frequentemente exige a abertura de um dossiê lateral contendo não apenas os campos da própria linha, mas dados vinculados de entidades filhas ou agregadas:
@@ -2132,9 +2132,9 @@ Como o `@praxisui/crud` e o `@praxisui/table` não oferecem suporte declarativo 
 Construção imperativa dos 5 componentes de gaveta com mais de 5.400 linhas de código TypeScript, templates HTML e SCSS ad hoc.
 
 ### Critérios de Aceite para Resolução
-- [ ] O contrato `behavior.drawer.relations` é suportado no schema de configuração do `@praxisui/crud` e `@praxisui/table`.
-- [ ] O runtime resolve templates de rota e injeta automaticamente as respostas no contexto do drawer (`relations.<key>`).
-- [ ] A aplicação consumidora pode montar dossiês analíticos multi-recurso puramente via JSON, sem necessidade de componentes Angular dedicados para o drawer.
+- [x] O contrato `behavior.drawer.relations` é suportado no schema de configuração do `@praxisui/crud` e `@praxisui/table`.
+- [x] O runtime resolve templates de rota e injeta automaticamente as respostas no contexto do drawer (`relations.<key>`).
+- [x] A aplicação consumidora pode montar dossiês analíticos multi-recurso puramente via JSON, sem necessidade de componentes Angular dedicados para o drawer.
 
 ---
 
