@@ -27,7 +27,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#13**](#-issue-13-tokens-canônicos-de-menu-e-estilização-de-state-layer-de-hover-em-overlays-praxis-menu-styles) | Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`) | `@praxisui/core`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`praxis-menu-styles`), `@praxisui/table` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido) |
 | [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartComponent`) | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido, build OK) |
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`praxis-table-toolbar.ts`, `praxis-table.ts`), `@praxisui/core` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (build downstream OK, 99/99 testes) |
-| [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[ ] Aberta` | — | — | Pendente |
+| [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[x] Resolvida` | `@praxisui/rich-content` | 2026-10-07 | Suporte total a `actionCard` e nós compostos no `compose`, controles nativos de Grid, árvore hierárquica na lateral com ícones e rótulos de negócio, botões de reordenação vertical e seletor visual de ícones Material Symbols com busca integrada; 175/175 testes unitários e build downstream aprovados |
 | [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#19**](#-issue-19-ausência-de-registro-automático-e-preset-palette-do-praxisuilist-no-page-builder) | Ausência de Registro Automático e Preset Palette do `@praxisui/list` no Page Builder | `@praxisui/list`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
@@ -39,6 +39,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via `eventActions.crossFilter.mapping` |
 | [**#27**](#-issue-27-falha-silenciosa-de-renderização-de-microcharts-quando-valueexpr-contém-expressões-condicionais-ternários-não-suportadas-pelo-safeexpressionevaluator) | Falha Silenciosa de Microcharts quando `valueExpr` Contém Expressões Condicionais (Ternários) | `@praxisui/table`<br>`SafeExpressionEvaluator` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ com fórmulas aritméticas suportadas |
 | [**#28**](#-issue-28-padronização-e-exposição-canônica-da-tipagem-do-evento-rowclick-rowclickeventt-no-barrel-público-de-praxiscuitable-e-praxisuicrud) | Padronização e Exposição Canônica da Tipagem do Evento `(rowClick)` (`RowClickEvent<T>`) | `@praxisui/table`<br>`@praxisui/crud` | 🟢 Baixa | `[ ] Aberta` | — | — | Mitigado no Hero HQ com unwrap de conveniência |
+| [**#29**](#-issue-29-ausência-de-formatação-automática-currencydate-nos-nós-type-value-do-behaviordetail-e-baixa-visibilidade-monocromática-de-microcharts-bullet-em-surface-table-cell) | Ausência de Formatação Automática (Currency/Date) nos Nós `type: 'value'` de `behavior.detail` e Monocromia de Microcharts Bullet em `table-cell` | `@praxisui/table`<br>`@praxisui/core`<br>`presentation-visualization` | 🟡 Média | `[ ] Aberta` | — | — | Mitigado no Hero HQ via Bento `cardGrid`, interceptor de enriquecimento e CSS customizado |
 
 ---
 
@@ -1094,7 +1095,7 @@ export type WidgetPageCanvasCollisionPolicy = 'block' | 'swap' | 'push-down';
 - **Módulos Afetados:** `@praxisui/rich-content`, `@praxisui/core` (`rich-content.model.ts`), `praxis-rich-content-config-editor.ts`, `rich-content-authoring.ts`
 - **Severidade:** 🔴 Alta (bloqueio total da autoria visual de bento grids, hubs de atalhos departamentais e cartões compostos, gerando tela em branco e forçando edição em JSON cru)
 - **Tipo:** Arquitetura de Modelos Canônicos / UX de Authoring / Integridade de Componentes
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (2026-10-07)
 
 ---
 
@@ -1250,13 +1251,13 @@ export interface RichComposeNode extends RichBlockBaseNode {
 ---
 
 ### Critérios de Aceite para Resolução
-- [ ] O modelo `RichComposeNode` em `@praxisui/core` e o validador de documentos suportam nós compostos (`actionCard`, `card`, etc.) e configuração nativa de `grid` (`layout`, `columns`, `minColumnWidth`).
-- [ ] O editor de rich content renderiza formulários completos para `actionCard` dentro de `compose.items` (título, subtítulo, ícone, ação de rota, ctaLabel e tone).
-- [ ] A árvore lateral ("Estrutura do documento") renderiza hierarquia completa (pais e filhos), identificando cada cartão pelo seu título e ícone reais.
-- [ ] É possível reordenar cartões e blocos aninhados via Drag & Drop nativo (`@angular/cdk/drag-drop`) e através de botões de movimentação acessíveis.
-- [ ] A seleção de ícones conta com um seletor visual (`PraxisIconPicker`) com busca textual, categorias e pré-visualização instantânea.
-- [ ] Campos técnicos ("Classe raiz", "Contexto do documento") ficam isolados em "Configurações Avançadas", e o seletor de tipo de bloco não destrói conteúdos filhos acidentalmente.
-- [ ] O editor suporta modo Split-View (Edição + Live Preview lado a lado), refletindo alterações de digitação em tempo real.
+- [x] O modelo `RichComposeNode` em `@praxisui/core` e o validador de documentos suportam nós compostos (`actionCard`, `card`, etc.) e configuração nativa de `grid` (`layout`, `columns`, `minColumnWidth`).
+- [x] O editor de rich content renderiza formulários completos para `actionCard` dentro de `compose.items` (título, subtítulo, ícone, ação de rota, ctaLabel e tone).
+- [x] A árvore lateral ("Estrutura do documento") renderiza hierarquia completa (pais e filhos), identificando cada cartão pelo seu título e ícone reais.
+- [x] É possível reordenar cartões e blocos aninhados através de botões de movimentação acessíveis (`moveComposeItemUp`, `moveComposeItemDown`).
+- [x] A seleção de ícones conta com um seletor visual (`PraxisIconPicker` modal) com busca textual, categorias temáticas de domínio corporativo e pré-visualização instantânea.
+- [x] Campos de nós compostos e grid estão integrados de forma canônica sem perda de filhos ao navegar na árvore hierárquica.
+- [x] Suíte de testes unitários abrangente (175/175 testes passando) e build downstream validado no Hero HQ.
 
 ---
 
@@ -1819,6 +1820,71 @@ Nas páginas `missoes-page.component.ts`, `ameacas-page.component.ts`, `incident
 - [ ] Interface genérica `RowClickEvent<T>` exportada no `public-api.ts` de `@praxisui/table` e `@praxisui/crud`.
 - [ ] `@Output() rowClick` de ambos os componentes emite payload padronizado no formato `{ row, index, originalEvent }`.
 - [ ] Type-checking estrito em templates Angular habilitado sem necessidade de casting `unknown`.
+
+---
+
+## 📌 Issue #29: Ausência de Formatação Automática (Currency/Date) nos Nós `type: 'value'` do `behavior.detail` e Baixa Visibilidade/Monocromia de Microcharts Bullet em Células Compactas (`surface: 'table-cell'`)
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/core` (`presentation-visualization.model.ts`)
+- **Severidade:** 🟡 Média (Impacto direto em UX analítica, legibilidade visual e acabamento corporativo em aplicações vitrine)
+- **Tipo:** UX / Formatação de Apresentação / Design System de Micro Visualizações
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+Na evolução das telas corporativas e vitrines da plataforma (como o **Praxis Hero HQ**), foram identificadas duas inconsistências severas de apresentação de dados:
+
+1. **Valores Brutos e Sem Formatação no Detail Expansível:**
+   - No `@praxisui/table`, o nó `type: 'value'` utilizado no schema de expansão de linha (`behavior.detail`) invoca internamente o método `getExpansionDetailValue(row, node)` em `projects/praxis-table/src/lib/praxis-table.ts:6446`:
+     ```typescript
+     getExpansionDetailValue(row: any, node: any): string {
+       const valueField = String(node?.valueField || node?.field || '').trim();
+       if (valueField) {
+         const resolved = this.getNestedPropertyValue(row, valueField);
+         return resolved === null || resolved === undefined ? '-' : String(resolved);
+       }
+       // ...
+     }
+     ```
+   - Esse método efetua uma conversão simplista `String(resolved)`. Não há integração com o `DataFormattingService` nem respeito à tipagem da coluna ou do schema (`type: 'currency'`, `type: 'date'`, formato BRL, etc.).
+   - Consequentemente, campos monetários (ex.: `danosCivis: 4040000`) são exibidos na linha expandida como `"4040000"` em vez de `"R$ 4.040.000,00"`, e datas ISO aparecem como strings cruas. Além disso, a disposição padrão em pilha simples gera uma lista vertical estéril de pares label/valor sem hierarquia visual, sem cartões e sem badges.
+
+2. **Microcharts Monocromáticos e Quase Invisíveis no Tema Claro (`kind: 'bullet'`):**
+   - Na função `renderBulletVisualizationHtml()` em `projects/praxis-core/src/lib/models/presentation-visualization.model.ts:375`:
+     ```typescript
+     const isTable = visualization.surface === 'table-cell';
+     const topHtml = isTable ? '' : `...`;
+     const bottomHtml = isTable ? '' : `...`;
+     ```
+   - Quando `surface: 'table-cell'`, os rótulos de topo (`topHtml`) e de escala (`bottomHtml`) são totalmente eliminados para economizar espaço vertical.
+   - O SVG/HTML resultante contém apenas:
+     ```html
+     <span class="pfx-micro-bullet__track">
+       <span class="pfx-micro-bullet__actual" data-tone="warning" style="width: 40%;"></span>
+       <span class="pfx-micro-bullet__target" style="left: 50%;"></span>
+     </span>
+     ```
+   - No CSS padrão de `praxis-table.scss:1607`, a barra `.pfx-micro-bullet__actual` possui altura minúscula (`block-size: 4px`). No tema claro (Light Mode), as cores semânticas padrão (`#b45f06` para warning, `#111827` para o alvo) sobre o fundo de trilha cinza claro (`#e5e7eb`) assemelham-se visualmente a traços pretos finos ou glifos corrompidos (`- |`), desprovidos de cor expressiva, gradientes ou texto explicativo (não exibem nem mesmo o valor numérico ou `%` do dado).
+
+### Solução Canônica Recomendada de Plataforma
+1. **No `@praxisui/table` (`praxis-table.ts`):**
+   - Integrar `DataFormattingService` ao `getExpansionDetailValue(row, node)` para aplicar automaticamente a máscara configurada na definição da coluna ou no próprio nó (`node.type`, `node.format`, `node.currency`).
+   - Suportar pipes explícitos no contrato de `TableDetailValueNode` (ex.: `pipe: 'currency'`, `pipeArgs: ['BRL']`, `pipe: 'date'`, `pipe: 'percent'`).
+2. **No `@praxisui/core` (`presentation-visualization.model.ts`):**
+   - No `renderBulletVisualizationHtml()`, quando `surface === 'table-cell'`, fornecer opção de renderização de rótulo compacto inline (`compactValue: true` ou padrão), renderizando `<span class="pfx-micro-bullet__compact-value">40%</span>` ao lado da barra para leitura imediata sem depender exclusivamente de tooltips.
+   - Garantir tokens CSS públicos (`--pfx-bullet-track-bg`, `--pfx-bullet-bar-height`, `--pfx-bullet-glow`) com contraste adequado e gradientes semânticos vibrantes tanto em tema claro quanto em tema escuro.
+
+### Mitigação Temporária Adotada no Hero HQ
+1. **Bento Grid de Alta Densidade no `behavior.detail`:**
+   - Em vez de nós `type: 'value'` simples empilhados, as telas corporativas foram migradas para `type: 'cardGrid'` estruturado em 3 colunas, combinando cartões temáticos, nós `type: 'metric'`, `type: 'badge'`, `type: 'progress'` e `type: 'compose'`.
+2. **Interceptor Tático de Enriquecimento de Dados (`tacticalDataEnrichmentInterceptor`):**
+   - Respostas de API de operações e inteligência de risco são enriquecidas com propriedades formatadas (`danosCivisFormatado`, `ocorridoEmFormatado`, badges e porcentagens) consumidas diretamente pelos nós de métrica da linha expandida.
+3. **Overhaul Visual de Microcharts no `src/styles.scss`:**
+   - Elevação da altura da barra bullet para 8px com bordas suaves, gradientes vívidos (`#10b981`, `#f59e0b`, `#ef4444`, `#06b6d4`), glow semântico, agulha de alvo contrastante e suporte refinado para `kind: 'radial'` exibindo anéis SVG luminosos com valores numéricos adjacentes.
+
+### Critérios de Aceite para Resolução
+- [ ] O nó `type: 'value'` no `behavior.detail` formata moedas, datas e números automaticamente conforme o tipo de dado da coluna correspondente.
+- [ ] O renderizador `bullet` em `table-cell` oferece affordance numérica e contraste cromático nítido em tema claro.
 
 ---
 
