@@ -1,0 +1,338 @@
+/* ==========================================================================
+   Praxis Platform - Canonical Resource Page & KPI Bento Grid Styles
+   Centralized responsive layout, domain accents, glassmorphic surfaces
+   ========================================================================== */
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1540px;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  margin: 8px 0 0;
+  font-size: 0.88rem;
+  color: var(--muted-foreground);
+  max-width: 720px;
+  line-height: 1.45;
+}
+
+/* Domain Badges & Color Tones */
+.domain-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  span {
+    font-size: 14px;
+  }
+}
+
+.tone-operations {
+  color: var(--operations);
+  background: color-mix(in oklab, var(--operations) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--operations) 30%, transparent);
+}
+
+.tone-rh {
+  color: var(--rh);
+  background: color-mix(in oklab, var(--rh) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--rh) 30%, transparent);
+}
+
+.tone-risk {
+  color: var(--risk);
+  background: color-mix(in oklab, var(--risk) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--risk) 30%, transparent);
+}
+
+.tone-supplies {
+  color: var(--supplies);
+  background: color-mix(in oklab, var(--supplies) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--supplies) 30%, transparent);
+}
+
+.tone-assets {
+  color: var(--assets);
+  background: color-mix(in oklab, var(--assets) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--assets) 30%, transparent);
+}
+
+.tone-ready {
+  color: var(--ready);
+  background: color-mix(in oklab, var(--ready) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--ready) 30%, transparent);
+}
+
+.tone-warning {
+  color: var(--warning);
+  background: color-mix(in oklab, var(--warning) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--warning) 30%, transparent);
+}
+
+.tone-primary {
+  color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
+}
+
+/* Canonical KPI Surface Bento Grid */
+.kpi-surface,
+.kpi-section,
+[class*="-kpi-grid"] {
+  cursor: pointer;
+
+  .prx-rich-stat-group__items,
+  .pdx-rich-stat-group__items {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .prx-rich-stat-group__item,
+  .pdx-rich-stat-group__item {
+    border-radius: 16px !important;
+    padding: 18px !important;
+    border: 1px solid var(--border) !important;
+    background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    cursor: pointer !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease !important;
+
+    &:hover {
+      transform: translateY(-3px) !important;
+      border-color: color-mix(in oklab, var(--primary) 50%, var(--border)) !important;
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.35) !important;
+    }
+  }
+
+  .prx-rich-stat-group__value,
+  .pdx-rich-stat-group__value {
+    font-family: var(--font-display) !important;
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    color: var(--foreground) !important;
+    margin: 4px 0 0 !important;
+  }
+
+  .prx-rich-stat-group__label,
+  .pdx-rich-stat-group__label {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: var(--muted-foreground) !important;
+  }
+
+  .prx-rich-stat-group__caption,
+  .pdx-rich-stat-group__caption {
+    font-size: 0.72rem !important;
+    color: var(--muted-foreground) !important;
+    margin-top: 4px !important;
+  }
+}
+
+/* CRUD Surface Glass Container */
+.crud-surface {
+  border-radius: 18px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Visual Chart Surface */
+.chart-surface {
+  border-radius: 18px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+/* Persistence & Customization Toolbar Controls */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.table-persistence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+
+  &.customized {
+    background: color-mix(in oklab, var(--warning) 15%, transparent);
+    border: 1px solid color-mix(in oklab, var(--warning) 35%, transparent);
+    color: var(--warning);
+  }
+
+  &.governed {
+    background: color-mix(in oklab, var(--cobalt) 12%, transparent);
+    border: 1px solid color-mix(in oklab, var(--cobalt) 30%, transparent);
+    color: var(--cobalt);
+  }
+
+  .saved-time {
+    font-size: 0.65rem;
+    opacity: 0.8;
+  }
+}
+
+.pulse-indicator-amber {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--warning);
+  box-shadow: 0 0 6px var(--warning);
+}
+
+.pulse-indicator-cyan {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--cobalt);
+  box-shadow: 0 0 6px var(--cobalt);
+}
+
+.reset-layout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid color-mix(in oklab, var(--destructive) 35%, transparent);
+  background: color-mix(in oklab, var(--destructive) 10%, transparent);
+  color: var(--destructive);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    background: var(--destructive);
+    color: #fff;
+    border-color: var(--destructive);
+    transform: translateY(-1px);
+  }
+
+  span {
+    font-size: 16px;
+  }
+}
+
+.customize-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 80%, transparent);
+  color: var(--foreground);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  &.active {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+    box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 40%, transparent);
+  }
+
+  span {
+    font-size: 18px;
+  }
+}
+
+/* Tactical Notification Toast Banner */
+.tactical-notice {
+  position: fixed;
+  top: 96px;
+  right: 28px;
+  z-index: 100;
+  padding: 12px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: color-mix(in oklab, var(--card) 95%, transparent);
+  border: 1px solid var(--primary);
+  box-shadow: var(--shadow-command);
+  animation: fadeIn 0.2s ease-out;
+
+  span:first-child {
+    color: var(--primary);
+    font-size: 20px;
+  }
+  span:last-child {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+
+.dossier-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  span {
+    font-size: 18px;
+  }
+}

@@ -1,0 +1,269 @@
+import type { CrudMetadata } from '@praxisui/crud';
+import type { RichContentDocument } from '@praxisui/core';
+import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
+
+export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
+  component: 'praxis-crud',
+  resource: {
+    path: 'human-resources/ferias-afastamentos',
+    idField: 'id',
+  },
+  table: {
+    columns: [
+      {
+        field: 'id',
+        header: 'ID',
+        width: '80px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'tipo',
+        header: 'Tipo de Licença / Ausência',
+        width: '180px',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        field: 'funcionarioId',
+        header: 'Colaborador ID',
+        width: '140px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'dataInicio',
+        header: 'Início da Vigência',
+        type: 'date',
+        format: 'dd/MM/yyyy',
+        width: '150px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'dataFim',
+        header: 'Término Previsto',
+        type: 'date',
+        format: 'dd/MM/yyyy',
+        width: '150px',
+        align: 'center',
+        sortable: true,
+      },
+      {
+        field: 'progressoRecuperacao',
+        header: 'Progresso / Recuperação',
+        width: '190px',
+        align: 'center',
+        sortable: true,
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: 'row.progressoRecuperacao',
+              total: 100,
+              toneExpr: 'row.leaveTone',
+              fallbackText: 'Progresso',
+            },
+          },
+        },
+      },
+      {
+        field: 'observacoes',
+        header: 'Observações / Parecer Operacional',
+        width: '320px',
+        sortable: true,
+      },
+    ],
+    toolbar: {
+      search: {
+        enabled: true,
+        placeholder: 'Buscar afastamentos por tipo, colaborador ou observações...',
+      },
+      filters: {
+        enabled: true,
+        quickFilters: [
+          { id: 'all', label: 'Todos os Registros', filter: '', icon: 'history' },
+          { id: 'ferias', label: 'Férias Regulamentares', filter: "tipo='FERIAS'", icon: 'beach_access' },
+          { id: 'medica', label: 'Licença Médica / Recuperação', filter: "tipo='LICENCA_MEDICA' or tipo='MEDICA'", icon: 'health_and_safety' },
+          { id: 'treinamento', label: 'Treinamento Tático', filter: "tipo='TREINAMENTO'", icon: 'model_training' },
+        ],
+        showAdvancedButton: true,
+      },
+    },
+    behavior: {
+      filtering: {
+        columnFilters: {
+          enabled: true,
+        },
+        advancedFilters: {
+          schemaUrl: '/schemas/filtered?path=/api/human-resources/ferias-afastamentos/filter&operation=post&schemaType=request',
+          settings: {
+            inline: true,
+            alwaysVisibleFields: ['tipo', 'funcionarioId', 'dataInicio'],
+            useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: createBentoDetailExpansion([
+        {
+          type: 'cardGrid',
+          title: 'Dossiê do Período de Afastamento & Escala Tática',
+          subtitle: 'Acompanhamento clínico pós-combate, parecer médico e designação de contingente',
+          columns: 3,
+          minCardWidth: 280,
+          cards: [
+            {
+              id: 'card-recuperacao',
+              title: 'Período & Motivo',
+              subtitle: 'Datas e enquadramento tático',
+              content: [
+                {
+                  type: 'compose',
+                  direction: 'column',
+                  gap: 'sm',
+                  items: [
+                    {
+                      type: 'badge',
+                      labelExpr: 'row.tipo',
+                      icon: 'event_busy',
+                    },
+                    {
+                      type: 'metric',
+                      label: 'Início da Vigência',
+                      valueExpr: 'row.dataInicioFormatada || row.dataInicio',
+                      icon: 'calendar_today',
+                    },
+                    {
+                      type: 'metric',
+                      label: 'Previsão de Retorno',
+                      valueExpr: 'row.dataFimFormatada || row.dataFim',
+                      icon: 'event_available',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'card-medico',
+              title: 'Laudo & Recuperação',
+              subtitle: 'Status biológico e regenerativo',
+              content: [
+                {
+                  type: 'compose',
+                  direction: 'column',
+                  gap: 'sm',
+                  items: [
+                    {
+                      type: 'progress',
+                      label: 'Ciclo Regenerativo Concluído',
+                      valueExpr: 'row.progressoRecuperacao',
+                      max: 100,
+                      showPercent: true,
+                    },
+                    {
+                      type: 'metric',
+                      label: 'Parecer da Ala Médica',
+                      valueExpr: 'row.laudoMedico',
+                      icon: 'medical_services',
+                    },
+                    {
+                      type: 'metric',
+                      label: 'Observações Gerais',
+                      valueExpr: 'row.observacoes',
+                      icon: 'clinical_notes',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 'card-substituicao',
+              title: 'Substituição Operacional',
+              subtitle: 'Cobertura de posto tático',
+              content: [
+                {
+                  type: 'compose',
+                  direction: 'column',
+                  gap: 'sm',
+                  items: [
+                    {
+                      type: 'metric',
+                      label: 'Substituto Designado',
+                      valueExpr: 'row.substitutoDesignado',
+                      icon: 'person_pin',
+                    },
+                    {
+                      type: 'metric',
+                      label: 'Colaborador Afastado (ID)',
+                      valueExpr: 'row.funcionarioId',
+                      icon: 'badge',
+                    },
+                    {
+                      type: 'metric',
+                      label: 'Protocolo de Prontidão',
+                      valueExpr: "'Protocolo Aegis Nível 2'",
+                      icon: 'shield',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+    },
+  } as unknown as CrudMetadata['table'],
+  defaults: {
+    openMode: 'drawer',
+  },
+};
+
+export const AFASTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
+  kind: 'praxis.rich-content',
+  version: '1.0.0',
+  nodes: [
+    {
+      type: 'statGroup',
+      layout: 'grid',
+      tileLayout: 'tile',
+      headerSpacing: 'normal',
+      className: 'afastamentos-kpi-grid',
+      items: [
+        {
+          id: 'ciclos',
+          label: 'Total de Registros',
+          value: '111 Registros',
+          caption: 'Férias regulamentares e licenças',
+          icon: 'history',
+          tone: 'neutral',
+        },
+        {
+          id: 'criticos',
+          label: 'Casos Críticos / Graves',
+          value: '51 Ocorrências',
+          caption: 'Trauma de combate e regeneração',
+          icon: 'health_and_safety',
+          tone: 'danger',
+        },
+        {
+          id: 'padrao',
+          label: 'Licenças Padrão',
+          value: '60 Registros',
+          caption: 'Descanso e suporte preventivo',
+          icon: 'event_available',
+          tone: 'info',
+        },
+        {
+          id: 'dias',
+          label: 'Dias em Recuperação',
+          value: '1.204 Dias',
+          caption: 'Total acumulado em afastamento',
+          icon: 'calendar_month',
+          tone: 'warning',
+        },
+      ],
+    },
+  ],
+};
