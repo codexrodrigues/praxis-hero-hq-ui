@@ -266,7 +266,7 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
                           {
                             type: 'metric',
                             label: 'Data de Pagamento',
-                            valueExpr: 'row.dataPagamento',
+                            valueExpr: 'row.dataPagamentoFormatada || row.dataPagamento',
                             icon: 'event_available',
                           },
                           {

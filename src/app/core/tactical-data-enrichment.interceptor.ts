@@ -27,6 +27,17 @@ function formatTacticalDateTime(isoStr?: string | null): string {
   }
 }
 
+function formatDatePtBr(dateStr?: string | null): string {
+  if (!dateStr) return '—';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
+  const match = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const [, y, m, d] = match;
+    return `${d}/${m}/${y}`;
+  }
+  return dateStr;
+}
+
 function enrichIncident(item: any): any {
   if (!item || typeof item !== 'object') return item;
   const danos = Number(item.danosCivis ?? 0);
@@ -334,15 +345,19 @@ function enrichAfastamento(item: any): any {
   const idNum = Number(item.id ?? 1);
   const progressoRecuperacao = Math.min(100, Math.max(30, 40 + (idNum % 5) * 14));
   const leaveTone = progressoRecuperacao >= 80 ? 'success' : progressoRecuperacao >= 50 ? 'info' : 'warning';
+  const dataInicioFormatada = formatDatePtBr(item.dataInicio);
+  const dataFimFormatada = formatDatePtBr(item.dataFim);
 
   return {
     ...item,
+    dataInicioFormatada,
+    dataFimFormatada,
     progressoRecuperacao,
     progressoRecuperacaoPercentual: `${progressoRecuperacao}%`,
     leaveTone,
     laudoMedico: 'Em recuperação tecidual acelerada (Câmara de Cura S.H.I.E.L.D.)',
     substitutoDesignado: 'Sentinela de Apoio Tático Alpha',
-    previsaoRetorno: item.dataFim ?? '30 dias',
+    previsaoRetorno: dataFimFormatada,
   };
 }
 
@@ -363,21 +378,63 @@ function enrichDepartamento(item: any): any {
   };
 }
 
-function enrichFolha(item: any): any {
+function enrichEquipe(item: any): any {
   if (!item || typeof item !== 'object') return item;
-  const bruto = Number(item.salarioBruto ?? 10000);
-  const liquido = Number(item.salarioLiquido ?? 8000);
-  const ratio = bruto > 0 ? Math.round((liquido / bruto) * 100) : 80;
-  const margemTone = ratio >= 80 ? 'success' : 'info';
+  const idNum = Number(item.id ?? 1);
+  const prontidaoScore =
+    item.status === 'ATIVA' ? Math.min(100, 85 + (idNum % 4) * 4) : item.status === 'EM_MISSAO' ? 95 : 60;
+  const prontidaoTone = prontidaoScore >= 85 ? 'success' : prontidaoScore >= 70 ? 'info' : 'warning';
 
   return {
     ...item,
+    prontidaoScore,
+    prontidaoPercentual: `${prontidaoScore}%`,
+    prontidaoTone,
+    liderTatico:
+      idNum % 3 === 0
+        ? 'Capitão América (Steve Rogers)'
+        : idNum % 3 === 1
+          ? 'Iron Man (Tony Stark)'
+          : 'Thor Odinson',
+    efetivoOperacional: `${12 + (idNum % 6) * 4} Operadores Táticos`,
+    historicoMissoes: `${40 + (idNum % 15) * 8} Operações Concluídas`,
+    nivelAcessoEquipe: 'Credencial Classe Vingadores',
+  };
+}
+
+function enrichFuncionario(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const idNum = Number(item.id ?? 1);
+  const prontidaoScore = item.ativo !== false ? Math.min(100, 80 + (idNum % 5) * 4) : 40;
+  const prontidaoTone = prontidaoScore >= 85 ? 'success' : prontidaoScore >= 70 ? 'info' : 'warning';
+
+  return {
+    ...item,
+    prontidaoScore,
+    prontidaoPercentual: `${prontidaoScore}%`,
+    prontidaoTone,
+  };
+}
+
+function enrichFolha(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  const bruto = Number(item.salarioBruto ?? 10000);
+  const descontos = Number(item.totalDescontos ?? 2000);
+  // Integridade de Folha Corporativa: Salário Líquido = Bruto - Retenções
+  const liquidoReal = Math.max(0, bruto - descontos);
+  const ratio = bruto > 0 ? Math.min(100, Math.max(0, Math.round((liquidoReal / bruto) * 100))) : 80;
+  const margemTone = ratio >= 80 ? 'success' : ratio >= 60 ? 'info' : 'warning';
+
+  return {
+    ...item,
+    salarioLiquido: liquidoReal,
     margemLiquida: ratio,
     margemLiquidaPercentual: `${ratio}%`,
     margemTone,
     salarioBrutoFormatado: formatCurrencyBrl(bruto),
-    salarioLiquidoFormatado: formatCurrencyBrl(liquido),
-    totalDescontosFormatado: formatCurrencyBrl(item.totalDescontos),
+    salarioLiquidoFormatado: formatCurrencyBrl(liquidoReal),
+    totalDescontosFormatado: formatCurrencyBrl(descontos),
+    dataPagamentoFormatada: formatDatePtBr(item.dataPagamento),
     statusTransferencia: 'Liquidado via Banco Central S.H.I.E.L.D.',
   };
 }
@@ -397,6 +454,8 @@ function enrichDataPayload(body: any, url: string): any {
   const isAfastamentos = url.includes('afastamentos');
   const isDepartamentos = url.includes('departamentos');
   const isFolha = url.includes('folhas-pagamento') || url.includes('folha-pagamento');
+  const isEquipes = url.includes('equipes');
+  const isFuncionarios = url.includes('funcionarios');
 
   const enricher = isIncidentes
     ? enrichIncident
@@ -422,7 +481,11 @@ function enrichDataPayload(body: any, url: string): any {
                         ? enrichDepartamento
                         : isFolha
                           ? enrichFolha
-                          : (x: any) => x;
+                          : isEquipes
+                            ? enrichEquipe
+                            : isFuncionarios
+                              ? enrichFuncionario
+                              : (x: any) => x;
 
   // Case 1: body.data.content (Spring Page wrapped in ApiResponse)
   if (body.data && Array.isArray(body.data.content)) {

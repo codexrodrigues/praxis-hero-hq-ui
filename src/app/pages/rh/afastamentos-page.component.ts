@@ -189,13 +189,13 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
                           {
                             type: 'metric',
                             label: 'Início da Vigência',
-                            valueExpr: 'row.dataInicio',
+                            valueExpr: 'row.dataInicioFormatada || row.dataInicio',
                             icon: 'calendar_today',
                           },
                           {
                             type: 'metric',
                             label: 'Previsão de Retorno',
-                            valueExpr: 'row.dataFim',
+                            valueExpr: 'row.dataFimFormatada || row.dataFim',
                             icon: 'event_available',
                           },
                         ],

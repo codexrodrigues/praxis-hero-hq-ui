@@ -69,9 +69,29 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         header: 'Status',
         type: 'boolean',
         format: 'custom|Ativo|Inativo',
-        width: '120px',
+        width: '110px',
         sortable: true,
         filterable: true,
+      },
+      {
+        field: 'prontidaoScore',
+        header: 'Prontidão de Campo',
+        width: '180px',
+        align: 'center',
+        sortable: true,
+        renderer: {
+          type: 'microVisualization',
+          microVisualization: {
+            visualization: {
+              kind: 'radial',
+              surface: 'table-cell',
+              valueExpr: 'row.prontidaoScore',
+              total: 100,
+              toneExpr: 'row.prontidaoTone',
+              fallbackText: 'Prontidão',
+            },
+          },
+        },
       },
       {
         field: 'dataAdmissao',
