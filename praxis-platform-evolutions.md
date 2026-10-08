@@ -2195,7 +2195,7 @@ Pela ausência de uma funcionalidade canônica no `@praxisui/table` para definir
 - **Módulos Afetados:** `@praxisui/core`, `@praxisui/table`, `@praxisui/crud`
 - **Severidade:** 🟡 Média (Prevenção de regressão por quebra de contrato e eliminação de dezenas de interfaces manuais)
 - **Tipo:** Arquitetura de Tipos / Paradigma Metadata-Driven
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 O repositório do Hero HQ define manualmente dezenas de interfaces estáticas TypeScript (`HeroProfile`, `IncidentProfile`, `PayrollRecord`, `MissionProfile`, `BaseFacilityProfile`, `EquipmentRecord`, etc.).
@@ -2204,15 +2204,22 @@ Quando a estrutura dos campos é governada pelo backend em `/schemas/filtered`, 
 
 ### Solução Canônica Recomendada de Plataforma
 1. **Exposição de Modelos Dinâmicos Guiados por Metadados no `@praxisui/core`:**
-   Padronizar o uso de `DynamicDataRecord<T = Record<string, unknown>>` com helpers utilitários para acesso seguro a propriedades dinâmicas (`resolveField(row, 'field')`).
+   Padronizar o uso de `DynamicDataRecord<T = Record<string, unknown>>` com helpers utilitários para acesso seguro a propriedades dinâmicas (`resolveDataField(row, 'field')`).
 2. **Eventos e Ações Fortemente Tipados em Metadados:**
    Garantir que eventos como `(rowClick)` e handlers de formulário operem com tipagens genéricas parametrizáveis, dispensando declarações manuais de interfaces locais em aplicações vitrine.
 
-### Mitigação Temporária Adotada no Hero HQ
-Declaração de interfaces específicas em cada arquivo de gaveta e página.
+### Implementação Canônica da Solução
+1. **No `@praxisui/core` (`projects/praxis-core/src/lib/models/dynamic-record.model.ts`):**
+   - Criados contratos universais `DynamicDataRecord<T>` e `DynamicDataCollection<T>`, fornecendo assinatura indexada `[key: string]: unknown` combinada com identificador padrão `id?: string | number`.
+   - Implementados helpers utilitários puros: `resolveDataField<R>()` (com navegação segura por caminhos profundos `a.b.c`), `createDynamicRecord<T>()`, `isDynamicDataRecord()` e `extractRecordId()`.
+   - Suite de testes unitários dedicada `dynamic-record.model.spec.ts` com 7 specs e 100% de aprovação.
+   - Exportação canônica no `public-api.ts` de `@praxisui/core`.
+2. **No `@praxisui/table` e `@praxisui/crud`:**
+   - Tipagem padrão de `RowClickEvent<T = DynamicDataRecord>` parametrizada em `table-events.ts`.
+   - Re-exportação canônica de `DynamicDataRecord` em ambos os pacotes para consumo simplificado.
 
 ### Critérios de Aceite para Resolução
-- [ ] Os módulos públicos de `@praxisui/*` fornecem contratos genéricos dinâmicos que dispensam DTOs TypeScript locais nas aplicações consumidoras.
+- [x] Os módulos públicos de `@praxisui/*` fornecem contratos genéricos dinâmicos que dispensam DTOs TypeScript locais nas aplicações consumidoras.
 
 ---
 
@@ -2222,7 +2229,7 @@ Declaração de interfaces específicas em cada arquivo de gaveta e página.
 - **Módulos Afetados:** `@praxisui/dynamic-form`, `@praxisui/core`
 - **Severidade:** 🟡 Média (Elimina centenas de linhas de HTML customizado com cartões de leitura cadastral)
 - **Tipo:** UX / Design System / Formulários Dinâmicos
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 Ao inspecionar o dossiê de uma entidade (ex.: Aba *Identidade Civil* em `hero-dossier-drawer.component.ts` ou Aba *Parâmetros* em `base-facility-drawer.component.ts`), o operador precisa visualizar informações cadastrais estruturadas em seções limpas.
@@ -2236,12 +2243,24 @@ O componente `@praxisui/dynamic-form` em modo `disabled` ou `readOnly` continua 
    - Renderiza seções e grupos como cartões Bento limpos com divisores sutis.
    - Preserva o mesmo schema JSON utilizado para edição (`mode: 'edit'`), permitindo alternância instantânea entre modo de leitura executiva e modo de edição sem escrever uma única linha de HTML extra.
 
-### Mitigação Temporária Adotada no Hero HQ
-Construção manual de templates HTML repetitivos para exibição de atributos de leitura nas abas dos drawers.
+### Implementação Canônica da Solução
+1. **No `@praxisui/core` (`field-presentation.model.ts`):**
+   - Atualizado `DynamicFormMode` para incluir `'presentation'` e `'dossier'`.
+2. **No `@praxisui/dynamic-form` (`PraxisDynamicForm`):**
+   - Atualizado `@Input() mode: DynamicFormMode`.
+   - `effectivePresentation` ativado automaticamente quando `mode === 'presentation'` ou `mode === 'dossier'`.
+   - `effectivePresentationPreset` define `'corporate-dossier'` para o modo `'dossier'`.
+   - Adicionada a classe `.praxis-dynamic-form--presentation` junto de `.presentation-mode`.
+   - `effectiveReadonly` e `presentationForLoader` habilitados diretamente.
+   - Ocultação automática da barra de ações de envio em modo de apresentação.
+   - Atualizado o editor de configurações `PraxisDynamicFormConfigEditor` para operar com `DynamicFormMode`.
+3. **Testes e Validação:**
+   - Suite de testes em `praxis-dynamic-form.spec.ts` validando ativação e classes de apresentação e dossiê corporativo (220 specs aprovados com sucesso).
+   - Validação downstream em `praxis-hero-hq-ui` com build de produção verde (código 0).
 
 ### Critérios de Aceite para Resolução
-- [ ] `<praxis-dynamic-form [mode]="'presentation'">` renderiza os dados do registro como uma ficha técnica editorial sem affordance de campos de entrada desabilitados.
-- [ ] É possível reutilizar 100% do schema JSON do formulário para apresentação de dados de leitura.
+- [x] `<praxis-dynamic-form [mode]="'presentation'">` renderiza os dados do registro como uma ficha técnica editorial sem affordance de campos de entrada desabilitados.
+- [x] É possível reutilizar 100% do schema JSON do formulário para apresentação de dados de leitura.
 
 
 ---
