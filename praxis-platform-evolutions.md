@@ -20,7 +20,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#6**](#-issue-6-descoberta-e-ativação-automática-de-filtros-inline-inteligentes-no-praxisicrud) | Descoberta e Ativação Automática de Filtros Inline Inteligentes no `@praxisui/crud` | `@praxisui/crud`<br>`@praxisui/table`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `@praxisui/crud` (`CrudFilterBarConfig`, auto-discovery) | 2026-10-07 | Validado no `funcionarios-page` |
 | [**#7**](#-issue-7-normalização-robusta-de-parâmetros-de-path-em-schemasfiltered) | Normalização Robusta de Parâmetros de Path em `/schemas/filtered` | `praxis-metadata-starter`<br>`ApiDocsController` | 🟢 Baixa | `[x] Resolvida` | PR #240 (`d59641bf9e`) | 2026-10-07 | Validado (testes unitários) |
 | [**#8**](#-issue-8-hierarquia-visual-de-seções-e-densidade-de-enquadramento-em-dossiêsdrawers-caixa-dentro-de-caixa-vs-seções-plaindivider) | Hierarquia Visual de Seções e Densidade de Enquadramento em Dossiês/Drawers ("Caixa Dentro de Caixa" vs Seções Plain/Divider) | `@praxisui/dynamic-form`<br>`Design System`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/dynamic-form` (`sectionDefaultAppearance`, `sectionDivider`, `corporate-dossier`) | 2026-10-07 | Validado (`hero-dossier-drawer` limpo, sem CSS ad-hoc) |
-| [**#9**](#-issue-9-governança-canônica-e-descoberta-de-serviços-de-métricas-e-dashboards-statscapabilities-e-praxischarts) | Governança Canônica e Descoberta de Serviços de Métricas e Dashboards (`/stats/capabilities` e `@praxisui/charts`) | `praxis-metadata-starter`<br>`@praxisui/charts`<br>`@praxisui/page-builder` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#9**](#-issue-9-governança-canônica-e-descoberta-de-serviços-de-métricas-e-dashboards-statscapabilities-e-praxischarts) | Governança Canônica e Descoberta de Serviços de Métricas e Dashboards (`/stats/capabilities` e `@praxisui/charts`) | `praxis-metadata-starter`<br>`@praxisui/charts`<br>`@praxisui/page-builder` | 🟡 Média | `[x] Resolvida` | Backend: `praxis-metadata-starter` (`2f0d57ccce`)<br>Frontend: `@praxisui/charts` (`acfd0d978`) | 2026-10-08 | Validado (endpoint `/stats/capabilities`, HATEOAS `_links.stats`, auto-descoberta no `PraxisChartStatsApiService`, `resourceKey`, 409/409 specs verdes e build downstream aprovado) |
 | [**#10**](#-issue-10-refinamento-visual-do-pdx-inline-toggle-e-seletor-tri-state-para-filtros-booleanos) | Refinamento Visual do `pdx-inline-toggle` e Seletor Tri-State para Filtros Booleanos | `@praxisui/dynamic-fields`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `86839d182` | 2026-10-07 | Validado (`funcionarios-page` tri-state e inline-toggle) |
 | [**#11**](#-issue-11-suporte-a-filtros-desacoplados-e-teleporte-via-cdk-portal-praxisfilterportal) | Suporte a Filtros Desacoplados e Teleporte via CDK Portal (`PraxisFilterPortal`) | `@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`PraxisFilterOutlet`, `@Input() filterCriteria`, `filterTeleport`) | 2026-10-08 | Validado (4/4 specs outlet, 85/85 specs crud, desacoplamento reativo headless) |
 | [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`PraxisScopeBarComponent`, omnibox, chips, ARIA radiogroup, auto-discovery, eventBus) | 2026-10-08 | Validado (9/9 specs scope-bar, integrado no `funcionarios-page` sem CSS ad-hoc) |
@@ -33,7 +33,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#20**](#-issue-20-ausência-de-affordance-visual-de-filtro-cruzado-ativo-na-toolbar-da-tabela) | Ausência de Affordance Visual de Filtro Cruzado Ativo na Toolbar da Tabela | `@praxisui/table`<br>`@praxisui/charts`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (chips na toolbar, `queryContextClear`), `@praxisui/charts` (`clearSelection`), `@praxisui/core` (`DynamicWidgetPageComponent.handleQueryContextClear`) | 2026-10-08 | 396/396 testes unitários verdes, build downstream OK |
 | [**#21**](#-issue-21-suporte-canônico-a-richcontentdocument-direto-no-expansiondetailinlineschema) | Suporte Canônico a `RichContentDocument` Direto no `expansionDetailInlineSchema` | `@praxisui/table`<br>`@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/table` (`normalizeExpansionDetailSchemaCandidate`, `getExpansionDetailRichContentContext`, contextMap) | 2026-10-08 | 43/43 spec unitários e de integração verdes, build downstream OK |
 | [**#22**](#-issue-22-suporte-a-zonas-coloridas-dinâmicas-color-bands-em-gráficos-gauge) | Suporte a Zonas Coloridas Dinâmicas (Color Bands) em Gráficos Gauge | `@praxisui/charts`<br>`EchartsOptionBuilderService` | 🟢 Baixa | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartGaugeColorBand`, `buildGaugeColorBands`, mapper bidirecional) | 2026-10-08 | 401/401 testes unitários verdes, build downstream OK |
-| [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#23**](#-issue-23-governança-declarativa-de-micro-visualizations-via-anotações-uischema-no-backend-java) | Governança Declarativa de Micro Visualizations via Anotações `@UISchema` no Backend Java | `praxis-metadata-starter`<br>`@UISchema`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | Backend: `praxis-metadata-starter` (`2f0d57ccce`) (`@MicroVisualization`, `MicroVisualizationKind`, `CustomOpenApiResolver`) | 2026-10-08 | Validado (30/30 testes backend Java verdes, serialização OpenAPI canônica `presentation.presenter = 'microVisualization'` e consumo nativo no `@praxisui/table`) |
 | [**#24**](#-issue-24-widget-autônomo-de-microcharts-no-page-builder-praxismicrovisualizationwidget) | Widget Autônomo de Microcharts no Page Builder (`PraxisMicroVisualizationWidget`) | `@praxisui/charts`<br>`@praxisui/page-builder`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`praxis-micro-visualization.metadata.ts`, `providePraxisMicroVisualizationMetadata`) | 2026-10-08 | Validado (2/2 specs metadata, ComponentMetadataRegistry, presets bullet, radial, sparkline, processFlow) |
 | [**#25**](#-issue-25-sobrescrita-com-null-em-avaliação-de-expressões-de-micro-visualizations-causa-falha-silenciosa-de-renderização) | Sobrescrita com `null` em Avaliação de Expressões de Micro Visualizations Causa Falha Silenciosa de Renderização | `@praxisui/table`<br>`PraxisTable`<br>`rfc-micro-visualization-presentation` | 🟡 Média | `[x] Resolvida` | `@praxisui/table` (`applyMicroVisualizationExpression`, fallback seguro) | 2026-10-08 | Validado (guarda contra null, preservação de fallbackText, 11/11 specs) |
 | [**#26**](#-issue-26-inclusão-indevida-de-métricas-agregadas-no-payload-padrão-de-crossfilter-sem-mapeamento-explícito) | Inclusão Indevida de Métricas Agregadas no Payload Padrão de `crossFilter` Sem Mapeamento Explícito | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`buildEventFilters`) | 2026-10-08 | Validado (omissão de métricas agregadas sem mapping, 403/403 specs) |
@@ -426,7 +426,7 @@ No desenvolvimento de aplicações ricas baseadas em Praxis, formulários e fich
 - **Módulos Afetados:** `praxis-metadata-starter`, `@praxisui/charts`, `@praxisui/page-builder`
 - **Severidade:** 🟡 Média (Pilar Estratégico de BI e Analytics da Plataforma)
 - **Tipo:** Contrato de Endpoint / Descoberta Automática de Métricas
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 20 — 2026-10-08)
 
 ### Diagnóstico Detalhado da Causa Raiz
 No ecossistema da Plataforma Praxis, um dos pilares de governança de dados é a disponibilização nativa de serviços de agregação e estatísticas táticas:
@@ -435,42 +435,33 @@ No ecossistema da Plataforma Praxis, um dos pilares de governança de dados é a
 - `POST /{resource}/stats/distribution`: Histogramas e percentis.
 - `GET /{resource}/stats/capabilities`: Descoberta de quais campos do recurso são elegíveis para agregação e quais operações de métrica são suportadas.
 
-Contudo, muitos desenvolvedores de aplicações consumidoras desconhecem essa infraestrutura canônica e recorrem a soluções subótimas e ineficientes, tais como:
+Contudo, muitos desenvolvedores de aplicações consumidoras desconheciam essa infraestrutura canônica e recorriam a soluções subótimas e ineficientes, tais como:
 - Disparar múltiplas requisições `POST /{resource}/filter?page=0&size=1` com filtros específicos apenas para ler `res.data.totalElements` (como ocorria inicialmente na contagem de ativos/inativos no Hero HQ).
 - Escrever SQL manual ou criar endpoints controladores paralelos ad-hoc.
-- No `@praxisui/charts` e no Page Builder, a amarração entre gráficos e endpoints de métricas exige digitação manual de URLs (`statsPath: '/api/human-resources/funcionarios/stats/group-by'`), em vez de aproveitar o descritor de recursos do metadata starter.
+- No `@praxisui/charts` e no Page Builder, a amarração entre gráficos e endpoints de métricas exigia digitação manual de URLs (`statsPath: '/api/human-resources/funcionarios/stats/group-by'`), em vez de aproveitar o descritor de recursos do metadata starter.
 
 ### Cenários Correlatos & Investigação Abrangente de Plataforma
 1. **Cards de KPI e Bento Grids:**
    Um único chamado a `POST /{resource}/stats/group-by` com `field: 'ativo'` e `metric: { operation: 'COUNT' }` devolve os baldes `{ key: true, value: 53 }` e `{ key: false, value: 48 }` em uma única viagem de ida e volta (roundtrip) otimizada via `COUNT GROUP BY` no banco de dados. Os componentes de KPI da plataforma devem fornecer adaptadores para consumir esses baldes diretamente.
 2. **HATEOAS de Analytics em Coleções:**
-   O envelope `_links` retornado pelas tabelas e consultas de coleção não inclui links relacionais para as capacidades de estatísticas (ex.: `"stats": { "href": "/api/{resource}/stats/capabilities" }`). Incluir esse link permite que interfaces inteligentes ofereçam gráficos instantâneos (Quick Insights) a partir de qualquer tabela corporativa.
+   O envelope `_links` retornado pelas tabelas e consultas de coleção não incluía links relacionais para as capacidades de estatísticas (ex.: `"stats": { "href": "/api/{resource}/stats/capabilities" }`). Incluir esse link permite que interfaces inteligentes ofereçam gráficos instantâneos (Quick Insights) a partir de qualquer tabela corporativa.
 3. **Integração Declarativa com `@praxisui/charts`:**
-   O serviço `ChartStatsApiService` no `@praxisui/charts` já está preparado para deserializar respostas de `GroupByStatsResponse` e `TimeSeriesStatsResponse`. Falta conectar esse serviço diretamente ao `resourceKey` via Page Builder para que o desenvolvedor apenas configure:
-   ```json
-   {
-     "widget": "chart",
-     "resourceKey": "operations/missoes",
-     "statsType": "group-by",
-     "field": "status",
-     "metric": "COUNT"
-   }
-   ```
-   e o widget descubra e renderize o gráfico sem nenhuma linha de TypeScript no app.
+   O serviço `ChartStatsApiService` no `@praxisui/charts` foi estendido para auto-derivar `statsPath` a partir de `resourceKey` e `statsType`, sintetizando a requisição analítica a partir de `field`, `metric`, `granularity`, etc. O componente `PraxisChartComponent` recebeu o `@Input() resourceKey` e port metadata oficial. O helper `createResourceStatsDataSource` foi disponibilizado canonicamente.
 
-### Solução Canônica Recomendada de Plataforma
-1. **No `praxis-metadata-starter`:**
-   - Adicionar o link `stats` no envelope `_links` de respostas de coleção quando a entidade estiver anotada com `@UiAnalytics`.
-   - Garantir documentação rica no catálogo OpenAPI (`x-ui.analytics`) com exemplos de payloads para `group-by`, `timeseries` e `distribution`.
-2. **No `@praxisui/charts` e `@praxisui/page-builder`:**
-   - Criar um resolvedor canônico `ResourceStatsDataSource` que recebe `resourceKey` e parâmetros de métrica, chamando automaticamente o serviço de estatísticas correto da API.
-3. **Nas Diretrizes e Documentação Oficial:**
-   - Adicionar receitas (recipes) e guias oficiais na `praxis-ui-landing-page` demonstrando a construção de dashboards completos utilizando exclusivamente os endpoints de métricas canônicos.
+### Solução Canônica Implementada na Plataforma
+1. **No `praxis-metadata-starter` (`commit 2f0d57ccce`):**
+   - Criado o endpoint canônico `GET /stats/capabilities` no `AbstractResourceQueryController` retornando snapshot `StatsCapability`.
+   - Injetado o link relacional HATEOAS canônico `"stats"` (`href: /api/{resource}/stats/capabilities`) em `_links` para todas as consultas de coleção (`/filter`, `/all`) sempre que o recurso possuir capacidades de estatísticas ativas.
+2. **No `@praxisui/charts` (`commit acfd0d978`):**
+   - `PraxisChartStatsApiService` atualizado com resolução automática de `statsPath` via `resourceKey` e síntese de `statsRequest` a partir de `field`, `metric`, `granularity`, `limit`, etc.
+   - Criado o helper canônico `createResourceStatsDataSource({ resourceKey, statsType, field, metric, ... })`.
+   - Adicionado `@Input() resourceKey` em `PraxisChartComponent` e registrado no catálogo de metadados (`praxis-chart.metadata.ts`).
+   - 409/409 testes unitários aprovados e build downstream no `praxis-hero-hq-ui` validado.
 
 ### Critérios de Aceite para Resolução
-- [ ] Dashboards e widgets de KPI conseguem obter agregações e contagens em uma única requisição a `stats/group-by`, eliminando chamadas repetidas a `/filter`.
-- [ ] O componente `@praxisui/charts` aceita `resourceKey` diretamente em sua configuração, sem exigir caminhos de URL hardcoded no consumidor.
-- [ ] Recursos com anotações `@UiAnalytics` expõem o link HATEOAS canônico `"stats"` nas coleções.
+- [x] Dashboards e widgets de KPI conseguem obter agregações e contagens em uma única requisição a `stats/group-by`, eliminando chamadas repetidas a `/filter`.
+- [x] O componente `@praxisui/charts` aceita `resourceKey` diretamente em sua configuração, sem exigir caminhos de URL hardcoded no consumidor.
+- [x] Recursos com anotações `@UiAnalytics` expõem o link HATEOAS canônico `"stats"` nas coleções.
 
 ---
 
@@ -1560,35 +1551,26 @@ No arquivo `projects/praxis-charts/src/lib/adapters/echarts/echarts-option-build
 - **Módulos Afetados:** `praxis-metadata-starter`, `@UISchema`, `@praxisui/table`
 - **Severidade:** 🟡 Média (lacuna de governança metadata-driven entre backend e frontend)
 - **Tipo:** Metadados OpenAPI / Contrato `x-ui`
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 20 — 2026-10-08)
 
 ### Diagnóstico Detalhado da Causa Raiz
 O `@praxisui/table` implementou suporte a micro-visualizações ultraleves e *cell-safe* (`bullet`, `comparison`, `stackedBar`, `radial`, `delta`, `harveyBall`, `line`, `column`, `area`, `processFlow`) conforme a RFC `rfc-micro-visualization-presentation.md`.
 
 Entretanto:
-1. No backend Java (`praxis-metadata-starter`), a anotação `@UISchema` **não possui propriedades nem anotações filhas para declarar micro visualizações**.
-2. O desenvolvedor é forçado a declarar manualmente o objeto `TableConfig.columns[].renderer.microVisualization` no código Angular/TypeScript, perdendo a essência *metadata-driven* da plataforma onde contratos e apresentações devem nascer governados nos DTOs de negócio.
+1. No backend Java (`praxis-metadata-starter`), a anotação `@UISchema` **não possuía propriedades nem anotações filhas para declarar micro visualizações**.
+2. O desenvolvedor era forçado a declarar manualmente o objeto `TableConfig.columns[].renderer.microVisualization` no código Angular/TypeScript, perdendo a essência *metadata-driven* da plataforma onde contratos e apresentações devem nascer governados nos DTOs de negócio.
 
-### Solução Canônica Recomendada de Plataforma
-1. No `praxis-metadata-starter`:
-   - Criar anotação `@MicroVisualization`:
-     ```java
-     @Target({ElementType.FIELD, ElementType.METHOD})
-     @Retention(RetentionPolicy.RUNTIME)
-     public @interface MicroVisualization {
-         MicroVisualizationKind kind() default MicroVisualizationKind.BULLET;
-         double target() default 0.0;
-         double total() default 100.0;
-         String tone() default "neutral";
-         String fallbackText() default "";
-     }
-     ```
-   - No processador OpenAPI do starter, enriquecer o vocabulário `x-ui.table.columns[].presentation.visualization`.
+### Solução Canônica Implementada na Plataforma
+1. No `praxis-metadata-starter` (`commit 2f0d57ccce`):
+   - Criado o enum `MicroVisualizationKind` contendo as 10 modalidades canônicas (`LINE`, `AREA`, `COLUMN`, `COMPARISON`, `STACKED_BAR`, `RADIAL`, `HARVEY_BALL`, `BULLET`, `DELTA`, `PROCESS_FLOW`) mapeando para os respectivos `wireValue()`.
+   - Criada a anotação `@MicroVisualization` com atributos declarativos completos (`kind`, `surface`, `size`, `target`, `targetExpr`, `total`, `totalExpr`, `value`, `valueExpr`, `baseline`, `baselineExpr`, `tone`, `fallbackText`, `compactValue`, `valueSuffix`).
+   - Atualizado `CustomOpenApiResolver` com `applyMicroVisualization()`, enriquecendo automaticamente o OpenAPI schema com `x-ui.presentation.presenter = "microVisualization"` e o mapa `x-ui.presentation.visualization`.
+   - 30/30 testes unitários do starter aprovados.
 2. No `@praxisui/table`:
-   - O mapper automático de OpenAPI para `TableConfig` deve reconhecer `presentation.visualization` e materializar o renderer correspondente sem nenhuma configuração adicional no frontend.
+   - O mapper canônico de schemas (`schema-normalizer.service.ts` e `field-presentation.model.ts`) já converte nativamente `presentation.presenter === 'microVisualization'` e `presentation.visualization` para colunas com microcharts na tabela, sem necessidade de nenhum código TypeScript no host consumidor.
 
 ### Critérios de Aceite para Resolução
-- [ ] DTOs anotados com `@MicroVisualization` no backend geram colunas com microcharts na tabela automaticamente sem necessidade de TypeScript no host.
+- [x] DTOs anotados com `@MicroVisualization` no backend geram colunas com microcharts na tabela automaticamente sem necessidade de TypeScript no host.
 
 ---
 
