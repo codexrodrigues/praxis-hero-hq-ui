@@ -464,7 +464,7 @@ Contudo, muitos desenvolvedores de aplicações consumidoras desconhecem essa in
 - **Módulos Afetados:** `@praxisui/dynamic-fields`, `@praxisui/table`, Design System da Plataforma
 - **Severidade:** 🟡 Média (Impacto estético crítico na toolbar, quebra forçada de linha e atrito de UX com controles binários para filtros)
 - **Tipo:** Componente Visual / Design Tokens MDC / UX de Filtragem
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 No componente de filtros da tabela (`PraxisFilterComponent`), campos booleanos (como `ativo` em Heróis e Colaboradores) apresentam uma experiência visual truncada e um comportamento de layout engessado:
@@ -515,10 +515,25 @@ No componente de filtros da tabela (`PraxisFilterComponent`), campos booleanos (
 3. **Revisão do Grid de Layout no `praxis-filter`:**
    - Permitir que controles booleanos e toggles compactos residam na linha de `.compact-fields`, eliminando a expulsão arbitrária para a segunda linha em `.query-auxiliary`.
 
+### Implementação Canônica da Solução
+1. **No `@praxisui/dynamic-fields` (`InlineToggleComponent` / `pdx-inline-toggle`):**
+   - **Eliminação do Anti-Pattern Visual:** Injetados tokens CSS MDC no componente (`--mdc-switch-unselected-handle-color`, `--mdc-switch-unselected-track-color`, `--mdc-switch-unselected-focus-handle-color`, `--mdc-switch-unselected-hover-handle-color`), garantindo maçaneta 100% circular (`border-radius: 50% !important;`), trilho pill arredondado (`border-radius: 999px !important;`) e sombra suave em qualquer estado.
+   - **Suporte ao Modo Tri-State:** Adicionado `@Input() tristate` e suporte a `metadata.tristate`. Ciclo de alternância por clique: `null` (Todos) -> `true` (Sim/Ativo) -> `false` (Não/Inativo) -> `null` (Todos).
+   - **Apresentação Contextual e Acessibilidade:**
+     - Quando `null` em modo tri-state: exibe rótulo `${label}: Todos` (i18n `praxis.dynamicFields.boolean.all` em pt-BR e en-US) e `aria-label` condizente.
+     - Quando `false`: exibe `${label}: Não` com ícone sutil de `cancel`.
+     - Preserva affordance de quick clear (`showQuickClear`) habilitado sob seleção em modo tri-state.
+2. **No `@praxisui/table` (`PraxisFilterComponent`):**
+   - **Injeção Automática de Preferências:** Em `applyToggleDisplayPrefs`, injeta automaticamente `tristate: (m as any).tristate ?? true` e `clearButton: (m as any).clearButton ?? { enabled: true, showOnlyWhenFilled: true }` nos toggles da barra de filtros.
+   - **Correção de Case-Sensitivity:** Corrigido bug em `isToggle` que comparava `ct` (lowercase) com `INLINE_TOGGLE_CONTROL_TYPE` (camelCase `'inlineToggle'`), normalizando com `String(INLINE_TOGGLE_CONTROL_TYPE).toLowerCase()`.
+   - **Layout Flex Fluido na Toolbar:** Em `praxis-filter.component.scss`, substituído o colapso rígido de grid de `.praxis-filter-bar.has-compact` por `display: flex; flex-wrap: wrap; align-items: center; gap: 8px;`, permitindo que os campos compactos e a `query-auxiliary` convivam elegantemente na primeira linha quando houver largura disponível, deixando a quebra de linha fluida apenas quando faltar espaço.
+
 ### Critérios de Aceite para Resolução
-- [ ] O filtro de status na toolbar da tabela exibe visual harmonioso integrado ao Design System, sem maçanetas quadradas ou blocos cinzas fora de padrão.
-- [ ] O operador consegue alternar claramente entre os estados *Todos*, *Ativo* e *Inativo* sem ambiguidade semântica.
-- [ ] Controles inline booleanos convivem na primeira linha com inputs e selects compactos quando houver largura de viewport disponível.
+- [x] O filtro de status na toolbar da tabela exibe visual harmonioso integrado ao Design System, sem maçanetas quadradas ou blocos cinzas fora de padrão.
+- [x] O operador consegue alternar claramente entre os estados *Todos*, *Ativo* e *Inativo* sem ambiguidade semântica.
+- [x] Controles inline booleanos convivem na primeira linha com inputs e selects compactos quando houver largura de viewport disponível.
+- [x] Bateria de testes unitários automatizados validada com 100% de sucesso (13 specs em `InlineToggleComponent`, 198 specs em `PraxisFilterComponent`).
+- [x] Build de produção das libs `@praxisui/*` e do host consumidor `praxis-hero-hq-ui` concluído com sucesso (código 0).
 
 ---
 
