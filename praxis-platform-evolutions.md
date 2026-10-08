@@ -25,7 +25,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#11**](#-issue-11-suporte-a-filtros-desacoplados-e-teleporte-via-cdk-portal-praxisfilterportal) | Suporte a Filtros Desacoplados e Teleporte via CDK Portal (`PraxisFilterPortal`) | `@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#12**](#-issue-12-componente-canônico-governado-de-barra-de-escopo-tática-praxisscopebar) | Componente Canônico Governado de Barra de Escopo Tática (`PraxisScopeBar`) | `@praxisui/table`<br>`@praxisui/rich-content`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#13**](#-issue-13-tokens-canônicos-de-menu-e-estilização-de-state-layer-de-hover-em-overlays-praxis-menu-styles) | Tokens Canônicos de Menu e Estilização de State Layer de Hover em Overlays (`praxis-menu-styles`) | `@praxisui/core`<br>`@praxisui/table` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`praxis-menu-styles`), `@praxisui/table` | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido) |
-| [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
+| [**#14**](#-issue-14-evolução-do-modo-de-tabela-em-gráficos-praxis-chart-scroll-interno-sticky-header-eliminação-de-false-affordance-e-ux-analítico) | Evolução do Modo de Tabela em Gráficos (`praxis-chart`): Scroll Interno, Sticky Header, Eliminação de False Affordance e UX Analítico | `@praxisui/charts`<br>`praxis-chart.component.ts` | 🟡 Média | `[x] Resolvida` | `@praxisui/charts` (`PraxisChartComponent`) | 2026-10-07 | Validado no `praxis-hero-hq-ui` (CSS local removido, build OK) |
 | [**#15**](#-issue-15-síntese-compulsória-de-botão-adicionar-em-recursos-read-only-desalinhamento-de-hover-e-perda-de-contraste-mdc) | Síntese Compulsória de Botão "Adicionar" em Recursos Read-Only, Desalinhamento de Hover e Perda de Contraste MDC | `@praxisui/table`<br>`@praxisui/crud`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
 | [**#17**](#-issue-17-redesenho-didático-e-funcional-do-editor-de-rich-content-árvore-hierárquica-drag--drop-icon-picker-e-suporte-canônico-a-grids-e-actioncard-aninhado) | Redesenho Didático e Funcional do Editor de Rich Content: Árvore Hierárquica, Drag & Drop, Icon Picker e Suporte Canônico a Grids e `actionCard` Aninhado | `@praxisui/rich-content`<br>`praxis-rich-content-config-editor.ts`<br>`rich-content-authoring.ts` | 🔴 Alta | `[ ] Aberta` | — | — | Pendente |
 | [**#18**](#-issue-18-desalinhamento-de-authoring-em-charts-praxischartwidgetconfigeditor-não-suporta-runtime-config-exigindo-chartdocument-e-bloqueando-edição-visual) | Desalinhamento de Authoring em Charts: `PraxisChartWidgetConfigEditor` Não Suporta Runtime `config`, Exigindo `chartDocument` e Bloqueando Edição Visual | `@praxisui/charts`<br>`praxis-chart-widget-config-editor.ts`<br>`chart-canonical-contract-mapper.service.ts` | 🟡 Média | `[ ] Aberta` | — | — | Pendente |
@@ -735,7 +735,7 @@ Ao abrir o menu de overflow de ações em qualquer linha da tabela (`praxis-tabl
 - **Módulos Afetados:** `@praxisui/charts` (`PraxisChartComponent`)
 - **Severidade:** 🟡 Média (degradação severa de usabilidade ao alternar gráficos densos para tabela, quebra de hierarquia visual e confusão de affordance de link em dados tabulares)
 - **Tipo:** Refinamento de Componente / UX e Acessibilidade Analítica
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Contexto & Origem da Feature
 No componente `PraxisChartComponent` (`projects/praxis-charts/src/lib/components/praxis-chart/praxis-chart.component.ts`), existe uma funcionalidade acionada pelo botão da toolbar do widget shell (`chart-data-view`, ícone `table_view`), que permite ao usuário alternar a renderização do gráfico para uma tabela de dados estruturada.
@@ -863,78 +863,23 @@ No template de `praxis-chart.component.ts`:
 
 ---
 
-### Mitigação Temporária no Host Hero HQ
-Enquanto a biblioteca `@praxisui/charts` não recebe a atualização canônica, aplicar no SCSS global do tema da aplicação (`theme-praxis.scss`):
-```scss
-// Mitigação para PraxisChart Accessible Data View
-.praxis-chart-accessible-data {
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  padding: 52px 16px 16px !important;
-
-  h3, caption {
-    flex-shrink: 0;
-  }
-
-  table {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-
-    thead {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: var(--md-sys-color-surface-container-lowest, #fff);
-      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
-
-      tr {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-      }
-    }
-
-    tbody {
-      flex: 1;
-
-      tr {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-      }
-    }
-
-    th:last-child,
-    td:last-child {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-  }
-
-  .praxis-chart-point-action {
-    text-decoration: none !important; // Elimina o falso aspecto de hyperlink
-    font-weight: 500;
-
-    &:hover {
-      text-decoration: none !important;
-      background: rgba(18, 99, 180, 0.08);
-      border-radius: 4px;
-    }
-  }
-}
-```
+### Solução Canônica Implementada na Plataforma
+1. **Em `@praxisui/charts` (`PraxisChartComponent`):**
+   - **Layout Flexbox com Viewport Dedicado:** A seção `.praxis-chart-accessible-data` foi reestruturada para `display: flex; flex-direction: column; overflow: hidden;` com `.praxis-chart-accessible-header` fixo no topo e a tabela encapsulada no container de rolagem dedicado `.praxis-chart-table-container` (`flex: 1; min-height: 0; overflow-y: auto; overflow-x: auto; overscroll-behavior: contain;`).
+   - **Sticky Headers com Linha Divisória e Superfície Opaca:** O `thead` possui `position: sticky; top: 0; z-index: 2;` com background herdeiro da cor de superfície opaca configurada (`--praxis-chart-accessible-thead-bg`) e sombra sutil de separação (`box-shadow: 0 1px 0 ...`).
+   - **Eliminação da False Affordance de Hyperlink:** `.praxis-chart-point-action` utiliza `text-decoration: none;` com affordance de botão interativo moderno (`border-radius: 4px; hover: color-mix(currentColor 8%)`), preservando foco acessível e realce quando selecionado (`[aria-pressed='true']`).
+   - **Alinhamento Numérico Tabular:** Classe `.praxis-chart-col-value` com `text-align: right !important; font-variant-numeric: tabular-nums;`.
+   - **Ordenação Interativa (Sorting):** Adicionados signals reativos `accessibleSortField`, `accessibleSortDirection` e `sortedAccessiblePoints = computed(...)`, permitindo ao usuário alternar ordenação por valor numérico (`asc`/`desc`) ou por categoria alfabética, com indicadores visuais (`▲`/`▼`) e atributos `aria-sort`.
+2. **No Host Hero HQ:**
+   - Removido o bloco CSS ad-hoc em `src/styles/theme-praxis.scss`. O componente responde nativamente à experiência requerida.
 
 ### Critérios de Aceite para Resolução Definitiva na Plataforma
-- [ ] Ao alternar para a visualização de tabela em um gráfico com grande volume de dados, apenas as linhas de dados rolam verticalmente.
-- [ ] O título da tabela e o cabeçalho das colunas (`thead`) permanecem perfeitamente visíveis e fixos no topo durante a rolagem.
-- [ ] Nenhum texto nas células da tabela possui sublinhado permanente (`text-decoration: underline`), eliminando a confusão com hyperlinks de navegação.
-- [ ] As colunas numéricas de valores utilizam alinhamento à direita e numerais tabulares (`tabular-nums`).
-- [ ] O estado de seleção ou clique no botão de categoria mantém total acessibilidade por teclado (`Enter`/`Space`) e leitor de tela (`aria-pressed`).
-- [ ] O design do container respeita as margens internas do widget shell sem vazar barras de rolagem para os limites externos do card.
+- [x] Ao alternar para a visualização de tabela em um gráfico com grande volume de dados, apenas as linhas de dados rolam verticalmente.
+- [x] O título da tabela e o cabeçalho das colunas (`thead`) permanecem perfeitamente visíveis e fixos no topo durante a rolagem.
+- [x] Nenhum texto nas células da tabela possui sublinhado permanente (`text-decoration: underline`), eliminando a confusão com hyperlinks de navegação.
+- [x] As colunas numéricas de valores utilizam alinhamento à direita e numerais tabulares (`tabular-nums`).
+- [x] O estado de seleção ou clique no botão de categoria mantém total acessibilidade por teclado (`Enter`/`Space`) e leitor de tela (`aria-pressed`).
+- [x] O design do container respeita as margens internas do widget shell sem vazar barras de rolagem para os limites externos do card.
 
 ---
 

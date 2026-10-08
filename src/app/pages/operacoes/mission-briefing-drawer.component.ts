@@ -16,6 +16,8 @@ import { catchError, map } from 'rxjs/operators';
 import type {
   RichCardNode,
   RichContentDocument,
+  RichTimelineItem,
+  RichSemanticTone,
 } from '@praxisui/core';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
@@ -23,10 +25,18 @@ import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 export interface MissionProfile {
   id: number;
   titulo: string;
+  objetivo?: string;
   descricao?: string;
   prioridade: string;
   status: string;
-  localizacao: string;
+  local?: string;
+  localizacao?: string;
+  ameacaId?: number;
+  ameacaNome?: string;
+  inicioPrev?: string;
+  fimPrev?: string;
+  inicioReal?: string | null;
+  fimReal?: string | null;
   dataInicioPrevista?: string;
   dataFimPrevista?: string;
 }
@@ -62,6 +72,23 @@ export interface VehicleMissionUsage {
 
 export type MissionTabId = 'briefing' | 'squad' | 'incidents';
 
+export function formatMissionDateTime(isoStr?: string | null): string {
+  if (!isoStr) return '';
+  try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    return d.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return isoStr;
+  }
+}
+
 /**
  * 1. Hero Identity Card (Top of Drawer)
  */
@@ -70,6 +97,9 @@ export function buildMissionHeaderDocument(mission: MissionProfile): RichContent
     mission.prioridade === 'ALTA' ||
     mission.prioridade === 'CRITICA' ||
     mission.prioridade === 'OMEGA';
+
+  const theaterText = mission.local || mission.localizacao || 'Setor Global';
+  const threatText = mission.ameacaNome ? ` · Alvo Primário: ${mission.ameacaNome}` : '';
 
   return {
     kind: 'praxis.rich-content',
@@ -81,7 +111,7 @@ export function buildMissionHeaderDocument(mission: MissionProfile): RichContent
         tone: 'neutral',
         className: 'glass-panel briefing-hero-card',
         title: mission.titulo,
-        subtitle: `Teatro: ${mission.localizacao} · Código: #MIS-${mission.id}`,
+        subtitle: `Teatro: ${theaterText}${threatText} · Código: #MIS-${mission.id}`,
         media: {
           kind: 'icon',
           icon: 'military_tech',
@@ -110,6 +140,15 @@ export function buildMissionHeaderDocument(mission: MissionProfile): RichContent
                       ? 'status-pill priority-high'
                       : 'status-pill status-active',
               },
+              ...(mission.ameacaNome
+                ? [
+                    {
+                      type: 'badge' as const,
+                      label: `AMEAÇA: ${mission.ameacaNome}`,
+                      className: 'status-pill sev-critical',
+                    },
+                  ]
+                : []),
             ],
           },
         ],
@@ -121,7 +160,113 @@ export function buildMissionHeaderDocument(mission: MissionProfile): RichContent
 /**
  * 2. Briefing Tático & Diretrizes
  */
-export function buildBriefingParamsDocument(mission: MissionProfile): RichContentDocument {
+export function buildBriefingParamsDocument(
+  mission: MissionProfile,
+  participants: MissionParticipant[] = [],
+  incidents: IncidentRecord[] = []
+): RichContentDocument {
+  const theater = mission.local || mission.localizacao || 'Setor Global';
+  const startPlanned = formatMissionDateTime(mission.inicioPrev || mission.dataInicioPrevista) || 'Imediato';
+  const endPlanned = formatMissionDateTime(mission.fimPrev || mission.dataFimPrevista) || 'Sob demanda tática';
+  const startReal = mission.inicioReal
+    ? formatMissionDateTime(mission.inicioReal)
+    : (mission.status === 'EM_ANDAMENTO' || mission.status === 'CONCLUIDA' ? 'Desdobrado em campo' : 'Não iniciado');
+  const endReal = mission.fimReal
+    ? formatMissionDateTime(mission.fimReal)
+    : (mission.status === 'CONCLUIDA' ? 'Finalizada' : 'Em andamento');
+
+  const timelineItems: RichTimelineItem[] = [
+    {
+      id: 'm1-briefing',
+      title: 'Briefing Tático & Planejamento de Recursos',
+      subtitle: `Operação aprovada pelo Comando Central para engajamento em ${theater} com prioridade ${mission.prioridade}.`,
+      opposite: startPlanned,
+      badge: 'PLANEJADO',
+      markerColor: 'info' as const,
+      markerStyle: 'filled' as const,
+      connectorColor: 'info' as const,
+      connectorVariant: 'solid' as const,
+    },
+    {
+      id: 'm2-mobilizacao',
+      title: 'Despacho & Mobilização de Esquadrão',
+      subtitle:
+        participants.length > 0
+          ? `${participants.length} operadores designados (Líder: ${participants.find((p) => p.papel === 'LIDER')?.funcionarioNome || participants[0]?.funcionarioNome}).`
+          : 'Força tática pré-alocada aguardando ordem de incursão.',
+      opposite: startReal !== 'Não iniciado' ? startReal : 'Prontidão',
+      badge: mission.status !== 'PLANEJADA' ? 'MOBILIZADO' : 'STANDBY',
+      markerColor: mission.status !== 'PLANEJADA' ? ('success' as const) : ('neutral' as const),
+      markerStyle: 'filled' as const,
+      connectorColor: mission.status !== 'PLANEJADA' ? ('success' as const) : ('neutral' as const),
+      connectorVariant: 'solid' as const,
+    },
+    {
+      id: 'm3-ameaca',
+      title: mission.ameacaNome ? `Engajamento com ${mission.ameacaNome}` : 'Varredura Perimetral & Contenção',
+      subtitle: `Incursão tática no setor ${theater}. Diretiva de resposta proporcional com proteção a zonas civis.`,
+      opposite: 'Incursão',
+      badge:
+        mission.status === 'CONCLUIDA'
+          ? 'NEUTRALIZADO'
+          : mission.status === 'EM_ANDAMENTO'
+            ? 'CONFRONTO'
+            : mission.status === 'FALHOU'
+              ? 'CONTENÇÃO'
+              : 'MONITORAMENTO',
+      markerColor:
+        mission.status === 'EM_ANDAMENTO'
+          ? ('warning' as const)
+          : mission.status === 'CONCLUIDA'
+            ? ('success' as const)
+            : ('primary' as const),
+      markerStyle: 'filled' as const,
+      connectorColor: 'primary' as const,
+      connectorVariant: 'solid' as const,
+    },
+    {
+      id: 'm4-sinistros',
+      title:
+        incidents.length > 0
+          ? `Registro de ${incidents.length} Ocorrências & Sinistros`
+          : 'Perímetro Seguro (Zero Danos Civis)',
+      subtitle:
+        incidents.length > 0
+          ? `Sinistros reportados na zona de impacto. Esquadrões de perícia e resgate ativados.`
+          : 'Nenhum dano colateral ou ferido reportado pela telemetria quântica.',
+      opposite: 'Telemetria',
+      badge: incidents.length > 0 ? 'SINISTROS' : 'SEGURO',
+      markerColor: incidents.length > 0 ? ('warning' as const) : ('success' as const),
+      markerStyle: 'filled' as const,
+      connectorColor: 'neutral' as const,
+      connectorVariant: 'solid' as const,
+    },
+    {
+      id: 'm5-desfecho',
+      title:
+        mission.status === 'CONCLUIDA'
+          ? 'Operação Concluída com Êxito'
+          : mission.status === 'FALHOU'
+            ? 'Operação Abortada / Falha Tática'
+            : 'Operação em Andamento no Radar',
+      subtitle:
+        mission.fimReal
+          ? `Registro final em ${formatMissionDateTime(mission.fimReal)}. Dossiê arquivado no QG.`
+          : mission.status === 'CONCLUIDA'
+            ? 'Missão homologada pelo Alto Comando.'
+            : 'Unidades em campo mantendo vigilância contínua.',
+      opposite: endReal,
+      badge: mission.status,
+      markerColor:
+        mission.status === 'CONCLUIDA'
+          ? ('success' as const)
+          : mission.status === 'FALHOU'
+            ? ('danger' as const)
+            : ('primary' as const),
+      markerStyle: 'filled' as const,
+    },
+  ];
+
   return {
     kind: 'praxis.rich-content',
     version: '1.0.0',
@@ -132,21 +277,14 @@ export function buildBriefingParamsDocument(mission: MissionProfile): RichConten
         columns: 2,
         items: [
           { id: 'id', label: 'Código da Missão', value: `#MIS-${mission.id}`, icon: 'tag' },
-          { id: 'local', label: 'Teatro de Operações', value: mission.localizacao, icon: 'explore' },
-          {
-            id: 'inicio',
-            label: 'Janela de Início',
-            value: mission.dataInicioPrevista || 'Imediato',
-            icon: 'schedule',
-          },
-          {
-            id: 'fim',
-            label: 'Janela de Conclusão',
-            value: mission.dataFimPrevista || 'Sob demanda tática',
-            icon: 'event_available',
-          },
+          { id: 'local', label: 'Teatro de Operações', value: theater, icon: 'explore' },
+          { id: 'ameaca', label: 'Ameaça / Alvo Tático', value: mission.ameacaNome || 'Não especificada', icon: 'crisis_alert' },
           { id: 'prioridade', label: 'Nível de Resposta', value: mission.prioridade, icon: 'priority_high' },
           { id: 'status', label: 'Status Operacional', value: mission.status, icon: 'verified' },
+          { id: 'inicioPrev', label: 'Janela de Início Previsto', value: startPlanned, icon: 'schedule' },
+          { id: 'fimPrev', label: 'Janela de Fim Previsto', value: endPlanned, icon: 'event_available' },
+          { id: 'inicioReal', label: 'Início Efetivo em Campo', value: startReal, icon: 'flight_takeoff' },
+          { id: 'fimReal', label: 'Conclusão Efetiva', value: endReal, icon: 'task_alt' },
         ],
       },
       {
@@ -159,6 +297,7 @@ export function buildBriefingParamsDocument(mission: MissionProfile): RichConten
           {
             type: 'text',
             text:
+              mission.objetivo ||
               mission.descricao ||
               'Operação tática autorizada pelo Comando Central. Todas as unidades devem manter silêncio de rádio subespacial e resguardar prioritariamente a integridade das zonas residenciais civis.',
           },
@@ -166,35 +305,10 @@ export function buildBriefingParamsDocument(mission: MissionProfile): RichConten
       },
       {
         type: 'timeline',
-        title: 'Protocolos de Engajamento Ativos',
+        title: 'Cronologia Operacional & Diário de Bordo',
         density: 'comfortable',
         connectorVariant: 'solid',
-        items: [
-          {
-            id: 'p1',
-            title: 'Protocolo Alpha-9: Força Proporcional',
-            subtitle: 'Emprego de força proporcional com mitigação estrita de danos colaterais a infraestruturas civis.',
-            icon: 'verified',
-            badge: 'ATIVO',
-            markerColor: 'success',
-          },
-          {
-            id: 'p2',
-            title: 'Telemetria Quântica Criptografada',
-            subtitle: 'Transmissão contínua de sinais vitais, biometria e status de blindagem em tempo real ao Centro de Comando.',
-            icon: 'cell_tower',
-            badge: 'LINK SEGURO',
-            markerColor: 'warning',
-          },
-          {
-            id: 'p3',
-            title: 'Evacuação & Suporte Médico de Emergência',
-            subtitle: 'Ponto de extração prioritária e suporte tático pré-alocado na Base Central.',
-            icon: 'local_hospital',
-            badge: 'STANDBY',
-            markerColor: 'info',
-          },
-        ],
+        items: timelineItems,
       },
     ],
   };
@@ -819,7 +933,7 @@ export class MissionBriefingDrawerComponent implements OnDestroy {
   protected readonly briefingDocument = computed<RichContentDocument>(() => {
     const m = this.mission();
     if (!m) return { kind: 'praxis.rich-content', version: '1.0.0', nodes: [] };
-    return buildBriefingParamsDocument(m);
+    return buildBriefingParamsDocument(m, this.participants(), this.incidents());
   });
 
   protected readonly squadDocument = computed<RichContentDocument>(() => {
