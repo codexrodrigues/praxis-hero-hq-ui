@@ -28,6 +28,15 @@ async function run() {
 
   const page = await context.newPage();
 
+  page.on('console', (msg) => {
+    if (msg.type() === 'error' || msg.text().includes('Error') || msg.text().includes('Failed')) {
+      log('BROWSER_CONSOLE', `[${msg.type()}] ${msg.text()}`);
+    }
+  });
+  page.on('pageerror', (err) => {
+    log('BROWSER_PAGE_ERROR', err.stack || err.message);
+  });
+
   // Monitoramento de requisições de persistência de configuração (/api/praxis/config/ui)
   const configCalls = [];
   page.on('request', (req) => {
