@@ -41,51 +41,92 @@
 .hero-executive-banner {
   position: relative;
   overflow: hidden;
-  border-radius: 24px !important;
-  padding: 32px 38px !important;
+  border-radius: 20px !important;
+  padding: 24px 32px !important;
   border: 1px solid var(--border) !important;
   background: color-mix(in oklab, var(--card) 60%, transparent) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
 
+.hero-executive-banner .prx-rich-card,
+.hero-executive-banner .pdx-rich-card {
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  grid-template-rows: auto auto auto !important;
+  align-items: start !important;
+  row-gap: 12px !important;
+  column-gap: 32px !important;
+}
+
+.hero-executive-banner .prx-rich-card-header,
+.hero-executive-banner .pdx-rich-card-header {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  margin: 0 !important;
+}
+
+.hero-executive-banner .prx-rich-card-heading,
+.hero-executive-banner .pdx-rich-card-heading {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  margin: 0 !important;
+}
+
 .hero-executive-banner .pdx-rich-card__title,
-.hero-executive-banner .prx-rich-card__title {
+.hero-executive-banner .prx-rich-card__title,
+.hero-executive-banner .prx-rich-card-title {
   font-family: var(--font-display) !important;
-  font-size: 2.4rem !important;
+  font-size: 2.2rem !important;
   font-weight: 700 !important;
   line-height: 1.15 !important;
   background: linear-gradient(135deg, var(--foreground) 0%, color-mix(in oklab, var(--foreground) 70%, var(--primary)) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin: 0 0 6px 0 !important;
 }
 
 .hero-executive-banner .pdx-rich-card__subtitle,
-.hero-executive-banner .prx-rich-card__subtitle {
+.hero-executive-banner .prx-rich-card__subtitle,
+.hero-executive-banner .prx-rich-card-subtitle {
   font-size: 0.95rem !important;
   line-height: 1.5 !important;
   color: var(--muted-foreground) !important;
   max-width: 760px;
+  margin: 0 !important;
+}
+
+.hero-executive-banner .prx-rich-card-actions,
+.hero-executive-banner .pdx-rich-card-actions {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  margin-top: 6px !important;
 }
 
 /* Radar Telemetry Graphic inside Card Media */
-.hero-executive-banner .prx-rich-card-media[data-kind="icon"],
-.hero-executive-banner .pdx-rich-card-media[data-kind="icon"] {
+.hero-executive-banner .prx-rich-card-media,
+.hero-executive-banner .pdx-rich-card-media {
+  grid-column: 2 !important;
+  grid-row: 1 / span 3 !important;
+  align-self: center !important;
   position: relative;
-  width: 140px;
-  height: 140px;
-  min-width: 140px;
+  width: 130px;
+  height: 130px;
+  min-width: 130px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   background: color-mix(in oklab, var(--primary) 8%, transparent);
   border: 1px dashed color-mix(in oklab, var(--primary) 35%, transparent);
-  margin-left: auto;
+  margin: 0 !important;
 }
 
-.hero-executive-banner .prx-rich-card-media[data-kind="icon"]::before,
-.hero-executive-banner .pdx-rich-card-media[data-kind="icon"]::before {
+.hero-executive-banner .prx-rich-card-media::before,
+.hero-executive-banner .pdx-rich-card-media::before {
   content: '';
   position: absolute;
   inset: 18px;
@@ -94,8 +135,8 @@
   pointer-events: none;
 }
 
-.hero-executive-banner .prx-rich-card-media[data-kind="icon"]::after,
-.hero-executive-banner .pdx-rich-card-media[data-kind="icon"]::after {
+.hero-executive-banner .prx-rich-card-media::after,
+.hero-executive-banner .pdx-rich-card-media::after {
   content: '';
   position: absolute;
   inset: -8px;
@@ -115,15 +156,6 @@
   font-size: 32px !important;
   color: var(--primary) !important;
   z-index: 2;
-}
-
-.hero-executive-banner .prx-rich-card__actions,
-.hero-executive-banner .pdx-rich-card__actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-top: 18px;
-  flex-wrap: wrap;
 }
 
 .hero-executive-banner .prx-rich-action-button,
@@ -517,5 +549,47 @@
 
   &:active {
     transform: translateY(0) scale(0.98) !important;
+  }
+}
+
+/* 11. Distress Signals List Spacing & Item Cards */
+#hero-distress-signals-list {
+  mat-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 0 !important;
+  }
+
+  mat-list-item,
+  .mat-mdc-list-item {
+    margin-bottom: 8px !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border) !important;
+    background: color-mix(in oklab, var(--card) 60%, transparent) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    overflow: hidden !important;
+
+    &:last-child {
+      margin-bottom: 0 !important;
+    }
+
+    &:hover {
+      background: color-mix(in oklab, var(--card) 90%, transparent) !important;
+      border-color: color-mix(in oklab, var(--primary) 40%, transparent) !important;
+      transform: translateX(2px) !important;
+    }
+  }
+
+  .list-row-shell {
+    padding: 6px 12px !important;
+  }
+
+  .meta {
+    font-family: var(--font-mono, monospace) !important;
+    font-size: 0.8rem !important;
+    color: var(--muted-foreground) !important;
   }
 }

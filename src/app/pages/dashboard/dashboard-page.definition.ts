@@ -111,10 +111,11 @@ export const DISTRESS_SIGNALS_LIST_CONFIG: PraxisListConfig = {
   },
   layout: {
     variant: 'list',
+    itemSpacing: 'default',
     density: 'compact',
     pageSize: 6,
     lines: 2,
-    dividers: 'between',
+    dividers: 'none',
   },
   skin: {
     type: 'glass',
@@ -139,8 +140,8 @@ export const DISTRESS_SIGNALS_LIST_CONFIG: PraxisListConfig = {
       expr: 'Ameaça Nível ${item.nivelAmeaca}',
     },
     meta: {
-      type: 'text',
-      expr: '${item.abertoEm}',
+      type: 'date',
+      expr: "${item.abertoEm} | pt-BR:short",
     },
     trailing: {
       type: 'chip',
@@ -460,6 +461,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                 type: 'card',
                 variant: 'unstyled',
                 tone: 'neutral',
+                orientation: 'horizontal',
                 className: 'glass-panel hero-executive-banner bg-grid',
                 header: [
                   {
@@ -903,7 +905,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                       surface: 'table-cell',
                       valueExpr: '= max(15, 100 - round(min(85, (danosCivis / 4000000) * 100)))',
                       total: 100,
-                      toneExpr: "row.severidade === 'CRITICA' ? 'danger' : row.severidade === 'ALTA' ? 'warning' : 'info'",
+                      toneExpr: "= (100 - round(min(85, (danosCivis / 4000000) * 100))) >= 70 ? 'success' : ((100 - round(min(85, (danosCivis / 4000000) * 100))) >= 40 ? 'warning' : 'danger')",
                       fallbackText: 'Contenção Tática',
                     },
                   },
