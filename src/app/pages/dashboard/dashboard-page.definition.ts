@@ -540,7 +540,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
         id: 'praxis-rich-content',
         inputs: {
           context: {
-            progressValue: 98.4,
+            progressValue: '${kpis.readinessRate}',
           },
           document: {
             kind: 'praxis.rich-content',
@@ -564,25 +564,24 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                       },
                       {
                         type: 'badge',
-                        label: 'Operacional',
+                        label: '${kpis.readinessRate}% Força',
                         className: 'tag-status ready-tag',
                       },
                     ],
                   },
                 ],
-                title: '98,4%',
-                subtitle: 'Prontidão da Força',
+                title: '${kpis.activeHeroes} Ativos',
+                subtitle: 'Prontidão Operacional',
                 content: [
                   {
                     type: 'progress',
-                    value: 98.4,
                     valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-ready',
                   },
                   {
                     type: 'text',
-                    text: '21 heróis em escala ativa imediata',
+                    text: '${kpis.activeHeroes} de ${kpis.totalHeroes} heróis prontos para ação',
                     className: 'card-footnote',
                   },
                 ],
@@ -604,7 +603,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
         id: 'praxis-rich-content',
         inputs: {
           context: {
-            progressValue: 70,
+            progressValue: '${kpis.missoesPercent}',
           },
           document: {
             kind: 'praxis.rich-content',
@@ -628,25 +627,24 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                       },
                       {
                         type: 'badge',
-                        label: '07 Em Curso',
+                        label: '${kpis.inProgressMissionsBadge} Em Curso',
                         className: 'tag-status operations-tag',
                       },
                     ],
                   },
                 ],
-                title: '14 Agendadas',
-                subtitle: 'Missões Ativas em Campo',
+                title: '${kpis.plannedMissions} Planejadas',
+                subtitle: 'Missões Operacionais',
                 content: [
                   {
                     type: 'progress',
-                    value: 96.2,
                     valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-operations',
                   },
                   {
                     type: 'text',
-                    text: 'Taxa de sucesso operacional de 96,2%',
+                    text: '${kpis.totalMissions} missões catalogadas no radar tático',
                     className: 'card-footnote',
                   },
                 ],
@@ -668,7 +666,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
         id: 'praxis-rich-content',
         inputs: {
           context: {
-            progressValue: 84.5,
+            progressValue: '${kpis.folhaPercent}',
           },
           document: {
             kind: 'praxis.rich-content',
@@ -692,25 +690,24 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                       },
                       {
                         type: 'badge',
-                        label: 'Outubro / 2026',
+                        label: '${kpis.latestPayrollMonth}',
                         className: 'tag-status rh-tag',
                       },
                     ],
                   },
                 ],
-                title: 'R$ 4,85 M',
-                subtitle: 'Execução Orçamentária',
+                title: 'R$ ${kpis.latestPayrollNetMillion} M',
+                subtitle: 'Execução da Folha',
                 content: [
                   {
                     type: 'progress',
-                    value: 78.5,
                     valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-rh',
                   },
                   {
                     type: 'text',
-                    text: 'Folha programada e benefícios especiais',
+                    text: 'Folha de ${kpis.latestPayrollEmployees} colaboradores auditados',
                     className: 'card-footnote',
                   },
                 ],
@@ -732,7 +729,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
         id: 'praxis-rich-content',
         inputs: {
           context: {
-            progressValue: 25,
+            progressValue: '${kpis.riscosPercent}',
           },
           document: {
             kind: 'praxis.rich-content',
@@ -756,25 +753,24 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                       },
                       {
                         type: 'badge',
-                        label: 'Defcon 5',
+                        label: '${kpis.totalIncidents} Incidentes',
                         className: 'tag-status risk-tag',
                       },
                     ],
                   },
                 ],
-                title: '02 Em Análise',
-                subtitle: 'Incidentes Críticos',
+                title: '${kpis.criticalIncidentsBadge} Críticos',
+                subtitle: 'Ameaças & Incidentes',
                 content: [
                   {
                     type: 'progress',
-                    value: 15.0,
                     valueExpr: 'progressValue',
                     showPercent: false,
                     className: 'fill-risk',
                   },
                   {
                     type: 'text',
-                    text: 'Danos colaterais e contenção em andamento',
+                    text: '${kpis.highIncidents} ocorrências de severidade alta em contenção',
                     className: 'card-footnote',
                   },
                 ],

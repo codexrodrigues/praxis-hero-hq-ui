@@ -5,6 +5,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -100,6 +101,7 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
       <main class="dashboard-canvas-container">
         <praxis-dynamic-page-builder
           [page]="pageDefinition()"
+          [context]="dashboardContext()"
           [enableCustomization]="isCustomizing()"
           [showSettingsButton]="isCustomizing()"
           (pageChange)="onPageChange($event)"
@@ -304,14 +306,61 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   protected readonly isLayoutCustomized = signal<boolean>(false);
   protected readonly lastSavedAt = signal<string | null>(null);
 
-  private currentKpis: DashboardTacticalKpis | null = null;
+  protected readonly dashboardKpis = signal<DashboardTacticalKpis | null>(null);
+
+  protected readonly dashboardContext = computed(() => {
+    const k = this.dashboardKpis();
+    if (!k) {
+      return {
+        kpis: {
+          readinessRate: 98.4,
+          activeHeroes: 21,
+          totalHeroes: 21,
+          inProgressMissions: 7,
+          inProgressMissionsBadge: '07',
+          plannedMissions: 14,
+          totalMissions: 21,
+          missoesPercent: 70,
+          latestPayrollMonth: 'Outubro / 2026',
+          latestPayrollNetMillion: '4,85',
+          latestPayrollEmployees: 98,
+          folhaPercent: 78.5,
+          totalIncidents: 24,
+          criticalIncidents: 2,
+          criticalIncidentsBadge: '02',
+          highIncidents: 5,
+          riscosPercent: 15,
+        },
+      };
+    }
+    const missoesPercent = Math.min(
+      100,
+      Math.round((k.inProgressMissions / Math.max(1, k.totalMissions)) * 100),
+    );
+    const riscosPercent = Math.min(
+      100,
+      Math.round((k.criticalIncidents / Math.max(1, k.totalIncidents)) * 100),
+    );
+    return {
+      kpis: {
+        ...k,
+        inProgressMissionsBadge:
+          k.inProgressMissions < 10 ? `0${k.inProgressMissions}` : String(k.inProgressMissions),
+        criticalIncidentsBadge:
+          k.criticalIncidents < 10 ? `0${k.criticalIncidents}` : String(k.criticalIncidents),
+        missoesPercent,
+        riscosPercent,
+        folhaPercent: 78.5,
+      },
+    };
+  });
 
   ngOnInit(): void {
     this.loadEffectiveLayout();
 
     this.statsService.getTacticalKpis().subscribe((kpis) => {
-      this.currentKpis = kpis;
-      this.pageDefinition.update((def) => projectTacticalKpis(def, kpis));
+      this.dashboardKpis.set(kpis);
+      this.cdr.markForCheck();
     });
 
     if (typeof window !== 'undefined') {
@@ -333,11 +382,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     // Ao alternar a persona tática, reseta o estado visual imediato para o padrão de governança
     // e dispara a carga remota da nova persona para isolamento total
     this.isLayoutCustomized.set(false);
-    this.pageDefinition.set(
-      this.currentKpis
-        ? projectTacticalKpis(DASHBOARD_PAGE_DEFINITION, this.currentKpis)
-        : DASHBOARD_PAGE_DEFINITION,
-    );
+    this.pageDefinition.set(DASHBOARD_PAGE_DEFINITION);
     this.loadEffectiveLayout();
   };
 
@@ -356,16 +401,10 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
 
     if (stored && stored.widgets && stored.widgets.length > 0) {
       this.isLayoutCustomized.set(true);
-      const effective = this.currentKpis
-        ? projectTacticalKpis(stored, this.currentKpis)
-        : stored;
-      this.pageDefinition.set(effective);
+      this.pageDefinition.set(stored);
     } else {
       this.isLayoutCustomized.set(false);
-      const effective = this.currentKpis
-        ? projectTacticalKpis(DASHBOARD_PAGE_DEFINITION, this.currentKpis)
-        : DASHBOARD_PAGE_DEFINITION;
-      this.pageDefinition.set(effective);
+      this.pageDefinition.set(DASHBOARD_PAGE_DEFINITION);
     }
 
     // 2. Sincroniza com a persistência canônica remota no backend (praxis-config-starter)
@@ -380,10 +419,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
             }
             if (remote && remote.widgets && remote.widgets.length > 0) {
               this.isLayoutCustomized.set(true);
-              const effective = this.currentKpis
-                ? projectTacticalKpis(remote, this.currentKpis)
-                : remote;
-              this.pageDefinition.set(effective);
+              this.pageDefinition.set(remote);
               if (typeof localStorage !== 'undefined') {
                 try {
                   localStorage.setItem(localScopedKey, JSON.stringify(remote));
@@ -391,10 +427,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
               }
             } else {
               this.isLayoutCustomized.set(false);
-              const effective = this.currentKpis
-                ? projectTacticalKpis(DASHBOARD_PAGE_DEFINITION, this.currentKpis)
-                : DASHBOARD_PAGE_DEFINITION;
-              this.pageDefinition.set(effective);
+              this.pageDefinition.set(DASHBOARD_PAGE_DEFINITION);
               if (typeof localStorage !== 'undefined') {
                 try {
                   localStorage.removeItem(localScopedKey);
@@ -450,11 +483,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     }
     this.isLayoutCustomized.set(false);
     this.lastSavedAt.set(null);
-    this.pageDefinition.set(
-      this.currentKpis
-        ? projectTacticalKpis(DASHBOARD_PAGE_DEFINITION, this.currentKpis)
-        : DASHBOARD_PAGE_DEFINITION,
-    );
+    this.pageDefinition.set(DASHBOARD_PAGE_DEFINITION);
     this.cdr.markForCheck();
   }
 
@@ -474,156 +503,4 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
       window.open(payload.url, '_blank', 'noopener,noreferrer');
     }
   }
-}
-
-interface BentoKpiCardConfig {
-  icon: string;
-  toneClass: string;
-  badgeLabel: string;
-  badgeClass: string;
-  title: string;
-  subtitle: string;
-  progressValue: number;
-  progressClass: string;
-  footnote: string;
-}
-
-function buildBentoKpiCard(config: BentoKpiCardConfig) {
-  return {
-    type: 'card',
-    variant: 'unstyled',
-    tone: 'neutral',
-    className: 'glass-panel bento-kpi-card',
-    header: [
-      {
-        type: 'compose',
-        direction: 'row',
-        gap: 'sm',
-        items: [
-          {
-            type: 'icon',
-            icon: config.icon,
-            className: `card-icon ${config.toneClass}`,
-          },
-          {
-            type: 'badge',
-            label: config.badgeLabel,
-            className: `tag-status ${config.badgeClass}`,
-          },
-        ],
-      },
-    ],
-    title: config.title,
-    subtitle: config.subtitle,
-    content: [
-      {
-        type: 'progress',
-        value: config.progressValue,
-        valueExpr: 'progressValue',
-        showPercent: false,
-        className: config.progressClass,
-      },
-      {
-        type: 'text',
-        text: config.footnote,
-        className: 'card-footnote',
-      },
-    ],
-  };
-}
-
-function projectTacticalKpis(
-  def: WidgetPageDefinition,
-  kpis: DashboardTacticalKpis,
-): WidgetPageDefinition {
-  const missoesPercent = Math.min(
-    100,
-    Math.round((kpis.inProgressMissions / Math.max(1, kpis.totalMissions)) * 100),
-  );
-  const riscosPercent = Math.min(
-    100,
-    Math.round((kpis.criticalIncidents / Math.max(1, kpis.totalIncidents)) * 100),
-  );
-
-  const kpiCardMap: Record<string, { card: ReturnType<typeof buildBentoKpiCard>; progressValue: number }> = {
-    kpiProntidao: {
-      card: buildBentoKpiCard({
-        icon: 'verified_user',
-        toneClass: 'tone-ready',
-        badgeLabel: `${kpis.readinessRate}% Força`,
-        badgeClass: 'ready-tag',
-        title: `${kpis.activeHeroes} Ativos`,
-        subtitle: 'Prontidão Operacional',
-        progressValue: kpis.readinessRate,
-        progressClass: 'fill-ready',
-        footnote: `${kpis.activeHeroes} de ${kpis.totalHeroes} heróis prontos para ação`,
-      }),
-      progressValue: kpis.readinessRate,
-    },
-    kpiMissoes: {
-      card: buildBentoKpiCard({
-        icon: 'military_tech',
-        toneClass: 'tone-operations',
-        badgeLabel: `${kpis.inProgressMissions < 10 ? '0' : ''}${kpis.inProgressMissions} Em Curso`,
-        badgeClass: 'operations-tag',
-        title: `${kpis.plannedMissions} Planejadas`,
-        subtitle: 'Missões Operacionais',
-        progressValue: missoesPercent,
-        progressClass: 'fill-operations',
-        footnote: `${kpis.totalMissions} missões catalogadas no radar tático`,
-      }),
-      progressValue: missoesPercent,
-    },
-    kpiFolha: {
-      card: buildBentoKpiCard({
-        icon: 'payments',
-        toneClass: 'tone-rh',
-        badgeLabel: kpis.latestPayrollMonth,
-        badgeClass: 'rh-tag',
-        title: `R$ ${kpis.latestPayrollNetMillion} M`,
-        subtitle: 'Execução da Folha',
-        progressValue: 78.5,
-        progressClass: 'fill-rh',
-        footnote: `Folha de ${kpis.latestPayrollEmployees} colaboradores auditados`,
-      }),
-      progressValue: 78.5,
-    },
-    kpiRiscos: {
-      card: buildBentoKpiCard({
-        icon: 'emergency',
-        toneClass: 'tone-risk',
-        badgeLabel: `${kpis.totalIncidents} Incidentes`,
-        badgeClass: 'risk-tag',
-        title: `${kpis.criticalIncidents < 10 ? '0' : ''}${kpis.criticalIncidents} Críticos`,
-        subtitle: 'Ameaças & Incidentes',
-        progressValue: riscosPercent,
-        progressClass: 'fill-risk',
-        footnote: `${kpis.highIncidents} ocorrências de severidade alta em contenção`,
-      }),
-      progressValue: riscosPercent,
-    },
-  };
-
-  return {
-    ...def,
-    widgets: (def.widgets || []).map((w) => {
-      const entry = kpiCardMap[w.key];
-      if (!entry) return w;
-      return {
-        ...w,
-        definition: {
-          ...w.definition,
-          inputs: {
-            ...w.definition?.inputs,
-            context: { progressValue: entry.progressValue },
-            document: {
-              kind: 'praxis.rich-content',
-              version: '1.0.0',
-              nodes: [entry.card],
-            },
-          },
-        },
-      };
-    }),
-  };
 }
