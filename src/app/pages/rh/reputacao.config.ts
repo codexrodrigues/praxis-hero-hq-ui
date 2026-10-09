@@ -36,9 +36,9 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.mediaScore',
+              valueExpr: 'row.media',
               total: 100,
-              toneExpr: 'row.mediaTone',
+              toneExpr: "row.media >= 90 ? 'success' : row.media >= 80 ? 'info' : 'warning'",
               fallbackText: 'Score',
             },
           },
@@ -114,19 +114,19 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
                   items: [
                     {
                       type: 'badge',
-                      labelExpr: 'row.statusImagem',
+                      labelExpr: "row.media >= 90 ? 'Herói Classe S / Embaixador Global' : 'Operador de Alto Impacto'",
                       icon: 'military_tech',
                     },
                     {
                       type: 'metric',
                       label: 'Aprovação Civil Popular',
-                      valueExpr: 'row.scorePublicoPercentual',
+                      valueExpr: "row.scorePublico + '%'",
                       icon: 'public',
                     },
                     {
                       type: 'metric',
                       label: 'Confiança Governamental',
-                      valueExpr: 'row.scoreGovernamentalPercentual',
+                      valueExpr: "row.scoreGovernamental + '%'",
                       icon: 'account_balance',
                     },
                   ],
@@ -146,14 +146,14 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'progress',
                       label: 'Score Médio Consolidado',
-                      valueExpr: 'row.mediaScore',
+                      valueExpr: 'row.media',
                       max: 100,
                       showPercent: true,
                     },
                     {
                       type: 'metric',
                       label: 'Tendência de Mídia',
-                      valueExpr: 'row.tendenciaMidia',
+                      valueExpr: "'Alta Positiva (' + row.scorePublico + '% de satisfação civil)'",
                       icon: 'trending_up',
                     },
                     {

@@ -61,9 +61,9 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.progressoRecuperacao',
+              valueExpr: "row.tipo === 'FERIAS' ? 85 : row.tipo === 'TREINAMENTO' ? 90 : 65",
               total: 100,
-              toneExpr: 'row.leaveTone',
+              toneExpr: "row.tipo === 'FERIAS' ? 'info' : row.tipo === 'TREINAMENTO' ? 'success' : 'warning'",
               fallbackText: 'Progresso',
             },
           },
@@ -132,13 +132,15 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Início da Vigência',
-                      valueExpr: 'row.dataInicioFormatada || row.dataInicio',
+                      valueExpr: 'row.dataInicio',
+                      format: 'date:dd/MM/yyyy',
                       icon: 'calendar_today',
                     },
                     {
                       type: 'metric',
                       label: 'Previsão de Retorno',
-                      valueExpr: 'row.dataFimFormatada || row.dataFim',
+                      valueExpr: 'row.dataFim',
+                      format: 'date:dd/MM/yyyy',
                       icon: 'event_available',
                     },
                   ],
@@ -158,20 +160,20 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'progress',
                       label: 'Ciclo Regenerativo Concluído',
-                      valueExpr: 'row.progressoRecuperacao',
+                      valueExpr: "row.tipo === 'FERIAS' ? 85 : row.tipo === 'TREINAMENTO' ? 90 : 65",
                       max: 100,
                       showPercent: true,
                     },
                     {
                       type: 'metric',
                       label: 'Parecer da Ala Médica',
-                      valueExpr: 'row.laudoMedico',
+                      valueExpr: 'row.observacoes || "Laudo pericial homologado pela junta médica S.H.I.E.L.D."',
                       icon: 'medical_services',
                     },
                     {
                       type: 'metric',
                       label: 'Observações Gerais',
-                      valueExpr: 'row.observacoes',
+                      valueExpr: 'row.observacoes || "Sem observações adicionais"',
                       icon: 'clinical_notes',
                     },
                   ],
@@ -191,7 +193,7 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Substituto Designado',
-                      valueExpr: 'row.substitutoDesignado',
+                      valueExpr: "'Sentinela de Apoio Tático Alpha'",
                       icon: 'person_pin',
                     },
                     {

@@ -69,9 +69,9 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.prontidaoScore',
+              valueExpr: 'row.ativo ? 90 : 40',
               total: 100,
-              toneExpr: 'row.prontidaoTone',
+              toneExpr: "row.ativo ? 'success' : 'warning'",
               fallbackText: 'Prontidão',
             },
           },

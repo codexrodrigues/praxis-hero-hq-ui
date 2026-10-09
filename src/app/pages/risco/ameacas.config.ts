@@ -58,9 +58,9 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.letalidadeCalculada',
+              valueExpr: 'row.nivel * 14',
               total: 100,
-              toneExpr: 'row.ameacaTone',
+              toneExpr: "row.nivel >= 6 ? 'danger' : row.nivel >= 4 ? 'warning' : 'info'",
               fallbackText: 'Letalidade',
             },
           },
@@ -167,13 +167,13 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Classificação de Gravidade',
-                      valueExpr: 'row.riscoGravidade',
+                      valueExpr: "row.nivel >= 6 ? 'Ameaça de Nível Extremo' : row.nivel >= 4 ? 'Ameaça Significativa' : 'Risco Controlado'",
                       icon: 'emergency',
                     },
                     {
                       type: 'progress',
                       label: 'Índice Relativo de Letalidade',
-                      valueExpr: 'row.letalidadeCalculada',
+                      valueExpr: 'row.nivel * 14',
                       max: 100,
                       showPercent: true,
                     },
@@ -194,13 +194,13 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Status de Confinamento',
-                      valueExpr: 'row.confinamentoStatus',
+                      valueExpr: "row.status === 'CAPTURADO' ? 'Confinado em Câmara Magnética' : 'Ativo e em Monitoramento Satelital'",
                       icon: 'lock',
                     },
                     {
                       type: 'metric',
                       label: 'Contramedida Recomendada',
-                      valueExpr: 'row.contraMedidaSugerida',
+                      valueExpr: "row.nivel >= 6 ? 'Acionar Defensores Primários' : 'Contenção via Drones Táticos'",
                       icon: 'shield',
                     },
                   ],

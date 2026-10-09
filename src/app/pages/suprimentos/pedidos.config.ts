@@ -25,9 +25,9 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: 'row.progressoEntrega',
+                valueExpr: "row.status === 'RECEIVED' ? 100 : row.status === 'APPROVED' ? 75 : row.status === 'PENDING' ? 35 : 10",
                 total: 100,
-                toneExpr: 'row.orderTone',
+                toneExpr: "row.status === 'RECEIVED' ? 'success' : row.status === 'APPROVED' ? 'info' : 'warning'",
                 fallbackText: 'Progresso',
               },
             },
@@ -102,7 +102,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Especificação de Carga',
-                      valueExpr: 'row.especificacaoCarga',
+                      valueExpr: "'Lotes de Ligas Especiais e Microcomponentes'",
                       icon: 'inventory_2',
                     },
                     {
@@ -128,14 +128,14 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'progress',
                       label: 'Progresso da Expedição',
-                      valueExpr: 'row.progressoEntrega',
+                      valueExpr: "row.status === 'RECEIVED' ? 100 : row.status === 'APPROVED' ? 75 : row.status === 'PENDING' ? 35 : 10",
                       max: 100,
                       showPercent: true,
                     },
                     {
                       type: 'metric',
                       label: 'Previsão de Recebimento',
-                      valueExpr: 'row.prazoEstimado',
+                      valueExpr: "row.status === 'RECEIVED' ? 'Entregue no Armazém' : '7 dias úteis'",
                       icon: 'schedule',
                     },
                     {
@@ -161,7 +161,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Centro de Custo',
-                      valueExpr: 'row.centroCusto',
+                      valueExpr: "'Divisão Tática Operacional - CC-408'",
                       icon: 'account_balance',
                     },
                     {

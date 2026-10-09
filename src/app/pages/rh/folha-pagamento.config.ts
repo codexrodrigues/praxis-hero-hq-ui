@@ -77,9 +77,9 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.margemLiquida',
+              valueExpr: "row.salarioBruto > 0 ? Math.round((row.salarioLiquido / row.salarioBruto) * 100) : 0",
               total: 100,
-              toneExpr: 'row.margemTone',
+              toneExpr: "(row.salarioLiquido / row.salarioBruto) >= 0.8 ? 'success' : (row.salarioLiquido / row.salarioBruto) >= 0.6 ? 'info' : 'warning'",
               fallbackText: 'Margem',
             },
           },
@@ -144,19 +144,21 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
                   items: [
                     {
                       type: 'badge',
-                      labelExpr: 'row.statusTransferencia',
+                      labelExpr: "'Liquidado via Banco Central S.H.I.E.L.D.'",
                       icon: 'account_balance',
                     },
                     {
                       type: 'metric',
                       label: 'Salário Bruto Tático',
-                      valueExpr: 'row.salarioBrutoFormatado',
+                      valueExpr: 'row.salarioBruto',
+                      format: 'currency:BRL',
                       icon: 'payments',
                     },
                     {
                       type: 'metric',
                       label: 'Líquido Disponível',
-                      valueExpr: 'row.salarioLiquidoFormatado',
+                      valueExpr: 'row.salarioLiquido',
+                      format: 'currency:BRL',
                       icon: 'account_balance_wallet',
                     },
                   ],
@@ -176,14 +178,15 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'progress',
                       label: 'Eficiência de Repasse Líquido',
-                      valueExpr: 'row.margemLiquida',
+                      valueExpr: "row.salarioBruto > 0 ? Math.round((row.salarioLiquido / row.salarioBruto) * 100) : 0",
                       max: 100,
                       showPercent: true,
                     },
                     {
                       type: 'metric',
                       label: 'Total de Retenções',
-                      valueExpr: 'row.totalDescontosFormatado',
+                      valueExpr: 'row.totalDescontos',
+                      format: 'currency:BRL',
                       icon: 'price_check',
                     },
                     {
@@ -209,7 +212,8 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Data de Pagamento',
-                      valueExpr: 'row.dataPagamentoFormatada || row.dataPagamento',
+                      valueExpr: 'row.dataPagamento',
+                      format: 'date:dd/MM/yyyy',
                       icon: 'event_available',
                     },
                     {

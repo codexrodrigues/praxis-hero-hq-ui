@@ -905,9 +905,9 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                     visualization: {
                       kind: 'radial',
                       surface: 'table-cell',
-                      valueExpr: '= max(15, 100 - row.indiceDanoCalculado)',
+                      valueExpr: '= max(15, 100 - round(min(85, (danosCivis / 4000000) * 100)))',
                       total: 100,
-                      toneExpr: 'row.sinistroTone',
+                      toneExpr: "row.severidade === 'CRITICA' ? 'danger' : row.severidade === 'ALTA' ? 'warning' : 'info'",
                       fallbackText: 'Contenção Tática',
                     },
                   },

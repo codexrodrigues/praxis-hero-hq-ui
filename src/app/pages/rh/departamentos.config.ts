@@ -42,9 +42,9 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.ocupacaoScore',
+              valueExpr: '85',
               total: 100,
-              toneExpr: 'row.ocupacaoTone',
+              toneExpr: "'info'",
               fallbackText: 'Ocupação',
             },
           },
@@ -118,7 +118,7 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Instalação / Local',
-                      valueExpr: 'row.salaComando',
+                      valueExpr: "'Complexo S.H.I.E.L.D. - Setor ' + (row.codigo || 'HQ')",
                       icon: 'apartment',
                     },
                   ],
@@ -144,7 +144,7 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Credencial de Acesso',
-                      valueExpr: 'row.nivelSigilo',
+                      valueExpr: "'Nível Alfa (Conselho de Segurança)'",
                       icon: 'lock',
                     },
                     {
@@ -165,16 +165,16 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
                 {
                   type: 'progress',
                   label: 'Taxa de Ocupação do Setor',
-                  valueExpr: 'row.ocupacaoScore',
+                  valueExpr: '85',
                   max: 100,
                   showPercent: true,
-                },
-                {
-                  type: 'metric',
-                  label: 'Especialistas Ativos',
-                  valueExpr: 'row.contingenteTotal',
-                  icon: 'groups',
-                },
+                    },
+                    {
+                      type: 'metric',
+                      label: 'Especialistas Ativos',
+                      valueExpr: "'34 Especialistas'",
+                      icon: 'groups',
+                    },
                 {
                   type: 'metric',
                   label: 'Prontidão Operacional',

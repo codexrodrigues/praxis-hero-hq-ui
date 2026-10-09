@@ -48,9 +48,9 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.prontidaoScore',
+              valueExpr: "row.status === 'ATIVA' ? 95 : row.status === 'RESERVA' ? 70 : 40",
               total: 100,
-              toneExpr: 'row.prontidaoTone',
+              toneExpr: "row.status === 'ATIVA' ? 'success' : row.status === 'RESERVA' ? 'info' : 'warning'",
               fallbackText: 'Prontidão',
             },
           },
@@ -146,20 +146,20 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'progress',
                       label: 'Prontidão Operacional do Squad',
-                      valueExpr: 'row.prontidaoScore',
+                      valueExpr: "row.status === 'ATIVA' ? 95 : row.status === 'RESERVA' ? 70 : 40",
                       max: 100,
                       showPercent: true,
                     },
                     {
                       type: 'metric',
                       label: 'Efetivo de Operadores',
-                      valueExpr: 'row.efetivoOperacional',
+                      valueExpr: "row.status === 'ATIVA' ? '16 Operadores Táticos' : '8 Operadores em Reserva'",
                       icon: 'groups',
                     },
                     {
                       type: 'metric',
                       label: 'Histórico de Missões',
-                      valueExpr: 'row.historicoMissoes',
+                      valueExpr: "'Esquadrão Operacional ' + (row.sigla || row.nome)",
                       icon: 'military_tech',
                     },
                   ],
@@ -179,13 +179,13 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Líder Tático',
-                      valueExpr: 'row.liderTatico',
+                      valueExpr: "'Comando Tático ' + (row.basePrincipalNome || 'Central')",
                       icon: 'person_star',
                     },
                     {
                       type: 'metric',
                       label: 'Nível de Autorização',
-                      valueExpr: 'row.nivelAcessoEquipe',
+                      valueExpr: "'Credencial Classe Vingadores'",
                       icon: 'verified_user',
                     },
                     {

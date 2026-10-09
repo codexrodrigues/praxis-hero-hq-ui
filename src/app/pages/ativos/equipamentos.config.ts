@@ -46,9 +46,9 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.resistenciaScore',
+              valueExpr: 'row.resistencia * 10',
               total: 100,
-              toneExpr: 'row.resistenciaTone',
+              toneExpr: "row.resistencia >= 8 ? 'success' : row.resistencia >= 6 ? 'info' : row.resistencia >= 4 ? 'warning' : 'danger'",
               fallbackText: 'Blindagem',
             },
           },
@@ -118,7 +118,7 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
                   items: [
                     {
                       type: 'badge',
-                      labelExpr: 'row.statusBadge',
+                      labelExpr: "row.status === 'EM_USO' ? 'Em Custódia Ativa' : row.status === 'MANUTENCAO' ? 'Em Manutenção' : 'Disponível em Arsenal'",
                       icon: 'verified_user',
                     },
                     {
@@ -130,7 +130,7 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'progress',
                       label: 'Integridade Estrutural',
-                      valueExpr: 'row.resistenciaScore',
+                      valueExpr: 'row.resistencia * 10',
                       max: 100,
                       showPercent: true,
                     },
@@ -151,19 +151,19 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Fonte de Energia Primária',
-                      valueExpr: 'row.fonteEnergia',
+                      valueExpr: "row.tipo === 'ARMADURA' ? 'Micro-Reator Arc Mark VI' : row.tipo === 'ARTEFATO' || row.tipo === 'GADGET' ? 'Matriz de Vibranium Estabilizada' : row.tipo === 'ARMA' ? 'Célula de Plasma Iônico' : 'Bateria Quântica de Alto Rendimento'",
                       icon: 'bolt',
                     },
                     {
                       type: 'metric',
                       label: 'Engenharia & Origem',
-                      valueExpr: 'row.tecnologiaOrigem',
+                      valueExpr: "row.tipo === 'ARMADURA' ? 'Stark Industries R&D' : row.tipo === 'ARTEFATO' ? 'Wakanda Design Group' : 'Divisão Científica S.H.I.E.L.D.'",
                       icon: 'precision_manufacturing',
                     },
                     {
                       type: 'metric',
                       label: 'Última Calibração Tática',
-                      valueExpr: 'row.ultimaRevisaoFormatada',
+                      valueExpr: "'Calibração Homologada'",
                       icon: 'history_toggle_off',
                     },
                   ],
@@ -189,13 +189,13 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Localização de Armaria',
-                      valueExpr: 'row.localizacaoArmaria',
+                      valueExpr: "row.status === 'EM_USO' ? 'Em Campo com Operador' : row.status === 'MANUTENCAO' ? 'Hangar Tático - Bancada 3' : 'Cofre Central Subterrâneo - Nível 4'",
                       icon: 'shelves',
                     },
                     {
                       type: 'metric',
                       label: 'Nível de Autorização',
-                      valueExpr: 'row.autorizacaoAcesso',
+                      valueExpr: "row.resistencia >= 8 ? 'Nível Ômega (Vingadores)' : 'Nível Alfa (Comando Superior)'",
                       icon: 'key',
                     },
                   ],

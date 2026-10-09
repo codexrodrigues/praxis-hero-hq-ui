@@ -65,7 +65,6 @@ import { providePraxisListMetadata } from '@praxisui/list';
 import { HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS } from './core/analytical-drawer-schemas.catalog';
 import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
-import { tacticalDataEnrichmentInterceptor } from './core/tactical-data-enrichment.interceptor';
 
 const API_URL_VALUE: ApiUrlConfig = {
   default: { baseUrl: PRAXIS_API_BASE_URL },
@@ -133,7 +132,6 @@ export const appConfig: ApplicationConfig = {
           return next(cloned);
         },
         praxisApiLoadingBridgeInterceptor,
-        tacticalDataEnrichmentInterceptor,
       ]),
     ),
     ...providePraxisDynamicFieldsCore(),

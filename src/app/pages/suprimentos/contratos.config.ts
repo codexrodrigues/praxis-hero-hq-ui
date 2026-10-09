@@ -34,9 +34,9 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.complianceScore',
+              valueExpr: "row.status === 'ACTIVE' || row.status === 'SIGNED' ? 95 : row.status === 'DRAFT' ? 65 : 38",
               total: 100,
-              toneExpr: 'row.slaTone',
+              toneExpr: "row.status === 'ACTIVE' || row.status === 'SIGNED' ? 'success' : row.status === 'DRAFT' ? 'info' : 'warning'",
               fallbackText: 'SLA',
             },
           },
@@ -134,7 +134,7 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Renovação',
-                      valueExpr: 'row.renovacaoAutomatica',
+                      valueExpr: "'Cláusula de Renovação Bianual'",
                       icon: 'autorenew',
                     },
                   ],
@@ -154,14 +154,14 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'progress',
                       label: 'Índice de Conformidade de Entregas',
-                      valueExpr: 'row.complianceScore',
+                      valueExpr: "row.status === 'ACTIVE' || row.status === 'SIGNED' ? 95 : row.status === 'DRAFT' ? 65 : 38",
                       max: 100,
                       showPercent: true,
                     },
                     {
                       type: 'metric',
                       label: 'Cláusula Penal',
-                      valueExpr: 'row.penalidadeDescricao',
+                      valueExpr: "'Multa padrão de 15% por atraso de entrega de insumos'",
                       icon: 'policy',
                     },
                     {
@@ -187,7 +187,7 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Gestor Responsável',
-                      valueExpr: 'row.gestorContrato',
+                      valueExpr: "'Diretoria de Suprimentos & Armaria'",
                       icon: 'supervisor_account',
                     },
                     {

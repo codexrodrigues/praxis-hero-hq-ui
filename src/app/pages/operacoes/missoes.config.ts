@@ -57,9 +57,9 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
             visualization: {
               kind: 'radial',
               surface: 'table-cell',
-              valueExpr: 'row.progressoCalculado',
+              valueExpr: "row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 68 : row.status === 'PAUSADA' ? 40 : 15",
               total: 100,
-              toneExpr: 'row.missaoTone',
+              toneExpr: "row.status === 'CONCLUIDA' ? 'success' : row.prioridade === 'CRITICA' ? 'danger' : 'info'",
               fallbackText: 'Prontidão',
             },
           },
@@ -139,7 +139,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
                   items: [
                     {
                       type: 'badge',
-                      labelExpr: 'row.prioridadeBadge',
+                      labelExpr: 'row.prioridade',
                       icon: 'crisis_alert',
                     },
                     {
@@ -152,7 +152,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
                       type: 'metric',
                       label: 'Teatro de Operações',
                       valueExpr: 'row.local',
-                      captionExpr: 'row.janelaOperacional',
+                      captionExpr: "row.status === 'CONCLUIDA' ? 'Operação concluída com êxito' : 'Janela operacional ativa'",
                       icon: 'location_on',
                     },
                   ],
@@ -178,13 +178,13 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Liderança Tática',
-                      valueExpr: 'row.liderancaTatica',
+                      valueExpr: "'Comando Central Hero HQ'",
                       icon: 'military_tech',
                     },
                     {
                       type: 'progress',
                       label: 'Prontidão Operacional do Esquadrão',
-                      valueExpr: 'row.progressoCalculado',
+                      valueExpr: "row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 68 : row.status === 'PAUSADA' ? 40 : 15",
                       max: 100,
                       showPercent: true,
                     },
@@ -205,19 +205,21 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
                     {
                       type: 'metric',
                       label: 'Início Previsto',
-                      valueExpr: 'row.dataInicioFormatada',
+                      valueExpr: 'row.inicioPrev',
+                      format: 'date:dd/MM/yyyy HH:mm',
                       icon: 'calendar_today',
                     },
                     {
                       type: 'metric',
                       label: 'Prazo Limite',
-                      valueExpr: 'row.prazoLimiteFormatado',
+                      valueExpr: 'row.fimPrev',
+                      format: 'date:dd/MM/yyyy HH:mm',
                       icon: 'event_available',
                     },
                     {
                       type: 'metric',
                       label: 'Orçamento Tático Alocado',
-                      valueExpr: 'row.orcamentoFormatado',
+                      valueExpr: "'Alocação Tática S.H.I.E.L.D.'",
                       icon: 'payments',
                     },
                   ],
