@@ -49,6 +49,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#35**](#-issue-35-eliminação-de-dtos-typescript-estáticos-redundantes-via-contratos-genéricos-dinâmicos-dynamicdatarecord--governança-por-schema) | Eliminação de DTOs TypeScript Estáticos Redundantes via Contratos Genéricos Dinâmicos (`DynamicDataRecord`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/table`, `@praxisui/crud` (`DynamicDataRecord`, helpers) | 2026-10-08 | Validado (7/7 specs unitários, tipagem dinâmica em eventos de linha) |
 | [**#36**](#-issue-36-modo-de-apresentação-e-ficha-técnica-editorial-para-formulários-dinâmicos-mode-presentation-no-praxisuidynamic-form) | Modo de Apresentação e Ficha Técnica Editorial para Formulários Dinâmicos (`mode: 'presentation'`) | `@praxisui/dynamic-form`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/dynamic-form`, `@praxisui/core` (`mode: 'presentation'`, `mode: 'dossier'`) | 2026-10-08 | Validado (220 specs aprovados, renderização editorial sem inputs desativados) |
 | [**#37**](#-issue-37-componente-canônico-de-layout-e-shell-de-aplicação-corporativa-praxisappshell--praxisishell-ou-praxisicore) | Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell`) | `@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`PraxisAppShell`, `shell.models.ts`) | 2026-10-08 | Validado (10/10 specs unitários, build downstream OK, eliminação de CSS manual) |
+| [**#38**](#-issue-38-descoberta-integral-de-recurso-e-roteamento-zero-code-no-praxis-crud-praxisresourcepage--auto-resource-host) | Descoberta Integral de Recurso e Roteamento Zero-Code (`PraxisResourcePage` Smart Page) | `@praxisui/crud`<br>`@praxisui/table` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (`912ecf87b`) | 2026-10-09 | Validado (11/11 specs unitários, Auto-Header, Auto-ScopeBar, 100% dos 14 componentes de página eliminados no Hero HQ via commit `0ae972a`) |
 | [**#39**](#-issue-39-auto-hidratação-e-descoberta-de-gavetas-analíticas-drawers-via-resourcepath-e-metadados-openapi-schemasurfaces--behaviordrawer) | Auto-Hidratação e Descoberta de Gavetas Analíticas (Drawers) via `resourcePath` e Metadados OpenAPI (`/schemas/surfaces` / `behavior.drawer`) | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`8c522fbb2`) | 2026-10-09 | Validado (auto-hidratação por DI registry, 10/10 specs drawer, 87/87 specs crud, 100% dos 5 `*-drawer.config.ts` eliminados e build de produção downstream aprovado) |
 | [**#40**](#-issue-40-descarbonização-de-kpis-de-recursos-e-extinção-da-agregação-client-side-via-behaviorkpiband-declarativo-nativamente-integrado-no-praxis-crud) | Descarbonização de KPIs de Recursos e Extinção da Agregação Client-Side via `behavior.kpiBand` Declarativo Nativamente Integrado no `<praxis-crud>` | `@praxisui/crud`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (nativo `kpiBand` + `filterCriteria`), `praxis-hero-hq-ui` | 2026-10-09 | Validado (15 recursos descarbonizados, 14 blocos `*_KPI_DOCUMENT` extintos, `dashboard-stats.service` reduzido em 674 linhas, 2.214+ linhas líquidas eliminadas, tsc e build OK) |
 
@@ -2341,17 +2342,19 @@ Cada uma dessas páginas contém entre 650 e 1.021 linhas de código TypeScript,
    - Adicionado `@Input() resource?: string;` com suporte a inicialização zero-code (`<praxis-crud resource="operations/missoes">`).
    - `metadata` e `crudId` tornados opcionais com fallbacks seguros (`table: { columns: [] }`, `crud-${resource}`).
    - Tratamento dinâmico em `ngOnChanges` para `resource`, normalizando strings simples ou JSON, disparando automaticamente a descoberta de esquema e capacidades.
-2. **Componente Canônico de Rota `PraxisResourcePage` em `@praxisui/crud`:**
-   - Componente standalone com detecção de rota reativa (`ActivatedRoute.snapshot.data['resource']`, `route.paramMap`, `@Input() resource`).
-   - Encaminhamento direto de eventos de linha (`rowClick`, `rowDblClick`), gaveta (`drawerClose`), KPIs (`kpiCardClick`) e persistência (`save`).
-   - Exportação canônica no `public-api.ts` de `@praxisui/crud`.
+2. **Evolução para Smart Resource Page Canônica em `@praxisui/crud` (Commit `912ecf87b`):**
+   - Suporte nativo a **Auto-Header Governado** (`title`, `subtitle`, `domain`: label, icon, tone, com slot para `[page-header-actions]`).
+   - Suporte nativo a **Auto-ScopeBar Integrado** (`scopeBar`, `scopeItems`), sincronizando reativamente o chip de filtro ativo diretamente com `effectiveMetadata().filterCriteria`.
+   - Interação automática com **KPI Band** (`kpiCardClick`), ativando o chip do ScopeBar correspondente quando um card com filtro for clicado.
+   - Extração automática de `title`, `subtitle`, `domain`, `metadata`, `scopeBar` e `enableCustomization` de `route.data` e inputs Angular.
 3. **Validação & Testes:**
-   - Suíte unitária `praxis-resource-page.component.spec.ts` com 5/5 specs aprovados e suíte global do `@praxisui/crud` com 238/238 specs aprovados no ChromeHeadless.
-   - Compilação downstream e verificação no `praxis-hero-hq-ui` aprovadas com código 0.
+   - Suíte unitária `praxis-resource-page.component.spec.ts` com 11/11 specs aprovados com 100% de sucesso.
+   - Compilação das bibliotecas da plataforma aprovada com código 0.
+   - **Showcase 100% Descarbonizado (Commit `0ae972a`):** 100% dos 14 componentes de página `*-page.component.ts` foram excluídos da aplicação, sendo substituídos exclusivamente por rotas declarativas diretas no `app.routes.ts`. Mais de 1.800 linhas líquidas eliminadas do showcase, compilação de produção aprovada com código 0 em 11.8s.
 
 ### Critérios de Aceite para Resolução
 - [x] O componente `<praxis-crud>` é capaz de operar de forma auto-contida recebendo apenas a coordenada `resource`.
-- [x] As 14 páginas de recurso do Hero HQ podem ser reduzidas a simples definições de rota ou componentes com menos de 30 linhas de código.
+- [x] As 14 páginas de recurso do Hero HQ foram 100% extintas, substituídas por rotas declarativas zero-code utilizando o `PraxisResourcePage` inteligente.
 
 ---
 
