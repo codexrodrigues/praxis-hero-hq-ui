@@ -188,8 +188,13 @@ export class HeroAppShellComponent {
       event.preventDefault();
       this.searchOpen.set(true);
     }
-    if (event.key === 'Escape' && this.searchOpen()) {
-      this.searchOpen.set(false);
+    if (event.key === 'Escape') {
+      if (this.searchOpen()) {
+        this.searchOpen.set(false);
+      }
+      if (this.personaMenuOpen()) {
+        this.personaMenuOpen.set(false);
+      }
     }
   }
 
