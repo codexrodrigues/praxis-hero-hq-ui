@@ -54,9 +54,9 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#40**](#-issue-40-descarbonização-de-kpis-de-recursos-e-extinção-da-agregação-client-side-via-behaviorkpiband-declarativo-nativamente-integrado-no-praxis-crud) | Descarbonização de KPIs de Recursos e Extinção da Agregação Client-Side via `behavior.kpiBand` Declarativo Nativamente Integrado no `<praxis-crud>` | `@praxisui/crud`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (nativo `kpiBand` + `filterCriteria`), `praxis-hero-hq-ui` | 2026-10-09 | Validado (15 recursos descarbonizados, 14 blocos `*_KPI_DOCUMENT` extintos, `dashboard-stats.service` reduzido em 674 linhas, 2.214+ linhas líquidas eliminadas, tsc e build OK) |
 | [**#41**](#-issue-41-auto-projeção-de-colunas-openapi-columnprojection-source-schema-e-eliminação-de-declarações-manuais-nas-tabelas-crud) | Auto-Projeção de Colunas OpenAPI (`columnProjection: { source: 'schema' }`) e Eliminação de Declarações Manuais nas Tabelas CRUD | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `praxis-hero-hq-ui` (`columnProjection`), `@praxisui/table` (`b5aa2adba`) | 2026-10-09 | Validado (100% dos 14 recursos migrados para `columnProjection: { source: 'schema' }`, `columns: []`, fix de ordenação de additions em `praxis-table`, tsc e build OK) |
 | [**#42**](#-issue-42-descarbonizacao-do-dashboard-corporativo-via-binding-declarativo-de-contexto-praxis-dynamic-page-builder-context-e-expressoes-ast) | Descarbonização do Dashboard Corporativo via Binding Declarativo de Contexto (`<praxis-dynamic-page-builder [context]="...">`) | `@praxisui/page-builder`<br>`@praxisui/rich-content`<br>`praxis-hero-hq-ui` | 🟡 Média | `[x] Resolvida` | `praxis-hero-hq-ui` (`DASHBOARD_PAGE_DEFINITION`, `DashboardPageComponent`) | 2026-10-09 | Validado (eliminação de 160+ linhas de clonagem procedural de AST, binding declarativo de contexto, build downstream OK) |
-| [**#43**](#-issue-43-agrupamento-estrutural-canônico-de-corpo-prx-rich-card-body-e-alinhamento-vertical-de-mídia-em-cards-horizontais-no-praxisuirich-content) | Agrupamento Estrutural Canônico de Corpo (`.prx-rich-card-body`) e Alinhamento Vertical de Mídia em Cards Horizontais | `@praxisui/rich-content`<br>`prx-rich-card` | 🟡 Média | `[ ] Aberta` | - | - | Mitigação via Grid CSS em `dashboard-theme.scss` |
-| [**#44**](#-issue-44-correção-do-seletor-css-de-itemspacing-novo-itemappearance-card-e-apresentação-temporal-estendida-no-praxisuilist) | Correção do Seletor CSS de `itemSpacing`, Novo `itemAppearance: 'card'` e Apresentação Temporal Estendida (`datetime`/`relative`) | `@praxisui/list`<br>`list-config.model`<br>`template-evaluator` | 🟡 Média | `[ ] Aberta` | - | - | Mitigação via Flex gap e `meta.type: 'date'` |
-| [**#45**](#-issue-45-tolerância-sintática-em-toneexpr-e-contrato-declarativo-de-thresholds-para-microvisualizações-no-praxiscuitable) | Tolerância Sintática em `toneExpr` e Contrato Declarativo de `thresholds` para Microvisualizações | `@praxisui/table`<br>`praxis-metadata-starter` | 🟡 Média | `[ ] Aberta` | - | - | Mitigação com prefixo `=` em `toneExpr` |
+| [**#43**](#-issue-43-agrupamento-estrutural-canônico-de-corpo-prx-rich-card-body-e-alinhamento-vertical-de-mídia-em-cards-horizontais-no-praxisuirich-content) | Agrupamento Estrutural Canônico de Corpo (`.prx-rich-card-main`) e Alinhamento Vertical de Mídia em Cards Horizontais | `@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`verticalAlign`), `@praxisui/rich-content` (`.prx-rich-card-main`, 61/61 specs) | 2026-10-09 | Validado (remoção de 40+ linhas de grid manual em `dashboard-theme.scss`, build OK) |
+| [**#44**](#-issue-44-correção-do-seletor-css-de-itemspacing-novo-itemappearance-card-e-apresentação-temporal-estendida-no-praxisuilist) | Correção do Seletor CSS de `itemSpacing`, Novo `itemAppearance: 'card'` e Apresentação Temporal Estendida (`datetime`/`relative`) | `@praxisui/list`<br>`list-config.model`<br>`template-evaluator` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (seletor nested, `itemAppearance`, `formatRelativeTime`, `datetime`, 109/109 specs) | 2026-10-09 | Validado (remoção de overrides manuais em `#hero-distress-signals-list`, build OK) |
+| [**#45**](#-issue-45-tolerância-sintática-em-toneexpr-e-contrato-declarativo-de-thresholds-para-microvisualizações-no-praxiscuitable) | Tolerância Sintática em `toneExpr` e Contrato Declarativo de `thresholds` para Microvisualizações | `@praxisui/table`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`thresholds`), `@praxisui/table` (tolerância sem `=`, `deriveToneFromThresholds`, 13/13 specs) | 2026-10-09 | Validado (substituição de ternários manuais em Contenção Tática por `thresholds` declarativos, build OK) |
 
 
 
@@ -2665,7 +2665,7 @@ No dashboard executivo do Hero HQ (`src/app/pages/dashboard`):
 - **Módulos Afetados:** `@praxisui/rich-content` (`prx-rich-card`, `praxis-rich-content.ts`), Design System da Plataforma
 - **Severidade:** 🟡 Média (elimina vazios verticais de layout e uniformiza banners e heróis corporativos sem hacks CSS no consumidor)
 - **Tipo:** Layout e Arquitetura de Componentes / Design System de Plataforma
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 No componente `PraxisRichContent` (`projects/praxis-rich-content/src/lib/praxis-rich-content.ts`), quando um nó de cartão é configurado com orientação horizontal (`orientation: 'horizontal'`) e mídia lateral (`media.placement = 'trailing'` ou `'leading'`):
@@ -2680,12 +2680,12 @@ No componente `PraxisRichContent` (`projects/praxis-rich-content/src/lib/praxis-
 4. **Authoring Visual no Page Builder:** No editor visual de rich content (`PraxisRichContentConfigEditor`), a ausência de um bloco de corpo dificulta a manipulação de nós via arrastar-e-soltar (drag & drop), pois o usuário enxerga elementos soltos em vez de uma divisão clara entre mídia e conteúdo textual.
 
 ### Solução Canônica Recomendada de Plataforma
-1. **Introdução de Container Canônico de Corpo (`.prx-rich-card-body`):**
+1. **Introdução de Container Canônico de Corpo (`.prx-rich-card-main` / `.prx-rich-card-body`):**
    - No template do `prx-rich-card` para layouts horizontais, encapsular automaticamente todos os blocos textuais (`header`, `heading`, `content`, `actions`) dentro de um elemento estrutural:
      ```html
      <section class="prx-rich-card prx-rich-card--horizontal">
        @if (hasLeadingMedia()) { <div class="prx-rich-card-media">...</div> }
-       <div class="prx-rich-card-body">
+       <div class="prx-rich-card-main">
          <div class="prx-rich-card-header">...</div>
          <div class="prx-rich-card-heading">...</div>
          <div class="prx-rich-card-content">...</div>
@@ -2696,7 +2696,7 @@ No componente `PraxisRichContent` (`projects/praxis-rich-content/src/lib/praxis-
      ```
 2. **Estilização Canônica com CSS Flexbox de 2 Colunas:**
    - `.prx-rich-card--horizontal` deve adotar `display: flex; flex-direction: row; gap: var(--prx-card-horizontal-gap, 32px);`.
-   - `.prx-rich-card-body` adota `display: flex; flex-direction: column; justify-content: center; gap: var(--prx-card-body-gap, 12px); flex: 1 1 auto; min-width: 0;`.
+   - `.prx-rich-card-main` adota `display: flex; flex-direction: column; justify-content: center; gap: var(--prx-card-body-gap, 12px); flex: 1 1 auto; min-width: 0;`.
 3. **Propriedade Declarativa `media.verticalAlign`:**
    - Adicionar ao modelo `RichCardMediaNode` a propriedade opcional `verticalAlign?: 'center' | 'top' | 'stretch'` (default: `'center'`), controlando `align-self` da mídia.
 
@@ -2704,12 +2704,12 @@ No componente `PraxisRichContent` (`projects/praxis-rich-content/src/lib/praxis-
 - Em `src/styles/dashboard-theme.scss`, aplicou-se uma regra explícita de CSS Grid 2x3 para `.hero-executive-banner .prx-rich-card` com `grid-template-rows: auto auto auto !important; row-gap: 12px !important;` e `grid-row: 1 / span 3 !important; align-self: center !important;` na mídia.
 
 ### Critérios de Aceite para Resolução
-- [ ] O componente `prx-rich-card` renderiza internamente uma `<div class="prx-rich-card-body">` quando `orientation: 'horizontal'`.
-- [ ] Cartões horizontais mantêm espaçamento compacto e uniforme entre pílulas, título, subtítulo e ações, independentemente da altura da mídia lateral.
-- [ ] Suporte a `media.verticalAlign: 'center' | 'top' | 'stretch'`.
-- [ ] Colapso gracioso para layout vertical em telas narrow (< 600px) preservando a hierarquia natural do corpo.
-- [ ] Testes unitários em `praxis-rich-content.spec.ts` validando a nova árvore DOM e layout de 2 colunas.
-- [ ] Validação downstream no Hero HQ com remoção do workaround de CSS Grid.
+- [x] O componente `prx-rich-card` renderiza internamente uma `<div class="prx-rich-card-main">` quando `orientation: 'horizontal'`.
+- [x] Cartões horizontais mantêm espaçamento compacto e uniforme entre pílulas, título, subtítulo e ações, independentemente da altura da mídia lateral.
+- [x] Suporte a `media.verticalAlign: 'center' | 'top' | 'stretch'`.
+- [x] Colapso gracioso para layout vertical em telas narrow (< 600px) preservando a hierarquia natural do corpo.
+- [x] Testes unitários em `praxis-rich-content.spec.ts` validando a nova árvore DOM e layout de 2 colunas.
+- [x] Validação downstream no Hero HQ com remoção do workaround de CSS Grid.
 
 ---
 
@@ -2719,7 +2719,7 @@ No componente `PraxisRichContent` (`projects/praxis-rich-content/src/lib/praxis-
 - **Módulos Afetados:** `@praxisui/list` (`praxis-list.component.scss`, `list-config.model.ts`, `template-evaluator.ts`)
 - **Severidade:** 🟡 Média (falha silenciosa de espaçamento de itens em listas com seções; falta de variante para listas em cartões compactos/pílulas; ausência de data+hora combinadas e tempo relativo)
 - **Tipo:** Ciclo de Vida Visual / Apresentação de Dados / DX de Configuração
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 Durante a configuração do widget de **Sinais de Socorro Ativos** (`DISTRESS_SIGNALS_LIST_CONFIG`):
@@ -2766,12 +2766,12 @@ Durante a configuração do widget de **Sinais de Socorro Ativos** (`DISTRESS_SI
 - Em `dashboard-theme.scss`, forçou-se o espaçamento com `#hero-distress-signals-list mat-list { display: flex; flex-direction: column; gap: 8px; }` e estilização individual em `mat-list-item` com `margin-bottom: 8px !important; border-radius: 12px !important;`.
 
 ### Critérios de Aceite para Resolução
-- [ ] O seletor CSS de `itemSpacing` funciona com listas agrupadas por seção sob controle de fluxo Angular Ivy (`@for`).
-- [ ] Configurar `itemAppearance: 'card'` na lista gera linhas em cápsulas isoladas com espaçamento nativo sem nenhum CSS customizado.
-- [ ] `template-evaluator.ts` suporta `type: 'datetime'` e exibe data + hora formatadas no padrão regional.
-- [ ] Suporte ao pipe `relative` exibindo tempo decorrido amigável.
-- [ ] Testes unitários em `praxis-list.component.spec.ts` e `template-evaluator.spec.ts`.
-- [ ] Validação downstream no Hero HQ com remoção das regras manuais de `#hero-distress-signals-list`.
+- [x] O seletor CSS de `itemSpacing` funciona com listas agrupadas por seção sob controle de fluxo Angular Ivy (`@for`).
+- [x] Configurar `itemAppearance: 'card'` na lista gera linhas em cápsulas isoladas com espaçamento nativo sem nenhum CSS customizado.
+- [x] `template-evaluator.ts` suporta `type: 'datetime'` e exibe data + hora formatadas no padrão regional.
+- [x] Suporte ao pipe `relative` exibindo tempo decorrido amigável.
+- [x] Testes unitários em `praxis-list.component.spec.ts` e `template-evaluator.spec.ts`.
+- [x] Validação downstream no Hero HQ com remoção das regras manuais de `#hero-distress-signals-list`.
 
 ---
 
@@ -2781,7 +2781,7 @@ Durante a configuração do widget de **Sinais de Socorro Ativos** (`DISTRESS_SI
 - **Módulos Afetados:** `@praxisui/table` (`praxis-table.ts`, `micro-visualization.model.ts`, `safe-expression-evaluator.ts`), `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (falha silenciosa para azul 'info' quando falta o prefixo '='; dependência frágil de strings ternárias de código JavaScript para cores condicionais em vez de metadados estruturados)
 - **Tipo:** Avaliação de Expressões / Ergonomia de DX / Contrato Metadata-Driven
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida`
 
 ### Diagnóstico Detalhado da Causa Raiz
 No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a propriedade `toneExpr` de microvisualizações (anéis, barras de progresso, bullets) define a cor semântica do indicador (`success`, `warning`, `danger`, `info`, `neutral`).
@@ -2828,12 +2828,12 @@ No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a
   `toneExpr: "= (100 - round(min(85, (danosCivis / 4000000) * 100))) >= 70 ? 'success' : ((100 - round(min(85, (danosCivis / 4000000) * 100))) >= 40 ? 'warning' : 'danger')"`
 
 ### Critérios de Aceite para Resolução
-- [ ] `evaluateMicroVisualizationExpression` detecta expressões com operadores condicionais mesmo sem o prefixo `=` e emite aviso explicativo em DevMode.
-- [ ] O modelo `MicroVisualizationPresentation` suporta a propriedade declarativa `thresholds: MicroVisualizationThreshold[]`.
-- [ ] Microvisualizações radiais, barras e bullets adaptam suas cores automaticamente com base na lista de `thresholds`.
-- [ ] Backend `praxis-metadata-starter` suporta configuração declarativa de faixas semânticas.
-- [ ] Testes unitários em `praxis-table.spec.ts` validando resolução com e sem `=`, e via objeto `thresholds`.
-- [ ] Validação downstream no Hero HQ com substituição da fórmula ternária por `thresholds` declarativos.
+- [x] `evaluateMicroVisualizationExpression` detecta expressões com operadores condicionais mesmo sem o prefixo `=` e emite aviso explicativo em DevMode.
+- [x] O modelo `MicroVisualizationPresentation` suporta a propriedade declarativa `thresholds: MicroVisualizationThreshold[]`.
+- [x] Microvisualizações radiais, barras e bullets adaptam suas cores automaticamente com base na lista de `thresholds`.
+- [x] Backend `praxis-metadata-starter` suporta configuração declarativa de faixas semânticas.
+- [x] Testes unitários em `praxis-table.spec.ts` validando resolução com e sem `=`, e via objeto `thresholds`.
+- [x] Validação downstream no Hero HQ com substituição da fórmula ternária por `thresholds` declarativos.
 
 ---
 

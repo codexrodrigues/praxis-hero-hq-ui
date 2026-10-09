@@ -111,7 +111,8 @@ export const DISTRESS_SIGNALS_LIST_CONFIG: PraxisListConfig = {
   },
   layout: {
     variant: 'list',
-    itemSpacing: 'default',
+    itemAppearance: 'card',
+    itemSpacing: 'relaxed',
     density: 'compact',
     pageSize: 6,
     lines: 2,
@@ -140,8 +141,8 @@ export const DISTRESS_SIGNALS_LIST_CONFIG: PraxisListConfig = {
       expr: 'Ameaça Nível ${item.nivelAmeaca}',
     },
     meta: {
-      type: 'date',
-      expr: "${item.abertoEm} | pt-BR:short",
+      type: 'text',
+      expr: '${item.abertoEm|relative:pt-BR}',
     },
     trailing: {
       type: 'chip',
@@ -523,6 +524,7 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                   kind: 'icon',
                   icon: 'radar',
                   placement: 'trailing',
+                  verticalAlign: 'center',
                 },
               },
             ],
@@ -905,7 +907,11 @@ export const DASHBOARD_PAGE_DEFINITION: WidgetPageDefinition = {
                       surface: 'table-cell',
                       valueExpr: '= max(15, 100 - round(min(85, (danosCivis / 4000000) * 100)))',
                       total: 100,
-                      toneExpr: "= (100 - round(min(85, (danosCivis / 4000000) * 100))) >= 70 ? 'success' : ((100 - round(min(85, (danosCivis / 4000000) * 100))) >= 40 ? 'warning' : 'danger')",
+                      thresholds: [
+                        { min: 70, tone: 'success' },
+                        { min: 40, max: 69, tone: 'warning' },
+                        { max: 39, tone: 'danger' },
+                      ],
                       fallbackText: 'Contenção Tática',
                     },
                   },
