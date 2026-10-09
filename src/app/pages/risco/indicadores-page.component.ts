@@ -14,11 +14,9 @@ import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import {
-  PraxisAnalyticalDrawerComponent,
   PraxisScopeBarComponent,
   type PraxisScopeBarItem,
 } from '@praxisui/table';
-import { INCIDENT_ANALYTICAL_DRAWER_CONFIG } from '../operacoes/incident-drawer.config';
 import { INDICADORES_CRUD_METADATA, INDICADORES_KPI_DOCUMENT } from './indicadores.config';
 
 @Component({
@@ -28,7 +26,6 @@ import { INDICADORES_CRUD_METADATA, INDICADORES_KPI_DOCUMENT } from './indicador
     CommonModule,
     PraxisCrudComponent,
     PraxisRichContent,
-    PraxisAnalyticalDrawerComponent,
     PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,23 +66,12 @@ import { INDICADORES_CRUD_METADATA, INDICADORES_KPI_DOCUMENT } from './indicador
         <praxis-crud
           crudId="heroes-hq-indicadores-crud"
           [metadata]="activeCrudMetadata()"
-          (rowClick)="onIncidentRowClicked($event)"
         />
       </section>
-
-      <!-- Tactical Incident Investigation Drawer (Canonical PraxisAnalyticalDrawer) -->
-      <praxis-analytical-drawer
-        [isOpen]="!!selectedIncident()"
-        [row]="selectedIncident()"
-        [drawerConfig]="incidentDrawerConfig"
-        (closeDrawer)="selectedIncident.set(null)"
-      />
     </div>
   `,
 })
 export class IndicadoresPageComponent implements OnInit, OnDestroy {
-  protected readonly incidentDrawerConfig = INCIDENT_ANALYTICAL_DRAWER_CONFIG;
-  protected readonly selectedIncident = signal<Record<string, unknown> | null>(null);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly scopeItems: PraxisScopeBarItem[] = [
     { id: 'all', label: 'Todos os Casos', count: 74, icon: 'account_balance', tone: 'default', isDefault: true },
@@ -131,20 +117,6 @@ export class IndicadoresPageComponent implements OnInit, OnDestroy {
 
   protected onScopeChange(item: PraxisScopeBarItem): void {
     this.setFilter(item.id);
-  }
-
-  protected onIncidentRowClicked(event: unknown): void {
-    const row =
-      (event as { row?: any; data?: any })?.row ||
-      (event as { row?: any; data?: any })?.data ||
-      (event as any);
-
-    if (row) {
-      this.selectedIncident.set({
-        ...row,
-        id: Number(row.incidenteId ?? row.id ?? 1),
-      });
-    }
   }
 
   private loadKpis(): void {

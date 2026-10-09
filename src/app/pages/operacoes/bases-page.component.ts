@@ -13,11 +13,9 @@ import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import {
-  PraxisAnalyticalDrawerComponent,
   PraxisScopeBarComponent,
   type PraxisScopeBarItem,
 } from '@praxisui/table';
-import { BASE_FACILITY_ANALYTICAL_DRAWER_CONFIG } from './base-facility-drawer.config';
 import { BASES_CRUD_METADATA, BASES_KPI_DOCUMENT } from './bases.config';
 
 @Component({
@@ -27,7 +25,6 @@ import { BASES_CRUD_METADATA, BASES_KPI_DOCUMENT } from './bases.config';
     CommonModule,
     PraxisCrudComponent,
     PraxisRichContent,
-    PraxisAnalyticalDrawerComponent,
     PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,23 +65,12 @@ import { BASES_CRUD_METADATA, BASES_KPI_DOCUMENT } from './bases.config';
         <praxis-crud
           crudId="heroes-hq-bases-crud"
           [metadata]="activeCrudMetadata()"
-          (rowClick)="onFacilityRowClicked($event)"
         />
       </section>
-
-      <!-- Base Facility Tactical Drawer Governed via Canonical Schema -->
-      <praxis-analytical-drawer
-        [isOpen]="!!selectedFacility()"
-        [row]="selectedFacility()"
-        [drawerConfig]="facilityDrawerConfig"
-        (closeDrawer)="selectedFacility.set(null)"
-      />
     </div>
   `,
 })
 export class BasesPageComponent implements OnInit, OnDestroy {
-  protected readonly facilityDrawerConfig = BASE_FACILITY_ANALYTICAL_DRAWER_CONFIG;
-  protected readonly selectedFacility = signal<Record<string, unknown> | null>(null);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalCount = signal<number>(7);
   protected readonly classifiedCount = signal<number>(4);
@@ -156,16 +142,6 @@ export class BasesPageComponent implements OnInit, OnDestroy {
 
   protected setFilter(filterId: string): void {
     this.activeFilterId.set(filterId);
-  }
-
-  protected onFacilityRowClicked(event: unknown): void {
-    const row =
-      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.row ||
-      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.data ||
-      (event as Record<string, unknown>);
-    if (row && (row['id'] != null || row['baseId'] != null)) {
-      this.selectedFacility.set(row);
-    }
   }
 
   protected onKpiCardClick(event: MouseEvent): void {

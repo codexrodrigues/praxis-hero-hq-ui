@@ -14,11 +14,9 @@ import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import {
-  PraxisAnalyticalDrawerComponent,
   PraxisScopeBarComponent,
   type PraxisScopeBarItem,
 } from '@praxisui/table';
-import { THREAT_ANALYTICAL_DRAWER_CONFIG } from './threat-drawer.config';
 import { AMEACAS_CRUD_METADATA, AMEACAS_KPI_DOCUMENT } from './ameacas.config';
 
 @Component({
@@ -28,7 +26,6 @@ import { AMEACAS_CRUD_METADATA, AMEACAS_KPI_DOCUMENT } from './ameacas.config';
     CommonModule,
     PraxisCrudComponent,
     PraxisRichContent,
-    PraxisAnalyticalDrawerComponent,
     PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,23 +66,12 @@ import { AMEACAS_CRUD_METADATA, AMEACAS_KPI_DOCUMENT } from './ameacas.config';
         <praxis-crud
           crudId="heroes-hq-ameacas-crud"
           [metadata]="activeCrudMetadata()"
-          (rowClick)="onThreatRowClicked($event)"
         />
       </section>
-
-      <!-- Threat Intelligence Drawer Governed via Canonical Schema -->
-      <praxis-analytical-drawer
-        [isOpen]="!!selectedThreat()"
-        [row]="selectedThreat()"
-        [drawerConfig]="threatDrawerConfig"
-        (closeDrawer)="selectedThreat.set(null)"
-      />
     </div>
   `,
 })
 export class AmeacasPageComponent implements OnInit, OnDestroy {
-  protected readonly threatDrawerConfig = THREAT_ANALYTICAL_DRAWER_CONFIG;
-  protected readonly selectedThreat = signal<Record<string, unknown> | null>(null);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalAmeacas = signal<number>(16);
   protected readonly confrontation = signal<number>(6);
@@ -231,12 +217,5 @@ export class AmeacasPageComponent implements OnInit, OnDestroy {
         ],
       });
     });
-  }
-
-  protected onThreatRowClicked(event: unknown): void {
-    const raw = (event as any)?.row ?? (event as any)?.data ?? event;
-    if (raw && typeof raw === 'object' && 'id' in raw) {
-      this.selectedThreat.set(raw as Record<string, unknown>);
-    }
   }
 }

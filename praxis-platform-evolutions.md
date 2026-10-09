@@ -49,8 +49,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#35**](#-issue-35-eliminação-de-dtos-typescript-estáticos-redundantes-via-contratos-genéricos-dinâmicos-dynamicdatarecord--governança-por-schema) | Eliminação de DTOs TypeScript Estáticos Redundantes via Contratos Genéricos Dinâmicos (`DynamicDataRecord`) | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/crud` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/table`, `@praxisui/crud` (`DynamicDataRecord`, helpers) | 2026-10-08 | Validado (7/7 specs unitários, tipagem dinâmica em eventos de linha) |
 | [**#36**](#-issue-36-modo-de-apresentação-e-ficha-técnica-editorial-para-formulários-dinâmicos-mode-presentation-no-praxisuidynamic-form) | Modo de Apresentação e Ficha Técnica Editorial para Formulários Dinâmicos (`mode: 'presentation'`) | `@praxisui/dynamic-form`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/dynamic-form`, `@praxisui/core` (`mode: 'presentation'`, `mode: 'dossier'`) | 2026-10-08 | Validado (220 specs aprovados, renderização editorial sem inputs desativados) |
 | [**#37**](#-issue-37-componente-canônico-de-layout-e-shell-de-aplicação-corporativa-praxisappshell--praxisishell-ou-praxisicore) | Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell`) | `@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`PraxisAppShell`, `shell.models.ts`) | 2026-10-08 | Validado (10/10 specs unitários, build downstream OK, eliminação de CSS manual) |
-| [**#38**](#-issue-38-descoberta-integral-de-recurso-e-roteamento-zero-code-no-praxis-crud-praxisresourcepage--auto-resource-host) | Descoberta Integral de Recurso e Roteamento Zero-Code no `<praxis-crud>` (`PraxisResourcePage`) | `@praxisui/crud`<br>`@praxisui/table` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (`PraxisResourcePage`, auto-resource `<praxis-crud resource="...">`) | 2026-10-08 | Validado (5/5 specs de rota, 238/238 specs de crud, build downstream OK) |
-| [**#39**](#-issue-39-auto-hidratação-e-descoberta-de-gavetas-analíticas-drawers-via-resourcepath-e-metadados-openapi-schemasurfaces--behaviordrawer) | Auto-Hidratação e Descoberta de Gavetas Analíticas (Drawers) via `resourcePath` e Metadados OpenAPI (`/schemas/surfaces` / `behavior.drawer`) | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🔴 Alta | `[ ] Aberta` | - | - | Pendente de implementação |
+| [**#39**](#-issue-39-auto-hidratação-e-descoberta-de-gavetas-analíticas-drawers-via-resourcepath-e-metadados-openapi-schemasurfaces--behaviordrawer) | Auto-Hidratação e Descoberta de Gavetas Analíticas (Drawers) via `resourcePath` e Metadados OpenAPI (`/schemas/surfaces` / `behavior.drawer`) | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`8c522fbb2`) | 2026-10-09 | Validado (auto-hidratação por DI registry, 10/10 specs drawer, 87/87 specs crud, 100% dos 5 `*-drawer.config.ts` eliminados e build de produção downstream aprovado) |
 
 
 
@@ -2359,7 +2358,7 @@ Cada uma dessas páginas contém entre 650 e 1.021 linhas de código TypeScript,
 - **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`, `@praxisui/core`, `praxis-metadata-starter`
 - **Severidade:** 🔴 Alta (Elimina mais de 550 linhas de arquivos estáticos `*-drawer.config.ts`, centenas de linhas de código de cola nos componentes hospedeiros e orquestra a gaveta de forma 100% metadata-driven)
 - **Tipo:** Paradigma Zero-Code Metadata-Driven / Descoberta de Superfícies / Gaveta Analítica
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (`8c522fbb2`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 A implementação da Issue #30 introduziu com sucesso o `PraxisAnalyticalDrawerComponent` e o schema `PraxisAnalyticalDrawerConfig`. Essa infraestrutura canônica permitiu desmantelar e apagar completamente as gavetas monolíticas artesanais que ultrapassavam 1.400 linhas de código TypeScript e HTML (`incident-analysis-drawer.component.ts`, `hero-dossier-drawer.component.ts`, `mission-briefing-drawer.component.ts`, `base-facility-drawer.component.ts` e `threat-intelligence-drawer.component.ts` — totalizando 5.436 linhas removidas).
@@ -2485,10 +2484,10 @@ No entanto, uma inspeção criteriosa nas páginas de recursos do showcase (`inc
 ---
 
 ### Critérios de Aceite para Resolução
-- [ ] `<praxis-analytical-drawer [resourcePath]="'operations/incidentes'" [row]="selectedRow">` descobre e renderiza automaticamente o dossiê analítico sem necessidade de `drawerConfig` estático no cliente.
-- [ ] `<praxis-crud [resourcePath]="'operations/incidentes'">` abre a gaveta analítica nativamente ao clicar em um registro quando `openMode: 'drawer'`.
-- [ ] Eliminação de 100% dos arquivos `*-drawer.config.ts` na aplicação modelo `praxis-hero-hq-ui` com zero regressão visual e funcional.
-- [ ] 100% dos testes unitários e de integração de `@praxisui/table` e `@praxisui/crud` aprovados no ChromeHeadless.
+- [x] `<praxis-analytical-drawer [resourcePath]="'operations/incidentes'" [row]="selectedRow">` descobre e renderiza automaticamente o dossiê analítico sem necessidade de `drawerConfig` estático no cliente.
+- [x] `<praxis-crud [resourcePath]="'operations/incidentes'">` abre a gaveta analítica nativamente ao clicar em um registro quando `openMode: 'drawer'`.
+- [x] Eliminação de 100% dos arquivos `*-drawer.config.ts` na aplicação modelo `praxis-hero-hq-ui` com zero regressão visual e funcional.
+- [x] 100% dos testes unitários e de integração de `@praxisui/table` e `@praxisui/crud` aprovados no ChromeHeadless.
 
 ---
 

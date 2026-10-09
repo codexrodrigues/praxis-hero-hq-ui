@@ -60,8 +60,9 @@ import {
   providePraxisSettingsPanelBridge,
   providePraxisSurfaceDrawerBridge,
 } from '@praxisui/settings-panel';
-import { providePraxisTableMetadata } from '@praxisui/table';
+import { providePraxisTableMetadata, providePraxisAnalyticalDrawerSchemas } from '@praxisui/table';
 import { providePraxisListMetadata } from '@praxisui/list';
+import { HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS } from './core/analytical-drawer-schemas.catalog';
 import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
 import { tacticalDataEnrichmentInterceptor } from './core/tactical-data-enrichment.interceptor';
@@ -138,6 +139,7 @@ export const appConfig: ApplicationConfig = {
     ...providePraxisDynamicFieldsCore(),
     providePraxisDynamicFormMetadata(),
     providePraxisTableMetadata(),
+    providePraxisAnalyticalDrawerSchemas(HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS),
     providePraxisListMetadata(),
     providePraxisCrudMetadata(),
     providePraxisDialogMetadata(),

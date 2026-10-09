@@ -12,11 +12,9 @@ import { Subscription } from 'rxjs';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import {
-  PraxisAnalyticalDrawerComponent,
   PraxisScopeBarComponent,
   type PraxisScopeBarItem,
 } from '@praxisui/table';
-import { MISSION_ANALYTICAL_DRAWER_CONFIG } from './mission-drawer.config';
 import { MISSOES_CRUD_METADATA, MISSIONS_KPI_DOCUMENT } from './missoes.config';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 
@@ -27,7 +25,6 @@ import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
     CommonModule,
     PraxisCrudComponent,
     PraxisRichContent,
-    PraxisAnalyticalDrawerComponent,
     PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,28 +70,17 @@ import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
         <praxis-crud
           crudId="heroes-hq-missoes-crud"
           [metadata]="activeCrudMetadata()"
-          (rowClick)="onMissionRowClicked($event)"
         />
       </section>
-
-      <!-- Mission Briefing Drawer (Canonical PraxisAnalyticalDrawer) -->
-      <praxis-analytical-drawer
-        [isOpen]="!!selectedMission()"
-        [row]="selectedMission()"
-        [drawerConfig]="missionDrawerConfig"
-        (closeDrawer)="selectedMission.set(null)"
-      />
     </div>
   `,
 })
 export class MissoesPageComponent implements OnInit, OnDestroy {
-  protected readonly missionDrawerConfig = MISSION_ANALYTICAL_DRAWER_CONFIG;
   protected readonly activeFilterId = signal<'all' | 'ativas' | 'concluidas' | 'planejamento' | 'omega'>('all');
   protected readonly activeCount = signal<number>(6);
   protected readonly completedCount = signal<number>(4);
   protected readonly plannedCount = signal<number>(10);
   protected readonly omegaCount = signal<number>(10);
-  protected readonly selectedMission = signal<Record<string, unknown> | null>(null);
 
   protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
     {
@@ -174,16 +160,6 @@ export class MissoesPageComponent implements OnInit, OnDestroy {
 
   protected onScopeChange(item: PraxisScopeBarItem): void {
     this.setFilter(item.id as 'all' | 'ativas' | 'concluidas' | 'planejamento' | 'omega');
-  }
-
-  protected onMissionRowClicked(event: unknown): void {
-    const row =
-      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.row ||
-      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.data ||
-      (event as Record<string, unknown>);
-    if (row && (row['id'] != null || row['missaoId'] != null)) {
-      this.selectedMission.set(row);
-    }
   }
 
   protected onKpiSectionClicked(event: MouseEvent): void {

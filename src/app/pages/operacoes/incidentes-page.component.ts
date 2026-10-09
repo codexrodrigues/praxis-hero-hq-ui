@@ -13,11 +13,9 @@ import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisRichContent } from '@praxisui/rich-content';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import {
-  PraxisAnalyticalDrawerComponent,
   PraxisScopeBarComponent,
   type PraxisScopeBarItem,
 } from '@praxisui/table';
-import { INCIDENT_ANALYTICAL_DRAWER_CONFIG } from './incident-drawer.config';
 import { INCIDENTES_CRUD_METADATA, INCIDENTES_KPI_DOCUMENT } from './incidentes.config';
 
 @Component({
@@ -27,7 +25,6 @@ import { INCIDENTES_CRUD_METADATA, INCIDENTES_KPI_DOCUMENT } from './incidentes.
     CommonModule,
     PraxisCrudComponent,
     PraxisRichContent,
-    PraxisAnalyticalDrawerComponent,
     PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,23 +65,12 @@ import { INCIDENTES_CRUD_METADATA, INCIDENTES_KPI_DOCUMENT } from './incidentes.
         <praxis-crud
           crudId="heroes-hq-incidentes-crud"
           [metadata]="activeCrudMetadata()"
-          (rowClick)="onIncidentRowClicked($event)"
         />
       </section>
-
-      <!-- Tactical Incident Investigation Drawer (Canonical PraxisAnalyticalDrawer) -->
-      <praxis-analytical-drawer
-        [isOpen]="!!selectedIncident()"
-        [row]="selectedIncident()"
-        [drawerConfig]="incidentDrawerConfig"
-        (closeDrawer)="selectedIncident.set(null)"
-      />
     </div>
   `,
 })
 export class IncidentesPageComponent implements OnInit, OnDestroy {
-  protected readonly incidentDrawerConfig = INCIDENT_ANALYTICAL_DRAWER_CONFIG;
-  protected readonly selectedIncident = signal<Record<string, unknown> | null>(null);
   protected readonly activeFilterId = signal<string>('all');
   protected readonly totalIncidentes = signal<number>(74);
   protected readonly criticalIncidentes = signal<number>(18);
@@ -135,16 +121,6 @@ export class IncidentesPageComponent implements OnInit, OnDestroy {
 
   protected onScopeChange(item: PraxisScopeBarItem): void {
     this.setFilter(item.id);
-  }
-
-  protected onIncidentRowClicked(event: unknown): void {
-    const row =
-      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.row ||
-      (event as { row?: Record<string, unknown>; data?: Record<string, unknown> })?.data ||
-      (event as Record<string, unknown>);
-    if (row && (row['id'] != null || row['incidenteId'] != null)) {
-      this.selectedIncident.set(row);
-    }
   }
 
   protected onKpiCardClick(event: MouseEvent): void {

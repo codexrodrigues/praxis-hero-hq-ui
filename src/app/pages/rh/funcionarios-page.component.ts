@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,18 +7,16 @@ import {
   OnInit,
   inject,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { type RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import {
-  PraxisAnalyticalDrawerComponent,
   PraxisScopeBarComponent,
   type PraxisScopeBarItem,
 } from '@praxisui/table';
 import { PraxisRichContent } from '@praxisui/rich-content';
-import { HERO_ANALYTICAL_DRAWER_CONFIG } from './hero-drawer.config';
-import { PRAXIS_API_BASE_URL } from '../../core/platform.config';
 import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import {
   HEROES_CRUD_METADATA,
@@ -35,7 +32,6 @@ import {
     PraxisCrudComponent,
     PraxisRichContent,
     PraxisScopeBarComponent,
-    PraxisAnalyticalDrawerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -96,17 +92,8 @@ import {
           #heroesCrud
           crudId="heroes-hq-funcionarios-crud"
           [metadata]="activeCrudMetadata()"
-          (rowClick)="onHeroRowClicked($event)"
         />
       </section>
-
-      <!-- Dossiê 360 Slide-over Drawer (Canonical PraxisAnalyticalDrawer) -->
-      <praxis-analytical-drawer
-        [isOpen]="!!selectedHero()"
-        [row]="selectedHero()"
-        [drawerConfig]="heroDrawerConfig"
-        (closeDrawer)="selectedHero.set(null)"
-      />
     </div>
   `,
 })
@@ -157,13 +144,10 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
     };
   });
 
-  protected readonly heroDrawerConfig = HERO_ANALYTICAL_DRAWER_CONFIG;
+  @ViewChild('heroesCrud') heroesCrud?: PraxisCrudComponent;
   protected readonly kpiDocument = signal<RichContentDocument>(HEROES_KPI_DOCUMENT);
-  protected readonly selectedHero = signal<Record<string, unknown> | null>(null);
-  protected readonly isTransitioning = signal(false);
   protected readonly notice = signal<string | null>(null);
 
-  private readonly http = inject(HttpClient);
   private readonly dashboardStats = inject(DashboardStatsService);
   private kpisSub: Subscription | null = null;
 
@@ -295,64 +279,7 @@ export class FuncionariosPageComponent implements OnInit, OnDestroy {
   }
 
   protected openSampleDossier(): void {
-    this.selectedHero.set(SAMPLE_HERO);
-  }
-
-  protected onHeroRowClicked(event: unknown): void {
-    const raw = (event as any)?.row ?? (event as any)?.data ?? event;
-    if (!raw || typeof raw !== 'object' || !('id' in raw)) {
-      return;
-    }
-    this.selectedHero.set(raw);
-  }
-
-  protected onToggleStatus(hero: Record<string, unknown>): void {
-    if (this.isTransitioning()) return;
-
-    this.isTransitioning.set(true);
-    const isAtivo = Boolean(hero['ativo']);
-    const action = isAtivo ? 'deactivate' : 'reactivate';
-    const payload = {
-      effectiveAt: new Date().toISOString().substring(0, 10),
-      reasonCode: isAtivo ? 'RESERVA_OPERACIONAL' : 'REATIVACAO_QUADRO',
-      comment: 'Transição de prontidão tática executada via Dossiê 360 do Centro de Comando.',
-    };
-
-    const headers: Record<string, string> = {};
-    if (hero['resourceVersion']) {
-      headers['If-Match'] = String(hero['resourceVersion']);
-    }
-
-    this.http
-      .post(
-        `${PRAXIS_API_BASE_URL}/human-resources/funcionarios/${hero['id']}/actions/${action}`,
-        payload,
-        { headers }
-      )
-      .subscribe({
-        next: () => {
-          this.isTransitioning.set(false);
-          const updated = { ...hero, ativo: !isAtivo };
-          this.selectedHero.set(updated);
-          this.loadKpis();
-          this.showNotice(
-            updated.ativo
-              ? `Colaborador ${hero['nomeCompleto']} reativado na força ativa com sucesso!`
-              : `Colaborador ${hero['nomeCompleto']} movido para a reserva com sucesso!`
-          );
-        },
-        error: () => {
-          this.isTransitioning.set(false);
-          const updated = { ...hero, ativo: !isAtivo };
-          this.selectedHero.set(updated);
-          this.loadKpis();
-          this.showNotice(
-            updated.ativo
-              ? `Colaborador ${hero['nomeCompleto']} reativado na força ativa (local)!`
-              : `Colaborador ${hero['nomeCompleto']} movido para a reserva (local)!`
-          );
-        },
-      });
+    this.heroesCrud?.openAnalyticalDrawer(SAMPLE_HERO);
   }
 
   private showNotice(msg: string): void {
