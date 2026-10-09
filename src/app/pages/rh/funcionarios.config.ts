@@ -50,8 +50,8 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
   table: {
     columnProjection: {
       source: 'schema',
-      include: ['fotoPerfilUrl', 'nomeCompleto', 'cargoNome', 'departamentoNome', 'ativo', 'dataAdmissao'],
-      order: ['fotoPerfilUrl', 'nomeCompleto', 'cargoNome', 'departamentoNome', 'ativo', 'prontidaoScore', 'dataAdmissao'],
+      include: ['avatarUrl', 'nomeCompleto', 'cargoNome', 'departamentoNome', 'ativo', 'dataAdmissao'],
+      order: ['avatarUrl', 'nomeCompleto', 'cargoNome', 'departamentoNome', 'ativo', 'prontidaoScore', 'dataAdmissao'],
       additions: [
         {
           field: 'prontidaoScore',
@@ -74,14 +74,14 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         },
       ],
       overrides: {
-        fotoPerfilUrl: {
+        avatarUrl: {
           width: '72px',
           align: 'center',
           header: 'Avatar',
           renderer: {
             type: 'avatar',
             avatar: {
-              srcField: 'fotoPerfilUrl',
+              srcField: 'avatarUrl',
               altField: 'nomeCompleto',
               initialsField: 'nomeCompleto',
               shape: 'circle',
