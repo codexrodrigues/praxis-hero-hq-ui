@@ -20,8 +20,12 @@ import {
   PercentPipe,
   TitleCasePipe,
   UpperCasePipe,
+  registerLocaleData,
 } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
 import { finalize } from 'rxjs';
+
+registerLocaleData(localePt, 'pt-BR');
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import {

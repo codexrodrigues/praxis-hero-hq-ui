@@ -141,8 +141,8 @@ export const DISTRESS_SIGNALS_LIST_CONFIG: PraxisListConfig = {
       expr: 'Ameaça Nível ${item.nivelAmeaca}',
     },
     meta: {
-      type: 'text',
-      expr: '${item.abertoEm|relative:pt-BR}',
+      type: 'relative',
+      expr: '${item.abertoEm}',
     },
     trailing: {
       type: 'chip',

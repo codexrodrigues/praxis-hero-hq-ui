@@ -401,7 +401,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
 
     if (stored && stored.widgets && stored.widgets.length > 0) {
       this.isLayoutCustomized.set(true);
-      this.pageDefinition.set(stored);
+      this.pageDefinition.set(this.mergeWithFactoryDefaults(stored));
     } else {
       this.isLayoutCustomized.set(false);
       this.pageDefinition.set(DASHBOARD_PAGE_DEFINITION);
@@ -419,10 +419,11 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
             }
             if (remote && remote.widgets && remote.widgets.length > 0) {
               this.isLayoutCustomized.set(true);
-              this.pageDefinition.set(remote);
+              const healed = this.mergeWithFactoryDefaults(remote);
+              this.pageDefinition.set(healed);
               if (typeof localStorage !== 'undefined') {
                 try {
-                  localStorage.setItem(localScopedKey, JSON.stringify(remote));
+                  localStorage.setItem(localScopedKey, JSON.stringify(healed));
                 } catch {}
               }
             } else {
@@ -442,6 +443,29 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
         });
     }
     this.cdr.markForCheck();
+  }
+
+  private mergeWithFactoryDefaults(stored: WidgetPageDefinition): WidgetPageDefinition {
+    if (!stored?.widgets?.length) return stored;
+    const factoryMap = new Map(DASHBOARD_PAGE_DEFINITION.widgets.map((w) => [w.key, w]));
+    const healedWidgets = stored.widgets.map((w) => {
+      const factory = factoryMap.get(w.key);
+      if (factory && factory.definition?.inputs) {
+        return {
+          ...w,
+          definition: {
+            ...w.definition,
+            inputs: {
+              ...factory.definition.inputs,
+              ...w.definition?.inputs,
+              config: factory.definition.inputs['config'] || w.definition?.inputs?.['config'],
+            },
+          },
+        };
+      }
+      return w;
+    });
+    return { ...stored, widgets: healedWidgets };
   }
 
   protected toggleCustomization(): void {
