@@ -47,54 +47,39 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'ID',
-        width: '80px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'nome',
-        header: 'Nome da Divisão',
-        width: '280px',
-        sortable: true,
-      },
-      {
-        field: 'codigo',
-        header: 'Sigla / Código',
-        width: '130px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'ocupacaoScore',
-        header: 'Taxa de Ocupação',
-        width: '180px',
-        align: 'center',
-        sortable: true,
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: '85',
-              total: 100,
-              toneExpr: "'info'",
-              fallbackText: 'Ocupação',
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'nome', 'codigo', 'responsavelNome'],
+      order: ['id', 'nome', 'codigo', 'ocupacaoScore', 'responsavelNome'],
+      additions: [
+        {
+          field: 'ocupacaoScore',
+          header: 'Taxa de Ocupação',
+          width: '180px',
+          align: 'center',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: '85',
+                total: 100,
+                toneExpr: "'info'",
+                fallbackText: 'Ocupação',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        id: { width: '80px', align: 'center', header: 'ID' },
+        nome: { width: '280px', header: 'Nome da Divisão' },
+        codigo: { width: '130px', align: 'center', header: 'Sigla / Código' },
+        responsavelNome: { width: '260px', header: 'Diretor / Líder Responsável' },
       },
-      {
-        field: 'responsavelNome',
-        header: 'Diretor / Líder Responsável',
-        width: '260px',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,

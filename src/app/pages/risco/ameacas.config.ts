@@ -50,82 +50,41 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'Cód.',
-        width: '80px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'nome',
-        header: 'Designação da Ameaça',
-        width: '220px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'classe',
-        header: 'Classe Tática',
-        width: '130px',
-        align: 'center',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'planeta',
-        header: 'Origem Planetária',
-        width: '140px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'nivel',
-        header: 'Nível',
-        type: 'number',
-        width: '80px',
-        align: 'center',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'indicePerigo',
-        header: 'Índice de Letalidade',
-        width: '180px',
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: 'row.nivel * 14',
-              total: 100,
-              toneExpr: "row.nivel >= 6 ? 'danger' : row.nivel >= 4 ? 'warning' : 'info'",
-              fallbackText: 'Letalidade',
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'nome', 'classe', 'planeta', 'nivel', 'status', 'recompensa'],
+      order: ['id', 'nome', 'classe', 'planeta', 'nivel', 'indicePerigo', 'status', 'recompensa'],
+      additions: [
+        {
+          field: 'indicePerigo',
+          header: 'Índice de Letalidade',
+          width: '180px',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: 'row.nivel * 14',
+                total: 100,
+                toneExpr: "row.nivel >= 6 ? 'danger' : row.nivel >= 4 ? 'warning' : 'info'",
+                fallbackText: 'Letalidade',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        id: { width: '80px', align: 'center', header: 'Cód.' },
+        nome: { width: '220px', header: 'Designação da Ameaça' },
+        classe: { width: '130px', align: 'center', header: 'Classe Tática' },
+        planeta: { width: '140px', header: 'Origem Planetária' },
+        nivel: { width: '80px', align: 'center', type: 'number', header: 'Nível' },
+        status: { width: '150px', align: 'center', header: 'Status de Contenção' },
+        recompensa: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Recompensa Fixada' },
       },
-      {
-        field: 'status',
-        header: 'Status de Contenção',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'recompensa',
-        header: 'Recompensa Fixada',
-        type: 'currency',
-        format: 'BRL',
-        width: '160px',
-        align: 'right',
-        sortable: true,
-        filterable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,

@@ -50,67 +50,37 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'Cód.',
-        width: '80px',
-        align: 'center',
-        sortable: true,
-        filterable: false,
-      },
-      {
-        field: 'nome',
-        header: 'Equipamento / Traje',
-        width: '260px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'tipo',
-        header: 'Categoria Tática',
-        width: '160px',
-        align: 'center',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'resistencia',
-        header: 'Integridade da Blindagem',
-        width: '190px',
-        align: 'center',
-        sortable: true,
-        filterable: true,
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: 'row.resistencia * 10',
-              total: 100,
-              toneExpr: "row.resistencia >= 8 ? 'success' : row.resistencia >= 6 ? 'info' : row.resistencia >= 4 ? 'warning' : 'danger'",
-              fallbackText: 'Blindagem',
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'nome', 'tipo', 'resistencia', 'proprietarioNome', 'status'],
+      order: ['id', 'nome', 'tipo', 'resistencia', 'proprietarioNome', 'status'],
+      overrides: {
+        id: { width: '80px', align: 'center', header: 'Cód.' },
+        nome: { width: '260px', header: 'Equipamento / Traje' },
+        tipo: { width: '160px', align: 'center', header: 'Categoria Tática' },
+        resistencia: {
+          width: '190px',
+          align: 'center',
+          header: 'Integridade da Blindagem',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: 'row.resistencia * 10',
+                total: 100,
+                toneExpr: "row.resistencia >= 8 ? 'success' : row.resistencia >= 6 ? 'info' : row.resistencia >= 4 ? 'warning' : 'danger'",
+                fallbackText: 'Blindagem',
+              },
             },
           },
         },
+        proprietarioNome: { width: '220px', header: 'Custodiante / Herói' },
+        status: { width: '160px', align: 'center', header: 'Status de Custódia' },
       },
-      {
-        field: 'proprietarioNome',
-        header: 'Custodiante / Herói',
-        width: '220px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'status',
-        header: 'Status de Custódia',
-        width: '160px',
-        align: 'center',
-        sortable: true,
-        filterable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       visible: true,
       filters: {

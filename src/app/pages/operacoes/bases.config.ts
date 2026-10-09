@@ -48,60 +48,40 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'ID',
-        width: '80px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'nome',
-        header: 'Nome da Instalação / Base',
-        width: '260px',
-        sortable: true,
-      },
-      {
-        field: 'tipo',
-        header: 'Tipo de Instalação',
-        width: '180px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'sigilo',
-        header: 'Nível de Sigilo',
-        width: '160px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'prontidao',
-        header: 'Prontidão Operacional',
-        width: '180px',
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: "row.sigilo === 'ULTRA_SECRETA' ? 98 : row.sigilo === 'SECRETA' ? 85 : row.sigilo === 'CONFIDENCIAL' ? 72 : 55",
-              total: 100,
-              toneExpr: "row.sigilo === 'ULTRA_SECRETA' ? 'success' : row.sigilo === 'SECRETA' ? 'info' : 'warning'",
-              fallbackText: 'Prontidão',
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'nome', 'tipo', 'sigilo', 'planeta'],
+      order: ['id', 'nome', 'tipo', 'sigilo', 'prontidao', 'planeta'],
+      additions: [
+        {
+          field: 'prontidao',
+          header: 'Prontidão Operacional',
+          width: '180px',
+          align: 'center',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: "row.sigilo === 'ULTRA_SECRETA' ? 98 : row.sigilo === 'SECRETA' ? 85 : row.sigilo === 'CONFIDENCIAL' ? 72 : 55",
+                total: 100,
+                toneExpr: "row.sigilo === 'ULTRA_SECRETA' ? 'success' : row.sigilo === 'SECRETA' ? 'info' : 'warning'",
+                fallbackText: 'Prontidão',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        id: { width: '80px', align: 'center', header: 'ID' },
+        nome: { width: '260px', header: 'Nome da Instalação / Base' },
+        tipo: { width: '180px', align: 'center', header: 'Tipo de Instalação' },
+        sigilo: { width: '160px', align: 'center', header: 'Nível de Sigilo' },
+        planeta: { width: '150px', align: 'center', header: 'Planeta / Teatro' },
       },
-      {
-        field: 'planeta',
-        header: 'Planeta / Teatro',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,

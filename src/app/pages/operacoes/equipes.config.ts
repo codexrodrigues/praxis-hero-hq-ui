@@ -49,61 +49,40 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'ID',
-        width: '80px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'nome',
-        header: 'Nome da Equipe / Esquadrão',
-        width: '260px',
-        sortable: true,
-      },
-      {
-        field: 'sigla',
-        header: 'Sigla',
-        width: '120px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'basePrincipalNome',
-        header: 'Base Principal Designada',
-        width: '240px',
-        sortable: true,
-      },
-      {
-        field: 'prontidaoScore',
-        header: 'Prontidão Operacional',
-        width: '180px',
-        align: 'center',
-        sortable: true,
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: "row.status === 'ATIVA' ? 95 : row.status === 'RESERVA' ? 70 : 40",
-              total: 100,
-              toneExpr: "row.status === 'ATIVA' ? 'success' : row.status === 'RESERVA' ? 'info' : 'warning'",
-              fallbackText: 'Prontidão',
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'nome', 'sigla', 'basePrincipalNome', 'status'],
+      order: ['id', 'nome', 'sigla', 'basePrincipalNome', 'prontidaoScore', 'status'],
+      additions: [
+        {
+          field: 'prontidaoScore',
+          header: 'Prontidão Operacional',
+          width: '180px',
+          align: 'center',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: "row.status === 'ATIVA' ? 95 : row.status === 'RESERVA' ? 70 : 40",
+                total: 100,
+                toneExpr: "row.status === 'ATIVA' ? 'success' : row.status === 'RESERVA' ? 'info' : 'warning'",
+                fallbackText: 'Prontidão',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        id: { width: '80px', align: 'center', header: 'ID' },
+        nome: { width: '260px', header: 'Nome da Equipe / Esquadrão' },
+        sigla: { width: '120px', align: 'center', header: 'Sigla' },
+        basePrincipalNome: { width: '240px', header: 'Base Principal Designada' },
+        status: { width: '140px', align: 'center', header: 'Status Tático' },
       },
-      {
-        field: 'status',
-        header: 'Status Tático',
-        width: '140px',
-        align: 'center',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,

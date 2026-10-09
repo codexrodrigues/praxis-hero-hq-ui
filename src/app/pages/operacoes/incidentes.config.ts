@@ -48,84 +48,49 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'Registro',
-        width: '90px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'descricao',
-        header: 'Descrição do Sinistro / Impacto',
-        width: '320px',
-        sortable: true,
-      },
-      {
-        field: 'local',
-        header: 'Teatro do Dano',
-        width: '200px',
-        sortable: true,
-      },
-      {
-        field: 'severidade',
-        header: 'Severidade',
-        width: '130px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'indiceSinistro',
-        header: 'Índice de Danos',
-        width: '180px',
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: '= round(min(100, (danosCivis / 4000000) * 100))',
-              total: 100,
-              toneExpr: {
-                if: [
-                  { '==': [{ var: 'severidade' }, 'CRITICA'] },
-                  'danger',
-                  { '==': [{ var: 'severidade' }, 'ALTA'] },
-                  'warning',
-                  'info',
-                ],
-              } as any,
-              fallbackText: 'Índice de Danos',
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'descricao', 'local', 'severidade', 'danosCivis', 'feridos', 'ocorridoEm'],
+      order: ['id', 'descricao', 'local', 'severidade', 'indiceSinistro', 'danosCivis', 'feridos', 'ocorridoEm'],
+      additions: [
+        {
+          field: 'indiceSinistro',
+          header: 'Índice de Danos',
+          width: '180px',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: '= round(min(100, (danosCivis / 4000000) * 100))',
+                total: 100,
+                toneExpr: {
+                  if: [
+                    { '==': [{ var: 'severidade' }, 'CRITICA'] },
+                    'danger',
+                    { '==': [{ var: 'severidade' }, 'ALTA'] },
+                    'warning',
+                    'info',
+                  ],
+                } as any,
+                fallbackText: 'Índice de Danos',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        id: { width: '90px', align: 'center', header: 'Registro' },
+        descricao: { width: '320px', header: 'Descrição do Sinistro / Impacto' },
+        local: { width: '200px', header: 'Teatro do Dano' },
+        severidade: { width: '130px', align: 'center', header: 'Severidade' },
+        danosCivis: { width: '170px', align: 'right', type: 'currency', format: 'BRL', header: 'Prejuízo Civil (R$)' },
+        feridos: { width: '90px', align: 'center', header: 'Feridos' },
+        ocorridoEm: { width: '150px', align: 'center', type: 'date', header: 'Data do Ocorrido' },
       },
-      {
-        field: 'danosCivis',
-        header: 'Prejuízo Civil (R$)',
-        type: 'currency',
-        format: 'BRL',
-        width: '170px',
-        align: 'right',
-        sortable: true,
-      },
-      {
-        field: 'feridos',
-        header: 'Feridos',
-        width: '90px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'ocorridoEm',
-        header: 'Data do Ocorrido',
-        type: 'date',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,

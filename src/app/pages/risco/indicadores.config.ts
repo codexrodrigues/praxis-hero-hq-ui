@@ -49,98 +49,52 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   table: {
     meta: { idField: 'incidenteId' },
     idField: 'incidenteId',
-    columns: [
-      {
-        field: 'incidenteId',
-        header: 'Registro',
-        width: '90px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'missao',
-        header: 'Missão de Origem',
-        width: '200px',
-        sortable: true,
-      },
-      {
-        field: 'local',
-        header: 'Local do Dano',
-        width: '150px',
-        sortable: true,
-      },
-      {
-        field: 'severidade',
-        header: 'Severidade',
-        width: '120px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'statusLiquidacao',
-        header: 'Taxa de Liquidação',
-        width: '180px',
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: '= round(min(100, (totalPago / max(1, totalIndenizacoes)) * 100))',
-              total: 100,
-              toneExpr: {
-                if: [
-                  { '==': [{ var: 'totalPendente' }, 0] },
-                  'success',
-                  { '==': [{ var: 'severidade' }, 'CRITICA'] },
-                  'danger',
-                  { '==': [{ var: 'severidade' }, 'ALTA'] },
-                  'warning',
-                  'info',
-                ],
-              } as any,
-              fallbackText: 'Taxa de Liquidação',
+    columnProjection: {
+      source: 'schema',
+      include: ['incidenteId', 'missao', 'local', 'severidade', 'danosCivis', 'totalIndenizacoes', 'totalPago', 'totalPendente'],
+      order: ['incidenteId', 'missao', 'local', 'severidade', 'statusLiquidacao', 'danosCivis', 'totalIndenizacoes', 'totalPago', 'totalPendente'],
+      additions: [
+        {
+          field: 'statusLiquidacao',
+          header: 'Taxa de Liquidação',
+          width: '180px',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: '= round(min(100, (totalPago / max(1, totalIndenizacoes)) * 100))',
+                total: 100,
+                toneExpr: {
+                  if: [
+                    { '==': [{ var: 'totalPendente' }, 0] },
+                    'success',
+                    { '==': [{ var: 'severidade' }, 'CRITICA'] },
+                    'danger',
+                    { '==': [{ var: 'severidade' }, 'ALTA'] },
+                    'warning',
+                    'info',
+                  ],
+                } as any,
+                fallbackText: 'Taxa de Liquidação',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        incidenteId: { width: '90px', align: 'center', header: 'Registro' },
+        missao: { width: '200px', header: 'Missão de Origem' },
+        local: { width: '150px', header: 'Local do Dano' },
+        severidade: { width: '120px', align: 'center', header: 'Severidade' },
+        danosCivis: { width: '170px', align: 'right', type: 'currency', format: 'BRL', header: 'Prejuízo Civil Estimado' },
+        totalIndenizacoes: { width: '170px', align: 'right', type: 'currency', format: 'BRL', header: 'Indenizações Totais' },
+        totalPago: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Total Indenizado' },
+        totalPendente: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Saldo Pendente' },
       },
-      {
-        field: 'danosCivis',
-        header: 'Prejuízo Civil Estimado',
-        type: 'currency',
-        format: 'BRL',
-        width: '170px',
-        align: 'right',
-        sortable: true,
-      },
-      {
-        field: 'totalIndenizacoes',
-        header: 'Indenizações Totais',
-        type: 'currency',
-        format: 'BRL',
-        width: '170px',
-        align: 'right',
-        sortable: true,
-      },
-      {
-        field: 'totalPago',
-        header: 'Total Indenizado',
-        type: 'currency',
-        format: 'BRL',
-        width: '160px',
-        align: 'right',
-        sortable: true,
-      },
-      {
-        field: 'totalPendente',
-        header: 'Saldo Pendente',
-        type: 'currency',
-        format: 'BRL',
-        width: '160px',
-        align: 'right',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,

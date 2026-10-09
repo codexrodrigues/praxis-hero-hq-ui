@@ -47,69 +47,38 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'posicao',
-        header: 'Pos.',
-        width: '70px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'codinome',
-        header: 'Codinome / Identidade Heroica',
-        width: '180px',
-        sortable: true,
-      },
-      {
-        field: 'media',
-        header: 'Score Médio Global',
-        width: '170px',
-        align: 'center',
-        sortable: true,
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: 'row.media',
-              total: 100,
-              toneExpr: "row.media >= 90 ? 'success' : row.media >= 80 ? 'info' : 'warning'",
-              fallbackText: 'Score',
+    columnProjection: {
+      source: 'schema',
+      include: ['posicao', 'codinome', 'media', 'nomeCompleto', 'equipe', 'scorePublico', 'scoreGovernamental'],
+      order: ['posicao', 'codinome', 'media', 'nomeCompleto', 'equipe', 'scorePublico', 'scoreGovernamental'],
+      overrides: {
+        posicao: { width: '70px', align: 'center', header: 'Pos.' },
+        codinome: { width: '180px', header: 'Codinome / Identidade Heroica' },
+        media: {
+          width: '170px',
+          align: 'center',
+          header: 'Score Médio Global',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: 'row.media',
+                total: 100,
+                toneExpr: "row.media >= 90 ? 'success' : row.media >= 80 ? 'info' : 'warning'",
+                fallbackText: 'Score',
+              },
             },
           },
         },
+        nomeCompleto: { width: '180px', header: 'Nome Civil' },
+        equipe: { width: '160px', header: 'Equipe Vinculada' },
+        scorePublico: { width: '140px', align: 'center', type: 'number', header: 'Aprovação Civil (%)' },
+        scoreGovernamental: { width: '150px', align: 'center', type: 'number', header: 'Confiança Governo (%)' },
       },
-      {
-        field: 'nomeCompleto',
-        header: 'Nome Civil',
-        width: '180px',
-        sortable: true,
-      },
-      {
-        field: 'equipe',
-        header: 'Equipe Vinculada',
-        width: '160px',
-        sortable: true,
-      },
-      {
-        field: 'scorePublico',
-        header: 'Aprovação Civil (%)',
-        type: 'number',
-        width: '140px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'scoreGovernamental',
-        header: 'Confiança Governo (%)',
-        type: 'number',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,

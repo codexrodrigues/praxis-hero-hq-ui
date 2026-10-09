@@ -48,88 +48,57 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'fotoPerfilUrl',
-        header: 'Avatar',
-        width: '72px',
-        align: 'center',
-        sortable: false,
-        filterable: false,
-        renderer: {
-          type: 'avatar',
-          avatar: {
-            srcField: 'fotoPerfilUrl',
-            altField: 'nomeCompleto',
-            initialsField: 'nomeCompleto',
-            shape: 'circle',
-            size: 40,
-          },
-        },
-      },
-      {
-        field: 'nomeCompleto',
-        header: 'Nome Completo / Civil',
-        width: '240px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'cargoNome',
-        header: 'Cargo',
-        width: '220px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'departamentoNome',
-        header: 'Departamento',
-        width: '240px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'ativo',
-        header: 'Status',
-        type: 'boolean',
-        format: 'custom|Ativo|Inativo',
-        width: '110px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'prontidaoScore',
-        header: 'Prontidão de Campo',
-        width: '180px',
-        align: 'center',
-        sortable: true,
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: 'row.ativo ? 90 : 40',
-              total: 100,
-              toneExpr: "row.ativo ? 'success' : 'warning'",
-              fallbackText: 'Prontidão',
+    columnProjection: {
+      source: 'schema',
+      include: ['fotoPerfilUrl', 'nomeCompleto', 'cargoNome', 'departamentoNome', 'ativo', 'dataAdmissao'],
+      order: ['fotoPerfilUrl', 'nomeCompleto', 'cargoNome', 'departamentoNome', 'ativo', 'prontidaoScore', 'dataAdmissao'],
+      additions: [
+        {
+          field: 'prontidaoScore',
+          header: 'Prontidão de Campo',
+          width: '180px',
+          align: 'center',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: 'row.ativo ? 90 : 40',
+                total: 100,
+                toneExpr: "row.ativo ? 'success' : 'warning'",
+                fallbackText: 'Prontidão',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        fotoPerfilUrl: {
+          width: '72px',
+          align: 'center',
+          header: 'Avatar',
+          renderer: {
+            type: 'avatar',
+            avatar: {
+              srcField: 'fotoPerfilUrl',
+              altField: 'nomeCompleto',
+              initialsField: 'nomeCompleto',
+              shape: 'circle',
+              size: 40,
+            },
+          },
+        },
+        nomeCompleto: { width: '240px', header: 'Nome Completo / Civil' },
+        cargoNome: { width: '220px', header: 'Cargo' },
+        departamentoNome: { width: '240px', header: 'Departamento' },
+        ativo: { width: '110px', type: 'boolean', format: 'custom|Ativo|Inativo', header: 'Status' },
+        dataAdmissao: { width: '160px', type: 'date', format: 'dd/MM/yyyy', header: 'Data de Admissão' },
       },
-      {
-        field: 'dataAdmissao',
-        header: 'Data de Admissão',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '160px',
-        sortable: true,
-        filterable: true,
-      },
-    ],
+    },
+    columns: [],
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },

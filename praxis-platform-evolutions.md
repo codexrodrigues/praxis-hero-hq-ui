@@ -52,6 +52,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#38**](#-issue-38-descoberta-integral-de-recurso-e-roteamento-zero-code-no-praxis-crud-praxisresourcepage--auto-resource-host) | Descoberta Integral de Recurso e Roteamento Zero-Code (`PraxisResourcePage` Smart Page) | `@praxisui/crud`<br>`@praxisui/table` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (`912ecf87b`) | 2026-10-09 | Validado (11/11 specs unitários, Auto-Header, Auto-ScopeBar, 100% dos 14 componentes de página eliminados no Hero HQ via commit `0ae972a`) |
 | [**#39**](#-issue-39-auto-hidratação-e-descoberta-de-gavetas-analíticas-drawers-via-resourcepath-e-metadados-openapi-schemasurfaces--behaviordrawer) | Auto-Hidratação e Descoberta de Gavetas Analíticas (Drawers) via `resourcePath` e Metadados OpenAPI (`/schemas/surfaces` / `behavior.drawer`) | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`8c522fbb2`) | 2026-10-09 | Validado (auto-hidratação por DI registry, 10/10 specs drawer, 87/87 specs crud, 100% dos 5 `*-drawer.config.ts` eliminados e build de produção downstream aprovado) |
 | [**#40**](#-issue-40-descarbonização-de-kpis-de-recursos-e-extinção-da-agregação-client-side-via-behaviorkpiband-declarativo-nativamente-integrado-no-praxis-crud) | Descarbonização de KPIs de Recursos e Extinção da Agregação Client-Side via `behavior.kpiBand` Declarativo Nativamente Integrado no `<praxis-crud>` | `@praxisui/crud`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (nativo `kpiBand` + `filterCriteria`), `praxis-hero-hq-ui` | 2026-10-09 | Validado (15 recursos descarbonizados, 14 blocos `*_KPI_DOCUMENT` extintos, `dashboard-stats.service` reduzido em 674 linhas, 2.214+ linhas líquidas eliminadas, tsc e build OK) |
+| [**#41**](#-issue-41-auto-projeção-de-colunas-openapi-columnprojection-source-schema-e-eliminação-de-declarações-manuais-nas-tabelas-crud) | Auto-Projeção de Colunas OpenAPI (`columnProjection: { source: 'schema' }`) e Eliminação de Declarações Manuais nas Tabelas CRUD | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `praxis-hero-hq-ui` (`columnProjection`) | 2026-10-09 | Validado (100% dos 14 recursos migrados para `columnProjection: { source: 'schema' }`, `columns: []`, microVisualizations preservadas, tsc e build OK) |
 
 
 
@@ -2558,6 +2559,47 @@ Após a eliminação das gavetas monolíticas (Issue #30/#39) e do interceptor a
 - [x] Exclusão do arquivo não utilizado `resource-hub-page.component.ts`.
 - [x] Compilação TypeScript (`npx tsc --noEmit`) e build de produção (`npm run build`) aprovados com 0 erros.
 - [x] Redução líquida de mais de 2.500 linhas de código no showcase.
+
+---
+
+## 📌 Issue #41: Auto-Projeção de Colunas OpenAPI (`columnProjection: { source: 'schema' }`) e Eliminação de Declarações Manuais nas Tabelas CRUD
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/table`, `@praxisui/crud`, `praxis-metadata-starter`, `praxis-hero-hq-ui`
+- **Severidade:** 🟡 Média (Elimina ~1.200 linhas de definições manuais estáticas de colunas em 14 arquivos `.config.ts`, migrando para a auto-resolução canônica governada pelo schema OpenAPI)
+- **Tipo:** Descarbonização de Código / Contrato Metadata-Driven / Projeção de Schema
+- **Status:** `[x] Resolvida` (Batch 24)
+
+### Diagnóstico Detalhado da Causa Raiz
+Atualmente, 14 dos 15 recursos da aplicação modelo (`equipamentos`, `veiculos`, `bases`, `equipes`, `incidentes`, `missoes`, `afastamentos`, `departamentos`, `folha-pagamento`, `funcionarios`, `reputacao`, `ameacas`, `indicadores`, `contratos`) definem manualmente arrays de 60 a 90 linhas de `table.columns: [...]`.
+- Em sistemas corporativos reais, a governança de campos, títulos legíveis, larguras padrão, tipos (`string`, `number`, `date`, `currency`, `boolean`), ordenabilidade e visibilidade pertence ao **backend** através das anotações de domínio (`@Schema`, `@UISchema`, `@Filterable`).
+- Apenas `pedidos.config.ts` utilizava o padrão canônico da plataforma:
+  ```typescript
+  table: {
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'orderDate', ...],
+      order: ['id', 'orderDate', ...],
+      additions: [...],
+      overrides: { ... }
+    },
+    columns: [],
+    // ...
+  }
+  ```
+- Replicar as colunas manualmente no frontend gera duplicação, risco de dessincronização de tipos e acoplamento estático.
+
+### Solução Canônica Recomendada de Plataforma
+1. Em todos os 14 arquivos `.config.ts`, adotar `columnProjection: { source: 'schema', include: [...], order: [...], additions: [...], overrides: { ... } }`.
+2. Preservar em `additions` os renderizadores visuais e micro-visualizações que enriquecem as células (`microVisualization`, `avatar`, etc.).
+3. Esvaziar o array `columns: []`, transferindo a responsabilidade da resolução de metadados para o resolvedor OpenAPI em runtime (`PraxisTable`).
+4. Manter overrides necessários para ajustes ergonômicos de cabeçalho e largura.
+
+### Critérios de Aceite para Resolução
+- [x] 100% dos 14 arquivos `.config.ts` migrados para `columnProjection: { source: 'schema' }` com `columns: []`.
+- [x] Renderizadores especiais (`microVisualization`, `avatar`) preservados via `columnProjection.additions`.
+- [x] Compilação TypeScript (`npx tsc --noEmit`) e build de produção (`npm run build`) aprovados com 0 erros.
+- [x] Redução líquida de código estático redundante em todos os 14 arquivos de configuração.
 
 ---
 

@@ -49,73 +49,41 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'ID',
-        width: '80px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'tipo',
-        header: 'Tipo de Licença / Ausência',
-        width: '180px',
-        align: 'left',
-        sortable: true,
-      },
-      {
-        field: 'funcionarioId',
-        header: 'Colaborador ID',
-        width: '140px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'dataInicio',
-        header: 'Início da Vigência',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'dataFim',
-        header: 'Término Previsto',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'progressoRecuperacao',
-        header: 'Progresso / Recuperação',
-        width: '190px',
-        align: 'center',
-        sortable: true,
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: "row.tipo === 'FERIAS' ? 85 : row.tipo === 'TREINAMENTO' ? 90 : 65",
-              total: 100,
-              toneExpr: "row.tipo === 'FERIAS' ? 'info' : row.tipo === 'TREINAMENTO' ? 'success' : 'warning'",
-              fallbackText: 'Progresso',
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'tipo', 'funcionarioId', 'dataInicio', 'dataFim', 'observacoes'],
+      order: ['id', 'tipo', 'funcionarioId', 'dataInicio', 'dataFim', 'progressoRecuperacao', 'observacoes'],
+      additions: [
+        {
+          field: 'progressoRecuperacao',
+          header: 'Progresso / Recuperação',
+          width: '190px',
+          align: 'center',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: "row.tipo === 'FERIAS' ? 85 : row.tipo === 'TREINAMENTO' ? 90 : 65",
+                total: 100,
+                toneExpr: "row.tipo === 'FERIAS' ? 'info' : row.tipo === 'TREINAMENTO' ? 'success' : 'warning'",
+                fallbackText: 'Progresso',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        id: { width: '80px', align: 'center', header: 'ID' },
+        tipo: { width: '180px', align: 'left', header: 'Tipo de Licença / Ausência' },
+        funcionarioId: { width: '140px', align: 'center', header: 'Colaborador ID' },
+        dataInicio: { width: '150px', align: 'center', type: 'date', format: 'dd/MM/yyyy', header: 'Início da Vigência' },
+        dataFim: { width: '150px', align: 'center', type: 'date', format: 'dd/MM/yyyy', header: 'Término Previsto' },
+        observacoes: { width: '320px', header: 'Observações / Parecer Operacional' },
       },
-      {
-        field: 'observacoes',
-        header: 'Observações / Parecer Operacional',
-        width: '320px',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,

@@ -50,88 +50,42 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'id',
-        header: 'Cód.',
-        width: '80px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'titulo',
-        header: 'Título da Missão',
-        width: '250px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'ameacaNome',
-        header: 'Ameaça / Alvo Tático',
-        width: '160px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'prioridade',
-        header: 'Prioridade',
-        width: '120px',
-        align: 'center',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'status',
-        header: 'Status Operacional',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'progresso',
-        header: 'Prontidão Operacional',
-        width: '180px',
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: "row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 68 : row.status === 'PAUSADA' ? 40 : 15",
-              total: 100,
-              toneExpr: "row.status === 'CONCLUIDA' ? 'success' : row.prioridade === 'CRITICA' ? 'danger' : 'info'",
-              fallbackText: 'Prontidão',
+    columnProjection: {
+      source: 'schema',
+      include: ['id', 'titulo', 'ameacaNome', 'prioridade', 'status', 'local', 'inicioPrev', 'fimPrev'],
+      order: ['id', 'titulo', 'ameacaNome', 'prioridade', 'status', 'progresso', 'local', 'inicioPrev', 'fimPrev'],
+      additions: [
+        {
+          field: 'progresso',
+          header: 'Prontidão Operacional',
+          width: '180px',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: "row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 68 : row.status === 'PAUSADA' ? 40 : 15",
+                total: 100,
+                toneExpr: "row.status === 'CONCLUIDA' ? 'success' : row.prioridade === 'CRITICA' ? 'danger' : 'info'",
+                fallbackText: 'Prontidão',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        id: { width: '80px', align: 'center', header: 'Cód.' },
+        titulo: { width: '250px', header: 'Título da Missão' },
+        ameacaNome: { width: '160px', header: 'Ameaça / Alvo Tático' },
+        prioridade: { width: '120px', align: 'center', header: 'Prioridade' },
+        status: { width: '150px', align: 'center', header: 'Status Operacional' },
+        local: { width: '170px', header: 'Teatro de Operações' },
+        inicioPrev: { width: '160px', type: 'date', format: 'dd/MM/yyyy HH:mm', header: 'Início Previsto' },
+        fimPrev: { width: '160px', type: 'date', format: 'dd/MM/yyyy HH:mm', header: 'Fim Previsto' },
       },
-      {
-        field: 'local',
-        header: 'Teatro de Operações',
-        width: '170px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'inicioPrev',
-        header: 'Início Previsto',
-        type: 'date',
-        format: 'dd/MM/yyyy HH:mm',
-        width: '160px',
-        sortable: true,
-        filterable: true,
-      },
-      {
-        field: 'fimPrev',
-        header: 'Fim Previsto',
-        type: 'date',
-        format: 'dd/MM/yyyy HH:mm',
-        width: '160px',
-        sortable: true,
-        filterable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       visible: true,
       filters: {

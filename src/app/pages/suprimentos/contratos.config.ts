@@ -50,69 +50,41 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
     ],
   },
   table: {
-    columns: [
-      {
-        field: 'number',
-        header: 'Nº do Contrato',
-        width: '150px',
-        sortable: true,
-      },
-      {
-        field: 'supplierName',
-        header: 'Fornecedor / Fabricante',
-        width: '240px',
-        sortable: true,
-      },
-      {
-        field: 'indiceSla',
-        header: 'Conformidade / SLA',
-        width: '180px',
-        align: 'center',
-        sortable: true,
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: "row.status === 'ACTIVE' || row.status === 'SIGNED' ? 95 : row.status === 'DRAFT' ? 65 : 38",
-              total: 100,
-              toneExpr: "row.status === 'ACTIVE' || row.status === 'SIGNED' ? 'success' : row.status === 'DRAFT' ? 'info' : 'warning'",
-              fallbackText: 'SLA',
+    columnProjection: {
+      source: 'schema',
+      include: ['number', 'supplierName', 'currency', 'validUntil', 'status', 'disabledReason'],
+      order: ['number', 'supplierName', 'indiceSla', 'currency', 'validUntil', 'status', 'disabledReason'],
+      additions: [
+        {
+          field: 'indiceSla',
+          header: 'Conformidade / SLA',
+          width: '180px',
+          align: 'center',
+          renderer: {
+            type: 'microVisualization',
+            microVisualization: {
+              visualization: {
+                kind: 'radial',
+                surface: 'table-cell',
+                valueExpr: "row.status === 'ACTIVE' || row.status === 'SIGNED' ? 95 : row.status === 'DRAFT' ? 65 : 38",
+                total: 100,
+                toneExpr: "row.status === 'ACTIVE' || row.status === 'SIGNED' ? 'success' : row.status === 'DRAFT' ? 'info' : 'warning'",
+                fallbackText: 'SLA',
+              },
             },
           },
         },
+      ],
+      overrides: {
+        number: { width: '150px', header: 'Nº do Contrato' },
+        supplierName: { width: '240px', header: 'Fornecedor / Fabricante' },
+        currency: { width: '90px', align: 'center', header: 'Moeda' },
+        validUntil: { width: '140px', align: 'center', type: 'date', format: 'dd/MM/yyyy', header: 'Vigência Até' },
+        status: { width: '150px', align: 'center', header: 'Status Contratual' },
+        disabledReason: { width: '240px', header: 'Observações / Motivo' },
       },
-      {
-        field: 'currency',
-        header: 'Moeda',
-        width: '90px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'validUntil',
-        header: 'Vigência Até',
-        type: 'date',
-        format: 'dd/MM/yyyy',
-        width: '140px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'status',
-        header: 'Status Contratual',
-        width: '150px',
-        align: 'center',
-        sortable: true,
-      },
-      {
-        field: 'disabledReason',
-        header: 'Observações / Motivo',
-        width: '240px',
-        sortable: true,
-      },
-    ],
+    },
+    columns: [],
     toolbar: {
       search: {
         enabled: true,
