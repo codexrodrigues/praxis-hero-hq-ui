@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -109,106 +108,10 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê da Divisão & Organização Tática',
-          subtitle: 'Estrutura administrativa, liderança setorial e contingente alocado',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-estrutura',
-              title: 'Estrutura & Identificação',
-              subtitle: 'Divisão e código setorial',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.codigo',
-                      icon: 'corporate_fare',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Divisão',
-                      valueExpr: 'row.nome',
-                      icon: 'business',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Instalação / Local',
-                      valueExpr: "'Complexo S.H.I.E.L.D. - Setor ' + (row.codigo || 'HQ')",
-                      icon: 'apartment',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-lideranca',
-              title: 'Liderança & Governança',
-              subtitle: 'Diretoria e credenciamento',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Líder / Diretor',
-                      valueExpr: 'row.responsavelNome',
-                      icon: 'military_tech',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Credencial de Acesso',
-                      valueExpr: "'Nível Alfa (Conselho de Segurança)'",
-                      icon: 'lock',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'ID Cadastral',
-                      valueExpr: 'row.id',
-                      icon: 'tag',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-contingente',
-              title: 'Contingente & Ocupação',
-              subtitle: 'Capacidade e alocação humana',
-              content: [
-                {
-                  type: 'progress',
-                  label: 'Taxa de Ocupação do Setor',
-                  valueExpr: '85',
-                  max: 100,
-                  showPercent: true,
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Especialistas Ativos',
-                      valueExpr: "'34 Especialistas'",
-                      icon: 'groups',
-                    },
-                {
-                  type: 'metric',
-                  label: 'Prontidão Operacional',
-                  valueExpr: "'99.8% Operante'",
-                  icon: 'verified',
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

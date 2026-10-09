@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -117,123 +116,10 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
       },
-      ...createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Auditoria Fiduciária & Conformidade de Sinistro',
-          subtitle: 'Protocolo regulatório regido pelas cláusulas do Acordo de Sokovia',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-origem',
-              title: 'Origem & Narrativa Pericial',
-              subtitle: 'Circunstâncias e missão associada',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.severidade',
-                      icon: 'emergency',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Missão de Origem',
-                      valueExpr: 'row.missao',
-                      caption: 'Operação tática catalogada',
-                      icon: 'military_tech',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Teatro do Dano',
-                      valueExpr: 'row.local',
-                      icon: 'location_on',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Laudo Pericial',
-                      valueExpr: 'row.descricao',
-                      icon: 'description',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-financeiro-balanco',
-              title: 'Balanço Compensatório',
-              subtitle: 'Auditoria de valores e cobertura',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Prejuízo Civil Estimado',
-                      valueExpr: 'row.danosCivis',
-                      caption: 'Sinistralidade apurada em campo',
-                      icon: 'broken_image',
-                    },
-                    {
-                      type: 'progress',
-                      label: 'Índice de Liquidação de Indenizações',
-                      valueExpr: '= round(min(100, (totalPago / max(1, totalIndenizacoes)) * 100))',
-                      max: 100,
-                      showPercent: true,
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Total Já Liquidado',
-                      valueExpr: 'row.totalPago',
-                      caption: 'Repasses confirmados aos civis',
-                      icon: 'payments',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-sokovia-protocolo',
-              title: 'Fundo Tático S.H.I.E.L.D.',
-              subtitle: 'Status fiduciário e conciliação',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Total Homologado',
-                      valueExpr: 'row.totalIndenizacoes',
-                      caption: 'Teto máximo pactuado em juízo',
-                      icon: 'gavel',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Saldo Pendente de Repasse',
-                      valueExpr: 'row.totalPendente',
-                      caption: 'Aguardando validação pericial',
-                      icon: 'pending_actions',
-                    },
-                    {
-                      type: 'badge',
-                      labelExpr: '= row.totalPendente == 0 ? "TOTALMENTE LIQUIDADO" : "CONCILIAÇÃO EM CURSO"',
-                      icon: 'verified',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -109,113 +108,10 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      ...createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê Técnico & Telemetria Balística',
-          subtitle: 'Especificações de manufatura, blindagem reativa e protocolos de custódia militar',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-especificacoes',
-              title: 'Blindagem & Integridade',
-              subtitle: 'Diagnóstico estrutural e absorção de impacto',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: "row.status === 'EM_USO' ? 'Em Custódia Ativa' : row.status === 'MANUTENCAO' ? 'Em Manutenção' : 'Disponível em Arsenal'",
-                      icon: 'verified_user',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Categoria Tática',
-                      valueExpr: 'row.tipo',
-                      icon: 'category',
-                    },
-                    {
-                      type: 'progress',
-                      label: 'Integridade Estrutural',
-                      valueExpr: 'row.resistencia * 10',
-                      max: 100,
-                      showPercent: true,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-telemetria',
-              title: 'Telemetria & Propulsão',
-              subtitle: 'Célula de energia e suporte balístico',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Fonte de Energia Primária',
-                      valueExpr: "row.tipo === 'ARMADURA' ? 'Micro-Reator Arc Mark VI' : row.tipo === 'ARTEFATO' || row.tipo === 'GADGET' ? 'Matriz de Vibranium Estabilizada' : row.tipo === 'ARMA' ? 'Célula de Plasma Iônico' : 'Bateria Quântica de Alto Rendimento'",
-                      icon: 'bolt',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Engenharia & Origem',
-                      valueExpr: "row.tipo === 'ARMADURA' ? 'Stark Industries R&D' : row.tipo === 'ARTEFATO' ? 'Wakanda Design Group' : 'Divisão Científica S.H.I.E.L.D.'",
-                      icon: 'precision_manufacturing',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Última Calibração Tática',
-                      valueExpr: "'Calibração Homologada'",
-                      icon: 'history_toggle_off',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-custodia',
-              title: 'Custódia & Governança',
-              subtitle: 'Protocolo de cofre e credenciamento',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Custodiante Credenciado',
-                      valueExpr: 'row.proprietarioNome',
-                      icon: 'shield_person',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Localização de Armaria',
-                      valueExpr: "row.status === 'EM_USO' ? 'Em Campo com Operador' : row.status === 'MANUTENCAO' ? 'Hangar Tático - Bancada 3' : 'Cofre Central Subterrâneo - Nível 4'",
-                      icon: 'shelves',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Nível de Autorização',
-                      valueExpr: "row.resistencia >= 8 ? 'Nível Ômega (Vingadores)' : 'Nível Alfa (Comando Superior)'",
-                      icon: 'key',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

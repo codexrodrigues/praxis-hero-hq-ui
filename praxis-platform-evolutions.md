@@ -2758,8 +2758,8 @@ Durante a configuração do widget de **Sinais de Socorro Ativos** (`DISTRESS_SI
 3. **Suporte Canônico a `datetime` e `relativeTime` no `template-evaluator.ts`:**
    - Adicionar `type: 'datetime'` em `TemplateDef`.
    - Suportar pipes ricos na interpolação: `${item.timestamp | datetime:pt-BR:short}` (`09/10/2026 12:27`) e `${item.timestamp | relative}` (*"há 5 minutos"*).
-4. **Inferência Automática de Formatação Baseada em OpenAPI:**
-   - Quando o `dataSource` da lista carregar um schema onde o campo alvo tem `type: 'string', format: 'date-time'`, aplicar a formatação localizada padrão mesmo que o desenvolvedor tenha omitido o pipe.
+4. **Inferência Automática de Formatação Baseada em OpenAPI (Fase 2 / Evolução Futura):**
+   - Quando o `dataSource` da lista carregar um schema onde o campo alvo tem `type: 'string', format: 'date-time'`, aplicar a formatação localizada padrão mesmo que o desenvolvedor tenha omitido o pipe. (Nota: mapeado para a fase de auto-projeção de campos da lista).
 
 ### Mitigação Temporária Aplicada no Hero HQ
 - Em `dashboard-page.definition.ts`, utilizou-se `meta: { type: 'date', expr: "${item.abertoEm} | pt-BR:short" }`.
@@ -2781,7 +2781,7 @@ Durante a configuração do widget de **Sinais de Socorro Ativos** (`DISTRESS_SI
 - **Módulos Afetados:** `@praxisui/table` (`praxis-table.ts`, `micro-visualization.model.ts`, `safe-expression-evaluator.ts`), `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (falha silenciosa para azul 'info' quando falta o prefixo '='; dependência frágil de strings ternárias de código JavaScript para cores condicionais em vez de metadados estruturados)
 - **Tipo:** Avaliação de Expressões / Ergonomia de DX / Contrato Metadata-Driven
-- **Status:** `[x] Resolvida`
+- **Status:** `[x] Resolvida` (Frontend Angular entregue; backend Java mapeado para ciclo starter)
 
 ### Diagnóstico Detalhado da Causa Raiz
 No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a propriedade `toneExpr` de microvisualizações (anéis, barras de progresso, bullets) define a cor semântica do indicador (`success`, `warning`, `danger`, `info`, `neutral`).
@@ -2820,8 +2820,8 @@ No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a
      }
      ```
    - O avaliador resolve o valor numérico da coluna e percorre os thresholds em ordem, aplicando o `tone` da primeira faixa correspondente.
-3. **Suporte no Backend `praxis-metadata-starter`:**
-   - Estender a anotação `@MicroVisualization` para incluir parâmetros de limiares que se projetam automaticamente no OpenAPI `/schemas/filtered` sob `x-ui.presentation.thresholds`.
+3. **Suporte no Backend `praxis-metadata-starter` (Fase Backend):**
+   - Estender a anotação `@MicroVisualization` para incluir parâmetros de limiares que se projetam automaticamente no OpenAPI `/schemas/filtered` sob `x-ui.presentation.thresholds`. (Rastreado no backlog do starter Java).
 
 ### Mitigação Temporária Aplicada no Hero HQ
 - Em `dashboard-page.definition.ts`, a expressão de `toneExpr` na coluna `Contenção Tática` foi corrigida adicionando o prefixo `=` e os parênteses condicionais:
@@ -2831,7 +2831,7 @@ No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a
 - [x] `evaluateMicroVisualizationExpression` detecta expressões com operadores condicionais mesmo sem o prefixo `=` e emite aviso explicativo em DevMode.
 - [x] O modelo `MicroVisualizationPresentation` suporta a propriedade declarativa `thresholds: MicroVisualizationThreshold[]`.
 - [x] Microvisualizações radiais, barras e bullets adaptam suas cores automaticamente com base na lista de `thresholds`.
-- [x] Backend `praxis-metadata-starter` suporta configuração declarativa de faixas semânticas.
+- [ ] Backend `praxis-metadata-starter` suporta configuração declarativa de faixas semânticas via anotação `@MicroVisualization` (ciclo de backend Java).
 - [x] Testes unitários em `praxis-table.spec.ts` validando resolução com e sem `=`, e via objeto `thresholds`.
 - [x] Validação downstream no Hero HQ com substituição da fórmula ternária por `thresholds` declarativos.
 
@@ -2872,3 +2872,27 @@ Quando o agente executor concluir o desenvolvimento de uma ou mais issues:
    - Registrar a versão gerada (ex.: `10.0.0-rc.6`), hash do commit ou PR correspondente.
    - Preencher a data de resolução.
 3. Notificar no canal de trabalho da plataforma para que o Hero HQ possa remover as mitigações temporárias e consumir o comportamento canônico nativo atualizado.
+
+---
+
+## 🚀 Batch 27 Concluído: Descarbonização Maciça e Inteligência Nativa de Plataforma
+
+### 1. Resumo das Frentes Entregues
+1. **Frente 1 (`@praxisui/table` - Auto-Derivação Canônica do Endpoint de Filtro Avançado):**
+   - Normalizado o fallback em `buildFilteredSchemaContext()` do `praxis-filter.component.ts` para prefixar canonicamente `/api/` quando ausente no `resourcePath`, alinhando perfeitamente com os endpoints do backend Java `praxis-metadata-starter` (`/api/{resource}/filter`) sem exigir `schemaUrl` explícito nos hosts.
+2. **Frente 2 (`@praxisui/table` - Expansão de Linha por Schema OpenAPI):**
+   - Suporte canônico a `expansion: { enabled: true, source: 'schema' }` (ou `mode: 'schema'`).
+   - Implementado método `resolveExpansionDetailFromSchema()` que sintetiza automaticamente o Bento Grid (`cardGrid`, `compose`, `badge`, `progress`, `metric`) a partir dos campos do schema não visíveis na tabela.
+   - Fornecidos defaults canônicos para `schemaContract` e `rendering` quando omitidos no `detail`, eliminando toda a cerimônia de configuração manual.
+3. **Frente 3 (`@praxisui/crud` & `@praxisui/table` - Auto-Promoção de ScopeBar e Supressão de Duplicidade):**
+   - Adicionada propriedade `showQuickFilters?: boolean` no `table-config-v2.model.ts` e suporte em `praxis-table-toolbar.ts`.
+   - `PraxisResourcePage` agora detecta `quickFilters` dos metadados da tabela e os auto-promove para o `PraxisScopeBar` no topo do Centro de Comando quando a rota não declarar um `scopeBar` customizado.
+   - A toolbar interna da tabela suprime automaticamente seus botões de filtro rápido (`showQuickFilters: false`), eliminando duplicação visual e preservando a toolbar limpa para busca, densidade, colunas e filtros avançados.
+
+### 2. Impacto Quantitativo no Showcase Praxis Hero HQ
+- **1.716 linhas de código redundante eliminadas** de uma só vez:
+  - 14 arquivos `*.config.ts`: remoção de mais de 1.400 linhas de blocos procedurais `createBentoDetailExpansion([ ... ])`.
+  - `src/app/app.routes.ts`: remoção de 142 linhas de declarações duplicadas de `scopeBar: { ... }`.
+  - `src/app/pages/shared/detail-expansion.helper.ts`: 71 linhas de helper procedural deletadas.
+- **Compilação e build de produção downstream (`ng build`) testados com 100% de sucesso (0 erros).**
+

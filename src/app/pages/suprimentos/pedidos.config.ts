@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -117,113 +116,10 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      ...createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê do Pedido & Logística de Expedição',
-          subtitle: 'Acompanhamento de entrega, homologação fiscal e especificação de suprimentos',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-carga',
-              title: 'Especificação & Lote',
-              subtitle: 'Insumos e materiais solicitados',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.status',
-                      icon: 'local_shipping',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Especificação de Carga',
-                      valueExpr: "'Lotes de Ligas Especiais e Microcomponentes'",
-                      icon: 'inventory_2',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Volume Total / Quantidade',
-                      valueExpr: 'row.quantity',
-                      icon: 'tag',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-timeline',
-              title: 'Status de Expedição & Entrega',
-              subtitle: 'Rastreabilidade operacional',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'progress',
-                      label: 'Progresso da Expedição',
-                      valueExpr: "row.status === 'RECEIVED' ? 100 : row.status === 'APPROVED' ? 75 : row.status === 'PENDING' ? 35 : 10",
-                      max: 100,
-                      showPercent: true,
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Previsão de Recebimento',
-                      valueExpr: "row.status === 'RECEIVED' ? 'Entregue no Armazém' : '7 dias úteis'",
-                      icon: 'schedule',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Data da Ordem',
-                      valueExpr: 'row.orderDate',
-                      icon: 'event',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-financeiro',
-              title: 'Centro de Custo & Auditoria',
-              subtitle: 'Alocação contábil S.H.I.E.L.D.',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Centro de Custo',
-                      valueExpr: "'Divisão Tática Operacional - CC-408'",
-                      icon: 'account_balance',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Moeda de Liquidação',
-                      valueExpr: 'row.currency',
-                      icon: 'payments',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Observações de Compra',
-                      valueExpr: 'row.disabledReason',
-                      icon: 'info',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

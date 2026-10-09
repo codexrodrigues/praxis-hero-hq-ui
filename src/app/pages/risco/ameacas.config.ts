@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -115,101 +114,10 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê Forense de Inteligência & Risco Global',
-          subtitle: 'Taxonomia de combate e protocolos sob governança do Conselho de Segurança',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-dossie',
-              title: 'Dossiê Biológico & Tático',
-              subtitle: 'Classificação e teatro de origem',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.status',
-                      icon: 'radar',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Classe de Ameaça',
-                      valueExpr: 'row.classe',
-                      icon: 'warning',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Origem Planetária',
-                      valueExpr: 'row.planeta',
-                      icon: 'public',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-letalidade',
-              title: 'Letalidade & Gravidade',
-              subtitle: 'Escala de destruição e recompensas',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Classificação de Gravidade',
-                      valueExpr: "row.nivel >= 6 ? 'Ameaça de Nível Extremo' : row.nivel >= 4 ? 'Ameaça Significativa' : 'Risco Controlado'",
-                      icon: 'emergency',
-                    },
-                    {
-                      type: 'progress',
-                      label: 'Índice Relativo de Letalidade',
-                      valueExpr: 'row.nivel * 14',
-                      max: 100,
-                      showPercent: true,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-contencao',
-              title: 'Protocolos de Contenção',
-              subtitle: 'Diretrizes táticas de engajamento',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Status de Confinamento',
-                      valueExpr: "row.status === 'CAPTURADO' ? 'Confinado em Câmara Magnética' : 'Ativo e em Monitoramento Satelital'",
-                      icon: 'lock',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Contramedida Recomendada',
-                      valueExpr: "row.nivel >= 6 ? 'Acionar Defensores Primários' : 'Contenção via Drones Táticos'",
-                      icon: 'shield',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -115,117 +114,10 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê do Ciclo de Compensação & Liquidação',
-          subtitle: 'Discriminação de proventos, encargos operacionais e liquidação bancária',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-demonstrativo',
-              title: 'Demonstrativo Salarial',
-              subtitle: 'Valores brutos e créditos',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: "'Liquidado via Banco Central S.H.I.E.L.D.'",
-                      icon: 'account_balance',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Salário Bruto Tático',
-                      valueExpr: 'row.salarioBruto',
-                      format: 'currency:BRL',
-                      icon: 'payments',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Líquido Disponível',
-                      valueExpr: 'row.salarioLiquido',
-                      format: 'currency:BRL',
-                      icon: 'account_balance_wallet',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-descontos',
-              title: 'Retenções & Encargos',
-              subtitle: 'Previdência e fundo de danos',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'progress',
-                      label: 'Eficiência de Repasse Líquido',
-                      valueExpr: "row.salarioBruto > 0 ? Math.round((row.salarioLiquido / row.salarioBruto) * 100) : 0",
-                      max: 100,
-                      showPercent: true,
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Total de Retenções',
-                      valueExpr: 'row.totalDescontos',
-                      format: 'currency:BRL',
-                      icon: 'price_check',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Competência',
-                      valueExpr: 'row.mes + "/" + row.ano',
-                      icon: 'calendar_month',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-liquidacao',
-              title: 'Liquidação & Identificação',
-              subtitle: 'Protocolo de tesouraria',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Data de Pagamento',
-                      valueExpr: 'row.dataPagamento',
-                      format: 'date:dd/MM/yyyy',
-                      icon: 'event_available',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Colaborador Credenciado (ID)',
-                      valueExpr: 'row.funcionarioId',
-                      icon: 'badge',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Ciclo Contábil (ID)',
-                      valueExpr: 'row.id',
-                      icon: 'receipt',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

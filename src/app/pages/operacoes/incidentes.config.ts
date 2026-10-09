@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -121,105 +120,10 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Laudo Pericial Tático & Circunstâncias de Campo',
-          subtitle: 'Dossiê preliminar de resposta emergencial, contenção civil e indenizações',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-pericia',
-              title: 'Perícia & Teatro de Confronto',
-              subtitle: 'Circunstâncias e narrativa do sinistro',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.severidade',
-                      icon: 'emergency',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Teatro do Dano',
-                      valueExpr: 'row.local',
-                      caption: 'Perímetro operacional catalogado',
-                      icon: 'location_on',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Descrição Tática Forense',
-                      valueExpr: 'row.descricao',
-                      icon: 'description',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-financeiro',
-              title: 'Impacto Financeiro & Indenizações',
-              subtitle: 'Prejuízo civil apurado e cobertura',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Prejuízo Civil Estimado',
-                      valueExpr: 'row.danosCivis',
-                      caption: 'Fundo Tático de Compensação Civil',
-                      icon: 'payments',
-                    },
-                    {
-                      type: 'progress',
-                      label: 'Índice de Gravidade Relativa',
-                      valueExpr: '= round(min(100, (danosCivis / 4000000) * 100))',
-                      max: 100,
-                      showPercent: true,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-socorro',
-              title: 'Socorro Civil & Mobilização',
-              subtitle: 'Vítimas e protocolo médico',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Vítimas Feridas Catalogadas',
-                      valueExpr: 'row.feridos',
-                      caption: 'Atendimento de emergência prestado no local',
-                      icon: 'medical_services',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Fatalidades Confirmadas',
-                      valueExpr: 'row.mortos',
-                      caption: 'Registro pericial S.H.I.E.L.D.',
-                      icon: 'heart_broken',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

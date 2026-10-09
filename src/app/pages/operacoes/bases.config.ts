@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const BASES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -112,107 +111,10 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Ficha Cadastral da Instalação Tática',
-          subtitle: 'Telemetria de posicionamento geodésico, defesa de perímetro e capacidade de hangar',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-instalacao',
-              title: 'Status & Classificação',
-              subtitle: 'Tipologia e diretrizes de sigilo',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.sigilo',
-                      icon: 'security',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Tipologia de Fortificação',
-                      valueExpr: 'row.tipo',
-                      icon: 'fort',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Teatro Planetário',
-                      valueExpr: 'row.planeta',
-                      icon: 'public',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-defesa',
-              title: 'Defesa & Escudos Ativos',
-              subtitle: 'Integridade energética e esquadrões',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Contingente Tático Alocado',
-                      valueExpr: "'Guarnição ativa sob protocolo ' + (row.sigilo || 'PADRÃO')",
-                      icon: 'groups',
-                    },
-                    {
-                      type: 'progress',
-                      label: 'Integridade dos Escudos Energéticos',
-                      valueExpr: "row.sigilo === 'ULTRA_SECRETA' ? 98 : row.sigilo === 'SECRETA' ? 85 : row.sigilo === 'CONFIDENCIAL' ? 72 : 55",
-                      max: 100,
-                      showPercent: true,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-logistica',
-              title: 'Logística & Suporte Avançado',
-              subtitle: 'Hangar e reatores de energia',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Reator Primário de Fusão',
-                      valueExpr: "'Reator de Fusão operando a 99.4%'",
-                      icon: 'bolt',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Hangar Tático Hero HQ',
-                      valueExpr: "'8 naves interceptoras disponíveis'",
-                      icon: 'flight',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Protocolo de Emergência',
-                      valueExpr: "'Protocolo Nível ' + (row.sigilo || 'PADRÃO')",
-                      icon: 'gavel',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

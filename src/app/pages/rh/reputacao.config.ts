@@ -1,6 +1,5 @@
 import type { CrudMetadata } from '@praxisui/crud';
 import type { PraxisChartConfig } from '@praxisui/charts';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -100,113 +99,10 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê de Reputação & Relações Públicas',
-          subtitle: 'Auditoria de imagem governamental, opinião pública e impacto da atuação heroica',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-indices',
-              title: 'Opinião Pública & Governo',
-              subtitle: 'Chancelas civis e estatais',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: "row.media >= 90 ? 'Herói Classe S / Embaixador Global' : 'Operador de Alto Impacto'",
-                      icon: 'military_tech',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Aprovação Civil Popular',
-                      valueExpr: "row.scorePublico + '%'",
-                      icon: 'public',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Confiança Governamental',
-                      valueExpr: "row.scoreGovernamental + '%'",
-                      icon: 'account_balance',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-auditoria',
-              title: 'Mídia & Opinião Global',
-              subtitle: 'Impacto midiático e redes',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'progress',
-                      label: 'Score Médio Consolidado',
-                      valueExpr: 'row.media',
-                      max: 100,
-                      showPercent: true,
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Tendência de Mídia',
-                      valueExpr: "'Alta Positiva (' + row.scorePublico + '% de satisfação civil)'",
-                      icon: 'trending_up',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Posição no Ranking',
-                      valueExpr: 'row.posicao',
-                      icon: 'workspace_premium',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-enquadramento',
-              title: 'Alocação & Protocolo',
-              subtitle: 'Equipe e diretrizes',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Equipe Vinculada',
-                      valueExpr: 'row.equipe',
-                      icon: 'groups',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Identidade Heroica',
-                      valueExpr: 'row.codinome',
-                      icon: 'shield',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Nome de Registro Civil',
-                      valueExpr: 'row.nomeCompleto',
-                      icon: 'badge',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

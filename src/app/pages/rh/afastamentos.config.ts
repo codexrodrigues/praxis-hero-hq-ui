@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -114,115 +113,10 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê do Período de Afastamento & Escala Tática',
-          subtitle: 'Acompanhamento clínico pós-combate, parecer médico e designação de contingente',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-recuperacao',
-              title: 'Período & Motivo',
-              subtitle: 'Datas e enquadramento tático',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.tipo',
-                      icon: 'event_busy',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Início da Vigência',
-                      valueExpr: 'row.dataInicio',
-                      format: 'date:dd/MM/yyyy',
-                      icon: 'calendar_today',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Previsão de Retorno',
-                      valueExpr: 'row.dataFim',
-                      format: 'date:dd/MM/yyyy',
-                      icon: 'event_available',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-medico',
-              title: 'Laudo & Recuperação',
-              subtitle: 'Status biológico e regenerativo',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'progress',
-                      label: 'Ciclo Regenerativo Concluído',
-                      valueExpr: "row.tipo === 'FERIAS' ? 85 : row.tipo === 'TREINAMENTO' ? 90 : 65",
-                      max: 100,
-                      showPercent: true,
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Parecer da Ala Médica',
-                      valueExpr: 'row.observacoes || "Laudo pericial homologado pela junta médica S.H.I.E.L.D."',
-                      icon: 'medical_services',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Observações Gerais',
-                      valueExpr: 'row.observacoes || "Sem observações adicionais"',
-                      icon: 'clinical_notes',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-substituicao',
-              title: 'Substituição Operacional',
-              subtitle: 'Cobertura de posto tático',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Substituto Designado',
-                      valueExpr: "'Sentinela de Apoio Tático Alpha'",
-                      icon: 'person_pin',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Colaborador Afastado (ID)',
-                      valueExpr: 'row.funcionarioId',
-                      icon: 'badge',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Protocolo de Prontidão',
-                      valueExpr: "'Protocolo Aegis Nível 2'",
-                      icon: 'shield',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

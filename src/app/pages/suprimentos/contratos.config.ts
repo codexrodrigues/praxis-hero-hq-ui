@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -115,113 +114,10 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      ...createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê Contratual & Gestão de Fornecedores',
-          subtitle: 'Cláusulas de suprimento, indicadores de entrega e governança orçamentária S.H.I.E.L.D.',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-clausulas',
-              title: 'Cláusulas & Vigência',
-              subtitle: 'Prazos legais e prorrogações',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.status',
-                      icon: 'description',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Fornecedor Credenciado',
-                      valueExpr: 'row.supplierName',
-                      icon: 'store',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Renovação',
-                      valueExpr: "'Cláusula de Renovação Bianual'",
-                      icon: 'autorenew',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-sla',
-              title: 'Performance & SLA',
-              subtitle: 'Confiabilidade e penalidades',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'progress',
-                      label: 'Índice de Conformidade de Entregas',
-                      valueExpr: "row.status === 'ACTIVE' || row.status === 'SIGNED' ? 95 : row.status === 'DRAFT' ? 65 : 38",
-                      max: 100,
-                      showPercent: true,
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Cláusula Penal',
-                      valueExpr: "'Multa padrão de 15% por atraso de entrega de insumos'",
-                      icon: 'policy',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Observações de Auditoria',
-                      valueExpr: 'row.disabledReason',
-                      icon: 'info',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-governanca',
-              title: 'Governança & Finanças',
-              subtitle: 'Moeda e gestão fiscal',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Gestor Responsável',
-                      valueExpr: "'Diretoria de Suprimentos & Armaria'",
-                      icon: 'supervisor_account',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Moeda de Faturamento',
-                      valueExpr: 'row.currency',
-                      icon: 'payments',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Protocolo Contratual',
-                      valueExpr: 'row.number',
-                      icon: 'pin',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

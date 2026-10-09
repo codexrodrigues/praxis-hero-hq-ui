@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const EQUIPES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -113,113 +112,10 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Dossiê do Esquadrão & Desdobramento Operacional',
-          subtitle: 'Composição tática de agentes, base de operações e prontidão de resposta',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-esquadrao',
-              title: 'Esquadrão & Base',
-              subtitle: 'Identificação e base designada',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.sigla',
-                      icon: 'shield',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Base Designada',
-                      valueExpr: 'row.basePrincipalNome',
-                      icon: 'domain',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Status Tático',
-                      valueExpr: 'row.status',
-                      icon: 'flag',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-capacidade',
-              title: 'Prontidão & Histórico',
-              subtitle: 'Capacidade e telemetria',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'progress',
-                      label: 'Prontidão Operacional do Squad',
-                      valueExpr: "row.status === 'ATIVA' ? 95 : row.status === 'RESERVA' ? 70 : 40",
-                      max: 100,
-                      showPercent: true,
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Efetivo de Operadores',
-                      valueExpr: "row.status === 'ATIVA' ? '16 Operadores Táticos' : '8 Operadores em Reserva'",
-                      icon: 'groups',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Histórico de Missões',
-                      valueExpr: "'Esquadrão Operacional ' + (row.sigla || row.nome)",
-                      icon: 'military_tech',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-lideranca',
-              title: 'Liderança & Acesso',
-              subtitle: 'Comando e autorização',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Líder Tático',
-                      valueExpr: "'Comando Tático ' + (row.basePrincipalNome || 'Central')",
-                      icon: 'person_star',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Nível de Autorização',
-                      valueExpr: "'Credencial Classe Vingadores'",
-                      icon: 'verified_user',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'ID do Esquadrão',
-                      valueExpr: 'row.id',
-                      icon: 'pin',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   defaults: {

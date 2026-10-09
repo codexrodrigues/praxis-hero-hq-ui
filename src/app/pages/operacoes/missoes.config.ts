@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const MISSOES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -114,116 +113,10 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
           },
         },
       },
-      expansion: createBentoDetailExpansion([
-        {
-          type: 'cardGrid',
-          title: 'Briefing Tático Integrado & Parâmetros de Missão',
-          subtitle: 'Visão operacional expandida do teatro de operações e alvos prioritários',
-          columns: 3,
-          minCardWidth: 280,
-          cards: [
-            {
-              id: 'card-briefing',
-              title: 'Briefing & Diretrizes Táticas',
-              subtitle: 'Objetivos e classificação de risco',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'badge',
-                      labelExpr: 'row.prioridade',
-                      icon: 'crisis_alert',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Objetivo Estratégico',
-                      valueExpr: 'row.objetivo',
-                      icon: 'flag',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Teatro de Operações',
-                      valueExpr: 'row.local',
-                      captionExpr: "row.status === 'CONCLUIDA' ? 'Operação concluída com êxito' : 'Janela operacional ativa'",
-                      icon: 'location_on',
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-esquadrao',
-              title: 'Alvos & Liderança Operacional',
-              subtitle: 'Comando e engajamento inimigo',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Ameaça / Hostil Associado',
-                      valueExpr: 'row.ameacaNome',
-                      icon: 'warning',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Liderança Tática',
-                      valueExpr: "'Comando Central Hero HQ'",
-                      icon: 'military_tech',
-                    },
-                    {
-                      type: 'progress',
-                      label: 'Prontidão Operacional do Esquadrão',
-                      valueExpr: "row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 68 : row.status === 'PAUSADA' ? 40 : 15",
-                      max: 100,
-                      showPercent: true,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id: 'card-cronograma',
-              title: 'Cronograma & Janela de Ação',
-              subtitle: 'Janelas temporais de execução',
-              content: [
-                {
-                  type: 'compose',
-                  direction: 'column',
-                  gap: 'sm',
-                  items: [
-                    {
-                      type: 'metric',
-                      label: 'Início Previsto',
-                      valueExpr: 'row.inicioPrev',
-                      format: 'date:dd/MM/yyyy HH:mm',
-                      icon: 'calendar_today',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Prazo Limite',
-                      valueExpr: 'row.fimPrev',
-                      format: 'date:dd/MM/yyyy HH:mm',
-                      icon: 'event_available',
-                    },
-                    {
-                      type: 'metric',
-                      label: 'Orçamento Tático Alocado',
-                      valueExpr: "'Alocação Tática S.H.I.E.L.D.'",
-                      icon: 'payments',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ]),
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
     },
   } as unknown as CrudMetadata['table'],
   actions: [
