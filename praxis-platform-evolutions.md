@@ -2820,8 +2820,11 @@ No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a
      }
      ```
    - O avaliador resolve o valor numérico da coluna e percorre os thresholds em ordem, aplicando o `tone` da primeira faixa correspondente.
-3. **Suporte no Backend `praxis-metadata-starter` (Fase Backend):**
-   - Estender a anotação `@MicroVisualization` para incluir parâmetros de limiares que se projetam automaticamente no OpenAPI `/schemas/filtered` sob `x-ui.presentation.thresholds`. (Rastreado no backlog do starter Java).
+3. **Suporte no Backend `praxis-metadata-starter` (Fase Backend - Dossiê Especificado):**
+   - Criação da anotação `@Threshold` com suporte a `min`, `max`, `value`, `equalsValue`, `tone` e `label`.
+   - Adição dos membros `toneExpr()` e `Threshold[] thresholds()` em `@MicroVisualization`.
+   - Serialização no resolvedor OpenAPI canônico `CustomOpenApiResolver.applyMicroVisualization` para `x-ui.presentation.visualization.thresholds` e `toneExpr`.
+   - Dossiê técnico completo gerado com código, testes e procedimentos para execução pelo agente de backend.
 
 ### Mitigação Temporária Aplicada no Hero HQ
 - Em `dashboard-page.definition.ts`, a expressão de `toneExpr` na coluna `Contenção Tática` foi corrigida adicionando o prefixo `=` e os parênteses condicionais:
