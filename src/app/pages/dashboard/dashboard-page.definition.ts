@@ -108,17 +108,11 @@ export const DISTRESS_SIGNALS_LIST_CONFIG: PraxisListConfig = {
     query: {
       sort: ['abertoEm,desc'],
     },
-    data: [
-      { id: 1, origem: 'Complexo Stark Sul', local: 'Laboratório de Fusão Arc', nivelAmeaca: 4, status: 'ATIVO', abertoEm: '14:25' },
-      { id: 2, origem: 'Porto Metropolitano', local: 'Terminal de Cargas 3', nivelAmeaca: 3, status: 'EM_ATENDIMENTO', abertoEm: '13:50' },
-      { id: 3, origem: 'Setor Aeroespacial', local: 'Órbita Baixa LEO-2', nivelAmeaca: 5, status: 'ATIVO', abertoEm: '12:15' },
-      { id: 4, origem: 'Subterrâneos Metro', local: 'Linha Vermelha Setor B', nivelAmeaca: 2, status: 'CONCLUIDO', abertoEm: '10:40' },
-      { id: 5, origem: 'Embaixada Wakanda', local: 'Pavilhão Cultural', nivelAmeaca: 1, status: 'CONCLUIDO', abertoEm: '09:05' },
-    ],
   },
   layout: {
     variant: 'list',
     density: 'compact',
+    pageSize: 6,
     lines: 2,
     dividers: 'between',
   },
@@ -153,6 +147,12 @@ export const DISTRESS_SIGNALS_LIST_CONFIG: PraxisListConfig = {
       expr: '${item.status}',
       variant: 'outlined',
       color: 'accent',
+    },
+    chipColorMap: {
+      ABERTO: 'warn',
+      EM_ATENDIMENTO: 'accent',
+      RESOLVIDO: 'primary',
+      FALSO: 'neutral',
     },
   },
 };
