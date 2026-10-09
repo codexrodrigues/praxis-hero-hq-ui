@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const MISSOES_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,48 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'operations/missoes',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'ativas',
+        label: 'Missões Ativas em Campo',
+        value: '06 Incursões',
+        caption: 'Em andamento no radar operacional',
+        icon: 'flight_takeoff',
+        tone: 'info',
+        filter: { status: 'EM_ANDAMENTO' },
+      },
+      {
+        id: 'concluidas',
+        label: 'Taxa de Sucesso Histórica',
+        value: '66,7%',
+        caption: '4 missões concluídas com êxito',
+        icon: 'task_alt',
+        tone: 'success',
+        filter: { status: 'CONCLUIDA' },
+      },
+      {
+        id: 'planejamento',
+        label: 'Em Planejamento / Briefing',
+        value: '10 Missões',
+        caption: 'Em preparação e briefing tático',
+        icon: 'schedule',
+        tone: 'warning',
+        filter: { status: 'PLANEJADA' },
+      },
+      {
+        id: 'omega',
+        label: 'Prioridade Ômega / Crítica',
+        value: '10 Alertas',
+        caption: 'Engajamento de prioridade crítica',
+        icon: 'crisis_alert',
+        tone: 'danger',
+        filter: { prioridade: 'CRITICA' },
+      },
+    ],
   },
   table: {
     columns: [
@@ -254,50 +295,3 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const MISSIONS_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'missions-kpi-grid',
-      items: [
-        {
-          id: 'ativas',
-          label: 'Missões Ativas em Campo',
-          value: '06 Incursões',
-          caption: 'Em andamento no radar operacional',
-          icon: 'flight_takeoff',
-          tone: 'info',
-        },
-        {
-          id: 'sucesso',
-          label: 'Taxa de Sucesso Histórica',
-          value: '66,7%',
-          caption: '4 missões concluídas com êxito',
-          icon: 'task_alt',
-          tone: 'success',
-        },
-        {
-          id: 'planejamento',
-          label: 'Em Planejamento / Briefing',
-          value: '10 Missões',
-          caption: 'Em preparação e briefing tático',
-          icon: 'schedule',
-          tone: 'warning',
-        },
-        {
-          id: 'omega',
-          label: 'Prioridade Ômega / Crítica',
-          value: '10 Alertas',
-          caption: 'Engajamento de prioridade crítica',
-          icon: 'crisis_alert',
-          tone: 'danger',
-        },
-      ],
-    },
-  ],
-};

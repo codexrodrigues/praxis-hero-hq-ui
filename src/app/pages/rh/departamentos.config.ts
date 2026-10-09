@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,45 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'human-resources/departamentos',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'divisoes',
+        label: 'Divisões Ativas',
+        value: '28 Departamentos',
+        caption: 'Estrutura operacional e estratégica',
+        icon: 'corporate_fare',
+        tone: 'info',
+        filter: {},
+      },
+      {
+        id: 'liderancas',
+        label: 'Lideranças Nomeadas',
+        value: '96,4% Cobertura',
+        caption: 'Diretoria e supervisão tática',
+        icon: 'military_tech',
+        tone: 'success',
+      },
+      {
+        id: 'cargos',
+        label: 'Cargos Mapeados',
+        value: '15 Funções',
+        caption: 'Catálogo de carreiras ativas',
+        icon: 'account_tree',
+        tone: 'warning',
+      },
+      {
+        id: 'senioridade',
+        label: 'Níveis de Carreira',
+        value: '5 Níveis',
+        caption: 'Do Júnior ao Executivo/Diretor',
+        icon: 'trending_up',
+        tone: 'neutral',
+      },
+    ],
   },
   table: {
     columns: [
@@ -193,50 +231,3 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const DEPARTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'departamentos-kpi-grid',
-      items: [
-        {
-          id: 'divisoes',
-          label: 'Divisões Ativas',
-          value: '28 Departamentos',
-          caption: 'Estrutura operacional e estratégica',
-          icon: 'corporate_fare',
-          tone: 'info',
-        },
-        {
-          id: 'liderancas',
-          label: 'Lideranças Nomeadas',
-          value: '96,4% Cobertura',
-          caption: 'Diretoria e supervisão tática',
-          icon: 'military_tech',
-          tone: 'success',
-        },
-        {
-          id: 'cargos',
-          label: 'Cargos Mapeados',
-          value: '15 Funções',
-          caption: 'Catálogo de carreiras ativas',
-          icon: 'account_tree',
-          tone: 'warning',
-        },
-        {
-          id: 'senioridade',
-          label: 'Níveis de Carreira',
-          value: '5 Níveis',
-          caption: 'Do Júnior ao Executivo/Diretor',
-          icon: 'trending_up',
-          tone: 'neutral',
-        },
-      ],
-    },
-  ],
-};

@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const INDICADORES_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,45 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'risk-intelligence/vw-indicadores-incidentes',
     idField: 'incidenteId',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'passivo',
+        label: 'Sinistros com Passivo',
+        value: '74 Casos',
+        caption: 'Histórico de acordos regulados pelo HQ',
+        icon: 'gavel',
+        tone: 'danger',
+        filter: {},
+      },
+      {
+        id: 'total',
+        label: 'Volume de Indenizações',
+        value: 'R$ 99,5 M',
+        caption: 'Compensações acordadas com o judiciário',
+        icon: 'payments',
+        tone: 'warning',
+      },
+      {
+        id: 'danos',
+        label: 'Danos Civis Apurados',
+        value: 'R$ 154,4 M',
+        caption: 'Prejuízo material total auditado',
+        icon: 'broken_image',
+        tone: 'info',
+      },
+      {
+        id: 'saldo',
+        label: 'Saldo em Conciliação',
+        value: 'R$ 72,8 M',
+        caption: 'Em análise de perícia e fundos de seguro',
+        icon: 'hourglass_top',
+        tone: 'neutral',
+      },
+    ],
   },
   table: {
     meta: { idField: 'incidenteId' },
@@ -249,50 +287,3 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const INDICADORES_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'indicadores-kpi-grid',
-      items: [
-        {
-          id: 'passivo',
-          label: 'Sinistros com Passivo',
-          value: '74 Casos',
-          caption: 'Histórico de acordos regulados pelo HQ',
-          icon: 'gavel',
-          tone: 'danger',
-        },
-        {
-          id: 'total',
-          label: 'Volume de Indenizações',
-          value: 'R$ 99,5 M',
-          caption: 'Compensações acordadas com o judiciário',
-          icon: 'payments',
-          tone: 'warning',
-        },
-        {
-          id: 'danos',
-          label: 'Danos Civis Apurados',
-          value: 'R$ 154,4 M',
-          caption: 'Prejuízo material total auditado',
-          icon: 'broken_image',
-          tone: 'info',
-        },
-        {
-          id: 'saldo',
-          label: 'Saldo em Conciliação',
-          value: 'R$ 72,8 M',
-          caption: 'Em análise de perícia e fundos de seguro',
-          icon: 'hourglass_top',
-          tone: 'neutral',
-        },
-      ],
-    },
-  ],
-};

@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,46 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'human-resources/folhas-pagamento',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'volume',
+        label: 'Volume Folha Mensal',
+        value: 'R$ 3,45M',
+        caption: 'Competência ativa 03/2026',
+        icon: 'account_balance_wallet',
+        tone: 'info',
+        filter: { mes: 3, ano: 2026 },
+      },
+      {
+        id: 'consolidados',
+        label: 'Registros Consolidados',
+        value: '3.246 Ciclos',
+        caption: 'Histórico fiscal e operacional',
+        icon: 'receipt_long',
+        tone: 'success',
+        filter: {},
+      },
+      {
+        id: 'retencoes',
+        label: 'Retenções & Encargos',
+        value: 'R$ 868,7k',
+        caption: 'Previdência, saúde e encargos',
+        icon: 'savings',
+        tone: 'warning',
+      },
+      {
+        id: 'liquidacao',
+        label: 'Próxima Liquidação',
+        value: '28/03/2026',
+        caption: 'Programada via tesouraria',
+        icon: 'calendar_month',
+        tone: 'neutral',
+      },
+    ],
   },
   table: {
     columns: [
@@ -242,50 +281,3 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const FOLHA_PAGAMENTO_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'folha-kpi-grid',
-      items: [
-        {
-          id: 'volume',
-          label: 'Volume Folha Mensal',
-          value: 'R$ 3,45M',
-          caption: 'Competência ativa 03/2026',
-          icon: 'account_balance_wallet',
-          tone: 'info',
-        },
-        {
-          id: 'consolidados',
-          label: 'Registros Consolidados',
-          value: '3.246 Ciclos',
-          caption: 'Histórico fiscal e operacional',
-          icon: 'receipt_long',
-          tone: 'success',
-        },
-        {
-          id: 'retencoes',
-          label: 'Retenções & Encargos',
-          value: 'R$ 868,7k',
-          caption: 'Previdência, saúde e encargos',
-          icon: 'savings',
-          tone: 'warning',
-        },
-        {
-          id: 'liquidacao',
-          label: 'Próxima Liquidação',
-          value: '28/03/2026',
-          caption: 'Programada via tesouraria',
-          icon: 'calendar_month',
-          tone: 'neutral',
-        },
-      ],
-    },
-  ],
-};

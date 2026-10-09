@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,46 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'operations/incidentes',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'all',
+        label: 'Total de Ocorrências',
+        value: '74 Registros',
+        caption: 'Sinistros pós-combate catalogados',
+        icon: 'report',
+        tone: 'neutral',
+        filter: {},
+      },
+      {
+        id: 'criticos',
+        label: 'Severidade Crítica',
+        value: '18 Casos Críticos',
+        caption: 'Alto impacto civil e estrutural',
+        icon: 'warning',
+        tone: 'danger',
+        filter: { severidade: 'CRITICA' },
+      },
+      {
+        id: 'danos',
+        label: 'Danos Materiais Totais',
+        value: 'R$ 154,4 M',
+        caption: 'Cobertura via Fundo Tático de Indenizações',
+        icon: 'account_balance',
+        tone: 'warning',
+      },
+      {
+        id: 'mitigacao',
+        label: 'Taxa de Mitigação',
+        value: '96,2% Contido',
+        caption: 'Evacuação prévia e blindagem energética',
+        icon: 'shield_with_heart',
+        tone: 'success',
+      },
+    ],
   },
   table: {
     columns: [
@@ -223,50 +262,3 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const INCIDENTES_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'incidentes-kpi-grid',
-      items: [
-        {
-          id: 'incidentes',
-          label: 'Total de Ocorrências',
-          value: '74 Registros',
-          caption: 'Sinistros pós-combate catalogados',
-          icon: 'report',
-          tone: 'neutral',
-        },
-        {
-          id: 'criticos',
-          label: 'Severidade Crítica',
-          value: '18 Casos Críticos',
-          caption: 'Alto impacto civil e estrutural',
-          icon: 'warning',
-          tone: 'danger',
-        },
-        {
-          id: 'danos',
-          label: 'Danos Materiais Totais',
-          value: 'R$ 154,4 M',
-          caption: 'Cobertura via Fundo Tático de Indenizações',
-          icon: 'account_balance',
-          tone: 'warning',
-        },
-        {
-          id: 'mitigacao',
-          label: 'Taxa de Mitigação',
-          value: '96,2% Contido',
-          caption: 'Evacuação prévia e blindagem energética',
-          icon: 'shield_with_heart',
-          tone: 'success',
-        },
-      ],
-    },
-  ],
-};

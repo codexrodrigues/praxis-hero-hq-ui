@@ -1,24 +1,14 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
-import { PraxisRichContent } from '@praxisui/rich-content';
-import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import { PraxisScopeBarComponent, type PraxisScopeBarItem } from '@praxisui/table';
-import { EQUIPES_CRUD_METADATA, EQUIPES_KPI_DOCUMENT } from './equipes.config';
+import type { PraxisKpiBandCard } from '@praxisui/core';
+import { EQUIPES_CRUD_METADATA } from './equipes.config';
 
 @Component({
   selector: 'app-equipes-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, PraxisScopeBarComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisScopeBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -35,16 +25,11 @@ import { EQUIPES_CRUD_METADATA, EQUIPES_KPI_DOCUMENT } from './equipes.config';
         </div>
       </header>
 
-      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
-      <section class="kpi-surface" (click)="onKpiCardClick($event)">
-        <praxis-rich-content [document]="kpiDocument()" />
-      </section>
-
       <!-- Barra Canônica de Escopo Tático -->
       <praxis-scope-bar
         leadLabel="Status Tático:"
         leadIcon="tune"
-        [items]="scopeItems()"
+        [items]="scopeItems"
         [activeId]="activeFilterId()"
         [showClearButton]="activeFilterId() !== 'all'"
         [showOmnibox]="false"
@@ -52,65 +37,60 @@ import { EQUIPES_CRUD_METADATA, EQUIPES_KPI_DOCUMENT } from './equipes.config';
         (clear)="setFilter('all')"
       />
 
-      <!-- Metadata-Driven CRUD Runtime -->
+      <!-- Metadata-Driven CRUD Runtime com Faixa Nativa de KPIs -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-equipes-crud"
           [metadata]="activeCrudMetadata()"
+          (kpiCardClick)="onKpiCardClick($event)"
         />
       </section>
     </div>
   `,
 })
-export class EquipesPageComponent implements OnInit, OnDestroy {
+export class EquipesPageComponent {
   protected readonly activeFilterId = signal<string>('all');
-  protected readonly totalCount = signal<number>(5);
-  protected readonly activeCount = signal<number>(4);
-  protected readonly reserveCount = signal<number>(1);
-  protected readonly linkedBasesCount = signal<number>(5);
 
-  protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
+  protected readonly scopeItems: PraxisScopeBarItem[] = [
     {
       id: 'all',
       label: 'Todos os Esquadrões',
-      count: this.totalCount(),
+      count: 5,
       icon: 'diversity_3',
       tone: 'default',
       isDefault: true,
     },
     {
-      id: 'ativa',
+      id: 'ativas',
       label: 'Prontidão Máxima',
-      count: this.activeCount(),
+      count: 4,
       icon: 'verified_user',
       tone: 'ready',
     },
     {
       id: 'reserva',
       label: 'Reserva & Suporte',
-      count: this.reserveCount(),
+      count: 1,
       icon: 'shield',
       tone: 'default',
     },
     {
       id: 'bases',
       label: 'Bases Interligadas',
-      count: this.linkedBasesCount(),
+      count: 5,
       icon: 'hub',
       tone: 'info',
     },
-  ]);
-
-  protected readonly kpiDocument = signal(EQUIPES_KPI_DOCUMENT);
+  ];
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
     let filterCriteria: Record<string, unknown> = {};
 
-    if (filterId === 'ativa') {
+    if (filterId === 'ativas') {
       filterCriteria = { status: 'ATIVA' };
     } else if (filterId === 'reserva') {
-      filterCriteria = { status: 'RESERVA' };
+      filterCriteria = { status: 'STANDBY' };
     }
 
     return {
@@ -119,91 +99,15 @@ export class EquipesPageComponent implements OnInit, OnDestroy {
     };
   });
 
-  private readonly dashboardStats = inject(DashboardStatsService);
-  private kpiSub: Subscription | null = null;
-
-  ngOnInit(): void {
-    this.loadKpis();
-  }
-
-  ngOnDestroy(): void {
-    this.kpiSub?.unsubscribe();
-  }
-
   protected setFilter(filterId: string): void {
+    if (this.activeFilterId() === filterId) return;
     this.activeFilterId.set(filterId);
   }
 
-  protected onKpiCardClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement | null;
-    const cardEl = target?.closest('.prx-stat-group__item, [data-stat-id], .prx-rich-card');
-    if (!cardEl) return;
-
-    const text = cardEl.textContent?.toLowerCase() ?? '';
-    if (text.includes('máxima') || text.includes('ativas') || text.includes('prontidão')) {
-      this.setFilter('ativa');
-    } else if (text.includes('reserva') || text.includes('suporte')) {
-      this.setFilter('reserva');
-    } else if (text.includes('esquadrões') || text.includes('registrados')) {
-      this.setFilter('all');
+  protected onKpiCardClick(event: { card: PraxisKpiBandCard }): void {
+    if (event.card.id) {
+      this.setFilter(event.card.id);
     }
   }
-
-  private loadKpis(): void {
-    this.kpiSub?.unsubscribe();
-    this.kpiSub = this.dashboardStats.getEquipesTacticalKpis().subscribe((kpis) => {
-      this.totalCount.set(kpis.totalEquipes);
-      this.activeCount.set(kpis.activeEquipes);
-      this.reserveCount.set(kpis.reserveEquipes);
-      this.linkedBasesCount.set(kpis.linkedBases);
-
-      this.kpiDocument.set({
-        kind: 'praxis.rich-content',
-        version: '1.0.0',
-        nodes: [
-          {
-            type: 'statGroup',
-            layout: 'grid',
-            tileLayout: 'tile',
-            headerSpacing: 'normal',
-            className: 'equipes-kpi-grid',
-            items: [
-              {
-                id: 'equipes',
-                label: 'Esquadrões Registrados',
-                value: `${kpis.totalEquipes} Equipes`,
-                caption: 'Compostas por heróis de ponta',
-                icon: 'diversity_3',
-                tone: 'info',
-              },
-              {
-                id: 'ativas',
-                label: 'Prontidão Máxima',
-                value: `${kpis.activeEquipes} Ativas`,
-                caption: 'Mobilizáveis para resposta imediata',
-                icon: 'verified_user',
-                tone: 'success',
-              },
-              {
-                id: 'reserva',
-                label: 'Reserva & Suporte',
-                value: `${kpis.reserveEquipes} em Treinamento`,
-                caption: 'Squad em ciclo de integração',
-                icon: 'shield',
-                tone: 'neutral',
-              },
-              {
-                id: 'bases',
-                label: 'Bases Interligadas',
-                value: `${kpis.linkedBases} Complexos`,
-                caption: 'Presença e ancoragem tática',
-                icon: 'hub',
-                tone: 'info',
-              },
-            ],
-          },
-        ],
-      });
-    });
-  }
 }
+

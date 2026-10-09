@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import type { PraxisChartConfig } from '@praxisui/charts';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
@@ -8,6 +7,44 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'human-resources/vw-ranking-reputacao',
     idField: 'funcionarioId',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'topHero',
+        label: 'Herói #1 no Ranking',
+        value: 'Captain Marvel',
+        caption: '91,5 de média consolidada',
+        icon: 'trophy',
+        tone: 'success',
+      },
+      {
+        id: 'aprovacao',
+        label: 'Aprovação Civil Média',
+        value: '84,3%',
+        caption: 'Índice de sentimento público',
+        icon: 'trending_up',
+        tone: 'info',
+      },
+      {
+        id: 'confianca',
+        label: 'Confiança Institucional',
+        value: '91,2%',
+        caption: 'Chancela de reguladores civis',
+        icon: 'verified',
+        tone: 'neutral',
+      },
+      {
+        id: 'monitorados',
+        label: 'Quadro Monitorado',
+        value: '101 Heróis',
+        caption: 'Cobertura integral de todas as equipes',
+        icon: 'groups',
+        tone: 'warning',
+      },
+    ],
   },
   table: {
     columns: [
@@ -206,54 +243,6 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
   defaults: {
     openMode: 'drawer',
   },
-};
-
-export const REPUTACAO_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'reputacao-kpi-grid',
-      items: [
-        {
-          id: 'topHero',
-          label: 'Herói #1 no Ranking',
-          value: 'Carol Danvers',
-          caption: '91,5% de média global consolidada',
-          icon: 'trophy',
-          tone: 'success',
-        },
-        {
-          id: 'aprovacao',
-          label: 'Aprovação Civil Média',
-          value: '86,8%',
-          caption: 'Amostragem em tempo real',
-          icon: 'trending_up',
-          tone: 'info',
-        },
-        {
-          id: 'confianca',
-          label: 'Confiança Institucional',
-          value: '91,2%',
-          caption: 'Chancela de reguladores civis',
-          icon: 'verified',
-          tone: 'neutral',
-        },
-        {
-          id: 'monitorados',
-          label: 'Quadro Monitorado',
-          value: '101 Heróis',
-          caption: 'Cobertura integral de todas as equipes',
-          icon: 'groups',
-          tone: 'warning',
-        },
-      ],
-    },
-  ],
 };
 
 export function buildReputacaoChartConfig(

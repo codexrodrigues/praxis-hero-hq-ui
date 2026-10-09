@@ -50,6 +50,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#36**](#-issue-36-modo-de-apresentação-e-ficha-técnica-editorial-para-formulários-dinâmicos-mode-presentation-no-praxisuidynamic-form) | Modo de Apresentação e Ficha Técnica Editorial para Formulários Dinâmicos (`mode: 'presentation'`) | `@praxisui/dynamic-form`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/dynamic-form`, `@praxisui/core` (`mode: 'presentation'`, `mode: 'dossier'`) | 2026-10-08 | Validado (220 specs aprovados, renderização editorial sem inputs desativados) |
 | [**#37**](#-issue-37-componente-canônico-de-layout-e-shell-de-aplicação-corporativa-praxisappshell--praxisishell-ou-praxisicore) | Componente Canônico de Layout e Shell de Aplicação Corporativa (`PraxisAppShell`) | `@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`PraxisAppShell`, `shell.models.ts`) | 2026-10-08 | Validado (10/10 specs unitários, build downstream OK, eliminação de CSS manual) |
 | [**#39**](#-issue-39-auto-hidratação-e-descoberta-de-gavetas-analíticas-drawers-via-resourcepath-e-metadados-openapi-schemasurfaces--behaviordrawer) | Auto-Hidratação e Descoberta de Gavetas Analíticas (Drawers) via `resourcePath` e Metadados OpenAPI (`/schemas/surfaces` / `behavior.drawer`) | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`8c522fbb2`) | 2026-10-09 | Validado (auto-hidratação por DI registry, 10/10 specs drawer, 87/87 specs crud, 100% dos 5 `*-drawer.config.ts` eliminados e build de produção downstream aprovado) |
+| [**#40**](#-issue-40-descarbonização-de-kpis-de-recursos-e-extinção-da-agregação-client-side-via-behaviorkpiband-declarativo-nativamente-integrado-no-praxis-crud) | Descarbonização de KPIs de Recursos e Extinção da Agregação Client-Side via `behavior.kpiBand` Declarativo Nativamente Integrado no `<praxis-crud>` | `@praxisui/crud`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (nativo `kpiBand` + `filterCriteria`), `praxis-hero-hq-ui` | 2026-10-09 | Validado (15 recursos descarbonizados, 14 blocos `*_KPI_DOCUMENT` extintos, `dashboard-stats.service` reduzido em 674 linhas, 2.214+ linhas líquidas eliminadas, tsc e build OK) |
 
 
 
@@ -2493,6 +2494,70 @@ No entanto, uma inspeção criteriosa nas páginas de recursos do showcase (`inc
 
 ---
 
+## 📌 Issue #40: Descarbonização de KPIs de Recursos e Extinção da Agregação Client-Side via `behavior.kpiBand` Declarativo Nativamente Integrado no `<praxis-crud>`
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/crud`, `@praxisui/core`, `praxis-metadata-starter`, `praxis-hero-hq-ui`
+- **Severidade:** 🔴 Alta (Elimina o serviço `DashboardStatsService` de 856 linhas, mais de 900 linhas de estruturas estáticas `*_KPI_DOCUMENT` em 14 arquivos `.config.ts`, e ~1.200 linhas de código repetido de subscrições, sinais e DOM scraping nas 14 telas de recursos)
+- **Tipo:** Descarbonização de Código / Arquitetura de Apresentação / Agregação Corporativa / Filtro Cruzado Nativo
+- **Status:** `[x] Resolvida` (Batch 23)
+
+### Diagnóstico Detalhado da Causa Raiz
+Após a eliminação das gavetas monolíticas (Issue #30/#39) e do interceptor ad-hoc de enriquecimento de dados (Issue #34), a auditoria no `praxis-hero-hq-ui` identificou a maior anomalia arquitetural remanescente:
+1. **Agregação em Memória no Navegador (`dashboard-stats.service.ts` - 856 linhas):**
+   O serviço mantém 14 métodos que executam chamadas HTTP para `POST /{resource}/filter?page=0&size=100` e calculam totalizadores através de filtros síncronos no array recebido (`content.filter(e => e.status === 'EM_USO').length`).
+   - Em cenários corporativos reais com dezenas de milhares de registros, essa abordagem é inviável: consome largura de banda desnecessariamente, satura a memória do cliente, falha ao truncar dados que excedem o `size` da página e degrada o desempenho da aplicação (INP/LCP).
+   - Cálculos agregados pertencem ao backend (`praxis-metadata-starter`, consultas SQL otimizadas no PostgreSQL/Neon ou views analíticas).
+2. **DOM Scraping Frágil nas 14 Páginas de CRUD:**
+   Todas as 14 páginas (`equipamentos`, `veiculos`, `bases`, `equipes`, `incidentes`, `missoes`, `afastamentos`, `departamentos`, `folha-pagamento`, `funcionarios`, `reputacao`, `ameacas`, `indicadores`, `contratos`, `pedidos`) possuem o seguinte método acoplado à estrutura interna do HTML:
+   ```typescript
+   protected onKpiSectionClicked(event: MouseEvent): void {
+     const target = event.target as HTMLElement | null;
+     if (!target) return;
+     const itemEl = target.closest('.prx-rich-stat-group__item') as HTMLElement | null;
+     if (!itemEl) return;
+     const items = Array.from(itemEl.parentElement?.children || []);
+     const index = items.indexOf(itemEl);
+     // mapeamento por índice hardcoded...
+   }
+   ```
+   Qualquer alteração em classes CSS ou layout do RichContent quebra a filtragem de negócio silenciosamente.
+3. **Duplicação Maciça de Código e JSON Estático:**
+   Cada página instancia um sinal `kpiDocument = signal<RichContentDocument>`, injeta `PraxisRichContent`, gerencia subscrições RxJS manuais com `unsubscribe` e depende de 14 arquivos `.config.ts` exportando blocos volumosos de `*_KPI_DOCUMENT`.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Ativação Nativa de `kpiBand` no `<praxis-crud>`:**
+   O componente `<praxis-crud>` já possui suporte nativo de primeira classe à projeção do `<praxis-kpi-band>` quando `kpiBand` estiver presente em `CrudMetadata` ou `TableConfig.behavior.kpiBand`.
+2. **Contrato Declarativo de Cards:**
+   Configurar nos metadados de cada recurso seus respectivos cards com propriedades semânticas:
+   - `id`: identificador do card.
+   - `label`: rótulo executivo da métrica.
+   - `icon`: ícone contextual Material Symbols.
+   - `tone`: tom semântico (`info`, `success`, `warning`, `error`, `neutral`).
+   - `value` ou `valueExpr`: valor numérico/formatado ou expressão avaliada via `SafeExpressionEvaluator`.
+   - `caption`: legenda de apoio ao indicador.
+   - `filter`: objeto de critério a ser aplicado automaticamente à tabela (ex.: `{ status: 'EM_USO' }`).
+3. **Filtro Cruzado Nativo sem Código no Hospedeiro:**
+   Ao clicar em um card que possua a propriedade `filter`, o `<praxis-crud>` automaticamente atualiza `tableQueryContext` e refiltra a tabela, além de disparar o evento `@Output() kpiCardClick`.
+4. **Descarbonização Radical das 14 Telas:**
+   - Eliminação de `<praxis-rich-content>` e da seção `<section class="kpi-surface">`.
+   - Remoção de `onKpiSectionClicked` e de todo o DOM scraping.
+   - Remoção de subscrições RxJS manuais, sinais de estado redundantes (`kpiDocument`, `totalCount`, `inUseCount`, etc.) e métodos de ciclo de vida.
+   - Eliminação dos 14 blocos `*_KPI_DOCUMENT` nos arquivos de configuração.
+   - Redução do `DashboardStatsService` exclusivamente às métricas do painel inicial (`getTacticalKpis()`).
+   - Remoção do arquivo de código morto `resource-hub-page.component.ts`.
+
+### Critérios de Aceite para Resolução
+- [x] As 14 páginas de CRUD exibem suas faixas de KPIs nativamente via `<praxis-crud>` sem uso de `<praxis-rich-content>` nem DOM scraping.
+- [x] Clicar em qualquer card de KPI aplica o filtro correspondente na tabela de forma 100% nativa.
+- [x] O `DashboardStatsService` é reduzido estritamente ao resumo tático do dashboard executivo principal (ou extinto).
+- [x] 100% dos 14 blocos `*_KPI_DOCUMENT` são eliminados dos arquivos de configuração.
+- [x] Exclusão do arquivo não utilizado `resource-hub-page.component.ts`.
+- [x] Compilação TypeScript (`npx tsc --noEmit`) e build de produção (`npm run build`) aprovados com 0 erros.
+- [x] Redução líquida de mais de 2.500 linhas de código no showcase.
+
+---
+
 ## 🏛️ Diagnóstico Arquitetural: Onde o Código Está Concentrado e Plano de Descarbonização de Código (Redução de 80%)
 
 A varredura quantitativa executada na aplicação modelo **Praxis Hero HQ** (`src/app`) identificou a distribuição real das ~20.000 linhas de código do projeto:
@@ -2508,12 +2573,12 @@ A varredura quantitativa executada na aplicação modelo **Praxis Hero HQ** (`sr
 | `threat-intelligence-drawer.component.ts` | 820 | Gaveta customizada | Falta de relações e cards Bento no drawer | **#30**, **#32**, **#39** |
 | `dashboard-page.definition.ts` + `component.ts` | **1.850** | Configuração estática de dashboard | Falta de carregamento de `WidgetPageDefinition` via API | **#18**, **#19** |
 | `hero-app-shell.component.ts` | **1.192** | Shell e navegação com CSS embutido | Falta de componente de shell corporativo oficial | **#37** |
-| `dashboard-stats.service.ts` | **855** | Agregação manual de métricas RxJS | Falta de banda de KPIs nativa no `<praxis-crud>` | **#33** |
+| `dashboard-stats.service.ts` | **855** | Agregação manual de métricas RxJS | Falta de banda de KPIs nativa no `<praxis-crud>` | **#33**, **#40** |
 | `tactical-data-enrichment.interceptor.ts` | **571** | Enriquecimento ad hoc de dados | Falta de campos calculados declarativos no schema | **#34** |
 | DTOs e Interfaces Estáticas (vários) | **~800** | Tipos manuais redundantes | Falta de tipos genéricos dinâmicos orientados a schema | **#35** |
 
 ### 🎯 Meta de Descarbonização de Código
-Com a resolução das Issues **#12, #30, #32, #33, #34, #35, #36, #37, #38 e #39**, a base de código do **Praxis Hero HQ** será reduzida de **~20.000 linhas** para aproximadamente **3.500 linhas** de arquivos de rota e metadados JSON puros — atingindo a diretriz de **menos de 20% a 30% de código residual**, tornando o showcase um verdadeiro testemunho da inteligência e governança nativa da Plataforma Praxis.
+Com a resolução das Issues **#12, #30, #32, #33, #34, #35, #36, #37, #38, #39 e #40**, a base de código do **Praxis Hero HQ** será reduzida de **~20.000 linhas** para aproximadamente **3.500 linhas** de arquivos de rota e metadados JSON puros — atingindo a diretriz de **menos de 20% a 30% de código residual**, tornando o showcase um verdadeiro testemunho da inteligência e governança nativa da Plataforma Praxis.
 
 ---
 

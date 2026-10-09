@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const EQUIPES_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,47 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'operations/equipes',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'all',
+        label: 'Esquadrões Registrados',
+        value: '5 Equipes',
+        caption: 'Compostas por heróis de ponta',
+        icon: 'diversity_3',
+        tone: 'info',
+        filter: {},
+      },
+      {
+        id: 'ativas',
+        label: 'Prontidão Máxima',
+        value: '4 Ativas',
+        caption: 'Mobilizáveis para resposta imediata',
+        icon: 'verified_user',
+        tone: 'success',
+        filter: { status: 'ATIVA' },
+      },
+      {
+        id: 'reserva',
+        label: 'Reserva & Suporte',
+        value: '1 em Treinamento',
+        caption: 'Squad em ciclo de integração',
+        icon: 'shield',
+        tone: 'neutral',
+        filter: { status: 'STANDBY' },
+      },
+      {
+        id: 'bases',
+        label: 'Bases Interligadas',
+        value: '5 Complexos',
+        caption: 'Presença e ancoragem tática',
+        icon: 'hub',
+        tone: 'info',
+      },
+    ],
   },
   table: {
     columns: [
@@ -208,50 +248,3 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const EQUIPES_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'equipes-kpi-grid',
-      items: [
-        {
-          id: 'equipes',
-          label: 'Esquadrões Registrados',
-          value: '5 Equipes',
-          caption: 'Compostas por heróis de ponta',
-          icon: 'diversity_3',
-          tone: 'info',
-        },
-        {
-          id: 'ativas',
-          label: 'Prontidão Máxima',
-          value: '4 Ativas',
-          caption: 'Mobilizáveis para resposta imediata',
-          icon: 'verified_user',
-          tone: 'success',
-        },
-        {
-          id: 'reserva',
-          label: 'Reserva & Suporte',
-          value: '1 em Treinamento',
-          caption: 'Squad em ciclo de integração',
-          icon: 'shield',
-          tone: 'neutral',
-        },
-        {
-          id: 'bases',
-          label: 'Bases Interligadas',
-          value: '5 Complexos',
-          caption: 'Presença e ancoragem tática',
-          icon: 'hub',
-          tone: 'info',
-        },
-      ],
-    },
-  ],
-};

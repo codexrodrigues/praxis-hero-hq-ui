@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,47 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'human-resources/ferias-afastamentos',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'ciclos',
+        label: 'Total de Registros',
+        value: '111 Registros',
+        caption: 'Férias regulamentares e licenças',
+        icon: 'history',
+        tone: 'neutral',
+        filter: {},
+      },
+      {
+        id: 'criticos',
+        label: 'Casos Críticos / Graves',
+        value: '51 Ocorrências',
+        caption: 'Trauma de combate e regeneração',
+        icon: 'health_and_safety',
+        tone: 'danger',
+        filter: { tipo: 'LICENCA_MEDICA' },
+      },
+      {
+        id: 'padrao',
+        label: 'Licenças Padrão',
+        value: '60 Registros',
+        caption: 'Descanso e suporte preventivo',
+        icon: 'event_available',
+        tone: 'info',
+        filter: { tipo: 'FERIAS' },
+      },
+      {
+        id: 'dias',
+        label: 'Dias em Recuperação',
+        value: '1.204 Dias',
+        caption: 'Total acumulado em afastamento',
+        icon: 'calendar_month',
+        tone: 'warning',
+      },
+    ],
   },
   table: {
     columns: [
@@ -222,50 +262,3 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const AFASTAMENTOS_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'afastamentos-kpi-grid',
-      items: [
-        {
-          id: 'ciclos',
-          label: 'Total de Registros',
-          value: '111 Registros',
-          caption: 'Férias regulamentares e licenças',
-          icon: 'history',
-          tone: 'neutral',
-        },
-        {
-          id: 'criticos',
-          label: 'Casos Críticos / Graves',
-          value: '51 Ocorrências',
-          caption: 'Trauma de combate e regeneração',
-          icon: 'health_and_safety',
-          tone: 'danger',
-        },
-        {
-          id: 'padrao',
-          label: 'Licenças Padrão',
-          value: '60 Registros',
-          caption: 'Descanso e suporte preventivo',
-          icon: 'event_available',
-          tone: 'info',
-        },
-        {
-          id: 'dias',
-          label: 'Dias em Recuperação',
-          value: '1.204 Dias',
-          caption: 'Total acumulado em afastamento',
-          icon: 'calendar_month',
-          tone: 'warning',
-        },
-      ],
-    },
-  ],
-};

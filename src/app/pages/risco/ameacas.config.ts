@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const AMEACAS_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,48 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'risk-intelligence/ameacas',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'ameacas',
+        label: 'Ameaças Monitoradas',
+        value: '16 Alvos',
+        caption: 'Radar contínuo em frequência quântica',
+        icon: 'warning',
+        tone: 'danger',
+        filter: {},
+      },
+      {
+        id: 'confronto',
+        label: 'Em Confronto Ativo',
+        value: '6 em Combate',
+        caption: 'Esquadrões mobilizados em solo',
+        icon: 'crisis_alert',
+        tone: 'warning',
+        filter: { status: 'CONFRONTO' },
+      },
+      {
+        id: 'contidos',
+        label: 'Contidos / Prisão Raft',
+        value: '3 Neutralizados',
+        caption: 'Custodiados em estase de força',
+        icon: 'lock',
+        tone: 'success',
+        filter: { status: 'CONTIDO' },
+      },
+      {
+        id: 'recompensas',
+        label: 'Fundo Total de Recompensas',
+        value: 'R$ 12,1 M',
+        caption: 'Garantido pelo Acordo de Sokovia',
+        icon: 'payments',
+        tone: 'info',
+        filter: { nivel: 5 },
+      },
+    ],
   },
   table: {
     columns: [
@@ -217,50 +258,3 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const AMEACAS_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'ameacas-kpi-grid',
-      items: [
-        {
-          id: 'ameacas',
-          label: 'Ameaças Monitoradas',
-          value: '16 Alvos',
-          caption: 'Radar contínuo em frequência quântica',
-          icon: 'warning',
-          tone: 'danger',
-        },
-        {
-          id: 'confronto',
-          label: 'Em Confronto Ativo',
-          value: '6 em Combate',
-          caption: 'Esquadrões mobilizados em solo',
-          icon: 'crisis_alert',
-          tone: 'warning',
-        },
-        {
-          id: 'contidos',
-          label: 'Contidos / Prisão Raft',
-          value: '3 Neutralizados',
-          caption: 'Custodiados em estase de força',
-          icon: 'lock',
-          tone: 'success',
-        },
-        {
-          id: 'recompensas',
-          label: 'Fundo Total de Recompensas',
-          value: 'R$ 12,1 M',
-          caption: 'Garantido pelo Acordo de Sokovia',
-          icon: 'payments',
-          tone: 'info',
-        },
-      ],
-    },
-  ],
-};

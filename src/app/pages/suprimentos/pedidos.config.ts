@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,48 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'procurement/purchase-orders',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'ordens',
+        label: 'Ordens de Compra',
+        value: '10 Pedidos',
+        caption: 'Ciclo de suprimento em andamento',
+        icon: 'local_shipping',
+        tone: 'info',
+        filter: {},
+      },
+      {
+        id: 'aprovadas',
+        label: 'Aprovadas / Entregues',
+        value: '5 Ordens',
+        caption: 'Itens em expedição ou já recebidos',
+        icon: 'inventory',
+        tone: 'success',
+        filter: { status: 'APPROVED' },
+      },
+      {
+        id: 'analise',
+        label: 'Aguardando Aprovação',
+        value: '3 em Análise',
+        caption: 'Compliance de compras e finanças',
+        icon: 'pending_actions',
+        tone: 'warning',
+        filter: { status: 'DRAFT' },
+      },
+      {
+        id: 'canceladas',
+        label: 'Canceladas / Revogadas',
+        value: '2 Pedidos',
+        caption: 'Ordens reavaliadas pelo comando',
+        icon: 'cancel',
+        tone: 'neutral',
+        filter: { status: 'CANCELLED' },
+      },
+    ],
   },
   table: {
     columnProjection: {
@@ -190,54 +231,3 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const PEDIDOS_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'pedidos-kpi-grid',
-      items: [
-        {
-          id: 'ordens',
-          label: 'Ordens de Compra',
-          value: '10 Pedidos',
-          caption: 'Ciclo de suprimento em andamento',
-          icon: 'local_shipping',
-          tone: 'info',
-          action: { actionId: 'scope.filter', payload: 'all' },
-        },
-        {
-          id: 'aprovadas',
-          label: 'Aprovadas / Entregues',
-          value: '5 Ordens',
-          caption: 'Itens em expedição ou já recebidos',
-          icon: 'inventory',
-          tone: 'success',
-          action: { actionId: 'scope.filter', payload: 'aprovadas' },
-        },
-        {
-          id: 'analise',
-          label: 'Aguardando Aprovação',
-          value: '3 em Análise',
-          caption: 'Compliance de compras e finanças',
-          icon: 'pending_actions',
-          tone: 'warning',
-          action: { actionId: 'scope.filter', payload: 'analise' },
-        },
-        {
-          id: 'canceladas',
-          label: 'Canceladas / Revogadas',
-          value: '2 Pedidos',
-          caption: 'Ordens reavaliadas pelo comando',
-          icon: 'cancel',
-          tone: 'neutral',
-          action: { actionId: 'scope.filter', payload: 'canceladas' },
-        },
-      ],
-    },
-  ],
-};

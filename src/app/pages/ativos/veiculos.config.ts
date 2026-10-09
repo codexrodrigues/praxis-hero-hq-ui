@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const VEICULOS_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,47 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'assets/veiculos',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'all',
+        label: 'Unidades na Frota',
+        value: '8 Veículos',
+        caption: 'Aeronaves, hovercrafts e terrestres',
+        icon: 'rocket_launch',
+        tone: 'info',
+        filter: {},
+      },
+      {
+        id: 'operacional',
+        label: 'Prontidão de Voo',
+        value: '5 Disponíveis',
+        caption: 'Abastecidos e prontos para decolagem',
+        icon: 'verified',
+        tone: 'success',
+        filter: { status: 'OPERACIONAL' },
+      },
+      {
+        id: 'manutencao',
+        label: 'Em Revisão / Hangar',
+        value: '2 em Manutenção',
+        caption: 'Calibragem de propulsores iônicos',
+        icon: 'build',
+        tone: 'warning',
+        filter: { status: 'MANUTENCAO' },
+      },
+      {
+        id: 'eficiencia',
+        label: 'Taxa Operacional',
+        value: '62,5% Ativo',
+        caption: 'Capacidade de transporte de squads',
+        icon: 'speed',
+        tone: 'neutral',
+      },
+    ],
   },
   table: {
     columns: [
@@ -215,50 +255,3 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const VEICULOS_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'veiculos-kpi-grid',
-      items: [
-        {
-          id: 'registradas',
-          label: 'Unidades na Frota',
-          value: '8 Veículos',
-          caption: 'Aeronaves, hovercrafts e terrestres',
-          icon: 'rocket_launch',
-          tone: 'info',
-        },
-        {
-          id: 'operacionais',
-          label: 'Prontidão de Voo',
-          value: '5 Disponíveis',
-          caption: 'Abastecidos e prontos para decolagem',
-          icon: 'verified',
-          tone: 'success',
-        },
-        {
-          id: 'manutencao',
-          label: 'Em Revisão / Hangar',
-          value: '2 em Manutenção',
-          caption: 'Calibragem de propulsores iônicos',
-          icon: 'build',
-          tone: 'warning',
-        },
-        {
-          id: 'eficiencia',
-          label: 'Taxa Operacional',
-          value: '62,5% Ativo',
-          caption: 'Capacidade de transporte de squads',
-          icon: 'speed',
-          tone: 'neutral',
-        },
-      ],
-    },
-  ],
-};

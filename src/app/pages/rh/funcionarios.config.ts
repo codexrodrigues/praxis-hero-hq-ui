@@ -1,11 +1,51 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 
 export const HEROES_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
   resource: {
     path: 'human-resources/funcionarios',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'total',
+        label: 'Efetivo Total',
+        value: '24 Cadastrados',
+        caption: 'Quadro ativo e reserva',
+        icon: 'group',
+        tone: 'info',
+        filter: {},
+      },
+      {
+        id: 'ativos',
+        label: 'Em Prontidão Ativa',
+        value: '21 Ativos',
+        caption: '87,5% da força operacional',
+        icon: 'verified_user',
+        tone: 'success',
+        filter: { ativo: true },
+      },
+      {
+        id: 'inativos',
+        label: 'Em Reserva / Licença',
+        value: '03 Inativos',
+        caption: 'Reserva tática ou licença civil',
+        icon: 'person_off',
+        tone: 'warning',
+        filter: { ativo: false },
+      },
+      {
+        id: 'reputacao',
+        label: 'Score Reputacional Médio',
+        value: '91,2 / 100',
+        caption: 'Índice combinado público-governo',
+        icon: 'auto_awesome',
+        tone: 'neutral',
+      },
+    ],
   },
   table: {
     columns: [
@@ -126,52 +166,6 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
     openMode: 'modal',
     modal: { width: '920px', maxWidth: '95vw' },
   },
-};
-
-export const HEROES_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      className: 'heroes-kpi-grid',
-      items: [
-        {
-          id: 'total',
-          label: 'Efetivo Total',
-          value: '24 Cadastrados',
-          caption: 'Quadro ativo e reserva',
-          icon: 'group',
-          tone: 'info',
-        },
-        {
-          id: 'ativos',
-          label: 'Em Prontidão Ativa',
-          value: '21 Ativos',
-          caption: '87,5% da força operacional',
-          icon: 'verified_user',
-          tone: 'success',
-        },
-        {
-          id: 'inativos',
-          label: 'Em Reserva / Licença',
-          value: '03 Inativos',
-          caption: 'Clark Kent · em licença civil',
-          icon: 'person_off',
-          tone: 'warning',
-        },
-        {
-          id: 'reputacao',
-          label: 'Score Reputacional Médio',
-          value: '91,2 / 100',
-          caption: 'Índice combinado público-governo',
-          icon: 'auto_awesome',
-          tone: 'neutral',
-        },
-      ],
-    },
-  ],
 };
 
 export const SAMPLE_HERO: Record<string, unknown> = {

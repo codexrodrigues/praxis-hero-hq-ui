@@ -2,27 +2,17 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  OnInit,
   computed,
-  inject,
   signal,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
-import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
 import { PraxisScopeBarComponent, type PraxisScopeBarItem } from '@praxisui/table';
-import { PraxisRichContent } from '@praxisui/rich-content';
-import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
-import {
-  AFASTAMENTOS_CRUD_METADATA,
-  AFASTAMENTOS_KPI_DOCUMENT,
-} from './afastamentos.config';
+import { AFASTAMENTOS_CRUD_METADATA } from './afastamentos.config';
 
 @Component({
   selector: 'app-afastamentos-page',
   standalone: true,
-  imports: [CommonModule, PraxisCrudComponent, PraxisRichContent, PraxisScopeBarComponent],
+  imports: [CommonModule, PraxisCrudComponent, PraxisScopeBarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-container">
@@ -39,16 +29,11 @@ import {
         </div>
       </header>
 
-      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
-      <section class="kpi-surface" (click)="onKpiCardClick($event)">
-        <praxis-rich-content [document]="kpiDocument()" />
-      </section>
-
       <!-- Scope Bar Canônico da Plataforma Praxis -->
       <praxis-scope-bar
         leadLabel="Tipo de Afastamento"
         leadIcon="tune"
-        [items]="scopeBarItems()"
+        [items]="scopeBarItems"
         [activeId]="activeFilterId()"
         [showClearButton]="activeFilterId() !== 'all'"
         [showOmnibox]="false"
@@ -56,51 +41,46 @@ import {
         (clear)="setFilter('all')"
       />
 
-      <!-- Tabela CRUD Governança Canônica -->
+      <!-- Tabela CRUD Governança Canônica com kpiBand nativo -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-afastamentos-crud"
           [metadata]="activeCrudMetadata()"
+          (kpiCardClick)="onKpiCardClick($event)"
         />
       </section>
     </div>
   `,
 })
-export class AfastamentosPageComponent implements OnInit, OnDestroy {
+export class AfastamentosPageComponent {
   protected readonly activeFilterId = signal<string>('all');
-  protected readonly totalRegistros = signal<number>(111);
-  protected readonly criticalCases = signal<number>(51);
-  protected readonly standardCases = signal<number>(60);
-  protected readonly totalDays = signal<number>(1204);
 
-  protected readonly scopeBarItems = computed<PraxisScopeBarItem[]>(() => [
+  protected readonly scopeBarItems: PraxisScopeBarItem[] = [
     {
       id: 'all',
       label: 'Todos os Registros',
       icon: 'history',
       filter: {},
-      count: this.totalRegistros(),
+      count: 111,
       isDefault: true,
     },
     {
       id: 'criticos',
       label: 'Médicas / Regeneração',
       icon: 'health_and_safety',
-      filter: "tipo='LICENCA_MEDICA'",
-      count: this.criticalCases(),
+      filter: { tipo: 'LICENCA_MEDICA' },
+      count: 51,
       tone: 'danger',
     },
     {
       id: 'padrao',
       label: 'Férias Regulamentares',
       icon: 'event_available',
-      filter: "tipo='FERIAS'",
-      count: this.standardCases(),
+      filter: { tipo: 'FERIAS' },
+      count: 60,
       tone: 'ready',
     },
-  ]);
-
-  protected readonly kpiDocument = signal<RichContentDocument>(AFASTAMENTOS_KPI_DOCUMENT);
+  ];
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -118,91 +98,22 @@ export class AfastamentosPageComponent implements OnInit, OnDestroy {
     };
   });
 
-  private readonly dashboardStats = inject(DashboardStatsService);
-  private kpiSub: Subscription | null = null;
-
-  ngOnInit(): void {
-    this.loadKpis();
-  }
-
-  ngOnDestroy(): void {
-    this.kpiSub?.unsubscribe();
-  }
-
   protected setFilter(filterId: string): void {
     this.activeFilterId.set(filterId);
   }
 
-  protected onKpiCardClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement | null;
-    const cardEl = target?.closest('.prx-stat-group__item, [data-stat-id], .prx-rich-card');
-    if (!cardEl) return;
-
-    const text = cardEl.textContent?.toLowerCase() ?? '';
-    if (text.includes('graves') || text.includes('críticos') || text.includes('regeneração')) {
-      this.setFilter('criticos');
-    } else if (text.includes('padrão') || text.includes('férias') || text.includes('descanso')) {
-      this.setFilter('padrao');
-    } else if (text.includes('total') || text.includes('registros')) {
+  protected onKpiCardClick(event: { card: { id?: string; filter?: Record<string, unknown> } }): void {
+    const filter = event.card.filter;
+    if (!filter || Object.keys(filter).length === 0) {
       this.setFilter('all');
+      return;
     }
-  }
 
-  private loadKpis(): void {
-    this.kpiSub?.unsubscribe();
-    this.kpiSub = this.dashboardStats.getAfastamentosTacticalKpis().subscribe((kpis) => {
-      this.totalRegistros.set(kpis.totalRecords);
-      this.criticalCases.set(kpis.criticalCases);
-      this.standardCases.set(kpis.standardLeaves);
-      this.totalDays.set(kpis.totalDaysAway);
-
-      this.kpiDocument.set({
-        kind: 'praxis.rich-content',
-        version: '1.0.0',
-        nodes: [
-          {
-            type: 'statGroup',
-            layout: 'grid',
-            tileLayout: 'tile',
-            headerSpacing: 'normal',
-            className: 'afastamentos-kpi-grid',
-            items: [
-              {
-                id: 'ciclos',
-                label: 'Total de Registros',
-                value: `${kpis.totalRecords} Registros`,
-                caption: 'Férias regulamentares e licenças',
-                icon: 'history',
-                tone: 'neutral',
-              },
-              {
-                id: 'criticos',
-                label: 'Casos Críticos / Graves',
-                value: `${kpis.criticalCases} Ocorrências`,
-                caption: 'Trauma de combate e regeneração',
-                icon: 'health_and_safety',
-                tone: 'danger',
-              },
-              {
-                id: 'padrao',
-                label: 'Licenças Padrão',
-                value: `${kpis.standardLeaves} Registros`,
-                caption: 'Descanso e suporte preventivo',
-                icon: 'event_available',
-                tone: 'info',
-              },
-              {
-                id: 'dias',
-                label: 'Dias em Recuperação',
-                value: `${kpis.totalDaysAway} Dias`,
-                caption: 'Total acumulado em afastamento',
-                icon: 'calendar_month',
-                tone: 'warning',
-              },
-            ],
-          },
-        ],
-      });
-    });
+    const matched = this.scopeBarItems.find(
+      (item) => JSON.stringify(item.filter) === JSON.stringify(filter)
+    );
+    if (matched) {
+      this.setFilter(matched.id);
+    }
   }
 }

@@ -2,22 +2,15 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  OnInit,
   computed,
-  inject,
   signal,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
-import type { RichContentDocument } from '@praxisui/core';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
-import { PraxisRichContent } from '@praxisui/rich-content';
-import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
 import {
   PraxisScopeBarComponent,
   type PraxisScopeBarItem,
 } from '@praxisui/table';
-import { INDICADORES_CRUD_METADATA, INDICADORES_KPI_DOCUMENT } from './indicadores.config';
+import { INDICADORES_CRUD_METADATA } from './indicadores.config';
 
 @Component({
   selector: 'app-indicadores-page',
@@ -25,7 +18,6 @@ import { INDICADORES_CRUD_METADATA, INDICADORES_KPI_DOCUMENT } from './indicador
   imports: [
     CommonModule,
     PraxisCrudComponent,
-    PraxisRichContent,
     PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,11 +36,6 @@ import { INDICADORES_CRUD_METADATA, INDICADORES_KPI_DOCUMENT } from './indicador
         </div>
       </header>
 
-      <!-- Metadata-Driven KPI Bento Grid via Praxis Rich Content -->
-      <section class="kpi-surface">
-        <praxis-rich-content [document]="kpiDocument()" />
-      </section>
-
       <!-- Barra Tática de Escopo e Filtros Rápidos (Canonical PraxisScopeBar) -->
       <praxis-scope-bar
         [items]="scopeItems"
@@ -61,26 +48,25 @@ import { INDICADORES_CRUD_METADATA, INDICADORES_KPI_DOCUMENT } from './indicador
         (clear)="setFilter('all')"
       />
 
-      <!-- Metadata-Driven CRUD Runtime -->
+      <!-- Metadata-Driven CRUD Runtime with native kpiBand integration -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-indicadores-crud"
           [metadata]="activeCrudMetadata()"
+          (kpiCardClick)="onKpiCardClick($event)"
         />
       </section>
     </div>
   `,
 })
-export class IndicadoresPageComponent implements OnInit, OnDestroy {
+export class IndicadoresPageComponent {
   protected readonly activeFilterId = signal<string>('all');
   protected readonly scopeItems: PraxisScopeBarItem[] = [
-    { id: 'all', label: 'Todos os Casos', count: 74, icon: 'account_balance', tone: 'default', isDefault: true },
+    { id: 'all', label: 'Todos os Casos', count: 74, icon: 'account_balance', tone: 'default', isDefault: true, filter: {} },
     { id: 'critico', label: 'Passivo Crítico', count: 18, icon: 'warning', tone: 'danger', filter: { severidade: 'CRITICA' } },
-    { id: 'pendente', label: 'Saldo em Aberto', count: 56, icon: 'pending', tone: 'warning' },
-    { id: 'homologado', label: '100% Homologado', count: 18, icon: 'verified', tone: 'success' },
+    { id: 'pendente', label: 'Saldo em Aberto', count: 56, icon: 'pending', tone: 'warning', filter: { 'totalPendente >': 0 } },
+    { id: 'homologado', label: '100% Homologado', count: 18, icon: 'verified', tone: 'success', filter: { totalPendente: 0 } },
   ];
-
-  protected readonly kpiDocument = signal<RichContentDocument>(INDICADORES_KPI_DOCUMENT);
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -100,17 +86,6 @@ export class IndicadoresPageComponent implements OnInit, OnDestroy {
     };
   });
 
-  private readonly dashboardStats = inject(DashboardStatsService);
-  private kpiSub: Subscription | null = null;
-
-  ngOnInit(): void {
-    this.loadKpis();
-  }
-
-  ngOnDestroy(): void {
-    this.kpiSub?.unsubscribe();
-  }
-
   protected setFilter(filterId: string): void {
     this.activeFilterId.set(filterId);
   }
@@ -119,56 +94,18 @@ export class IndicadoresPageComponent implements OnInit, OnDestroy {
     this.setFilter(item.id);
   }
 
-  private loadKpis(): void {
-    this.kpiSub?.unsubscribe();
-    this.kpiSub = this.dashboardStats.getIndicadoresRiscoTacticalKpis().subscribe((kpis) => {
-      this.kpiDocument.set({
-        kind: 'praxis.rich-content',
-        version: '1.0.0',
-        nodes: [
-          {
-            type: 'statGroup',
-            layout: 'grid',
-            tileLayout: 'tile',
-            headerSpacing: 'normal',
-            className: 'indicadores-kpi-grid',
-            items: [
-              {
-                id: 'passivo',
-                label: 'Sinistros com Passivo',
-                value: `${kpis.totalIncidentes} Casos`,
-                caption: 'Histórico de acordos regulados pelo HQ',
-                icon: 'gavel',
-                tone: 'danger',
-              },
-              {
-                id: 'total',
-                label: 'Volume de Indenizações',
-                value: `R$ ${kpis.totalIndenizacoesMillion} M`,
-                caption: `Compensações acordadas (${kpis.liquidationRate}% liquidado)`,
-                icon: 'payments',
-                tone: 'warning',
-              },
-              {
-                id: 'danos',
-                label: 'Danos Civis Apurados',
-                value: `R$ ${kpis.totalDanosMillion} M`,
-                caption: 'Prejuízo material total auditado',
-                icon: 'broken_image',
-                tone: 'info',
-              },
-              {
-                id: 'saldo',
-                label: 'Saldo em Conciliação',
-                value: `R$ ${kpis.totalPendenteMillion} M`,
-                caption: 'Em análise de perícia e fundos de seguro',
-                icon: 'hourglass_top',
-                tone: 'neutral',
-              },
-            ],
-          },
-        ],
-      });
-    });
+  protected onKpiCardClick(event: { card: { id?: string; filter?: Record<string, unknown> } }): void {
+    const filter = event.card.filter;
+    if (!filter || Object.keys(filter).length === 0) {
+      this.setFilter('all');
+      return;
+    }
+
+    const matched = this.scopeItems.find(
+      (item) => JSON.stringify(item.filter) === JSON.stringify(filter)
+    );
+    if (matched) {
+      this.setFilter(matched.id);
+    }
   }
 }

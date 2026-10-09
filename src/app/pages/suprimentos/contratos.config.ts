@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,48 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'procurement/contracts',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'vigentes',
+        label: 'Contratos Vigentes',
+        value: '11 Ativos',
+        caption: 'Acordos ativos e assinados com a base',
+        icon: 'description',
+        tone: 'info',
+        filter: { status: 'ACTIVE' },
+      },
+      {
+        id: 'total',
+        label: 'Total de Contratos',
+        value: '17 Cadastrados',
+        caption: 'Volume total de acordos catalogados',
+        icon: 'verified',
+        tone: 'success',
+        filter: {},
+      },
+      {
+        id: 'expirados',
+        label: 'Contratos Expirados',
+        value: '3 Requerem Ação',
+        caption: 'Demandam aditivo ou substituição',
+        icon: 'event_busy',
+        tone: 'warning',
+        filter: { status: 'EXPIRED' },
+      },
+      {
+        id: 'draft',
+        label: 'Em Minuta / Draft',
+        value: '1 em Aprovação',
+        caption: 'Aguardando validação jurídica e financeira',
+        icon: 'edit_note',
+        tone: 'neutral',
+        filter: { status: 'DRAFT' },
+      },
+    ],
   },
   table: {
     columns: [
@@ -216,50 +257,3 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const CONTRATOS_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'contratos-kpi-grid',
-      items: [
-        {
-          id: 'vigentes',
-          label: 'Contratos Vigentes',
-          value: '11 Ativos',
-          caption: 'Acordos ativos e assinados com a base',
-          icon: 'description',
-          tone: 'info',
-        },
-        {
-          id: 'total',
-          label: 'Total de Contratos',
-          value: '17 Cadastrados',
-          caption: 'Volume total de acordos catalogados',
-          icon: 'verified',
-          tone: 'success',
-        },
-        {
-          id: 'expirados',
-          label: 'Contratos Expirados',
-          value: '3 Requerem Ação',
-          caption: 'Demandam aditivo ou substituição',
-          icon: 'event_busy',
-          tone: 'warning',
-        },
-        {
-          id: 'draft',
-          label: 'Em Minuta / Draft',
-          value: '1 em Aprovação',
-          caption: 'Aguardando validação jurídica e financeira',
-          icon: 'edit_note',
-          tone: 'neutral',
-        },
-      ],
-    },
-  ],
-};

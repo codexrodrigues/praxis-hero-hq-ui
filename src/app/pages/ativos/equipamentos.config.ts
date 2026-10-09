@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { RichContentDocument } from '@praxisui/core';
 import { createBentoDetailExpansion } from '../shared/detail-expansion.helper';
 
 export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
@@ -7,6 +6,48 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
   resource: {
     path: 'assets/equipamentos',
     idField: 'id',
+  },
+  kpiBand: {
+    enabled: true,
+    columns: 4,
+    cards: [
+      {
+        id: 'all',
+        label: 'Total de Itens Táticos',
+        value: '62 Ativos',
+        caption: 'Trajes, armas e exoesqueletos',
+        icon: 'shield',
+        tone: 'info',
+        filter: {},
+      },
+      {
+        id: 'custodia',
+        label: 'Em Custódia / Uso Ativo',
+        value: '56 Itens',
+        caption: 'Alocados a heróis em missão',
+        icon: 'verified_user',
+        tone: 'success',
+        filter: { status: 'EM_USO' },
+      },
+      {
+        id: 'manutencao',
+        label: 'Em Manutenção',
+        value: '2 Itens',
+        caption: 'Recarga de reator e nanotecnologia',
+        icon: 'build',
+        tone: 'warning',
+        filter: { status: 'MANUTENCAO' },
+      },
+      {
+        id: 'estoque',
+        label: 'Em Reserva de Arsenal',
+        value: '4 Itens',
+        caption: 'Disponíveis no cofre central',
+        icon: 'inventory_2',
+        tone: 'neutral',
+        filter: { status: 'DISPONIVEL' },
+      },
+    ],
   },
   table: {
     columns: [
@@ -212,50 +253,3 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const EQUIPAMENTOS_KPI_DOCUMENT: RichContentDocument = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
-    {
-      type: 'statGroup',
-      layout: 'grid',
-      tileLayout: 'tile',
-      headerSpacing: 'normal',
-      className: 'equipamentos-kpi-grid',
-      items: [
-        {
-          id: 'total',
-          label: 'Total de Itens Táticos',
-          value: '62 Ativos',
-          caption: 'Trajes, armas e exoesqueletos',
-          icon: 'shield',
-          tone: 'info',
-        },
-        {
-          id: 'custodia',
-          label: 'Em Custódia / Uso Ativo',
-          value: '56 Itens',
-          caption: 'Alocados a heróis em missão',
-          icon: 'verified_user',
-          tone: 'success',
-        },
-        {
-          id: 'manutencao',
-          label: 'Em Manutenção',
-          value: '2 Itens',
-          caption: 'Recarga de reator e nanotecnologia',
-          icon: 'build',
-          tone: 'warning',
-        },
-        {
-          id: 'estoque',
-          label: 'Em Reserva de Arsenal',
-          value: '4 Itens',
-          caption: 'Disponíveis no cofre central',
-          icon: 'inventory_2',
-          tone: 'neutral',
-        },
-      ],
-    },
-  ],
-};

@@ -3,20 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  OnDestroy,
-  OnInit,
-  inject,
   signal,
 } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { PraxisCrudComponent, type CrudMetadata } from '@praxisui/crud';
-import { PraxisRichContent } from '@praxisui/rich-content';
 import {
   PraxisScopeBarComponent,
   type PraxisScopeBarItem,
 } from '@praxisui/table';
-import { MISSOES_CRUD_METADATA, MISSIONS_KPI_DOCUMENT } from './missoes.config';
-import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
+import { MISSOES_CRUD_METADATA } from './missoes.config';
 
 @Component({
   selector: 'app-missoes-page',
@@ -24,7 +18,6 @@ import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
   imports: [
     CommonModule,
     PraxisCrudComponent,
-    PraxisRichContent,
     PraxisScopeBarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,19 +36,9 @@ import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
         </div>
       </header>
 
-      <!-- Metadata-Driven KPI Bento Grid com Interatividade de Filtro -->
-      <section
-        class="kpi-surface"
-        (click)="onKpiSectionClicked($event)"
-        [attr.data-active-filter]="activeFilterId()"
-        title="Clique em um indicador para filtrar as missões abaixo"
-      >
-        <praxis-rich-content [document]="kpiDocument()" />
-      </section>
-
       <!-- Barra Tática de Filtro e Escopo de Missões (Canonical PraxisScopeBar) -->
       <praxis-scope-bar
-        [items]="scopeItems()"
+        [items]="scopeItems"
         [activeId]="activeFilterId()"
         leadLabel="Status da Operação:"
         leadIcon="filter_alt"
@@ -65,28 +48,25 @@ import { DashboardStatsService } from '../dashboard/dashboard-stats.service';
         (clear)="setFilter('all')"
       />
 
-      <!-- Metadata-Driven CRUD Runtime -->
+      <!-- Metadata-Driven CRUD Runtime with native kpiBand integration -->
       <section class="glass-panel crud-surface">
         <praxis-crud
           crudId="heroes-hq-missoes-crud"
           [metadata]="activeCrudMetadata()"
+          (kpiCardClick)="onKpiCardClick($event)"
         />
       </section>
     </div>
   `,
 })
-export class MissoesPageComponent implements OnInit, OnDestroy {
-  protected readonly activeFilterId = signal<'all' | 'ativas' | 'concluidas' | 'planejamento' | 'omega'>('all');
-  protected readonly activeCount = signal<number>(6);
-  protected readonly completedCount = signal<number>(4);
-  protected readonly plannedCount = signal<number>(10);
-  protected readonly omegaCount = signal<number>(10);
+export class MissoesPageComponent {
+  protected readonly activeFilterId = signal<string>('all');
 
-  protected readonly scopeItems = computed<PraxisScopeBarItem[]>(() => [
+  protected readonly scopeItems: PraxisScopeBarItem[] = [
     {
       id: 'all',
       label: 'Todas as Missões',
-      count: this.activeCount() + this.completedCount() + this.plannedCount(),
+      count: 20,
       icon: 'military_tech',
       tone: 'default',
       isDefault: true,
@@ -94,34 +74,36 @@ export class MissoesPageComponent implements OnInit, OnDestroy {
     {
       id: 'ativas',
       label: 'Em Andamento',
-      count: this.activeCount(),
+      count: 6,
       icon: 'flight_takeoff',
       tone: 'info',
+      filter: { status: 'EM_ANDAMENTO' },
     },
     {
       id: 'concluidas',
       label: 'Concluídas com Êxito',
-      count: this.completedCount(),
+      count: 4,
       icon: 'task_alt',
       tone: 'ready',
+      filter: { status: 'CONCLUIDA' },
     },
     {
       id: 'planejamento',
       label: 'Em Planejamento',
-      count: this.plannedCount(),
+      count: 10,
       icon: 'schedule',
       tone: 'warning',
+      filter: { status: 'PLANEJADA' },
     },
     {
       id: 'omega',
       label: 'Prioridade Ômega',
-      count: this.omegaCount(),
+      count: 10,
       icon: 'crisis_alert',
       tone: 'danger',
+      filter: { prioridade: 'CRITICA' },
     },
-  ]);
-
-  protected readonly kpiDocument = signal(MISSIONS_KPI_DOCUMENT);
+  ];
 
   protected readonly activeCrudMetadata = computed<CrudMetadata>(() => {
     const filterId = this.activeFilterId();
@@ -143,97 +125,26 @@ export class MissoesPageComponent implements OnInit, OnDestroy {
     };
   });
 
-  private readonly dashboardStats = inject(DashboardStatsService);
-  private kpiSub: Subscription | null = null;
-
-  ngOnInit(): void {
-    this.loadKpis();
-  }
-
-  ngOnDestroy(): void {
-    this.kpiSub?.unsubscribe();
-  }
-
-  protected setFilter(filterId: 'all' | 'ativas' | 'concluidas' | 'planejamento' | 'omega'): void {
+  protected setFilter(filterId: string): void {
     this.activeFilterId.set(filterId);
   }
 
   protected onScopeChange(item: PraxisScopeBarItem): void {
-    this.setFilter(item.id as 'all' | 'ativas' | 'concluidas' | 'planejamento' | 'omega');
+    this.setFilter(item.id);
   }
 
-  protected onKpiSectionClicked(event: MouseEvent): void {
-    const target = event.target as HTMLElement | null;
-    const cardEl = target?.closest('.prx-rich-stat-group__item, .pdx-rich-stat-group__item, [data-stat-id]');
-    if (!cardEl) return;
-
-    const text = cardEl.textContent?.toLowerCase() ?? '';
-    if (text.includes('ativas') || text.includes('incursões')) {
-      this.setFilter('ativas');
-    } else if (text.includes('êxito') || text.includes('sucesso')) {
-      this.setFilter('concluidas');
-    } else if (text.includes('planejamento') || text.includes('briefing')) {
-      this.setFilter('planejamento');
-    } else if (text.includes('ômega') || text.includes('crítica')) {
-      this.setFilter('omega');
+  protected onKpiCardClick(event: { card: { id?: string; filter?: Record<string, unknown> } }): void {
+    const filter = event.card.filter;
+    if (!filter || Object.keys(filter).length === 0) {
+      this.setFilter('all');
+      return;
     }
-  }
 
-  private loadKpis(): void {
-    this.kpiSub?.unsubscribe();
-    this.kpiSub = this.dashboardStats.getMissionTacticalKpis().subscribe((kpis) => {
-      this.activeCount.set(kpis.activeMissions);
-      this.completedCount.set(kpis.completedMissions);
-      this.plannedCount.set(kpis.plannedMissions);
-      this.omegaCount.set(kpis.criticalPriorityMissions);
-
-      this.kpiDocument.set({
-        kind: 'praxis.rich-content',
-        version: '1.0.0',
-        nodes: [
-          {
-            type: 'statGroup',
-            layout: 'grid',
-            tileLayout: 'tile',
-            headerSpacing: 'normal',
-            className: 'missions-kpi-grid',
-            items: [
-              {
-                id: 'ativas',
-                label: 'Missões Ativas em Campo',
-                value: `${kpis.activeMissions < 10 ? '0' : ''}${kpis.activeMissions} Incursões`,
-                caption: 'Em andamento no radar operacional',
-                icon: 'flight_takeoff',
-                tone: 'info',
-              },
-              {
-                id: 'sucesso',
-                label: 'Taxa de Sucesso Histórica',
-                value: `${kpis.successRate.toFixed(1).replace('.', ',')}%`,
-                caption: `${kpis.completedMissions} missões concluídas com êxito`,
-                icon: 'task_alt',
-                tone: 'success',
-              },
-              {
-                id: 'planejamento',
-                label: 'Em Planejamento / Briefing',
-                value: `${kpis.plannedMissions} Missões`,
-                caption: 'Em preparação e briefing tático',
-                icon: 'schedule',
-                tone: 'warning',
-              },
-              {
-                id: 'omega',
-                label: 'Prioridade Ômega / Crítica',
-                value: `${kpis.criticalPriorityMissions} Alertas`,
-                caption: 'Engajamento de prioridade crítica',
-                icon: 'crisis_alert',
-                tone: 'danger',
-              },
-            ],
-          },
-        ],
-      });
-    });
+    const matched = this.scopeItems.find(
+      (item) => JSON.stringify(item.filter) === JSON.stringify(filter)
+    );
+    if (matched) {
+      this.setFilter(matched.id);
+    }
   }
 }
