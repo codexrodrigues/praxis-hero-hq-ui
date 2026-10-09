@@ -52,7 +52,8 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#38**](#-issue-38-descoberta-integral-de-recurso-e-roteamento-zero-code-no-praxis-crud-praxisresourcepage--auto-resource-host) | Descoberta Integral de Recurso e Roteamento Zero-Code (`PraxisResourcePage` Smart Page) | `@praxisui/crud`<br>`@praxisui/table` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (`912ecf87b`) | 2026-10-09 | Validado (11/11 specs unitários, Auto-Header, Auto-ScopeBar, 100% dos 14 componentes de página eliminados no Hero HQ via commit `0ae972a`) |
 | [**#39**](#-issue-39-auto-hidratação-e-descoberta-de-gavetas-analíticas-drawers-via-resourcepath-e-metadados-openapi-schemasurfaces--behaviordrawer) | Auto-Hidratação e Descoberta de Gavetas Analíticas (Drawers) via `resourcePath` e Metadados OpenAPI (`/schemas/surfaces` / `behavior.drawer`) | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/table`, `@praxisui/crud` (`8c522fbb2`) | 2026-10-09 | Validado (auto-hidratação por DI registry, 10/10 specs drawer, 87/87 specs crud, 100% dos 5 `*-drawer.config.ts` eliminados e build de produção downstream aprovado) |
 | [**#40**](#-issue-40-descarbonização-de-kpis-de-recursos-e-extinção-da-agregação-client-side-via-behaviorkpiband-declarativo-nativamente-integrado-no-praxis-crud) | Descarbonização de KPIs de Recursos e Extinção da Agregação Client-Side via `behavior.kpiBand` Declarativo Nativamente Integrado no `<praxis-crud>` | `@praxisui/crud`<br>`@praxisui/core`<br>`praxis-metadata-starter` | 🔴 Alta | `[x] Resolvida` | `@praxisui/crud` (nativo `kpiBand` + `filterCriteria`), `praxis-hero-hq-ui` | 2026-10-09 | Validado (15 recursos descarbonizados, 14 blocos `*_KPI_DOCUMENT` extintos, `dashboard-stats.service` reduzido em 674 linhas, 2.214+ linhas líquidas eliminadas, tsc e build OK) |
-| [**#41**](#-issue-41-auto-projeção-de-colunas-openapi-columnprojection-source-schema-e-eliminação-de-declarações-manuais-nas-tabelas-crud) | Auto-Projeção de Colunas OpenAPI (`columnProjection: { source: 'schema' }`) e Eliminação de Declarações Manuais nas Tabelas CRUD | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `praxis-hero-hq-ui` (`columnProjection`) | 2026-10-09 | Validado (100% dos 14 recursos migrados para `columnProjection: { source: 'schema' }`, `columns: []`, microVisualizations preservadas, tsc e build OK) |
+| [**#41**](#-issue-41-auto-projeção-de-colunas-openapi-columnprojection-source-schema-e-eliminação-de-declarações-manuais-nas-tabelas-crud) | Auto-Projeção de Colunas OpenAPI (`columnProjection: { source: 'schema' }`) e Eliminação de Declarações Manuais nas Tabelas CRUD | `@praxisui/table`<br>`@praxisui/crud`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `praxis-hero-hq-ui` (`columnProjection`), `@praxisui/table` (`b5aa2adba`) | 2026-10-09 | Validado (100% dos 14 recursos migrados para `columnProjection: { source: 'schema' }`, `columns: []`, fix de ordenação de additions em `praxis-table`, tsc e build OK) |
+| [**#42**](#-issue-42-descarbonizacao-do-dashboard-corporativo-via-binding-declarativo-de-contexto-praxis-dynamic-page-builder-context-e-expressoes-ast) | Descarbonização do Dashboard Corporativo via Binding Declarativo de Contexto (`<praxis-dynamic-page-builder [context]="...">`) | `@praxisui/page-builder`<br>`@praxisui/rich-content`<br>`praxis-hero-hq-ui` | 🟡 Média | `[x] Resolvida` | `praxis-hero-hq-ui` (`DASHBOARD_PAGE_DEFINITION`, `DashboardPageComponent`) | 2026-10-09 | Validado (eliminação de 160+ linhas de clonagem procedural de AST, binding declarativo de contexto, build downstream OK) |
 
 
 
@@ -2600,6 +2601,58 @@ Atualmente, 14 dos 15 recursos da aplicação modelo (`equipamentos`, `veiculos`
 - [x] Renderizadores especiais (`microVisualization`, `avatar`) preservados via `columnProjection.additions`.
 - [x] Compilação TypeScript (`npx tsc --noEmit`) e build de produção (`npm run build`) aprovados com 0 erros.
 - [x] Redução líquida de código estático redundante em todos os 14 arquivos de configuração.
+
+### Auditoria e Refinamentos Canônicos de Integridade (Batch 25)
+Durante a auditoria abrangente de integridade de código e domínio em cenários corporativos, identificamos e corrigimos 3 pontos críticos de desacoplamento:
+1. **Bug Canônico de Ordenação de Adições no `@praxisui/table` (`b5aa2adba`):**
+   - `TableSchemaColumnProjector.projectSchemaColumns` ordenava apenas as colunas do schema e anexava cegamente as `additions` ao final (`[...orderedColumns, ...additions]`).
+   - Isso quebrava o layout de 11 dos 15 recursos corporativos que posicionavam micro-visualizações no meio da tabela (ex.: `order: ['id', 'nome', 'tipo', 'prontidao', 'capacidade']`).
+   - A ordenação combinada foi corrigida para respeitar estritamente a posição declarada em `columnProjection.order` para todos os campos (schema e additions), preservando compatibilidade para adições sem ordem explícita. Teste unitário adicionado e build de `@praxisui/table` validado.
+2. **Alinhamento de Contrato de Domínio em `funcionarios.config.ts`:**
+   - O arquivo solicitava `fotoPerfilUrl` que, no backend canônico `FuncionarioDTO.java`, é anotado com `@UISchema(tableHidden = true, formHidden = true)`, fazendo com que o renderizador de avatar fosse descartado pela tabela.
+   - O contrato foi alinhado ao campo canônico de apresentação `avatarUrl` (`@UISchema(controlType = FieldControlType.AVATAR)`), restaurando os avatares visuais automáticos.
+3. **Sanitização de Filtros ScopeBar em `app.routes.ts`:**
+   - Filtros fictícios e contadores fixos foram alinhados aos dados reais do banco Neon PostgreSQL:
+     - `rh/funcionarios`: `{ status: 'ATIVO' }` -> `{ ativo: true }`, `{ ativo: false }`.
+     - `rh/folha-pagamento`: remoção de status inexistente, adição de filtros por competência (`{ mes: 3, ano: 2026 }`, `{ ano: 2026 }`).
+     - `rh/afastamentos`: `{ tipo: 'FERIAS' }`, `{ tipo: 'TREINAMENTO' }`, `{ tipo: 'MEDICO' }`.
+     - `rh/reputacao`: `media >= 90` e `media >= 80`.
+     - `ativos/veiculos`: `{ status: 'OPERACIONAL' }` e `{ status: 'MANUTENCAO' }`.
+
+---
+
+## 📌 Issue #42: Descarbonização do Dashboard Corporativo via Binding Declarativo de Contexto (`<praxis-dynamic-page-builder [context]="...">`) e Eliminação de Clonagem Procedural de AST
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/page-builder`, `@praxisui/rich-content`, `praxis-hero-hq-ui`
+- **Severidade:** 🟡 Média (Elimina mais de 160 linhas de clonagem procedural de AST, extingue funções artesanais `projectTacticalKpis` / `buildBentoKpiCard` e viabiliza a persistência limpa de layouts de dashboard customizados)
+- **Tipo:** Descarbonização de Código / Reatividade Declarativa / Page Builder Context
+- **Status:** `[x] Resolvida` (Batch 25)
+
+### Diagnóstico Detalhado da Causa Raiz
+No dashboard executivo do Hero HQ (`src/app/pages/dashboard`):
+- O componente `DashboardPageComponent` mantinha 160 linhas de código procedural em `projectTacticalKpis` e `buildBentoKpiCard`.
+- Toda vez que novas métricas chegavam de `DashboardStatsService.getTacticalKpis()`, o componente realizava uma clonagem manual em memória de toda a árvore AST `WidgetPageDefinition`, substituindo nós e injetando strings formatadas diretamente nos nós de `card`.
+- **Efeito Colateral Corporativo:** Ao customizar ou salvar o layout do dashboard via persistência remota (`praxis-config-starter`), os valores numéricos ficavam "congelados" no documento persistido no banco de dados. Quando outro usuário ou uma persona posterior abria a tela, métricas antigas eram exibidas em vez de valores dinâmicos do backend.
+- Além disso, o template não utilizava a propriedade nativa `[context]` de `<praxis-dynamic-page-builder>`, desperdiçando o mecanismo de interpolação recursiva nativa `${kpis...}` suportado por `DynamicWidgetLoaderDirective` e `praxis-rich-content`.
+
+### Solução Canônica Recomendada de Plataforma
+1. Em `dashboard-page.definition.ts`, definir os 4 widgets Bento KPI (`kpiProntidao`, `kpiMissoes`, `kpiFolha`, `kpiRiscos`) com expressões declarativas `${kpis...}`:
+   - Rótulos e textos: `${kpis.activeHeroes} Ativos`, `${kpis.readinessRate}% Força`, `${kpis.inProgressMissionsBadge} Em Curso`, `R$ ${kpis.latestPayrollNetMillion} M`, `${kpis.criticalIncidentsBadge} Críticos`.
+   - Barras de progresso: `inputs.context: { progressValue: '${kpis.readinessRate}' }` e `valueExpr: 'progressValue'`.
+2. Em `dashboard-page.component.ts`:
+   - Conectar o sinal reativo `dashboardKpis = signal<DashboardTacticalKpis | null>(null)` e a propriedade computada `dashboardContext = computed(() => ({ kpis: ... }))`.
+   - Passar `[context]="dashboardContext()"` para `<praxis-dynamic-page-builder>`.
+   - Eliminar 100% de `projectTacticalKpis`, `buildBentoKpiCard`, `BentoKpiCardConfig` e a variável mutable `currentKpis`.
+   - Simplificar os fluxos de carga (`loadEffectiveLayout`), alternância de identidade (`onIdentitySwitch`) e restauração de fábrica (`resetToFactoryLayout`) para manipular o documento puro sem clones artesanais.
+
+### Critérios de Aceite para Resolução
+- [x] O documento `DASHBOARD_PAGE_DEFINITION` utiliza expressões declarativas `${kpis...}` para todos os valores dinâmicos dos cards Bento.
+- [x] `<praxis-dynamic-page-builder>` recebe `[context]="dashboardContext()"`, atualizando a interface dinamicamente via signals do Angular sem clonagem de AST.
+- [x] As funções procedurais `projectTacticalKpis` e `buildBentoKpiCard` são 100% removidas de `dashboard-page.component.ts`.
+- [x] Layouts customizados persistidos no `praxis-config-starter` / localStorage permanecem limpos e desacoplados de dados transitórios.
+- [x] Build de produção (`npm run build`) no showcase `praxis-hero-hq-ui` concluído com 0 erros.
+- [x] Redução líquida de 127 linhas de código (-205 deletions / +78 insertions) no dashboard.
 
 ---
 
