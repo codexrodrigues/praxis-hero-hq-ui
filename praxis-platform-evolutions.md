@@ -56,7 +56,11 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#42**](#-issue-42-descarbonizacao-do-dashboard-corporativo-via-binding-declarativo-de-contexto-praxis-dynamic-page-builder-context-e-expressoes-ast) | Descarbonização do Dashboard Corporativo via Binding Declarativo de Contexto (`<praxis-dynamic-page-builder [context]="...">`) | `@praxisui/page-builder`<br>`@praxisui/rich-content`<br>`praxis-hero-hq-ui` | 🟡 Média | `[x] Resolvida` | `praxis-hero-hq-ui` (`DASHBOARD_PAGE_DEFINITION`, `DashboardPageComponent`) | 2026-10-09 | Validado (eliminação de 160+ linhas de clonagem procedural de AST, binding declarativo de contexto, build downstream OK) |
 | [**#43**](#-issue-43-agrupamento-estrutural-canônico-de-corpo-prx-rich-card-body-e-alinhamento-vertical-de-mídia-em-cards-horizontais-no-praxisuirich-content) | Agrupamento Estrutural Canônico de Corpo (`.prx-rich-card-main`) e Alinhamento Vertical de Mídia em Cards Horizontais | `@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`verticalAlign`), `@praxisui/rich-content` (`.prx-rich-card-main`, 61/61 specs) | 2026-10-09 | Validado (remoção de 40+ linhas de grid manual em `dashboard-theme.scss`, build OK) |
 | [**#44**](#-issue-44-correção-do-seletor-css-de-itemspacing-novo-itemappearance-card-e-apresentação-temporal-estendida-no-praxisuilist) | Correção do Seletor CSS de `itemSpacing`, Novo `itemAppearance: 'card'` e Apresentação Temporal Estendida (`datetime`/`relative`) | `@praxisui/list`<br>`list-config.model`<br>`template-evaluator` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (seletor nested, `itemAppearance`, `formatRelativeTime`, `datetime`, 109/109 specs) | 2026-10-09 | Validado (remoção de overrides manuais em `#hero-distress-signals-list`, build OK) |
-| [**#45**](#-issue-45-tolerância-sintática-em-toneexpr-e-contrato-declarativo-de-thresholds-para-microvisualizações-no-praxiscuitable) | Tolerância Sintática em `toneExpr` e Contrato Declarativo de `thresholds` para Microvisualizações | `@praxisui/table`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`thresholds`), `@praxisui/table` (tolerância sem `=`, `deriveToneFromThresholds`, 13/13 specs) | 2026-10-09 | Validado (substituição de ternários manuais em Contenção Tática por `thresholds` declarativos, build OK) |
+| [**#45**](#-issue-45-tolerância-sintática-em-toneexpr-e-contrato-declarativo-de-thresholds-para-microvisualizações-no-praxiscuitable) | Tolerância Sintática em `toneExpr` e Contrato Declarativo de `thresholds` para Microvisualizações | `@praxisui/table`<br>`@praxisui/core`<br>`@praxisui/charts`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/charts`, `@praxisui/table` (`bc57e80fa`), `praxis-metadata-starter` (`e48d3a3b64`, `97f64b5d33`) | 2026-10-09 | Validado (resolução canônica bidirecional frontend/backend, A11y WCAG 2.1 AA, anotação `@Threshold`, serialização OpenAPI em `/schemas/filtered`, 36/36 specs Java, build downstream OK) |
+| [**#46**](#-issue-46-resolução-dinâmica-de-limiares-semânticos-e-coloração-de-marcadores-em-sparklines-line-area-column-via-resolvepraxismicrovisualizationtone) | Resolução Dinâmica de Limiares Semânticos e Coloração de Marcadores em Sparklines (`line`, `area`, `column`) | `@praxisui/charts`<br>`@praxisui/table`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `@praxisui/charts` | — | Em especificação |
+| [**#47**](#-issue-47-suporte-declarativo-a-mediaaspectratio-e-mediaobjectfit-em-cards-ricos-para-eliminação-de-cls-e-custom-css) | Suporte Declarativo a `media.aspectRatio` e `media.objectFit` em Cards Ricos para Eliminação de CLS | `@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `@praxisui/rich-content` | — | Em especificação |
+| [**#48**](#-issue-48-suporte-canônico-a-virtual-scrolling-angularcdkscrolling-e-ações-declarativas-de-item-com-hateoas-em-feeds-corporativos) | Suporte Canônico a Virtual Scrolling (`@angular/cdk/scrolling`) e Ações Declarativas de Item com HATEOAS em Feeds | `@praxisui/list`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `@praxisui/list` | — | Em especificação |
+| [**#49**](#-issue-49-validação-estática-em-tempo-de-inicialização-spring-boot-e-build-de-expressões-computadas-e-jsonlogic-de-domínio) | Validação Estática em Tempo de Inicialização (Spring Boot) de Expressões Computadas e JsonLogic de Domínio | `praxis-metadata-starter`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `praxis-metadata-starter` | — | Em especificação |
 
 
 
@@ -2781,7 +2785,7 @@ Durante a configuração do widget de **Sinais de Socorro Ativos** (`DISTRESS_SI
 - **Módulos Afetados:** `@praxisui/table` (`praxis-table.ts`, `micro-visualization.model.ts`, `safe-expression-evaluator.ts`), `praxis-metadata-starter`
 - **Severidade:** 🟡 Média (falha silenciosa para azul 'info' quando falta o prefixo '='; dependência frágil de strings ternárias de código JavaScript para cores condicionais em vez de metadados estruturados)
 - **Tipo:** Avaliação de Expressões / Ergonomia de DX / Contrato Metadata-Driven
-- **Status:** `[x] Resolvida` (Frontend Angular entregue; backend Java mapeado para ciclo starter)
+- **Status:** `[x] Resolvida` (Entregue ponta a ponta: Frontend Angular em `@praxisui/core`, `@praxisui/charts`, `@praxisui/table` via commit `bc57e80fa`; Backend Java em `praxis-metadata-starter` via commits `e48d3a3b64` e `97f64b5d33`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a propriedade `toneExpr` de microvisualizações (anéis, barras de progresso, bullets) define a cor semântica do indicador (`success`, `warning`, `danger`, `info`, `neutral`).
@@ -2834,9 +2838,190 @@ No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a
 - [x] `evaluateMicroVisualizationExpression` detecta expressões com operadores condicionais mesmo sem o prefixo `=` e emite aviso explicativo em DevMode.
 - [x] O modelo `MicroVisualizationPresentation` suporta a propriedade declarativa `thresholds: MicroVisualizationThreshold[]`.
 - [x] Microvisualizações radiais, barras e bullets adaptam suas cores automaticamente com base na lista de `thresholds`.
-- [ ] Backend `praxis-metadata-starter` suporta configuração declarativa de faixas semânticas via anotação `@MicroVisualization` (ciclo de backend Java).
+- [x] Backend `praxis-metadata-starter` suporta configuração declarativa de faixas semânticas via anotações `@MicroVisualization` e `@Threshold` com serialização no OpenAPI `/schemas/filtered` (ciclo Java concluído - commits `e48d3a3b64` e `97f64b5d33`).
 - [x] Testes unitários em `praxis-table.spec.ts` validando resolução com e sem `=`, e via objeto `thresholds`.
 - [x] Validação downstream no Hero HQ com substituição da fórmula ternária por `thresholds` declarativos.
+
+---
+
+## 📌 Issue #46: Resolução Dinâmica de Limiares Semânticos e Coloração de Marcadores em Sparklines (`line`, `area`, `column`) via `resolvePraxisMicroVisualizationTone`
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/charts` (`praxis-micro-visualization.component.ts`, `sparkline.model.ts`), `@praxisui/table`, `@praxisui/core`
+- **Severidade:** 🟡 Média (sparklines operam monocromaticamente e ignoram thresholds declarativos; impossibilidade de alertar visualmente tendências críticas ou reversões de KPIs)
+- **Tipo:** Visualização de Dados / Resolução Dinâmica de Metadados / UX Semântica
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+No componente `PraxisMicroVisualizationComponent` (`@praxisui/charts`), a renderização de sparklines nos formatos `line`, `area` e `column` utiliza um canal de cor estático fixado pelo atributo `tone` da configuração ou cai no tom primário da paleta de design system.
+1. **Ignorância da Lista de `thresholds` em Séries Temporais:**
+   - Enquanto microvisualizações pontuais (`radial`, `delta`, `bullet`, `stackedBar`) agora consomem `resolvePraxisMicroVisualizationTone` de `@praxisui/core`, o renderizador de sparkline não avalia os `thresholds` contra os dados da série (por exemplo, o valor atual mais recente `series[series.length - 1]` ou a média agregada da série).
+   - Como consequência, uma tendência de aquecimento de CPU ou escalada de sinistros que atinge 95% permanece renderizada em azul ou cinza neutro, a menos que o consumidor crie uma lógica procedural externa de reconfiguração de `tone`.
+2. **Ausência de Destaque Semântico do Marcador Final (`endMarker`):**
+   - Em gráficos de linha e área, executivos e operadores concentram a atenção no último ponto registrado. Hoje não há suporte declarativo para colorir o marcador final (`lastPointMarker`) com o tom correspondente ao threshold daquele instante específico, mantendo o restante da linha com tom neutro ou gradiente suave.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Tabelas Analíticas Densas com Séries Históricas:** Em tabelas financeiras e operacionais (ex.: histórico de gastos por centro de custo nos últimos 6 meses), o sparkline deve refletir instantaneamente se o último fechamento violou o orçamento, sem exigir que o desenvolvedor passe colunas adicionais de cor.
+2. **Painéis de Monitoramento e Dossiês:** Em cards Bento de dashboards e gavetas analíticas, sparklines representam telemetria e sinais vitais. A ausência de coloração dinâmica por faixa reduz a velocidade de triagem operacional e dificulta a priorização de incidentes.
+3. **Consistência de Contrato:** O contrato OpenAPI já publica `thresholds` para o campo; o desenvolvedor espera que qualquer tipo de microvisualização (`radial` ou `sparkline`) respeite essas mesmas regras declarativas.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Integração com `resolvePraxisMicroVisualizationTone` no Renderizador Sparkline:**
+   - Em `PraxisMicroVisualizationComponent`, ao renderizar `kind: 'line'`, `'area'` ou `'column'`, se `thresholds` estiver presente e `value` for um array numérico:
+     - Extrair o valor de referência (por padrão, o último valor da série `series[series.length - 1]`, ou valor especificado por `evaluationStrategy: 'last' | 'average' | 'max'`).
+     - Invocar `resolvePraxisMicroVisualizationTone(thresholds, targetValue)` para derivar o tom semântico dinâmico.
+2. **Propriedade Declarativa `highlightLastPoint` e Estilização de Marcadores:**
+   - Adicionar ao modelo de sparkline a opção `highlightLastPoint?: boolean`.
+   - Quando ativada, o traço principal pode adotar tom neutro/suave enquanto o ponto terminal recebe preenchimento pulsante e anel com a cor do threshold atingido (`success`, `warning`, `danger`), enriquecendo também o `aria-label` com a descrição da faixa.
+
+### Mitigação Temporária Aplicada no Hero HQ
+- Sparklines na tabela de missões e incidentes usam `tone: 'info'` estático ou cores fixadas manualmente em temas SCSS.
+
+### Critérios de Aceite para Resolução
+- [ ] Sparklines dos tipos `line`, `area` e `column` em `@praxisui/charts` derivam sua tonalidade semântica a partir de `thresholds` avaliando o último ponto da série.
+- [ ] Suporte a `highlightLastPoint` para destacar visualmente o estado final do indicador temporal.
+- [ ] Fallback resiliente para o tom estático `tone` quando nenhum threshold for atingido ou em séries vazias.
+- [ ] Testes unitários completos em `praxis-micro-visualization.component.spec.ts`.
+
+---
+
+## 📌 Issue #47: Suporte Declarativo a `media.aspectRatio` e `media.objectFit` em Cards Ricos para Eliminação de CLS e Custom CSS
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/rich-content` (`praxis-rich-card.component.ts`, `praxis-rich-card.component.scss`), `@praxisui/core` (`rich-content-config.model.ts`)
+- **Severidade:** 🟡 Média (mudança cumulativa de layout / Cumulative Layout Shift - CLS durante o carregamento de imagens de cards; distorção de proporção em capas variadas; necessidade de regras globais de CSS manuais)
+- **Tipo:** Layout / Performance Web (Core Web Vitals) / DX
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+No componente `PraxisRichCardComponent` (`@praxisui/rich-content`), o bloco de mídia (`media`) suporta `url`, `type: 'image'`, `position: 'top' | 'left' | 'right' | 'background'` e `width`.
+1. **Omissão de Proporção de Tela (`aspect-ratio`) Declarativa:**
+   - Não existe propriedade para definir a proporção da imagem (ex.: `16:9`, `4:3`, `1:1`, `21:9`).
+   - Antes do carregamento assíncrono do arquivo de imagem pelo navegador, o container do card colapsa verticalmente para 0px ou assume a altura do placeholder. Quando a imagem final é baixada, o container se expande abruptamente empurrando o conteúdo abaixo, causando um alto índice de CLS (Cumulative Layout Shift) que penaliza a métrica Core Web Vitals do Google.
+2. **Distorção de Imagens e Falta de `object-fit` Nativo:**
+   - Imagens enviadas por usuários ou APIs com dimensões heterogêneas sofrem achatamento ou estiramento indesejado, pois o CSS interno não expõe controle padronizado sobre `object-fit: cover | contain | fill`.
+   - Para mitigar isso, projetos como o **Praxis Hero HQ** são obrigados a injetar estilos manuais (`dashboard-theme.scss`, `::ng-deep img { object-fit: cover; aspect-ratio: 16/9; }`), violando a diretriz de plataforma contra remendos locais de CSS.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Dossiês Analíticos e Fichas de Pessoal:** Fotos de perfil ou de ativos em gavetas analíticas devem respeitar proporção `1:1` (quadrada) ou `3:4` com `object-fit: cover` sem cortar partes essenciais nem deformar o rosto do colaborador.
+2. **Banners em Modo Paisagem (`position: 'top'`):** Hero banners no topo de dashboards precisam fixar proporções como `16:9` ou `21:9` para garantir que o layout permaneça perfeitamente estável mesmo em redes lentas ou conexões 3G/4G móveis.
+3. **Cards Bento em Grids Responsivos:** Em layouts Bento (`cardGrid`), cards adjacentes quebram o alinhamento visual da linha se a imagem de um deles expandir mais que a do vizinho.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Extensão do Modelo `PraxisRichCardMediaConfig` em `@praxisui/core`:**
+   - Adicionar campos declarativos opcionais:
+     ```typescript
+     export interface PraxisRichCardMediaConfig {
+       url?: string;
+       type?: 'image' | 'video' | 'icon';
+       position?: 'top' | 'left' | 'right' | 'background';
+       width?: string;
+       aspectRatio?: '16:9' | '4:3' | '1:1' | '21:9' | 'auto' | string;
+       objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+       alt?: string;
+     }
+     ```
+2. **Implementação no Template e SCSS em `@praxisui/rich-content`:**
+   - Aplicar `aspect-ratio: var(--p-card-media-aspect-ratio, 16 / 9)` e `object-fit: var(--p-card-media-object-fit, cover)` nativamente no container e na tag `<img>`.
+   - Adicionar classes CSS utilitárias para proporções padrão e binding de estilo direto `[style.aspectRatio]="media.aspectRatio"`.
+
+### Mitigação Temporária Aplicada no Hero HQ
+- Em `dashboard-theme.scss`, foram criadas classes com `!important` para fixar `aspect-ratio: 16/9` e `object-fit: cover` nos cards de notícias e banners táticos.
+
+### Critérios de Aceite para Resolução
+- [ ] `PraxisRichCardMediaConfig` expõe `aspectRatio` e `objectFit` declarativamente.
+- [ ] O componente `PraxisRichCardComponent` renderiza imagens aplicando as propriedades sem saltos de layout (CLS = 0).
+- [ ] Remoção das regras manuais de CSS de mídia em `dashboard-theme.scss` do Hero HQ.
+- [ ] Testes unitários cobrindo variações de proporção em `praxis-rich-card.component.spec.ts`.
+
+---
+
+## 📌 Issue #48: Suporte Canônico a Virtual Scrolling (`@angular/cdk/scrolling`) e Ações Declarativas de Item com HATEOAS em Feeds Corporativos
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/list` (`praxis-list.component.ts`, `praxis-list.component.html`, `list-config.model.ts`), `@praxisui/core`
+- **Severidade:** 🟡 Média (degradação de performance e consumo excessivo de memória DOM em feeds com mais de 500 itens; ausência de orquestração declarativa de ações contextuais por item)
+- **Tipo:** Escalabilidade de Performance / Virtualização / Orquestração HATEOAS
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+O componente `<praxis-list>` (`@praxisui/list`) renderiza itens corporativos iterando a coleção via `*ngFor` ou `@for`.
+1. **Explosão de Nós no DOM em Feeds Contínuos:**
+   - Em cenários corporativos reais (feeds de auditoria, eventos de satélite, alertas em tempo real, logs de segurança), o volume de registros facilmente atinge milhares de entradas.
+   - A renderização síncrona de 1.000 nós completos de `mat-list-item` (cada um contendo ícones, badges, textos interpolados e microvisualizações) aloca dezenas de megabytes de memória no navegador, causa travamentos de rolagem e queda na taxa de quadros (FPS < 20).
+2. **Falta de Ações Declarativas de Item Integradas a HATEOAS:**
+   - Atualmente, para acionar comandos a partir de um item de lista (ex.: *"Despachar Equipe"*, *"Ignorar Alerta"*, *"Visualizar Dossiê"*), os desenvolvedores são forçados a criar templates customizados no host ou interceptar cliques manuais, perdendo toda a infraestrutura canônica de `PraxisActionService`, segurança baseada em papéis e links HATEOAS (`_links`) já disponível no `<praxis-crud>` e na tabela.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Feeds de Sinais de Socorro e Notificações no Hero HQ:** O componente `#hero-distress-signals-list` consome eventos táticos. À medida que novos incidentes chegam, a lista cresce linearmente sem paginação virtual.
+2. **Listas Selecionáveis com Ações em Massa ou Rápidas:** Usuários corporativos exigem menus de contexto (`kebab menu` ou botões de ação rápida à direita do item) padronizados visualmente e governados pelo catálogo de permissões do sistema.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Virtual Scrolling Opcional e Transparente com Angular CDK:**
+   - No modelo `PraxisListLayoutConfig`, adicionar:
+     ```typescript
+     export interface PraxisListVirtualScrollConfig {
+       enabled: boolean;
+       itemSize?: number; // padrão 64px
+       minBufferPx?: number;
+       maxBufferPx?: number;
+     }
+     ```
+   - No template do `<praxis-list>`, quando `virtualScroll.enabled === true`, encapsular a renderização com `<cdk-virtual-scroll-viewport [itemSize]="itemSize">`, mantendo idêntica a experiência visual do consumidor.
+2. **Ações Declarativas de Item (`itemActions`):**
+   - Suporte a `itemActions?: PraxisActionDefinition[]` na configuração da lista.
+   - Renderização nativa de gatilhos de ação na extremidade direita (`mat-icon-button` ou menu dropdown) que despacham comandos canônicos via `PraxisActionService`, resolvendo automaticamente parâmetros da linha e respeitando visibilidade condicional baseada no schema OpenAPI.
+
+### Mitigação Temporária Aplicada no Hero HQ
+- Limitação manual de registros exibidos no feed (`slice: 0:20`) e handlers de clique manuais no componente do host.
+
+### Critérios de Aceite para Resolução
+- [ ] `<praxis-list>` renderiza 2.000+ itens fluidamente a 60 FPS quando `virtualScroll.enabled = true`.
+- [ ] Suporte declarativo a `itemActions` orquestradas pelo `PraxisActionService`.
+- [ ] Transparência total de API: listas existentes continuam funcionando sem alterações.
+- [ ] Testes unitários cobrindo modos virtualizado e padrão em `praxis-list.component.spec.ts`.
+
+---
+
+## 📌 Issue #49: Validação Estática em Tempo de Inicialização (Spring Boot) e Build de Expressões Computadas e JsonLogic de Domínio
+
+### Classificação
+- **Módulos Afetados:** `praxis-metadata-starter` (`expression-validator`, `CustomOpenApiResolver.java`), `@praxisui/core`
+- **Severidade:** 🟡 Média (erros de sintaxe ou referências a campos inexistentes em `toneExpr`, `computedFields` e `predicate` só são detectados em tempo de execução no frontend Angular; falha silenciosa em produção)
+- **Tipo:** Governança de Backend / Integridade de Contratos / DX & Confiabilidade
+- **Status:** `[ ] Aberta`
+
+### Diagnóstico Detalhado da Causa Raiz
+Com as recentes evoluções de plataforma (Issue #34 com `computedFields` e Issue #45 com `toneExpr` e `thresholds`), anotações Java passam a aceitar expressões lógicas e aritméticas complexas diretamente nos DTOs:
+`@MicroVisualization(toneExpr = "= (taxaAtingimento >= 80) ? 'success' : 'danger'")`
+1. **Falta de Validação em Tempo de Compilação/Inicialização no Backend:**
+   - O Java trata o valor da expressão como uma string opaca (`String toneExpr()`).
+   - Se um engenheiro cometer um erro tipográfico (ex.: referenciar `taxaAtingimento` quando a propriedade no DTO se chama `taxaDeAtingimento`, esquecer parênteses de fechamento ou usar operador inválido), o backend compila sem erros, inicializa o Spring Boot normalmente e publica o metadado quebrado no endpoint `/schemas/filtered`.
+2. **Diagnóstico Tardio e Difícil no Frontend:**
+   - O erro só se manifesta quando o usuário final acessa a tela no navegador. O avaliador seguro de expressões do Angular (`safe-expression-evaluator.ts`) falha ao resolver o campo desconhecido, emitindo avisos no console e deixando o componente em tom neutro ou em branco sem indicar claramente ao desenvolvedor onde está a raiz do problema.
+
+### Cenários Correlatos & Investigação Abrangente de Plataforma
+1. **Refatoração de DTOs:** Quando um campo de DTO é renomeado no Java durante a evolução do sistema, refatorações automáticas da IDE (Eclipse/IntelliJ) não alteram strings literais dentro de anotações `@MicroVisualization` ou `@ComputedField`, quebrando silenciosamente as expressões já em produção.
+2. **Pipelines de CI/CD e Build Corporativo:** Em empresas de grande porte, testes automatizados e builds de CI devem barrar contratos inválidos antes do deploy em ambientes de homologação ou produção.
+
+### Solução Canônica Recomendada de Plataforma
+1. **Validador Estático no Startup do Spring Boot (`PraxisExpressionStaticValidator`):**
+   - No `praxis-metadata-starter`, registrar um componente ou `OpenApiCustomizer` que, durante a inicialização do contexto Spring:
+     - Varre todas as classes anotadas com `@Schema` ou registradas no OpenAPI.
+     - Analisa o AST léxico de todas as strings em `toneExpr`, `computedFields.expression` e predicados condicionais.
+     - Valida se todos os identificadores presentes na expressão correspondem a propriedades reais existentes no DTO ou em seus getters.
+2. **Comportamento Governança por Perfil (Profile-Aware):**
+   - Em perfis de teste e desenvolvimento (`dev`, `test`, `ci`): lançar exceção explícita (`InvalidDomainExpressionException`) abortando o startup com mensagem detalhada contendo a classe, o campo e o erro exato na expressão.
+   - Em perfil de produção (`prod`): registrar log de nível `ERROR` estruturado sem derrubar a aplicação, garantindo resiliência operacional.
+
+### Mitigação Temporária Aplicada no Hero HQ
+- Revisão manual minuciosa de cada string de expressão no código de definição de páginas e contratos de DTO.
+
+### Critérios de Aceite para Resolução
+- [ ] Validador no `praxis-metadata-starter` analisa expressões sintaticamente no startup do Spring Boot.
+- [ ] Identificação automática de propriedades inexistentes referenciadas nas expressões em relação à classe do DTO.
+- [ ] Falha em testes de integração com mensagem legível e acionável para o desenvolvedor.
+- [ ] Zero overhead em tempo de execução para requisições HTTP normais de usuários.
 
 ---
 
