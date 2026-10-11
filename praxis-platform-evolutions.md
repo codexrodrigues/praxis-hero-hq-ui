@@ -3048,7 +3048,13 @@ A varredura quantitativa executada na aplicação modelo **Praxis Hero HQ** (`sr
 | DTOs e Interfaces Estáticas (vários) | **~800** | Tipos manuais redundantes | Falta de tipos genéricos dinâmicos orientados a schema | **#35** |
 
 ### 🎯 Meta de Descarbonização de Código
-Com a resolução das Issues **#12, #30, #32, #33, #34, #35, #36, #37, #38, #39 e #40**, a base de código do **Praxis Hero HQ** será reduzida de **~20.000 linhas** para aproximadamente **3.500 linhas** de arquivos de rota e metadados JSON puros — atingindo a diretriz de **menos de 20% a 30% de código residual**, tornando o showcase um verdadeiro testemunho da inteligência e governança nativa da Plataforma Praxis.
+Com a resolução das Issues **#12, #30, #32, #33, #34, #35, #36, #37, #38, #39, #40 e #49**, a base de código do **Praxis Hero HQ** foi reduzida de **~20.000 linhas** para **4.531 linhas** (uma redução real medida de **77,3%** de código de aplicação), aproximando-se da meta máxima de **~3.500 linhas** de arquivos de rota e metadados JSON puros — tornando o showcase um verdadeiro testemunho da inteligência, reutilização e governança nativa da Plataforma Praxis.
+
+| Marco de Evolução | Linhas no `src/app` | Redução Acumulada | Descrição do Marco |
+| :--- | :---: | :---: | :--- |
+| **Linha de Base Inicial** | ~20.000 | 0% | 14 páginas artesanais, 5 drawers customizados, agregações RxJS manuais. |
+| **Batch 27 (Auto-CRUD & Gavetas)** | 5.711 | -71,4% | Substituição de 5 drawers por schemas analíticos e 14 páginas por `SmartResourcePage`. |
+| **Batch 28 (Dashboard & Agregação)** | **4.531** | **-77,3%** | Desacoplamento da definição do dashboard para schema JSON e consolidação de stats canônicos. |
 
 ---
 
