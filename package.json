@@ -8,7 +8,8 @@
     "start": "ng serve --host 127.0.0.1 --port 4302",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:e2e": "node e2e/run-e2e.cjs"
   },
   "dependencies": {
     "@angular/animations": "21.2.14",
