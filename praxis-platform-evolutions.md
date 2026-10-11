@@ -2993,7 +2993,7 @@ O componente `<praxis-list>` (`@praxisui/list`) renderiza itens corporativos ite
 - **Módulos Afetados:** `praxis-metadata-starter` (`expression-validator`, `CustomOpenApiResolver.java`), `@praxisui/core`
 - **Severidade:** 🟡 Média (erros de sintaxe ou referências a campos inexistentes em `toneExpr`, `computedFields` e `predicate` só são detectados em tempo de execução no frontend Angular; falha silenciosa em produção)
 - **Tipo:** Governança de Backend / Integridade de Contratos / DX & Confiabilidade
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Batch 28 — 2026-10-11)
 
 ### Diagnóstico Detalhado da Causa Raiz
 Com as recentes evoluções de plataforma (Issue #34 com `computedFields` e Issue #45 com `toneExpr` e `thresholds`), anotações Java passam a aceitar expressões lógicas e aritméticas complexas diretamente nos DTOs:
@@ -3008,24 +3008,23 @@ Com as recentes evoluções de plataforma (Issue #34 com `computedFields` e Issu
 1. **Refatoração de DTOs:** Quando um campo de DTO é renomeado no Java durante a evolução do sistema, refatorações automáticas da IDE (Eclipse/IntelliJ) não alteram strings literais dentro de anotações `@MicroVisualization` ou `@ComputedField`, quebrando silenciosamente as expressões já em produção.
 2. **Pipelines de CI/CD e Build Corporativo:** Em empresas de grande porte, testes automatizados e builds de CI devem barrar contratos inválidos antes do deploy em ambientes de homologação ou produção.
 
-### Solução Canônica Recomendada de Plataforma
-1. **Validador Estático no Startup do Spring Boot (`PraxisExpressionStaticValidator`):**
-   - No `praxis-metadata-starter`, registrar um componente ou `OpenApiCustomizer` que, durante a inicialização do contexto Spring:
-     - Varre todas as classes anotadas com `@Schema` ou registradas no OpenAPI.
-     - Analisa o AST léxico de todas as strings em `toneExpr`, `computedFields.expression` e predicados condicionais.
-     - Valida se todos os identificadores presentes na expressão correspondem a propriedades reais existentes no DTO ou em seus getters.
-2. **Comportamento Governança por Perfil (Profile-Aware):**
-   - Em perfis de teste e desenvolvimento (`dev`, `test`, `ci`): lançar exceção explícita (`InvalidDomainExpressionException`) abortando o startup com mensagem detalhada contendo a classe, o campo e o erro exato na expressão.
-   - Em perfil de produção (`prod`): registrar log de nível `ERROR` estruturado sem derrubar a aplicação, garantindo resiliência operacional.
+### Solução Canônica Implementada na Plataforma
+1. **No `praxis-metadata-starter` (`commit be0f2c93dc`):**
+   - Criado o validador estático canônico `PraxisExpressionStaticValidator` com parsing léxico de fórmulas (suporte a `=` ou sem `=`, interpolações `${row.prop}`, prefixos `row.`/`item.` e expressões JsonLogic canônicas `PraxisJsonLogicConditionValidator`).
+   - Implementado o customizer global SpringDoc `PraxisExpressionValidationOpenApiCustomizer` ativado automaticamente via `OpenApiUiSchemaAutoConfiguration`.
+   - Governança de perfil de execução corporativo (`ExpressionValidationProperties` com `praxis.metadata.expression-validation.enabled=true` e `strict=false` por padrão):
+     - Em perfis `dev`, `test`, `ci` ou com `strict=true`: lança `InvalidDomainExpressionException` abortando a inicialização imediatamente com diagnóstico claro do Schema, campo, propriedade ausente e lista de propriedades válidas disponíveis.
+     - Em perfil de produção (`prod`): emite logs estruturados de nível `ERROR` com diagnóstico completo sem derrubar o container, garantindo tolerância a falhas em runtime.
+   - Suite de testes unitários dedicada `PraxisExpressionStaticValidatorTest` (9/9 testes aprovados) e integração com o ciclo OpenAPI validada.
 
 ### Mitigação Temporária Aplicada no Hero HQ
-- Revisão manual minuciosa de cada string de expressão no código de definição de páginas e contratos de DTO.
+- Resolvida de forma definitiva e canônica na camada de infraestrutura de metadados do backend.
 
 ### Critérios de Aceite para Resolução
-- [ ] Validador no `praxis-metadata-starter` analisa expressões sintaticamente no startup do Spring Boot.
-- [ ] Identificação automática de propriedades inexistentes referenciadas nas expressões em relação à classe do DTO.
-- [ ] Falha em testes de integração com mensagem legível e acionável para o desenvolvedor.
-- [ ] Zero overhead em tempo de execução para requisições HTTP normais de usuários.
+- [x] Validador no `praxis-metadata-starter` analisa expressões sintaticamente no startup do Spring Boot.
+- [x] Identificação automática de propriedades inexistentes referenciadas nas expressões em relação à classe do DTO.
+- [x] Falha em testes de integração com mensagem legível e acionável para o desenvolvedor (`InvalidDomainExpressionException` em perfis `dev`, `test`, `ci` ou `strict=true`).
+- [x] Zero overhead em tempo de execução para requisições HTTP normais de usuários (executa exclusivamente durante a construção/customização do OpenAPI pelo SpringDoc no bootstrap).
 
 ---
 
