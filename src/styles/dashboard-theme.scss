@@ -528,15 +528,3 @@
   }
 }
 
-/* 11. Distress Signals List Spacing & Item Cards */
-#hero-distress-signals-list {
-  .list-row-shell {
-    padding: 6px 12px !important;
-  }
-
-  .meta {
-    font-family: var(--font-mono, monospace) !important;
-    font-size: 0.8rem !important;
-    color: var(--muted-foreground) !important;
-  }
-}

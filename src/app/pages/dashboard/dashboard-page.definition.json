@@ -961,8 +961,30 @@
                 "density": "compact",
                 "pageSize": 6,
                 "lines": 2,
-                "dividers": "none"
+                "dividers": "none",
+                "virtualScroll": {
+                  "enabled": true,
+                  "itemSize": 64,
+                  "viewportHeight": "380px"
+                }
               },
+              "itemActions": [
+                {
+                  "id": "atender-chamado",
+                  "label": "Atender Chamado",
+                  "icon": "support_agent",
+                  "kind": "menu-item",
+                  "placement": "menu",
+                  "hateoasRel": "atender"
+                },
+                {
+                  "id": "ver-detalhes",
+                  "label": "Ver Detalhes",
+                  "icon": "visibility",
+                  "kind": "menu-item",
+                  "placement": "menu"
+                }
+              ],
               "skin": {
                 "type": "glass",
                 "radius": "12px"
@@ -1582,8 +1604,30 @@
       "density": "compact",
       "pageSize": 6,
       "lines": 2,
-      "dividers": "none"
+      "dividers": "none",
+      "virtualScroll": {
+        "enabled": true,
+        "itemSize": 64,
+        "viewportHeight": "380px"
+      }
     },
+    "itemActions": [
+      {
+        "id": "atender-chamado",
+        "label": "Atender Chamado",
+        "icon": "support_agent",
+        "kind": "menu-item",
+        "placement": "menu",
+        "hateoasRel": "atender"
+      },
+      {
+        "id": "ver-detalhes",
+        "label": "Ver Detalhes",
+        "icon": "visibility",
+        "kind": "menu-item",
+        "placement": "menu"
+      }
+    ],
     "skin": {
       "type": "glass",
       "radius": "12px"
