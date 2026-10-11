@@ -57,7 +57,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#43**](#-issue-43-agrupamento-estrutural-canônico-de-corpo-prx-rich-card-body-e-alinhamento-vertical-de-mídia-em-cards-horizontais-no-praxisuirich-content) | Agrupamento Estrutural Canônico de Corpo (`.prx-rich-card-main`) e Alinhamento Vertical de Mídia em Cards Horizontais | `@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core` (`verticalAlign`), `@praxisui/rich-content` (`.prx-rich-card-main`, 61/61 specs) | 2026-10-09 | Validado (remoção de 40+ linhas de grid manual em `dashboard-theme.scss`, build OK) |
 | [**#44**](#-issue-44-correção-do-seletor-css-de-itemspacing-novo-itemappearance-card-e-apresentação-temporal-estendida-no-praxisuilist) | Correção do Seletor CSS de `itemSpacing`, Novo `itemAppearance: 'card'` e Apresentação Temporal Estendida (`datetime`/`relative`) | `@praxisui/list`<br>`list-config.model`<br>`template-evaluator` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (seletor nested, `itemAppearance`, `formatRelativeTime`, `datetime`, 109/109 specs) | 2026-10-09 | Validado (remoção de overrides manuais em `#hero-distress-signals-list`, build OK) |
 | [**#45**](#-issue-45-tolerância-sintática-em-toneexpr-e-contrato-declarativo-de-thresholds-para-microvisualizações-no-praxiscuitable) | Tolerância Sintática em `toneExpr` e Contrato Declarativo de `thresholds` para Microvisualizações | `@praxisui/table`<br>`@praxisui/core`<br>`@praxisui/charts`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/charts`, `@praxisui/table` (`bc57e80fa`), `praxis-metadata-starter` (`e48d3a3b64`, `97f64b5d33`) | 2026-10-09 | Validado (resolução canônica bidirecional frontend/backend, A11y WCAG 2.1 AA, anotação `@Threshold`, serialização OpenAPI em `/schemas/filtered`, 36/36 specs Java, build downstream OK) |
-| [**#46**](#-issue-46-resolução-dinâmica-de-limiares-semânticos-e-coloração-de-marcadores-em-sparklines-line-area-column-via-resolvepraxismicrovisualizationtone) | Resolução Dinâmica de Limiares Semânticos e Coloração de Marcadores em Sparklines (`line`, `area`, `column`) | `@praxisui/charts`<br>`@praxisui/table`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `@praxisui/charts` | — | Em especificação |
+| [**#46**](#-issue-46-resolução-dinâmica-de-limiares-semânticos-e-coloração-de-marcadores-em-sparklines-line-area-column-via-resolvepraxismicrovisualizationtone) | Resolução Dinâmica de Limiares Semânticos e Coloração de Marcadores em Sparklines (`line`, `area`, `column`) | `@praxisui/charts`<br>`@praxisui/table`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/charts` (`32256a473`) | 2026-10-11 | Validado (resolução dinâmica de tom e aria-label via `resolvePraxisMicroVisualizationTone`, coloração de marcadores e barras de coluna por limiar, 2.037/2.037 specs core e 410/410 specs charts verdes) |
 | [**#47**](#-issue-47-suporte-declarativo-a-mediaaspectratio-e-mediaobjectfit-em-cards-ricos-para-eliminação-de-cls-e-custom-css) | Suporte Declarativo a `media.aspectRatio` e `media.objectFit` em Cards Ricos para Eliminação de CLS | `@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `@praxisui/rich-content` | — | Em especificação |
 | [**#48**](#-issue-48-suporte-canônico-a-virtual-scrolling-angularcdkscrolling-e-ações-declarativas-de-item-com-hateoas-em-feeds-corporativos) | Suporte Canônico a Virtual Scrolling (`@angular/cdk/scrolling`) e Ações Declarativas de Item com HATEOAS em Feeds | `@praxisui/list`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `@praxisui/list` | — | Em especificação |
 | [**#49**](#-issue-49-validação-estática-em-tempo-de-inicialização-spring-boot-e-build-de-expressões-computadas-e-jsonlogic-de-domínio) | Validação Estática em Tempo de Inicialização (Spring Boot) de Expressões Computadas e JsonLogic de Domínio | `praxis-metadata-starter`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `praxis-metadata-starter` | — | Em especificação |
@@ -2850,7 +2850,7 @@ No componente `PraxisTable` (`projects/praxis-table/src/lib/praxis-table.ts`), a
 - **Módulos Afetados:** `@praxisui/charts` (`praxis-micro-visualization.component.ts`, `sparkline.model.ts`), `@praxisui/table`, `@praxisui/core`
 - **Severidade:** 🟡 Média (sparklines operam monocromaticamente e ignoram thresholds declarativos; impossibilidade de alertar visualmente tendências críticas ou reversões de KPIs)
 - **Tipo:** Visualização de Dados / Resolução Dinâmica de Metadados / UX Semântica
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (commit `32256a473`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 No componente `PraxisMicroVisualizationComponent` (`@praxisui/charts`), a renderização de sparklines nos formatos `line`, `area` e `column` utiliza um canal de cor estático fixado pelo atributo `tone` da configuração ou cai no tom primário da paleta de design system.
@@ -2878,10 +2878,10 @@ No componente `PraxisMicroVisualizationComponent` (`@praxisui/charts`), a render
 - Sparklines na tabela de missões e incidentes usam `tone: 'info'` estático ou cores fixadas manualmente em temas SCSS.
 
 ### Critérios de Aceite para Resolução
-- [ ] Sparklines dos tipos `line`, `area` e `column` em `@praxisui/charts` derivam sua tonalidade semântica a partir de `thresholds` avaliando o último ponto da série.
-- [ ] Suporte a `highlightLastPoint` para destacar visualmente o estado final do indicador temporal.
-- [ ] Fallback resiliente para o tom estático `tone` quando nenhum threshold for atingido ou em séries vazias.
-- [ ] Testes unitários completos em `praxis-micro-visualization.component.spec.ts`.
+- [x] Sparklines dos tipos `line`, `area` e `column` em `@praxisui/charts` e `@praxisui/core` derivam sua tonalidade semântica e `aria-label` a partir de `thresholds` avaliando o último ponto da série.
+- [x] Coloração dinâmica de marcadores de início, fim, mínimo e máximo e barras individuais de coluna via `thresholds` e tokens CSS com regras SVG `fill` explícitas.
+- [x] Fallback resiliente para o tom estático `tone` quando nenhum threshold for atingido ou em séries vazias.
+- [x] Testes unitários completos em `praxis-micro-visualization.component.spec.ts` (410/410) e `presentation-visualization.model.spec.ts` (2.037/2.037).
 
 ---
 
