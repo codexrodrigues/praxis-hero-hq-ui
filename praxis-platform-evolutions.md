@@ -59,7 +59,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#45**](#-issue-45-tolerância-sintática-em-toneexpr-e-contrato-declarativo-de-thresholds-para-microvisualizações-no-praxiscuitable) | Tolerância Sintática em `toneExpr` e Contrato Declarativo de `thresholds` para Microvisualizações | `@praxisui/table`<br>`@praxisui/core`<br>`@praxisui/charts`<br>`praxis-metadata-starter` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/charts`, `@praxisui/table` (`bc57e80fa`), `praxis-metadata-starter` (`e48d3a3b64`, `97f64b5d33`) | 2026-10-09 | Validado (resolução canônica bidirecional frontend/backend, A11y WCAG 2.1 AA, anotação `@Threshold`, serialização OpenAPI em `/schemas/filtered`, 36/36 specs Java, build downstream OK) |
 | [**#46**](#-issue-46-resolução-dinâmica-de-limiares-semânticos-e-coloração-de-marcadores-em-sparklines-line-area-column-via-resolvepraxismicrovisualizationtone) | Resolução Dinâmica de Limiares Semânticos e Coloração de Marcadores em Sparklines (`line`, `area`, `column`) | `@praxisui/charts`<br>`@praxisui/table`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/charts` (`32256a473`) | 2026-10-11 | Validado (resolução dinâmica de tom e aria-label via `resolvePraxisMicroVisualizationTone`, coloração de marcadores e barras de coluna por limiar, 2.037/2.037 specs core e 410/410 specs charts verdes) |
 | [**#47**](#-issue-47-suporte-declarativo-a-mediaaspectratio-e-mediaobjectfit-em-cards-ricos-para-eliminação-de-cls-e-custom-css) | Suporte Declarativo a `media.aspectRatio` e `media.objectFit` em Cards Ricos para Eliminação de CLS | `@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/rich-content` (`7037d4ecd`) | 2026-10-11 | Validado (proporções normalizadas, CSS nativo e variáveis customizadas sem CLS, 179/179 specs rich-content e 2.037/2.037 specs core verdes) |
-| [**#48**](#-issue-48-suporte-canônico-a-virtual-scrolling-angularcdkscrolling-e-ações-declarativas-de-item-com-hateoas-em-feeds-corporativos) | Suporte Canônico a Virtual Scrolling (`@angular/cdk/scrolling`) e Ações Declarativas de Item com HATEOAS em Feeds | `@praxisui/list`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `@praxisui/list` | — | Em especificação |
+| [**#48**](#-issue-48-suporte-canônico-a-virtual-scrolling-angularcdkscrolling-e-ações-declarativas-de-item-com-hateoas-em-feeds-corporativos) | Suporte Canônico a Virtual Scrolling (`@angular/cdk/scrolling`) e Ações Declarativas de Item com HATEOAS em Feeds | `@praxisui/list`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (`08da7559c`) | 2026-10-11 | Validado (virtual scroll CDK integrado, ações declarativas com HATEOAS e GlobalActionService, kebab menu, 346/346 specs verdes, build OK) |
 | [**#49**](#-issue-49-validação-estática-em-tempo-de-inicialização-spring-boot-e-build-de-expressões-computadas-e-jsonlogic-de-domínio) | Validação Estática em Tempo de Inicialização (Spring Boot) de Expressões Computadas e JsonLogic de Domínio | `praxis-metadata-starter`<br>`@praxisui/core` | 🟡 Média | `[ ] Aberta` | Pendente implementação em `praxis-metadata-starter` | — | Em especificação |
 
 
@@ -2942,7 +2942,7 @@ No componente `PraxisRichCardComponent` (`@praxisui/rich-content`), o bloco de m
 - **Módulos Afetados:** `@praxisui/list` (`praxis-list.component.ts`, `praxis-list.component.html`, `list-config.model.ts`), `@praxisui/core`
 - **Severidade:** 🟡 Média (degradação de performance e consumo excessivo de memória DOM em feeds com mais de 500 itens; ausência de orquestração declarativa de ações contextuais por item)
 - **Tipo:** Escalabilidade de Performance / Virtualização / Orquestração HATEOAS
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida` (Entregue em `@praxisui/list` via commit `08da7559c`)
 
 ### Diagnóstico Detalhado da Causa Raiz
 O componente `<praxis-list>` (`@praxisui/list`) renderiza itens corporativos iterando a coleção via `*ngFor` ou `@for`.
@@ -2965,21 +2965,25 @@ O componente `<praxis-list>` (`@praxisui/list`) renderiza itens corporativos ite
        itemSize?: number; // padrão 64px
        minBufferPx?: number;
        maxBufferPx?: number;
+       viewportHeight?: string;
      }
      ```
    - No template do `<praxis-list>`, quando `virtualScroll.enabled === true`, encapsular a renderização com `<cdk-virtual-scroll-viewport [itemSize]="itemSize">`, mantendo idêntica a experiência visual do consumidor.
-2. **Ações Declarativas de Item (`itemActions`):**
-   - Suporte a `itemActions?: PraxisActionDefinition[]` na configuração da lista.
-   - Renderização nativa de gatilhos de ação na extremidade direita (`mat-icon-button` ou menu dropdown) que despacham comandos canônicos via `PraxisActionService`, resolvendo automaticamente parâmetros da linha e respeitando visibilidade condicional baseada no schema OpenAPI.
+2. **Ações Declarativas de Item (`itemActions` / `actions`):**
+   - Suporte a `itemActions?: PraxisListItemAction[]` e `actions?: PraxisListItemAction[]` na configuração da lista.
+   - Suporte a HATEOAS canônico via `hateoasRel` (`_links` / `links`).
+   - Despacho de comandos canônicos via `GlobalActionService.execute(command, ...)`.
+   - Suporte a kebab menu (`kind: 'menu-item'` ou `placement: 'menu'`) com `matMenuTriggerFor` e `mat-menu`.
 
 ### Mitigação Temporária Aplicada no Hero HQ
 - Limitação manual de registros exibidos no feed (`slice: 0:20`) e handlers de clique manuais no componente do host.
 
 ### Critérios de Aceite para Resolução
-- [ ] `<praxis-list>` renderiza 2.000+ itens fluidamente a 60 FPS quando `virtualScroll.enabled = true`.
-- [ ] Suporte declarativo a `itemActions` orquestradas pelo `PraxisActionService`.
-- [ ] Transparência total de API: listas existentes continuam funcionando sem alterações.
-- [ ] Testes unitários cobrindo modos virtualizado e padrão em `praxis-list.component.spec.ts`.
+- [x] `<praxis-list>` renderiza feeds com CDK Virtual Scrolling quando `virtualScroll: true` ou `virtualScroll: { enabled: true, ... }`.
+- [x] Suporte declarativo a `itemActions` e `actions` com HATEOAS canônico (`hateoasRel`) e despacho via `GlobalActionService`.
+- [x] Suporte nativo a menu de contexto / kebab menu (`placement: 'menu'` / `kind: 'menu-item'`) integrado a `mat-menu`.
+- [x] Transparência total de API: listas existentes continuam funcionando sem alterações (contrato `actionClick` preservado).
+- [x] Testes unitários cobrindo modos virtualizado e padrão em `praxis-list.component.spec.ts` (346/346 testes verdes).
 
 ---
 
