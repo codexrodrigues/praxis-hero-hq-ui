@@ -951,6 +951,9 @@
                   ]
                 }
               },
+              "i18n": {
+                "locale": "pt-BR"
+              },
               "layout": {
                 "variant": "list",
                 "itemAppearance": "card",
@@ -1568,6 +1571,9 @@
           "abertoEm,desc"
         ]
       }
+    },
+    "i18n": {
+      "locale": "pt-BR"
     },
     "layout": {
       "variant": "list",
