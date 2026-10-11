@@ -26,18 +26,27 @@ export class DashboardStatsService {
   private readonly http = inject(HttpClient);
 
   getTacticalKpis(): Observable<DashboardTacticalKpis> {
-    const activeHeroes$ = this.http
-      .post<any>(`${PRAXIS_API_BASE_URL}/human-resources/funcionarios/filter?page=0&size=1`, { ativo: true })
+    const heroesStats$ = this.http
+      .post<any>(`${PRAXIS_API_BASE_URL}/human-resources/funcionarios/stats/group-by`, {
+        filter: {},
+        field: 'ativo',
+        metrics: [{ operation: 'COUNT', alias: 'total' }],
+      })
       .pipe(
-        map((res) => res?.data?.totalElements ?? 53),
-        catchError(() => of(53)),
-      );
-
-    const totalHeroes$ = this.http
-      .post<any>(`${PRAXIS_API_BASE_URL}/human-resources/funcionarios/filter?page=0&size=1`, {})
-      .pipe(
-        map((res) => res?.data?.totalElements ?? 101),
-        catchError(() => of(101)),
+        map((res) => {
+          const buckets: any[] = res?.data?.buckets ?? [];
+          let active = 0;
+          let total = 0;
+          for (const b of buckets) {
+            const count = Number(b.count ?? b.value ?? 0);
+            total += count;
+            if (b.key === true || b.key === 'true' || b.key === 1) {
+              active += count;
+            }
+          }
+          return { active: active || 53, totalHeroes: total || 101 };
+        }),
+        catchError(() => of({ active: 53, totalHeroes: 101 })),
       );
 
     const missionsStats$ = this.http
@@ -149,14 +158,15 @@ export class DashboardStatsService {
       );
 
     return forkJoin({
-      active: activeHeroes$,
-      totalHeroes: totalHeroes$,
+      heroes: heroesStats$,
       missions: missionsStats$,
       payroll: payrollStats$,
       incidents: incidentsStats$,
       reputation: reputationStats$,
     }).pipe(
-      map(({ active, totalHeroes, missions, payroll, incidents, reputation }) => {
+      map(({ heroes, missions, payroll, incidents, reputation }) => {
+        const active = heroes.active;
+        const totalHeroes = heroes.totalHeroes;
         const inativos = Math.max(0, totalHeroes - active);
         const rate = totalHeroes > 0 ? Math.round((active / totalHeroes) * 1000) / 10 : 52.5;
         return {
