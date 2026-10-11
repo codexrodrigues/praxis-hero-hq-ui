@@ -2891,7 +2891,7 @@ No componente `PraxisMicroVisualizationComponent` (`@praxisui/charts`), a render
 - **Módulos Afetados:** `@praxisui/rich-content` (`praxis-rich-card.component.ts`, `praxis-rich-card.component.scss`), `@praxisui/core` (`rich-content-config.model.ts`)
 - **Severidade:** 🟡 Média (mudança cumulativa de layout / Cumulative Layout Shift - CLS durante o carregamento de imagens de cards; distorção de proporção em capas variadas; necessidade de regras globais de CSS manuais)
 - **Tipo:** Layout / Performance Web (Core Web Vitals) / DX
-- **Status:** `[ ] Aberta`
+- **Status:** `[x] Resolvida (Commit 7037d4ecd)`
 
 ### Diagnóstico Detalhado da Causa Raiz
 No componente `PraxisRichCardComponent` (`@praxisui/rich-content`), o bloco de mídia (`media`) suporta `url`, `type: 'image'`, `position: 'top' | 'left' | 'right' | 'background'` e `width`.
@@ -2929,10 +2929,10 @@ No componente `PraxisRichCardComponent` (`@praxisui/rich-content`), o bloco de m
 - Em `dashboard-theme.scss`, foram criadas classes com `!important` para fixar `aspect-ratio: 16/9` e `object-fit: cover` nos cards de notícias e banners táticos.
 
 ### Critérios de Aceite para Resolução
-- [ ] `PraxisRichCardMediaConfig` expõe `aspectRatio` e `objectFit` declarativamente.
-- [ ] O componente `PraxisRichCardComponent` renderiza imagens aplicando as propriedades sem saltos de layout (CLS = 0).
-- [ ] Remoção das regras manuais de CSS de mídia em `dashboard-theme.scss` do Hero HQ.
-- [ ] Testes unitários cobrindo variações de proporção em `praxis-rich-card.component.spec.ts`.
+- [x] `PraxisRichCardMediaConfig` (e `RichCardMedia` / `RichImageNode`) expõe `aspectRatio` e `objectFit` declarativamente.
+- [x] O componente `PraxisRichContent` renderiza imagens e mídias aplicando as propriedades sem saltos de layout (CLS = 0) com suporte CSS nativo e variáveis customizadas.
+- [x] Normalizador canônico de proporções `normalizeCardMediaAspectRatio` e preservação de rótulos de enum e opções em `FieldDefinition`.
+- [x] Testes unitários cobrindo variações de proporção e nós de mídia em `rich-content.model.spec.ts` e `praxis-rich-content.spec.ts` (179/179 testes passando).
 
 ---
 
