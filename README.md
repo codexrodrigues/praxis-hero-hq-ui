@@ -57,13 +57,47 @@ A aplicação implementa um case corporativo de governança com persistência re
 
 ### 🧪 Executando a Bateria E2E Automatizada (Playwright)
 
-```powershell
-# Execução da bateria automatizada de 8 etapas
-$env:NODE_PATH = "D:\Developer\praxis-plataform\.worktrees\praxis-json-upgrade-p31a\praxis-ui-angular\node_modules"
-node test-e2e\test-multiuser-persistence.cjs
+Com `npm start` ativo na porta oficial 4302 e `@playwright/test` disponível no
+ambiente de testes (ou via `NODE_PATH` apontando para o `node_modules` do workspace Angular):
+
+```bash
+node test-e2e/test-multiuser-persistence.cjs
 ```
+
+O ensaio cobre dez cenários de Dashboard pelo DOM público: carga sem gravação,
+edição/salvar/reabrir, isolamento de persona, conflito e recuperação, documento vazio,
+retry de save sem perder o rascunho, reset confirmado/falho, falha de carga e viewport estreito. Todas as chamadas `/api/**`
+são interceptadas; não acessa o backend remoto nem comprova persistência em banco.
+Uma prova operacional de banco exige branch Neon isolada, conforme a governança do workspace.
 
 Para mais detalhes sobre as propostas e evoluções canônicas de plataforma, consulte:
 - [`docs/PRAXIS_PLATFORM_EVOLUTIONS.md`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/docs/PRAXIS_PLATFORM_EVOLUTIONS.md)
 - [`../docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md`](file:///d:/Developer/praxis-plataform/docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md)
 
+
+
+## Dashboard: página canônica e persistência
+
+O dashboard usa `DynamicPageBuilderComponent` (`praxis-dynamic-page-builder`) sobre
+`WidgetPageDefinition`. Não depende de `PraxisDashboardPage`. A toolbar e os indicadores
+são apresentação do HQ; identidade, carga, gravação, confirmação e reset pertencem ao
+runtime Core, via `pageIdentity`, `autoPersist` e `persistenceChange`.
+O host registra `providePraxisDialogGlobalActions()` para as confirmações de remoção
+e configura o storage com `errorPolicy: 'fail'` para exibir falhas de carga.
+
+A identidade usa app `praxis-hero-hq`, tenant e usuário da persona ativa, e rota `/`.
+O adapter remoto continua usando a identidade HTTP do host. Não há cache de layout
+paralelo nem hooks globais `PAX_*`. Uma definição salva é reaberta integralmente, inclusive
+quando todos os widgets foram removidos; não há merge implícito com novos widgets de fábrica.
+
+A chave antiga `dynamic-page:hq-dashboard` e os caches locais antigos não são lidos pelo
+novo fluxo. Nenhum registro antigo é apagado automaticamente. A adoção beta inicia o layout
+na nova identidade canônica; importar dados antigos exige uma migração com dono/escopo
+verificados, não a cópia de um cache compartilhado. “Restaurar Fábrica” só conclui após o
+backend confirmar; erros e conflitos permanecem visíveis. “Descartar alterações e recarregar”
+é uma ação explícita para recuperar o documento salvo.
+
+Este fonte requer o incremento de persistência canônica de Core/Page Builder desenvolvido
+junto com a remoção do wrapper. Não basta instalar rc.5/rc.7 publicados anteriormente.
+A validação local usa os pacotes construídos do incremento; a atualização para uma versão
+publicada deve acompanhar a release oficial, sem inventar uma versão ainda não publicada.
