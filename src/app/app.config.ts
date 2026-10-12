@@ -56,6 +56,7 @@ import {
 import { providePraxisCrudMetadata } from '@praxisui/crud';
 import {
   providePraxisDialogMetadata,
+  providePraxisDialogGlobalActions,
   providePraxisSurfaceGlobalActions,
 } from '@praxisui/dialog';
 import { providePraxisDynamicFormMetadata } from '@praxisui/dynamic-form';
@@ -146,6 +147,7 @@ export const appConfig: ApplicationConfig = {
     providePraxisListMetadata(),
     providePraxisCrudMetadata(),
     providePraxisDialogMetadata(),
+    providePraxisDialogGlobalActions(),
     providePraxisSurfaceGlobalActions(),
     providePraxisRichContentMetadata(),
     providePraxisChartsMetadata(),
@@ -171,6 +173,7 @@ export const appConfig: ApplicationConfig = {
       provide: API_CONFIG_STORAGE_OPTIONS,
       useValue: {
         baseUrl: `${PRAXIS_API_BASE_URL}/praxis/config/ui`,
+        errorPolicy: 'fail',
         headersFactory: () => {
           if (typeof localStorage === 'undefined') {
             return {
