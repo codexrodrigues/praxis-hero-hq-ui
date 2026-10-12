@@ -125,9 +125,9 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
       align-items: center;
       padding: 10px 18px;
       border-radius: 14px;
-      background: color-mix(in oklab, var(--card) 60%, transparent);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: var(--surface-gradient);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       border: 1px solid var(--border);
       gap: 16px;
       flex-wrap: wrap;
@@ -240,7 +240,7 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
 
       &:hover {
         background: var(--destructive);
-        color: #fff;
+        color: var(--destructive-foreground);
         border-color: var(--destructive);
         transform: translateY(-1px);
       }
@@ -259,7 +259,7 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
       font-weight: 600;
       cursor: pointer;
       border: 1px solid var(--border);
-      background: color-mix(in oklab, var(--card) 80%, transparent);
+      background: var(--card);
       color: var(--foreground);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 

@@ -1,5 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Injectable, computed, signal } from '@angular/core';
 
 export interface PersonaProfile {
   readonly id: string;
@@ -44,8 +43,6 @@ const STORAGE_KEYS = {
 
 @Injectable({ providedIn: 'root' })
 export class AuthSimulationService {
-  private readonly router = inject(Router);
-
   private readonly activeUserId = signal<string>(this.resolveInitialUserId());
 
   readonly personas = HERO_PERSONAS;
@@ -81,18 +78,7 @@ export class AuthSimulationService {
     this.activeUserId.set(target.id);
     this.syncStorage(target);
 
-    // Dispara evento de armazenamento para que outros serviços e componentes reajam à troca de identidade
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('praxis:identity-switch', {
-          detail: {
-            userId: target.id,
-            tenant: target.tenant,
-            persona: target,
-          },
-        }),
-      );
-    }
+
   }
 
   private syncStorage(persona: PersonaProfile): void {

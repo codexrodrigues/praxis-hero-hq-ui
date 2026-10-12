@@ -137,14 +137,14 @@ export function buildReputacaoChartConfig(
         name: 'Aprovação Civil',
         type: 'bar',
         metric: { field: 'civil', aggregation: 'sum' },
-        color: '#06b6d4',
+        color: 'var(--primary, #06b6d4)',
       },
       {
         id: 'governo',
         name: 'Confiança Governo',
         type: 'bar',
         metric: { field: 'governo', aggregation: 'sum' },
-        color: '#10b981',
+        color: 'var(--ready, #10b981)',
       },
     ],
   };

@@ -1,19 +1,98 @@
-/* ==========================================================================
-   Praxis Platform - Canonical Theme & Design Token Bridge
-   Bridges Hero HQ OKLCH tokens to Material 3 & Praxis Platform Core Tokens
-   Consumed via Canonical @praxisui/core/theming starter mixins (ISSUE-014)
-   ========================================================================== */
-
+/* Host-owned adaptation; consume the published Praxis token bridge. */
+@use '@angular/material' as mat;
 @use '@praxisui/core/theming' as praxis;
 
-:root {
-  @include praxis.define-praxis-theme();
+html {
+  @include mat.theme((color: mat.$azure-palette, typography: 'Work Sans', density: 0));
 }
-
-.dark {
-  @include praxis.praxis-dark-theme-overrides();
+$surfaces: (
+  'surface-container-lowest': var(--background),
+  'surface-container-low': var(--workspace-surface),
+  'surface-container': var(--card),
+  'surface-container-high': var(--popover),
+  'surface-container-highest': var(--secondary),
+  'primary-container': var(--accent),
+  'on-primary-container': var(--foreground),
+  'secondary': var(--secondary),
+  'on-secondary': var(--secondary-foreground),
+  'secondary-container': var(--secondary),
+  'on-secondary-container': var(--foreground),
+  'tertiary': var(--category-violet),
+  'on-tertiary': var(--primary-foreground),
+  'tertiary-container': var(--accent),
+  'on-tertiary-container': var(--foreground),
+  'error-container': var(--muted),
+  'outline': var(--input),
+  'outline-variant': var(--border),
+  'inverse-surface': var(--foreground),
+  'inverse-on-surface': var(--background),
+  'on-error-container': var(--destructive),
+);
+:root { @include praxis.define-praxis-theme($surfaces); }
+:root[data-theme='dark-tech'] { @include praxis.praxis-dark-theme-overrides($surfaces); }
+:root[data-theme] {
+  @include mat.theme-overrides((
+    primary: var(--primary), on-primary: var(--primary-foreground),
+    primary-container: var(--accent), on-primary-container: var(--foreground),
+    secondary: var(--secondary), on-secondary: var(--secondary-foreground),
+    secondary-container: var(--secondary), on-secondary-container: var(--foreground),
+    tertiary: var(--category-violet), on-tertiary: var(--primary-foreground),
+    tertiary-container: var(--accent), on-tertiary-container: var(--foreground),
+    error: var(--destructive), on-error: var(--destructive-foreground),
+    error-container: var(--muted), on-error-container: var(--destructive),
+    background: var(--background), on-background: var(--foreground),
+    surface: var(--card), on-surface: var(--foreground),
+    surface-container-lowest: var(--background), surface-container-low: var(--workspace-surface),
+    surface-container: var(--card), surface-container-high: var(--popover),
+    surface-container-highest: var(--secondary), on-surface-variant: var(--muted-foreground),
+    outline: var(--input), outline-variant: var(--border),
+    inverse-surface: var(--foreground), inverse-on-surface: var(--background),
+  ));
 }
-
+/* CRUD/KPI uses its own documented namespace, separate from Core's bridge. */
+:root[data-theme] {
+  --praxis-surface-card: var(--card);
+  --praxis-border-subtle: var(--border);
+  --praxis-text-primary: var(--foreground);
+  --praxis-text-secondary: var(--foreground);
+  --praxis-text-muted: var(--muted-foreground);
+  --praxis-primary: var(--primary);
+  --praxis-info: var(--category-sky);
+  --praxis-success: var(--ready);
+  --praxis-warning: var(--warning);
+  --praxis-error: var(--destructive);
+  --praxis-neutral: var(--muted-foreground);
+  --praxis-page-title-color: var(--foreground);
+  --pdx-shell-card-bg: var(--card);
+  --pdx-shell-card-backdrop-filter: none;
+}
 @include praxis.praxis-shell-styles();
 @include praxis.praxis-tooltip-styles();
 @include praxis.praxis-menu-styles();
+
+/* Table defines defaults on :host; specificity must override those same tokens. */
+html[data-theme] praxis-table {
+  --p-table-bg: var(--card);
+  --p-table-header-bg: var(--workspace-surface);
+  --p-table-header-fg: var(--foreground);
+  --p-table-row-bg: var(--card);
+  --p-table-text-color: var(--foreground);
+  --p-table-row-hover-bg: var(--accent);
+  --p-table-row-selected-bg: var(--accent);
+  --p-table-row-selected-fg: var(--foreground);
+  --p-table-border-color: var(--border);
+  --p-table-state-success-fg: var(--ready);
+  --p-table-state-warning-fg: var(--warning);
+  --p-table-state-danger-fg: var(--destructive);
+}
+.theme-swatch {
+  display: inline-block; width: 16px; height: 16px; margin-inline-end: 10px;
+  border: 1px solid var(--border); border-radius: 50%; vertical-align: middle;
+  &[data-preview='classic'] { background: oklch(0.54614972 0.21520775 262.88091714); }
+  &[data-preview='light-tech'] { background: oklch(0.45 0.092 232); }
+  &[data-preview='dark-tech'] { background: oklch(0.255 0.022 250); }
+}
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

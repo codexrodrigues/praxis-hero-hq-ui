@@ -1,3 +1,5 @@
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -20,7 +22,7 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
 @Component({
   selector: 'app-hero-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterOutlet, PraxisAppShellComponent],
+  imports: [CommonModule, RouterLink, RouterOutlet, PraxisAppShellComponent, MatMenuModule, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <praxis-app-shell
@@ -29,14 +31,26 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
       [user]="null"
       [footerStatus]="footerStatus"
       [isDarkTheme]="isDark()"
-      [showThemeToggle]="true"
+      [showThemeToggle]="false"
       [showSearch]="true"
       searchPlaceholder="Buscar no comando... (Ctrl+K)"
-      (themeToggle)="themeService.toggleTheme()"
       (searchSubmit)="openSearchModal()"
     >
       <!-- Header Actions projected into PraxisAppShell canonical slot -->
       <div shell-header-actions class="hud-extra-actions">
+        <button mat-icon-button [matMenuTriggerFor]="appearanceMenu"
+          [attr.aria-label]="'Aparência: ' + themeService.current().name" title="Aparência do workspace">
+          <span class="material-symbols-outlined">palette</span>
+        </button>
+        <mat-menu #appearanceMenu="matMenu">
+          @for (theme of themeService.themes; track theme.id) {
+            <button mat-menu-item role="menuitemradio" [attr.aria-checked]="themeService.theme() === theme.id"
+              (click)="themeService.choose(theme.id)">
+              <span class="theme-swatch" [attr.data-preview]="theme.id" aria-hidden="true"></span>
+              <span>{{ theme.name }} · {{ theme.description }}</span>
+            </button>
+          }
+        </mat-menu>
         <!-- Tactical Readiness Meter -->
         <div class="readiness-meter">
           <div class="readiness-header">
@@ -115,7 +129,10 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
       </div>
 
       <!-- Main Dynamic Content Routed from Modules -->
-      <router-outlet></router-outlet>
+      <!-- Persona simulation belongs to this host; rebuild its routed view on selection. -->
+      @for (personaId of [authService.currentPersona().id]; track personaId) {
+        <router-outlet></router-outlet>
+      }
     </praxis-app-shell>
 
     <!-- Quick Command Modal (Ctrl+K) -->

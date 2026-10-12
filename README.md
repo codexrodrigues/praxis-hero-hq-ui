@@ -97,7 +97,44 @@ verificados, não a cópia de um cache compartilhado. “Restaurar Fábrica” s
 backend confirmar; erros e conflitos permanecem visíveis. “Descartar alterações e recarregar”
 é uma ação explícita para recuperar o documento salvo.
 
-O incremento de persistência canônica acompanha `@praxisui/*` **10.0.0-rc.8**.
-O projeto fixa essa versão em `package.json` e `package-lock.json`; use `npm ci`
-para reproduzir a instalação a partir do npm público. O canal desta versão é `rc`;
-`latest` continua reservado à linha estável. Versões rc.5/rc.7 não oferecem esse contrato.
+Os 22 pacotes `@praxisui/*` estão fixados em **10.0.0-rc.9**, com lockfile
+resolvido no npm público. Esta versão contém as correções canônicas de shell,
+cores/tooltip dos gráficos e ciclo de contexto do CRUD.
+
+```sh
+npm ci --registry=https://registry.npmjs.org/
+npm run build
+npm start
+```
+
+A release oficial por tag `praxis-ui-v10.0.0-rc.9` passou por build, publicação OIDC
+e postflight dos 22 pacotes. A adoção deste host passou por instalação limpa e
+build; não depende de tarballs locais, paths para `dist` ou flags de peer legado.
+O canal `latest` permanece na linha estável; o host fixa a versão RC exata para
+reproduzir a apresentação.
+
+A troca de persona é uma simulação privada: o host recria sua rota ao escolher
+outra persona, sem emitir evento global para as bibliotecas. Isso não equivale
+a uma sessão corporativa confirmada no Core.
+
+## Aparência do workspace
+
+O menu **Aparência** no cabeçalho oferece **Essência**, **Aurora** e **Órbita**,
+com as paletas do Ergon Workflow Designer. Órbita permanece o padrão deste host.
+A preferência é local ao navegador e sincronizada entre abas; não altera a persona,
+o dashboard salvo ou dados de negócio. Work Sans é a fonte principal.
+
+A folha privada `src/styles/workspace-themes.scss` define as paletas;
+`src/styles/theme-praxis.scss` traduz esses valores para Material e os tokens dos
+componentes Praxis, incluindo tabela, CRUD/KPI e overlays. Não adicionar cores
+isoladas em cada página para ajustar o tema.
+
+Validação focal sem backend/banco:
+
+```bash
+node scripts/workspace/verify-workspace-themes.mjs
+npm run build
+```
+
+Consulte o [estudo e evidências dos temas](docs/design/workspace-themes-2026-10-11.md)
+para conhecer os tokens investigados, os estados conferidos e os limites de fidelidade.
