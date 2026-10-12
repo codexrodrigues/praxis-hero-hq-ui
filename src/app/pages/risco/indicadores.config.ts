@@ -93,7 +93,6 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         totalPendente: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Saldo Pendente' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

@@ -92,11 +92,10 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         nomeCompleto: { width: '240px', header: 'Nome Completo / Civil' },
         cargoNome: { width: '220px', header: 'Cargo' },
         departamentoNome: { width: '240px', header: 'Departamento' },
-        ativo: { width: '110px', type: 'boolean', format: 'custom|Ativo|Inativo', header: 'Status' },
-        dataAdmissao: { width: '160px', type: 'date', format: 'dd/MM/yyyy', header: 'Data de Admissão' },
+        ativo: { width: '110px', header: 'Status' },
+        dataAdmissao: { width: '160px', header: 'Data de Admissão' },
       },
     },
-    columns: [],
     behavior: {
       filtering: {
         columnFilters: {
@@ -104,7 +103,7 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         },
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   filterBar: {
     inlineFields: ['nomeCompleto', 'departamentoNome', 'ativo'],
     quickFilters: [
@@ -137,21 +136,3 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export const SAMPLE_HERO: Record<string, unknown> = {
-  id: 1,
-  nomeCompleto: 'Anthony Edward Stark',
-  codinome: 'Homem de Ferro',
-  cargoNome: 'Engenheiro Chefe & Especialista Tático',
-  departamentoNome: 'P&D e Tecnologia Avançada',
-  universo: 'Terra-616',
-  ativo: true,
-  salario: 95000,
-  cpf: '109.876.543-21',
-  telefone: '+55 (11) 99887-6655',
-  email: 'tony.stark@avengers.praxis.org',
-  fotoPerfilUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=face',
-  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&h=160&fit=crop&crop=face',
-  scorePublico: 96,
-  scoreGovernamental: 88,
-  dataAdmissao: '15/04/2018',
-};

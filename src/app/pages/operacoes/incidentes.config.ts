@@ -89,7 +89,6 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
         ocorridoEm: { width: '150px', align: 'center', type: 'date', header: 'Data do Ocorrido' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

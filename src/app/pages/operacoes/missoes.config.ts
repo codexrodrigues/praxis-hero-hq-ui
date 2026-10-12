@@ -84,7 +84,6 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         fimPrev: { width: '160px', type: 'date', format: 'dd/MM/yyyy HH:mm', header: 'Fim Previsto' },
       },
     },
-    columns: [],
     toolbar: {
       visible: true,
       filters: {

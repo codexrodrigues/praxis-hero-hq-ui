@@ -79,7 +79,6 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
         status: { width: '160px', align: 'center', header: 'Status de Custódia' },
       },
     },
-    columns: [],
     toolbar: {
       visible: true,
       filters: {

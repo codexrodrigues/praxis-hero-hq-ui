@@ -82,7 +82,6 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
         observacoes: { width: '320px', header: 'Observações / Parecer Operacional' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

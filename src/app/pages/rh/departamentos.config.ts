@@ -78,7 +78,6 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
         responsavelNome: { width: '260px', header: 'Diretor / Líder Responsável' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

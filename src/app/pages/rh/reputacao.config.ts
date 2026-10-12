@@ -77,7 +77,6 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
         scoreGovernamental: { width: '150px', align: 'center', type: 'number', header: 'Confiança Governo (%)' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

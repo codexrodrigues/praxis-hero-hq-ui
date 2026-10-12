@@ -83,7 +83,6 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         dataPagamento: { width: '150px', align: 'center', type: 'date', header: 'Data de Pagamento' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

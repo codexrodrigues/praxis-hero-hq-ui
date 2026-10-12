@@ -83,7 +83,6 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
         disabledReason: { width: '240px', header: 'Observações / Motivo' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

@@ -82,7 +82,6 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
         status: { width: '150px', align: 'center', header: 'Disponibilidade' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

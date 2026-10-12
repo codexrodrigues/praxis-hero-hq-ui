@@ -81,7 +81,6 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
         status: { width: '140px', align: 'center', header: 'Status Tático' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

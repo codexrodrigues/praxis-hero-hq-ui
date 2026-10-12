@@ -83,7 +83,6 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
         recompensa: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Recompensa Fixada' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

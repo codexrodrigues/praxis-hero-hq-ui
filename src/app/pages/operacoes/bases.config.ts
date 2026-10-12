@@ -80,7 +80,6 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
         planeta: { width: '150px', align: 'center', header: 'Planeta / Teatro' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,

@@ -85,7 +85,6 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
         disabledReason: { width: '220px', header: 'Observações' },
       },
     },
-    columns: [],
     toolbar: {
       search: {
         enabled: true,
