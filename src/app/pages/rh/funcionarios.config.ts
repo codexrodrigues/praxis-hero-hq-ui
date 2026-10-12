@@ -103,7 +103,7 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         },
       },
     },
-  },
+  } as unknown as CrudMetadata['table'],
   filterBar: {
     inlineFields: ['nomeCompleto', 'departamentoNome', 'ativo'],
     quickFilters: [

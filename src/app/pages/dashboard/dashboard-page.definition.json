@@ -975,7 +975,7 @@
                   "icon": "support_agent",
                   "kind": "menu-item",
                   "placement": "menu",
-                  "hateoasRel": "atender"
+                  "hateoasRel": "update"
                 },
                 {
                   "id": "ver-detalhes",
@@ -1618,7 +1618,7 @@
         "icon": "support_agent",
         "kind": "menu-item",
         "placement": "menu",
-        "hateoasRel": "atender"
+        "hateoasRel": "update"
       },
       {
         "id": "ver-detalhes",
