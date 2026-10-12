@@ -3,157 +3,10 @@
    OKLCH Palette, Glassmorphism, Bento Grid & Host Theme Ownership
    ========================================================================== */
 
+@use './styles/workspace-themes.scss';
 @use './styles/theme-praxis.scss';
 @use './styles/dashboard-theme.scss';
 @use './styles/resource-page.scss';
-
-:root {
-  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-
-  --radius: 1rem;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-
-  /* Light Theme (Corporate Clean SaaS) */
-  --background: oklch(0.982 0.004 247);
-  --foreground: oklch(0.208 0.042 265.755);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.035 247);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.52 0.16 244);
-  --primary-foreground: oklch(0.99 0.004 220);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.94 0.018 230);
-  --accent-foreground: oklch(0.3 0.06 230);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508 / 85%);
-  --input: oklch(0.929 0.013 255.508 / 85%);
-  --ring: oklch(0.57 0.13 224);
-
-  --sidebar: oklch(0.99 0.002 240);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.49 0.12 224);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
-
-  --ready: oklch(0.58 0.16 154);
-  --warning: oklch(0.65 0.15 72);
-  --alert: oklch(0.61 0.2 29);
-  --command: oklch(0.22 0.035 247);
-  --command-foreground: oklch(0.96 0.01 230);
-  --overlay: oklch(0.12 0.02 250 / 72%);
-  --cobalt: oklch(0.49 0.23 264);
-
-  /* Semantic Domain Tokens */
-  --rh: oklch(0.55 0.16 232);
-  --operations: oklch(0.7 0.17 70);
-  --assets: oklch(0.62 0.17 155);
-  --supplies: oklch(0.55 0.2 295);
-  --risk: oklch(0.58 0.22 20);
-
-  --shadow-panel: 0 1px 2px oklch(0.2 0.03 240 / 4%), 0 8px 24px oklch(0.2 0.03 240 / 5%);
-  --shadow-command: 0 24px 70px oklch(0.1 0.03 240 / 28%);
-
-  /* Praxis Platform Loading Canonical Tokens */
-  --pdx-loading-overlay-bg: color-mix(in oklab, var(--card) 60%, transparent);
-  --pdx-loading-text: var(--foreground);
-  --pdx-loading-text-shadow: none;
-  --pdx-loading-spinner-track: color-mix(in oklab, var(--primary) 20%, transparent);
-  --pdx-loading-spinner-accent: var(--primary);
-  --pdx-loading-topbar-gradient: linear-gradient(90deg, transparent, var(--primary), var(--cobalt), transparent);
-  --pdx-loading-topbar-height: 3px;
-  --pdx-loading-topbar-text: var(--muted-foreground);
-  --pdx-loading-inline-bg: var(--card);
-  --pdx-loading-inline-border: 1px solid var(--border);
-  --praxis-layer-loading-blocking: 99999;
-  --praxis-layer-loading-inline: 120;
-
-  /* Praxis Micro Visualizations Theme Token Bridge */
-  --prx-micro-tone-info: var(--cobalt);
-  --prx-micro-tone-info-text: var(--cobalt);
-  --prx-micro-tone-success: var(--ready);
-  --prx-micro-tone-success-text: var(--ready);
-  --prx-micro-tone-warning: var(--warning);
-  --prx-micro-tone-warning-text: var(--warning);
-  --prx-micro-tone-danger: var(--alert);
-  --prx-micro-tone-danger-text: var(--alert);
-  --prx-micro-track-color: color-mix(in oklab, var(--muted) 80%, transparent);
-  --prx-micro-text-color: var(--foreground);
-  --prx-micro-label-color: var(--muted-foreground);
-  --prx-micro-target-color: var(--foreground);
-}
-
-.dark {
-  /* Dark Theme (Tactical Bento / Cyber Command) */
-  --background: oklch(0.105 0.025 264);
-  --foreground: oklch(0.94 0.012 230);
-  --card: oklch(0.185 0.04 260 / 70%);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.16 0.035 260 / 96%);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.77 0.14 205);
-  --primary-foreground: oklch(0.17 0.025 248);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.27 0.035 240);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.45 0.06 247 / 34%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.77 0.14 205);
-
-  --sidebar: oklch(0.09 0.02 260 / 88%);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.77 0.14 205);
-  --sidebar-primary-foreground: oklch(0.16 0.03 250);
-  --sidebar-accent: oklch(0.24 0.035 242);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
-
-  --ready: oklch(0.75 0.16 154);
-  --warning: oklch(0.8 0.16 78);
-  --alert: oklch(0.71 0.2 30);
-  --command: oklch(0.13 0.025 250);
-  --command-foreground: oklch(0.95 0.012 230);
-  --overlay: oklch(0.06 0.02 250 / 82%);
-  --cobalt: oklch(0.62 0.2 255);
-
-  --rh: oklch(0.78 0.14 205);
-  --operations: oklch(0.8 0.16 78);
-  --assets: oklch(0.75 0.16 154);
-  --supplies: oklch(0.7 0.18 300);
-  --risk: oklch(0.7 0.2 20);
-
-  --shadow-panel: 0 1px 0 oklch(0.85 0.06 210 / 5%), 0 18px 40px oklch(0.05 0.02 250 / 20%);
-  --shadow-command: 0 25px 80px oklch(0.04 0.02 250 / 55%);
-
-  /* Praxis Platform Loading Tokens (Dark Mode) */
-  --pdx-loading-overlay-bg: oklch(0.06 0.02 250 / 65%);
-  --pdx-loading-text: var(--foreground);
-  --pdx-loading-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-  --pdx-loading-spinner-track: oklch(1 0 0 / 12%);
-  --pdx-loading-spinner-accent: var(--primary);
-  --pdx-loading-topbar-gradient: linear-gradient(90deg, transparent, var(--primary), var(--cobalt), transparent);
-  --pdx-loading-inline-bg: oklch(0.14 0.03 260 / 90%);
-  --pdx-loading-inline-border: 1px solid var(--border);
-}
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -168,7 +21,7 @@ html, body {
 
 body {
   background-color: var(--background);
-  background-image: radial-gradient(ellipse 80% 55% at 50% -20%, color-mix(in oklab, var(--primary) 18%, transparent), transparent);
+  background-image: var(--dark-canvas-gradient, none);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -178,10 +31,10 @@ body {
 
 /* Glassmorphism Panel */
 .glass-panel {
-  background: color-mix(in oklab, var(--card) 88%, transparent);
+  background: var(--card);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
@@ -198,7 +51,7 @@ body {
 }
 
 .dark .title-gradient {
-  background: linear-gradient(90deg, var(--primary), oklch(0.82 0.11 220), var(--cobalt));
+  background: linear-gradient(90deg, var(--foreground), var(--primary));
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -206,7 +59,7 @@ body {
 /* Primary Button / Highlight Gradient */
 .primary-gradient {
   color: var(--primary-foreground);
-  background: linear-gradient(135deg, var(--primary), var(--cobalt));
+  background: var(--command-gradient, var(--primary));
   box-shadow: 0 10px 28px color-mix(in oklab, var(--primary) 24%, transparent);
 }
 
@@ -300,8 +153,8 @@ praxis-crud, praxis-table, praxis-dynamic-form {
   }
 
   &[data-tone='info'] {
-    color: var(--cobalt) !important;
-    --micro-fill: var(--cobalt);
+    color: var(--category-sky) !important;
+    --micro-fill: var(--category-sky);
   }
 
   &[data-tone='neutral'] {
@@ -367,23 +220,23 @@ praxis-crud, praxis-table, praxis-dynamic-form {
 
     &[data-tone='danger'],
     &[data-tone='critical'] {
-      background: linear-gradient(90deg, #f87171, #ef4444) !important;
-      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4) !important;
+      background: var(--destructive) !important;
+      box-shadow: 0 0 8px color-mix(in oklab, var(--destructive) 25%, transparent) !important;
     }
 
     &[data-tone='warning'] {
-      background: linear-gradient(90deg, #fbbf24, #f59e0b) !important;
-      box-shadow: 0 0 8px rgba(245, 158, 11, 0.4) !important;
+      background: var(--warning) !important;
+      box-shadow: 0 0 8px color-mix(in oklab, var(--warning) 25%, transparent) !important;
     }
 
     &[data-tone='success'] {
-      background: linear-gradient(90deg, #34d399, #10b981) !important;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4) !important;
+      background: var(--ready) !important;
+      box-shadow: 0 0 8px color-mix(in oklab, var(--ready) 25%, transparent) !important;
     }
 
     &[data-tone='info'] {
-      background: linear-gradient(90deg, #38bdf8, #0ea5e9) !important;
-      box-shadow: 0 0 8px rgba(14, 165, 233, 0.4) !important;
+      background: var(--category-sky) !important;
+      box-shadow: 0 0 8px color-mix(in oklab, var(--category-sky) 25%, transparent) !important;
     }
   }
 

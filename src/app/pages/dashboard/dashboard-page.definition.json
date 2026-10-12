@@ -613,7 +613,7 @@
                     "field": "salarioLiquido",
                     "aggregation": "sum"
                   },
-                  "color": "#38bdf8",
+                  "color": "var(--category-sky, #38bdf8)",
                   "smooth": true
                 },
                 {
@@ -624,7 +624,7 @@
                     "field": "totalDescontos",
                     "aggregation": "sum"
                   },
-                  "color": "#a855f7",
+                  "color": "var(--category-violet, #a855f7)",
                   "smooth": true
                 }
               ],
@@ -634,9 +634,9 @@
                   "trigger": "axis"
                 },
                 "palette": [
-                  "#38bdf8",
-                  "#a855f7",
-                  "#22c55e"
+                  "var(--category-sky, #38bdf8)",
+                  "var(--category-violet, #a855f7)",
+                  "var(--ready, #22c55e)"
                 ]
               }
             }
@@ -734,7 +734,7 @@
                     "field": "scorePublico",
                     "aggregation": "avg"
                   },
-                  "color": "#06b6d4"
+                  "color": "var(--primary, #06b6d4)"
                 },
                 {
                   "id": "scoreGovernamental",
@@ -744,7 +744,7 @@
                     "field": "scoreGovernamental",
                     "aggregation": "avg"
                   },
-                  "color": "#10b981"
+                  "color": "var(--ready, #10b981)"
                 }
               ],
               "theme": {
@@ -753,8 +753,8 @@
                   "trigger": "axis"
                 },
                 "palette": [
-                  "#06b6d4",
-                  "#10b981"
+                  "var(--primary, #06b6d4)",
+                  "var(--ready, #10b981)"
                 ]
               }
             }
@@ -850,10 +850,10 @@
                   "enabled": true
                 },
                 "palette": [
-                  "#ef4444",
-                  "#f97316",
-                  "#eab308",
-                  "#38bdf8"
+                  "var(--destructive, #ef4444)",
+                  "var(--format-orange, #f97316)",
+                  "var(--format-amber, #eab308)",
+                  "var(--category-sky, #38bdf8)"
                 ],
                 "legend": {
                   "visible": true
@@ -919,7 +919,7 @@
               },
               "theme": {
                 "palette": [
-                  "#06b6d4"
+                  "var(--primary, #06b6d4)"
                 ],
                 "tooltip": {
                   "enabled": true
@@ -1523,10 +1523,10 @@
         "enabled": true
       },
       "palette": [
-        "#ef4444",
-        "#f97316",
-        "#eab308",
-        "#38bdf8"
+        "var(--destructive, #ef4444)",
+        "var(--format-orange, #f97316)",
+        "var(--format-amber, #eab308)",
+        "var(--category-sky, #38bdf8)"
       ],
       "legend": {
         "visible": true
@@ -1577,7 +1577,7 @@
     },
     "theme": {
       "palette": [
-        "#06b6d4"
+        "var(--primary, #06b6d4)"
       ],
       "tooltip": {
         "enabled": true
@@ -1748,7 +1748,7 @@
           "field": "salarioLiquido",
           "aggregation": "sum"
         },
-        "color": "#38bdf8",
+        "color": "var(--category-sky, #38bdf8)",
         "smooth": true
       },
       {
@@ -1759,7 +1759,7 @@
           "field": "totalDescontos",
           "aggregation": "sum"
         },
-        "color": "#a855f7",
+        "color": "var(--category-violet, #a855f7)",
         "smooth": true
       }
     ],
@@ -1769,9 +1769,9 @@
         "trigger": "axis"
       },
       "palette": [
-        "#38bdf8",
-        "#a855f7",
-        "#22c55e"
+        "var(--category-sky, #38bdf8)",
+        "var(--category-violet, #a855f7)",
+        "var(--ready, #22c55e)"
       ]
     }
   },
@@ -1854,7 +1854,7 @@
           "field": "scorePublico",
           "aggregation": "avg"
         },
-        "color": "#06b6d4"
+        "color": "var(--primary, #06b6d4)"
       },
       {
         "id": "scoreGovernamental",
@@ -1864,7 +1864,7 @@
           "field": "scoreGovernamental",
           "aggregation": "avg"
         },
-        "color": "#10b981"
+        "color": "var(--ready, #10b981)"
       }
     ],
     "theme": {
@@ -1873,8 +1873,8 @@
         "trigger": "axis"
       },
       "palette": [
-        "#06b6d4",
-        "#10b981"
+        "var(--primary, #06b6d4)",
+        "var(--ready, #10b981)"
       ]
     }
   }

@@ -39,7 +39,7 @@
 }
 
 .readiness-val {
-  color: var(--success, #10b981);
+  color: var(--ready);
 }
 
 .readiness-bar {
@@ -52,7 +52,7 @@
 
 .readiness-progress {
   height: 100%;
-  background: linear-gradient(90deg, #10b981, #06b6d4);
+  background: linear-gradient(90deg, var(--ready), var(--primary));
   border-radius: 9999px;
 }
 
@@ -82,7 +82,7 @@
   top: -4px;
   right: -4px;
   background: var(--destructive, #ef4444);
-  color: white;
+  color: var(--destructive-foreground);
   font-size: 10px;
   font-weight: 700;
   width: 16px;
@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--destructive) 35%, transparent);
 }
 
 /* Tactical Persona / Authentication Simulation Switcher */
@@ -195,7 +195,7 @@
   background: var(--card, #1e293b);
   border: 1px solid var(--border, rgba(255, 255, 255, 0.15));
   border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-command);
   padding: 12px;
   backdrop-filter: blur(20px);
 }
@@ -245,7 +245,7 @@
   }
 
   &.active {
-    background: rgba(0, 229, 255, 0.1);
+    background: var(--accent);
     border-color: var(--primary, #00e5ff);
   }
 }
@@ -276,7 +276,7 @@
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: flex-start;
@@ -290,7 +290,7 @@
   background: var(--card, #0f172a);
   border: 1px solid var(--border, rgba(255, 255, 255, 0.15));
   border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-command);
   overflow: hidden;
 }
 
