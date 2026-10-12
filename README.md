@@ -1,5 +1,11 @@
 # Praxis Hero HQ UI
 
+**Demonstração publicada:** [praxis-hero-hq.web.app](https://praxis-hero-hq.web.app).
+
+**Estado operacional:** frontend, quatro gráficos e layout remoto carregados.
+A API ainda retorna 503 em schemas/capabilities, afetando a tabela de incidentes.
+Veja o [registro de publicação](docs/design/hero-publication-2026-10-12.md).
+
 > **Plataforma Corporativa de Gestão Tática & RH de Super-Heróis** construída sobre a **Plataforma Praxis** (`@praxisui/*`), Angular 21 e arquitetura 100% orientada a metadados (*metadata-driven*).
 
 ---
@@ -138,3 +144,31 @@ npm run build
 
 Consulte o [estudo e evidências dos temas](docs/design/workspace-themes-2026-10-11.md)
 para conhecer os tokens investigados, os estados conferidos e os limites de fidelidade.
+
+## Publicação no Firebase Hosting
+
+O frontend usa o projeto Firebase `praxis-hero-hq`, definido em `.firebaserc`,
+e publica `dist/praxis-hero-hq-ui/browser`, conforme `firebase.json`. A primeira
+publicação de Praxis rc.9 foi feita com a CLI oficial Firebase 15.33.0, após
+instalação limpa e build, usando a sessão já autenticada do operador:
+
+```sh
+npm ci --registry=https://registry.npmjs.org/
+npm run build
+npx --yes --registry=https://registry.npmjs.org/ firebase-tools@15.33.0 deploy --only hosting --project praxis-hero-hq
+```
+
+O workflow GitHub `firebase-deploy.yml` executa instalação/build após push em
+`main`, mas seu deploy depende do secret
+`FIREBASE_SERVICE_ACCOUNT_PRAXIS_HERO_HQ`. No run `38310673919`, instalação e
+build passaram e o deploy foi ignorado pela ausência desse secret. Não considere
+um workflow verde, por si só, prova de publicação: confira a etapa de deploy.
+A automação futura precisa de autenticação própria; nenhuma chave de serviço
+foi criada nesta publicação.
+
+A API pública usada pelo host é `https://praxis-api-quickstart.onrender.com`.
+Seu proprietário é o Quickstart. A origem exata `https://praxis-hero-hq.web.app`
+deve estar em `CORS_ALLOWED_ORIGINS` e
+`APP_SECURITY_CONFIG_ORIGIN_RESTRICTION_ALLOWED_ORIGINS`. Não use wildcard nem
+desative autenticação, CSRF ou o filtro de origem para contornar bloqueios.
+A persona do host continua uma simulação; ela não concede autoridade corporativa.
