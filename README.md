@@ -97,7 +97,7 @@ verificados, não a cópia de um cache compartilhado. “Restaurar Fábrica” s
 backend confirmar; erros e conflitos permanecem visíveis. “Descartar alterações e recarregar”
 é uma ação explícita para recuperar o documento salvo.
 
-Este fonte requer o incremento de persistência canônica de Core/Page Builder desenvolvido
-junto com a remoção do wrapper. Não basta instalar rc.5/rc.7 publicados anteriormente.
-A validação local usa os pacotes construídos do incremento; a atualização para uma versão
-publicada deve acompanhar a release oficial, sem inventar uma versão ainda não publicada.
+O incremento de persistência canônica acompanha `@praxisui/*` **10.0.0-rc.8**.
+O projeto fixa essa versão em `package.json` e `package-lock.json`; use `npm ci`
+para reproduzir a instalação a partir do npm público. O canal desta versão é `rc`;
+`latest` continua reservado à linha estável. Versões rc.5/rc.7 não oferecem esse contrato.
