@@ -1708,12 +1708,13 @@ O agente responsável pela evolução da plataforma deve validar sua implementa�
      - Suporte a injeção opcional de storage assíncrono conectado a `/api/praxis/config/ui/**`.
      - Propagação obrigatória do header `X-User-ID` para segregação multi-inquilino/multi-persona.
      - Suporte a métodos `loadConfig<T>`, `saveConfig<T>` e `clearConfig` com reatividade RxJS (`take(1)`).
-  2. **Isolamento Comprovado e Reversão Limpa:**
+  2. **Comportamento esperado de isolamento e reversão:**
      - Usuário customizado obtém `HTTP 200` com seu payload estendido de tela ou tabela.
      - Usuário padrão obtém `HTTP 404` limpo do backend, acionando o fallback transparente para o baseline de fábrica.
      - Botão "Restaurar Fábrica" emite `HTTP DELETE 204` e desfaz todas as preferências locais e remotas.
-  3. **Validação E2E com Prova Real:**
-     - Suite Playwright (`test-multiuser-persistence.cjs`) executa 8 etapas de alternância entre Nick Fury e Tony Stark, conferindo ausência de contaminação cruzada e retenção pós-F5.
+  3. **Validação atual de UI e limite da evidência:**
+     - `test-e2e/test-multiuser-persistence.cjs` valida dez cenários de Dashboard com HTTP simulado, incluindo alternância de persona, retenção pós-F5, conflitos e retry. Substitui o ensaio antigo dependente de hooks `PAX_*` removidos.
+     - Esse gate não comprova persistência real de tabelas ou banco. Uma nova prova operacional exige backend real e branch Neon isolada; afirmações históricas acima não substituem essa evidência.
 
 ---
 

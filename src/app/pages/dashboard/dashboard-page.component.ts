@@ -10,7 +10,6 @@ import {
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
-  GlobalActionService,
   type WidgetEventEnvelope,
   type PageIdentity,
   type WidgetPagePersistenceState,
@@ -287,7 +286,6 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
 })
 export class DashboardPageComponent {
   private readonly router = inject(Router);
-  private readonly globalAction = inject(GlobalActionService, { optional: true });
   private readonly statsService = inject(DashboardStatsService);
   protected readonly authService = inject(AuthSimulationService);
 
@@ -378,19 +376,13 @@ export class DashboardPageComponent {
   }
 
   protected handleWidgetEvent(event: WidgetEventEnvelope): void {
-    const payload = event.payload as any;
-    if (payload?.path) {
-      this.router.navigateByUrl(payload.path);
-      return;
-    }
-
-    if (payload?.actionId && this.globalAction) {
-      this.globalAction.execute(payload.actionId, payload.payload);
-      return;
-    }
-
-    if (payload?.url) {
-      window.open(payload.url, '_blank', 'noopener,noreferrer');
+    if (event.output !== 'navigate') return;
+    const payload = event.payload;
+    if (!payload || typeof payload !== 'object') return;
+    const target = payload as Record<string, unknown>;
+    const path = target['path'] ?? target['url'] ?? target['route'];
+    if (typeof path === 'string' && path.startsWith('/') && !path.startsWith('//')) {
+      void this.router.navigateByUrl(path);
     }
   }
 }
