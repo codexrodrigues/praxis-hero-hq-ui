@@ -129,7 +129,10 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
       </div>
 
       <!-- Main Dynamic Content Routed from Modules -->
-      <router-outlet></router-outlet>
+      <!-- Persona simulation belongs to this host; rebuild its routed view on selection. -->
+      @for (personaId of [authService.currentPersona().id]; track personaId) {
+        <router-outlet></router-outlet>
+      }
     </praxis-app-shell>
 
     <!-- Quick Command Modal (Ctrl+K) -->

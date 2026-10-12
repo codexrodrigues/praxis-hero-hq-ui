@@ -1,5 +1,12 @@
 # Essência, Aurora e Órbita no Hero HQ
 
+## Estado atual — adoção pública em 12/10/2026
+
+Praxis `10.0.0-rc.9` publicado pelo fluxo oficial e adotado nos 22 pacotes deste
+host, com lockfile público, `npm ci` limpo e build aprovado. O PR consumidor
+reúne a implementação de temas e esta adoção; integração/live têm estados
+separados. As seções anteriores à release abaixo são histórico de validação.
+
 ## Escopo e direção
 
 Pedido: manter a estética dos três temas do Ergon Workflow Designer no host Angular, especialmente Órbita. Classificação `local-pequena`: aparência privada do host, sem alteração de contratos públicos, dependências, configurações de build, metadados ou regras de negócio. Baseline limpo `51b6769`, branch `codex/canonical-dashboard-page`, Praxis instalado `10.0.0-rc.7`, Angular/Material `21.2.14`.
@@ -201,3 +208,46 @@ Revisão independente aprovou código, repros, documentação e guidance sem nov
 bloqueador. Publicação, integração GitHub, sincronização das skills instaladas e
 adoção reproduzível do consumidor continuam pendentes. O preview permanece na
 origem oficial `http://127.0.0.1:4302/` para inspeção.
+
+## Adoção npm pública — 12/10/2026
+
+Classificação `transversal`, sem nova API. Fontes: Core/Charts/CRUD/Table no
+Angular PR #572; tag `praxis-ui-v10.0.0-rc.9`, commit `b2ab6a282`. Preparação
+run `38250745303` e publicação/postflight `38250801872` concluídos. O postflight
+provou 22 pacotes/canal rc e tarballs selados SHA-512; latest segue `9.0.67`.
+
+Instalação: manifesto e lockfile fixam rc.9, URLs do npm público e versões
+instaladas coincidem em todos os 22 pacotes. `npm ci` público sem flags de
+compatibilidade e `npm run build` aprovados. Warning existente: bundle inicial
+14,02 MB (23,32 kB acima do budget). Nenhuma configuração de build foi alterada.
+
+Browser Chrome/CUA no preview oficial 4302: três temas, quatro tipos de gráfico
+e tooltip Dark; ResourcePage exibe o ARIA neutro de escopos. Persona
+Nick→Tony→Nick recria a rota e restaura o filtro padrão; Tony persistiu após
+reload, URL preservada. O simulador não fabrica contexto corporativo confirmado.
+Prova de invalidação de contexto corporativo permanece nos testes focais da lib.
+Sem escrita de negócio/layout nem ensaio de banco.
+
+Capturas `published-rc9-*.png` na pasta de evidências: Essência, Aurora, Órbita,
+gráficos Dark, persona Tony e viewport 760×900. Navegação estreita abre/fecha;
+viewport/persona/preferência inicial restaurados após o teste. O corte de texto
+longo em KPI estreito e a tabela horizontal permanecem limites de layout já
+existentes, fora do aceite de fidelidade de cores.
+
+Verificador estático: 110 declarações de paleta, nove casos de bootstrap e
+12 pares de contraste aprovados. Skills de temas PR #754 e CRUD PR #757
+integradas e sincronizadas seletivamente, hashes em paridade. Guia público CRUD
+landing PR #255 integrado; não houve deploy da landing. Revisão independente
+do remount privado da rota: sem bloqueador; prova no browser executada pelo
+coordenador com pacote público.
+
+Auditoria informativa das dependências da instalação: 19 avisos totais;
+`npm audit --omit=dev` reporta oito no Angular já fixado em 21.2.14
+(quatro moderados/quatro altos, zero críticos de produção). Não se declara
+o host livre de vulnerabilidades nem se executa `npm audit fix --force`.
+Atualizar o train Angular exige um ciclo próprio de validação, fora deste
+incremento de temas/Praxis.
+
+O main do Hero dispara Firebase Hosting `channelId: live` em seu workflow.
+Integração do PR consumidor e esse deploy dependem de autorização explícita
+para publicar o site; build local/instalação npm não equivalem a deploy.

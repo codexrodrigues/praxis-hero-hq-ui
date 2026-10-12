@@ -97,16 +97,25 @@ verificados, não a cópia de um cache compartilhado. “Restaurar Fábrica” s
 backend confirmar; erros e conflitos permanecem visíveis. “Descartar alterações e recarregar”
 é uma ação explícita para recuperar o documento salvo.
 
-Os manifestos deste checkout ainda fixam `@praxisui/*` **10.0.0-rc.8**.
-`npm ci` reproduz essas dependências publicadas, mas não inclui as correções locais de aparência Core/Charts usadas
-na validação atual. Portanto, `npm ci` sozinho ainda não reproduz este protótipo.
+Os 22 pacotes `@praxisui/*` estão fixados em **10.0.0-rc.9**, com lockfile
+resolvido no npm público. Esta versão contém as correções canônicas de shell,
+cores/tooltip dos gráficos e ciclo de contexto do CRUD.
 
-A prova local consome tarballs produzidos do checkout canônico Praxis, identificados
-como rc.8 no build, com alterações de fonte ainda não publicadas. A identidade rc.8
-do tarball não comprova que esse incremento esteja disponível no npm. A adoção
-reproduzível exige publicar o incremento pela release oficial e depois alinhar todos
-os pacotes Praxis e o lockfile à versão efetivamente publicada. Não use ranges nem
-presuma que o pacote público com o mesmo número contém estas alterações.
+```sh
+npm ci --registry=https://registry.npmjs.org/
+npm run build
+npm start
+```
+
+A release oficial por tag `praxis-ui-v10.0.0-rc.9` passou por build, publicação OIDC
+e postflight dos 22 pacotes. A adoção deste host passou por instalação limpa e
+build; não depende de tarballs locais, paths para `dist` ou flags de peer legado.
+O canal `latest` permanece na linha estável; o host fixa a versão RC exata para
+reproduzir a apresentação.
+
+A troca de persona é uma simulação privada: o host recria sua rota ao escolher
+outra persona, sem emitir evento global para as bibliotecas. Isso não equivale
+a uma sessão corporativa confirmada no Core.
 
 ## Aparência do workspace
 
