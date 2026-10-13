@@ -76,12 +76,12 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       ],
       overrides: {
         id: { width: '80px', align: 'center', header: 'Cód.' },
-        orderDate: { width: '130px', align: 'center', format: 'dd/MM/yyyy', header: 'Data do Pedido' },
+        orderDate: { width: '130px', align: 'center', header: 'Data do Pedido' },
         quantity: { width: '120px', align: 'center', header: 'Qtd. Lote' },
         currency: { width: '90px', align: 'center', header: 'Moeda' },
         status: { width: '140px', align: 'center', header: 'Status' },
-        approvedAt: { width: '130px', align: 'center', format: 'dd/MM/yyyy', header: 'Aprovado Em' },
-        receivedAt: { width: '130px', align: 'center', format: 'dd/MM/yyyy', header: 'Recebido Em' },
+        approvedAt: { width: '130px', align: 'center', header: 'Aprovado Em' },
+        receivedAt: { width: '130px', align: 'center', header: 'Recebido Em' },
         disabledReason: { width: '220px', header: 'Observações' },
       },
     },
@@ -107,7 +107,6 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/procurement/purchase-orders/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['status', 'orderDate', 'quantity'],
@@ -120,7 +119,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

@@ -47,7 +47,6 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   },
   table: {
     meta: { idField: 'incidenteId' },
-    idField: 'incidenteId',
     columnProjection: {
       source: 'schema',
       include: ['incidenteId', 'missao', 'local', 'severidade', 'danosCivis', 'totalIndenizacoes', 'totalPago', 'totalPendente'],
@@ -87,10 +86,10 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         missao: { width: '200px', header: 'Missão de Origem' },
         local: { width: '150px', header: 'Local do Dano' },
         severidade: { width: '120px', align: 'center', header: 'Severidade' },
-        danosCivis: { width: '170px', align: 'right', type: 'currency', format: 'BRL', header: 'Prejuízo Civil Estimado' },
-        totalIndenizacoes: { width: '170px', align: 'right', type: 'currency', format: 'BRL', header: 'Indenizações Totais' },
-        totalPago: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Total Indenizado' },
-        totalPendente: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Saldo Pendente' },
+        danosCivis: { width: '170px', align: 'right', header: 'Prejuízo Civil Estimado' },
+        totalIndenizacoes: { width: '170px', align: 'right', header: 'Indenizações Totais' },
+        totalPago: { width: '160px', align: 'right', header: 'Total Indenizado' },
+        totalPendente: { width: '160px', align: 'right', header: 'Saldo Pendente' },
       },
     },
     toolbar: {
@@ -120,7 +119,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

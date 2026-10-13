@@ -117,7 +117,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   actions: [
     {
       id: 'edit',

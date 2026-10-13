@@ -103,7 +103,7 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

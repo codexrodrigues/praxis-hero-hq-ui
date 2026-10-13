@@ -111,7 +111,6 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/operations/incidentes/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['local', 'severidade', 'descricao'],
@@ -124,7 +123,7 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

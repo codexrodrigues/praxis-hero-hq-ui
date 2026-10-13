@@ -104,7 +104,6 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/human-resources/ferias-afastamentos/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['tipo', 'funcionarioId', 'dataInicio'],
@@ -117,7 +116,7 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

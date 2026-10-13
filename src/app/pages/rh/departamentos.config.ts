@@ -99,7 +99,6 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/human-resources/departamentos/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'codigo', 'responsavelNome'],
@@ -112,7 +111,7 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

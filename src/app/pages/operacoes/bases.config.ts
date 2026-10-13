@@ -102,7 +102,6 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/operations/bases/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'tipo', 'sigilo', 'planeta'],
@@ -115,7 +114,7 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

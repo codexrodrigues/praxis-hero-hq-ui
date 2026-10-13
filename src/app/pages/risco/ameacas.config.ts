@@ -105,7 +105,6 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/risk-intelligence/ameacas/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'classe', 'status', 'nivel'],
@@ -118,7 +117,7 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

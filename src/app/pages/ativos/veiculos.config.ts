@@ -104,7 +104,6 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/assets/veiculos/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'tipo', 'status', 'proprietarioNome'],
@@ -117,7 +116,7 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

@@ -105,7 +105,6 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/human-resources/folhas-pagamento/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['mes', 'ano', 'funcionarioId'],
@@ -118,7 +117,7 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },

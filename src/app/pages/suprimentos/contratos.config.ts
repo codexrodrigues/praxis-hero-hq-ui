@@ -78,7 +78,7 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
         number: { width: '150px', header: 'Nº do Contrato' },
         supplierName: { width: '240px', header: 'Fornecedor / Fabricante' },
         currency: { width: '90px', align: 'center', header: 'Moeda' },
-        validUntil: { width: '140px', align: 'center', type: 'date', format: 'dd/MM/yyyy', header: 'Vigência Até' },
+        validUntil: { width: '140px', align: 'center', header: 'Vigência Até' },
         status: { width: '150px', align: 'center', header: 'Status Contratual' },
         disabledReason: { width: '240px', header: 'Observações / Motivo' },
       },
@@ -105,7 +105,6 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
           enabled: true,
         },
         advancedFilters: {
-          schemaUrl: '/schemas/filtered?path=/api/procurement/contracts/filter&operation=post&schemaType=request',
           settings: {
             inline: true,
             alwaysVisibleFields: ['supplierName', 'status', 'number'],
@@ -118,7 +117,7 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
         source: 'schema',
       },
     },
-  } as unknown as CrudMetadata['table'],
+  },
   defaults: {
     openMode: 'drawer',
   },
