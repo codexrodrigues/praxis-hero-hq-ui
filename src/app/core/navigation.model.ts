@@ -38,6 +38,8 @@ export const HERO_NAVIGATION: NavGroup[] = [
         path: '/rh/folha-pagamento',
         icon: 'payments',
         description: 'Processamento de remunerações, eventos e pagamentos.',
+        badge: 'DEFCON 1',
+        badgeTone: 'warning',
       },
       {
         label: 'Férias & Afastamentos',
@@ -116,6 +118,8 @@ export const HERO_NAVIGATION: NavGroup[] = [
         path: '/suprimentos/contratos',
         icon: 'contract',
         description: 'Gestão de parceiros, contratos e níveis de serviço.',
+        badge: 'DEFCON 1',
+        badgeTone: 'warning',
       },
       {
         label: 'Pedidos de Compra',

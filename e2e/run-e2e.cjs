@@ -136,6 +136,10 @@ async function runE2E() {
       await page.waitForTimeout(3000);
       const payrollTitle = page.locator('h1, [class*="title"]').filter({ hasText: /Folha de Pagamento/i }).first();
       assert(await payrollTitle.count() > 0, 'Acesso autorizado com sucesso para Nick Fury (DEFCON 1)');
+
+      // Validar badges visuais de restrição tática DEFCON 1 na navegação
+      const defconBadges = page.locator('.praxis-shell__nav-badge').filter({ hasText: /DEFCON 1/i });
+      assert(await defconBadges.count() >= 2, 'Badges táticos "DEFCON 1" visíveis nos itens de menu restritos (Folha de Pagamento e Contratos)');
     }
   } catch (err) {
     console.error(`[E2E] Erro inesperado na execução:`, err);
