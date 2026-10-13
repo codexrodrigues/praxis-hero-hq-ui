@@ -72,7 +72,7 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
                     'warning',
                     'info',
                   ],
-                } as any,
+                },
                 fallbackText: 'Índice de Danos',
               },
             },

@@ -74,7 +74,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
                     'warning',
                     'info',
                   ],
-                } as any,
+                },
                 fallbackText: 'Taxa de Liquidação',
               },
             },
