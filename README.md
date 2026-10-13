@@ -5,9 +5,15 @@
 **Dependências:** 22 pacotes `@praxisui/*` fixados em `10.0.0-rc.12`, obtidos do
 npm público após o postflight oficial. A versão corrige a inferência de paginação
 remota para metadados parciais, preservando estratégias explicitamente configuradas.
-O aceite operacional desta adoção exige publicação no Firebase e validação de
-schemas, capabilities e total da tabela após reiniciar o Render. O [registro anterior](docs/design/hero-publication-2026-10-12.md)
-permanece como evidência histórica, incluindo seus limites.
+Em 13/10/2026, o Hero foi publicado no Firebase e validado após reinício oficial do
+Render com SDK `8.0.0-rc.169`: schemas, filtros, capabilities e actions carregaram,
+e a tabela de Heróis & Colaboradores manteve total 101 no percurso
+`1–10 → 11–20 → 1–10`. A nova JVM recuperou `RESTORED`, preservando
+READY13/PUBLISHED21. O [recibo de aceite e seus limites](https://github.com/codexrodrigues/praxis-api-quickstart/blob/fadf0ca4/docs/engineering/evidence/render-startup-recovery-live-rc169-20261013/acceptance.json)
+registra respostas críticas e términos, inclusive a requisição 304 cancelada com
+duplicata 200 concluída. Isso prova esse percurso de leitura, sem alegar SLA ou
+escrita de negócio. O [registro anterior](docs/design/hero-publication-2026-10-12.md)
+permanece como evidência histórica.
 
 > **Plataforma Corporativa de Gestão Tática & RH de Super-Heróis** construída sobre a **Plataforma Praxis** (`@praxisui/*`), Angular 21 e arquitetura 100% orientada a metadados (*metadata-driven*).
 
