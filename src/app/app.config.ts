@@ -128,12 +128,20 @@ export const appConfig: ApplicationConfig = {
                 localStorage.getItem('pax.api.user') ||
                 'nick.fury'
               : 'nick.fury';
+          const token =
+            typeof localStorage !== 'undefined'
+              ? localStorage.getItem('pax.api.token')
+              : null;
+          const headers: Record<string, string> = {
+            'X-Tenant-ID': tenant,
+            'X-Tenant': tenant,
+            'X-User-ID': user,
+          };
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
           const cloned = req.clone({
-            setHeaders: {
-              'X-Tenant-ID': tenant,
-              'X-Tenant': tenant,
-              'X-User-ID': user,
-            },
+            setHeaders: headers,
           });
           return next(cloned);
         },
