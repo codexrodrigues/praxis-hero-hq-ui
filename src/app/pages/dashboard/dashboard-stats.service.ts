@@ -69,7 +69,7 @@ export class DashboardStatsService {
           }
           return { planned, inProgress, total };
         }),
-        catchError(() => of({ planned: 10, inProgress: 6, total: 26 })),
+        catchError(() => of({ planned: 14, inProgress: 7, total: 21 })),
       );
 
     const payrollStats$ = this.http

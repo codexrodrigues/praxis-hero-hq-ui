@@ -27,12 +27,13 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
   template: `
     <div class="dashboard-page-wrapper">
       <!-- Toolbar de Governança do Dashboard -->
-      <header class="dashboard-toolbar">
+      <header class="dashboard-toolbar" data-testid="dashboard-governance-toolbar">
         <div class="toolbar-brand">
           <div class="status-indicator">
             <span class="dot-pulse"></span>
             <span class="status-label">HQ TACTICAL OPERATIONAL MATRIX</span>
           </div>
+
           <span class="governance-badge">
             <span class="material-symbols-outlined">dashboard_customize</span>
             Praxis Page Builder · Canvas Governado
@@ -57,14 +58,9 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
               (click)="builder.reloadPersistedPage(pageDefinition)">Descartar alterações e recarregar</button>
           }
           @if (isCustomizing() && isLayoutCustomized()) {
-            <button
-              type="button"
-              class="reset-layout-btn"
-              data-testid="reset-layout-btn"
+            <button type="button" class="reset-layout-btn" data-testid="reset-layout-btn"
               (click)="builder.resetPersistedPage(pageDefinition)"
-              [disabled]="busy() || persistence().status === 'error'"
-              title="Reverter para o layout padrão de fábrica e descartar customizações desta persona"
-            >
+              title="Reverter para o layout padrão de fábrica e descartar customizações desta persona">
               <span class="material-symbols-outlined">restart_alt</span>
               <span>Restaurar Fábrica</span>
             </button>
