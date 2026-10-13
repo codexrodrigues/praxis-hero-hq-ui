@@ -98,6 +98,45 @@ async function runE2E() {
     assert(heroesBody.includes('EFETIVO TOTAL') || heroesBody.includes('24 Cadastrados'), 'KPI de Efetivo Total presente');
     assert(heroesBody.includes('21 Ativos'), 'KPI de Prontidão Ativa presente');
 
+    // -------------------------------------------------------------
+    // Test 6: Tactical Clearance Guard & Governança de Autorização
+    // -------------------------------------------------------------
+    console.log('\n[Test 6] Validando Tactical Clearance Guard & Governança de Autorização...');
+    const personaBtn = page.locator('[data-testid="persona-switcher"]').first();
+    if (await personaBtn.count() > 0) {
+      await personaBtn.click();
+      await page.waitForTimeout(500);
+
+      const tonyOption = page.locator('[data-testid="persona-option-tony.stark"]').first();
+      assert(await tonyOption.count() > 0, 'Opção Tony Stark presente no switcher de persona');
+      await tonyOption.click();
+      await page.waitForTimeout(1000);
+
+      // Tentar acessar recurso restrito a DEFCON 1 (/rh/folha-pagamento)
+      console.log('  Tentando navegar para /rh/folha-pagamento com credencial DEFCON 2...');
+      await page.goto(`${BASE_URL}/rh/folha-pagamento`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(2000);
+
+      const currentUrl = page.url();
+      assert(currentUrl.includes('authDenied=true') || currentUrl.endsWith('/'), 'Navegação bloqueada pelo Tactical Clearance Guard e redirecionada ao Dashboard');
+
+      const authAlert = page.locator('[data-testid="tactical-auth-alert"]').first();
+      assert(await authAlert.count() > 0, 'Alerta tático de acesso restrito renderizado no Dashboard');
+
+      // Reverter para Nick Fury (DEFCON 1)
+      await personaBtn.click();
+      await page.waitForTimeout(500);
+      const furyOption = page.locator('[data-testid="persona-option-nick.fury"]').first();
+      await furyOption.click();
+      await page.waitForTimeout(1000);
+
+      // Acessar novamente /rh/folha-pagamento com DEFCON 1
+      console.log('  Navegando para /rh/folha-pagamento com credencial DEFCON 1 (Nick Fury)...');
+      await page.goto(`${BASE_URL}/rh/folha-pagamento`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(3000);
+      const payrollTitle = page.locator('h1, [class*="title"]').filter({ hasText: /Folha de Pagamento/i }).first();
+      assert(await payrollTitle.count() > 0, 'Acesso autorizado com sucesso para Nick Fury (DEFCON 1)');
+    }
   } catch (err) {
     console.error(`[E2E] Erro inesperado na execução:`, err);
     failures++;

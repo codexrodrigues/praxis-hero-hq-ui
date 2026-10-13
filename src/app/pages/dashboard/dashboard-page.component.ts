@@ -7,8 +7,9 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import {
   type WidgetEventEnvelope,
   type PageIdentity,
@@ -26,6 +27,23 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dashboard-page-wrapper">
+      @if (authDeniedResource(); as deniedRes) {
+        <div class="tactical-auth-alert glass-panel" role="alert" data-testid="tactical-auth-alert">
+          <div class="alert-content">
+            <span class="material-symbols-outlined alert-icon">shield_lock</span>
+            <div class="alert-text">
+              <strong class="alert-title">Acesso Tático Restrito (Credencial DEFCON 1 Requerida)</strong>
+              <p class="alert-desc">
+                A credencial de segurança de <strong>{{ authService.currentPersona().name }}</strong> ({{ authService.currentPersona().clearanceLevel }})
+                não possui autorização executiva para acessar <em>{{ deniedRes }}</em>. Alterne para <strong>Nick Fury</strong> no menu superior para autorizar o acesso.
+              </p>
+            </div>
+          </div>
+          <button type="button" class="alert-dismiss-btn" (click)="dismissAuthDenied()" aria-label="Fechar alerta">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      }
       <!-- Toolbar de Governança do Dashboard -->
       <header class="dashboard-toolbar" data-testid="dashboard-governance-toolbar">
         <div class="toolbar-brand">
@@ -275,6 +293,84 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
       span { font-size: 18px; }
     }
 
+    .tactical-auth-alert {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--destructive, #ef4444) 14%, var(--card, #1e293b));
+      border: 1px solid color-mix(in oklab, var(--destructive, #ef4444) 40%, transparent);
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+      margin-bottom: 20px;
+      animation: alertSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+      .alert-content {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+
+        .alert-icon {
+          font-size: 28px;
+          color: var(--destructive, #ef4444);
+        }
+
+        .alert-text {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .alert-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--destructive, #ef4444);
+            letter-spacing: -0.01em;
+          }
+
+          .alert-desc {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--foreground, #e2e8f0);
+            line-height: 1.4;
+
+            strong, em {
+              color: var(--foreground, #ffffff);
+            }
+          }
+        }
+      }
+
+      .alert-dismiss-btn {
+        background: transparent;
+        border: none;
+        color: var(--muted-foreground, #94a3b8);
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.08);
+          color: var(--foreground, #ffffff);
+        }
+      }
+    }
+
+    @keyframes alertSlideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .dashboard-canvas-container {
       width: 100%;
     }
@@ -282,8 +378,24 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
 })
 export class DashboardPageComponent {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly statsService = inject(DashboardStatsService);
   protected readonly authService = inject(AuthSimulationService);
+
+  protected readonly authDeniedResource = toSignal(
+    this.route.queryParams.pipe(
+      map((params) => (params['authDenied'] === 'true' ? params['resource'] || 'Recurso Restrito' : null)),
+    ),
+    { initialValue: null },
+  );
+
+  protected dismissAuthDenied(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { authDenied: null, resource: null },
+      queryParamsHandling: 'merge',
+    });
+  }
 
   protected readonly pageDefinition = DASHBOARD_PAGE_DEFINITION;
   protected readonly pageIdentity = computed<PageIdentity>(() => {

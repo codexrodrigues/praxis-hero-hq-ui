@@ -1,17 +1,16 @@
-export interface NavItem {
-  readonly label: string;
-  readonly path: string;
-  readonly icon: string;
+import type { PraxisNavGroup, PraxisNavItem } from '@praxisui/core';
+
+export interface NavItem extends PraxisNavItem {
   readonly description: string;
 }
 
-export interface NavGroup {
+export interface NavGroup extends PraxisNavGroup {
   readonly label: string;
   readonly domainKey: 'overview' | 'rh' | 'operations' | 'assets' | 'supplies' | 'risk';
-  readonly items: readonly NavItem[];
+  readonly items: NavItem[];
 }
 
-export const HERO_NAVIGATION: readonly NavGroup[] = [
+export const HERO_NAVIGATION: NavGroup[] = [
   {
     label: 'Visão Geral',
     domainKey: 'overview',

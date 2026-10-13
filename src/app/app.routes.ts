@@ -1,19 +1,6 @@
 import { Routes } from '@angular/router';
-import { HEROES_CRUD_METADATA } from './pages/rh/funcionarios.config';
-import { FOLHA_PAGAMENTO_CRUD_METADATA } from './pages/rh/folha-pagamento.config';
-import { AFASTAMENTOS_CRUD_METADATA } from './pages/rh/afastamentos.config';
-import { DEPARTAMENTOS_CRUD_METADATA } from './pages/rh/departamentos.config';
-import { REPUTACAO_CRUD_METADATA } from './pages/rh/reputacao.config';
-import { MISSOES_CRUD_METADATA } from './pages/operacoes/missoes.config';
-import { EQUIPES_CRUD_METADATA } from './pages/operacoes/equipes.config';
-import { BASES_CRUD_METADATA } from './pages/operacoes/bases.config';
-import { INCIDENTES_CRUD_METADATA } from './pages/operacoes/incidentes.config';
-import { EQUIPAMENTOS_CRUD_METADATA } from './pages/ativos/equipamentos.config';
-import { VEICULOS_CRUD_METADATA } from './pages/ativos/veiculos.config';
-import { CONTRATOS_CRUD_METADATA } from './pages/suprimentos/contratos.config';
-import { PEDIDOS_CRUD_METADATA } from './pages/suprimentos/pedidos.config';
-import { AMEACAS_CRUD_METADATA } from './pages/risco/ameacas.config';
-import { INDICADORES_CRUD_METADATA } from './pages/risco/indicadores.config';
+import type { CrudMetadata } from '@praxisui/crud';
+import { tacticalClearanceGuard } from './core/tactical-clearance.guard';
 
 interface ResourceRouteConfig {
   path: string;
@@ -23,8 +10,9 @@ interface ResourceRouteConfig {
   domain: string;
   icon: string;
   tone: string;
-  metadata: any;
+  loadMetadata: () => Promise<CrudMetadata>;
   enableCustomization?: boolean;
+  clearance?: 'DEFCON 1' | 'DEFCON 2';
 }
 
 const RESOURCE_ROUTES: ResourceRouteConfig[] = [
@@ -36,7 +24,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Pessoas & Recursos Humanos',
     icon: 'group',
     tone: 'rh',
-    metadata: HEROES_CRUD_METADATA,
+    loadMetadata: () => import('./pages/rh/funcionarios.config').then((m) => m.HEROES_CRUD_METADATA),
   },
   {
     path: 'rh/folha-pagamento',
@@ -46,7 +34,8 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Pessoas & Recursos Humanos',
     icon: 'payments',
     tone: 'rh',
-    metadata: FOLHA_PAGAMENTO_CRUD_METADATA,
+    clearance: 'DEFCON 1',
+    loadMetadata: () => import('./pages/rh/folha-pagamento.config').then((m) => m.FOLHA_PAGAMENTO_CRUD_METADATA),
   },
   {
     path: 'rh/afastamentos',
@@ -56,7 +45,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Pessoas & Recursos Humanos',
     icon: 'event_busy',
     tone: 'rh',
-    metadata: AFASTAMENTOS_CRUD_METADATA,
+    loadMetadata: () => import('./pages/rh/afastamentos.config').then((m) => m.AFASTAMENTOS_CRUD_METADATA),
   },
   {
     path: 'rh/cargos-departamentos',
@@ -66,7 +55,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Pessoas & Recursos Humanos',
     icon: 'domain',
     tone: 'rh',
-    metadata: DEPARTAMENTOS_CRUD_METADATA,
+    loadMetadata: () => import('./pages/rh/departamentos.config').then((m) => m.DEPARTAMENTOS_CRUD_METADATA),
   },
   {
     path: 'rh/reputacao',
@@ -76,7 +65,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Pessoas & Recursos Humanos',
     icon: 'monitoring',
     tone: 'rh',
-    metadata: REPUTACAO_CRUD_METADATA,
+    loadMetadata: () => import('./pages/rh/reputacao.config').then((m) => m.REPUTACAO_CRUD_METADATA),
   },
   {
     path: 'operacoes/missoes',
@@ -86,7 +75,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Operações & Missões Táticas',
     icon: 'military_tech',
     tone: 'operations',
-    metadata: MISSOES_CRUD_METADATA,
+    loadMetadata: () => import('./pages/operacoes/missoes.config').then((m) => m.MISSOES_CRUD_METADATA),
   },
   {
     path: 'operacoes/equipes',
@@ -96,7 +85,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Operações & Missões Táticas',
     icon: 'shield',
     tone: 'operations',
-    metadata: EQUIPES_CRUD_METADATA,
+    loadMetadata: () => import('./pages/operacoes/equipes.config').then((m) => m.EQUIPES_CRUD_METADATA),
   },
   {
     path: 'operacoes/bases',
@@ -106,7 +95,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Operações & Missões Táticas',
     icon: 'apartment',
     tone: 'operations',
-    metadata: BASES_CRUD_METADATA,
+    loadMetadata: () => import('./pages/operacoes/bases.config').then((m) => m.BASES_CRUD_METADATA),
   },
   {
     path: 'operacoes/incidentes',
@@ -116,7 +105,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Operações & Missões Táticas',
     icon: 'crisis_alert',
     tone: 'operations',
-    metadata: INCIDENTES_CRUD_METADATA,
+    loadMetadata: () => import('./pages/operacoes/incidentes.config').then((m) => m.INCIDENTES_CRUD_METADATA),
   },
   {
     path: 'ativos/equipamentos',
@@ -126,7 +115,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Ativos Operacionais',
     icon: 'inventory_2',
     tone: 'assets',
-    metadata: EQUIPAMENTOS_CRUD_METADATA,
+    loadMetadata: () => import('./pages/ativos/equipamentos.config').then((m) => m.EQUIPAMENTOS_CRUD_METADATA),
   },
   {
     path: 'ativos/veiculos',
@@ -136,7 +125,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Ativos Operacionais',
     icon: 'directions_car',
     tone: 'assets',
-    metadata: VEICULOS_CRUD_METADATA,
+    loadMetadata: () => import('./pages/ativos/veiculos.config').then((m) => m.VEICULOS_CRUD_METADATA),
   },
   {
     path: 'suprimentos/contratos',
@@ -147,7 +136,8 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Suprimentos & Aquisições Estratégicas',
     icon: 'contract',
     tone: 'supplies',
-    metadata: CONTRATOS_CRUD_METADATA,
+    clearance: 'DEFCON 1',
+    loadMetadata: () => import('./pages/suprimentos/contratos.config').then((m) => m.CONTRATOS_CRUD_METADATA),
   },
   {
     path: 'suprimentos/pedidos',
@@ -158,8 +148,8 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Suprimentos & Logística Tática',
     icon: 'shopping_cart_checkout',
     tone: 'supplies',
-    metadata: PEDIDOS_CRUD_METADATA,
     enableCustomization: true,
+    loadMetadata: () => import('./pages/suprimentos/pedidos.config').then((m) => m.PEDIDOS_CRUD_METADATA),
   },
   {
     path: 'risco/ameacas',
@@ -169,7 +159,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Inteligência de Risco',
     icon: 'radar',
     tone: 'risk',
-    metadata: AMEACAS_CRUD_METADATA,
+    loadMetadata: () => import('./pages/risco/ameacas.config').then((m) => m.AMEACAS_CRUD_METADATA),
   },
   {
     path: 'risco/indicadores',
@@ -179,7 +169,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Inteligência de Risco',
     icon: 'emergency',
     tone: 'risk',
-    metadata: INDICADORES_CRUD_METADATA,
+    loadMetadata: () => import('./pages/risco/indicadores.config').then((m) => m.INDICADORES_CRUD_METADATA),
   },
 ];
 
@@ -193,6 +183,10 @@ export const routes: Routes = [
   ...RESOURCE_ROUTES.map((r) => ({
     path: r.path,
     loadComponent: () => import('@praxisui/crud').then((m) => m.PraxisResourcePage),
+    canActivate: r.clearance ? [tacticalClearanceGuard] : [],
+    resolve: {
+      metadata: () => r.loadMetadata(),
+    },
     data: {
       resource: r.resource,
       title: r.title,
@@ -202,7 +196,7 @@ export const routes: Routes = [
         icon: r.icon,
         tone: r.tone,
       },
-      metadata: r.metadata,
+      ...(r.clearance ? { clearance: r.clearance } : {}),
       ...(r.enableCustomization ? { enableCustomization: true } : {}),
     },
     title: `Praxis Hero HQ | ${r.title}`,

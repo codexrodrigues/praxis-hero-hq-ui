@@ -185,7 +185,7 @@ export class HeroAppShellComponent {
     href: '/',
   };
 
-  protected readonly navigation = HERO_NAVIGATION as unknown as PraxisNavGroup[];
+  protected readonly navigation: PraxisNavGroup[] = HERO_NAVIGATION;
   protected readonly quickLinks = ALL_NAV_ITEMS.slice(0, 8);
 
   protected readonly footerStatus: PraxisShellFooterStatus = {
@@ -222,5 +222,11 @@ export class HeroAppShellComponent {
   protected selectPersona(personaId: string): void {
     this.authService.switchPersona(personaId);
     this.personaMenuOpen.set(false);
+    const currentUrl = this.router.url;
+    if (currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/?')) {
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigateByUrl(currentUrl);
+      });
+    }
   }
 }
