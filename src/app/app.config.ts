@@ -69,6 +69,7 @@ import {
 import { providePraxisTableMetadata, providePraxisAnalyticalDrawerSchemas } from '@praxisui/table';
 import { providePraxisListMetadata } from '@praxisui/list';
 import { HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS } from './core/analytical-drawer-schemas.catalog';
+import { praxisBulkOperationsMockInterceptor } from './core/bulk-operations-mock.interceptor';
 import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
 
@@ -146,6 +147,7 @@ export const appConfig: ApplicationConfig = {
           return next(cloned);
         },
         praxisApiLoadingBridgeInterceptor,
+        praxisBulkOperationsMockInterceptor,
       ]),
     ),
     ...providePraxisDynamicFieldsCore(),

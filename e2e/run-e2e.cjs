@@ -141,6 +141,58 @@ async function runE2E() {
       const defconBadges = page.locator('.praxis-shell__nav-badge').filter({ hasText: /DEFCON 1/i });
       assert(await defconBadges.count() >= 2, 'Badges táticos "DEFCON 1" visíveis nos itens de menu restritos (Folha de Pagamento e Contratos)');
     }
+
+    // -------------------------------------------------------------
+    // Test 7: Governed Bulk Operations & 2-Phase Protocol
+    // -------------------------------------------------------------
+    console.log('\n[Test 7] Validando Operações em Lote Corporativas (Protocolo de 2 Fases)...');
+    await page.goto(`${BASE_URL}/operacoes/incidentes`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(3000);
+
+    const incidentCheckboxes = page.locator('tbody mat-checkbox');
+    assert((await incidentCheckboxes.count()) > 0, 'Checkboxes de seleção presentes na tabela de Incidentes');
+
+    // Selecionar 2 linhas
+    await incidentCheckboxes.nth(0).click();
+    await incidentCheckboxes.nth(1).click();
+    await page.waitForTimeout(500);
+
+    // Verificar se a ação em lote "Conter Ocorrências" está disponível
+    const bulkButton = page
+      .locator('.praxis-floating-bulk-actions button, button')
+      .filter({ hasText: /Conter Ocorrências/i })
+      .first();
+    assert((await bulkButton.count()) > 0, 'Botão de ação em lote "Conter Ocorrências" disponível');
+
+    // Acionar a ação em lote
+    await bulkButton.click();
+    await page.waitForTimeout(1500);
+
+    // Validar abertura do diálogo canônico
+    const bulkDialog = page.locator('praxis-bulk-operation-dialog, .praxis-bulk-dialog').first();
+    assert((await bulkDialog.count()) > 0, 'Diálogo canônico PraxisBulkOperationDialogComponent aberto');
+
+    const dialogText = await bulkDialog.innerText();
+    assert(dialogText.includes('Conter Ocorrências Selecionadas'), 'Título do comando de domínio renderizado no diálogo');
+    assert(dialogText.includes('registros selecionados como alvo'), 'Badge de alvos selecionados presente no diálogo');
+    assert(dialogText.includes('Conformidade e Prévia de Execução') || dialogText.includes('REGISTROS ALVO'), 'Passo 1 (Avaliação/Preview) calculado com sucesso');
+
+    // Confirmar execução (Fase 2)
+    const confirmBtn = bulkDialog.locator('button').filter({ hasText: /Confirmar Execução/i }).first();
+    assert((await confirmBtn.count()) > 0, 'Botão "Confirmar Execução" habilitado na proposta');
+    await confirmBtn.click();
+    await page.waitForTimeout(1500);
+
+    const postConfirmText = await bulkDialog.innerText();
+    assert(postConfirmText.includes('Operação concluída com') || postConfirmText.includes('Status: Concluído'), 'Passo 2 (Confirmação Transacional) concluído com êxito');
+    assert(postConfirmText.includes('Concluir e Atualizar'), 'Botão de encerramento e atualização presente');
+
+    // Fechar diálogo com sucesso
+    const concludeBtn = bulkDialog.locator('button').filter({ hasText: /Concluir e Atualizar/i }).first();
+    await concludeBtn.click();
+    await page.waitForTimeout(1000);
+
+    assert((await page.locator('praxis-bulk-operation-dialog').count()) === 0, 'Diálogo fechado e tabela pronta para novo ciclo');
   } catch (err) {
     console.error(`[E2E] Erro inesperado na execução:`, err);
     failures++;

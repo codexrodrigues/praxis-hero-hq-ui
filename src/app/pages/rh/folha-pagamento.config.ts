@@ -99,7 +99,40 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         showAdvancedButton: true,
       },
     },
+    actions: {
+      bulk: {
+        enabled: true,
+        position: 'both',
+        actions: [
+          {
+            id: 'reajustar-salarial',
+            action: 'reajustar-salarial',
+            label: 'Reajuste Coletivo de Vencimentos',
+            icon: 'trending_up',
+          },
+          {
+            id: 'atualizacao-cadastral',
+            action: 'atualizacao-cadastral',
+            label: 'Atualização de Registros em Massa',
+            icon: 'edit_note',
+          },
+        ],
+      },
+    },
     behavior: {
+      selection: {
+        enabled: true,
+        type: 'multiple',
+        mode: 'checkbox',
+        allowSelectAll: true,
+        checkboxPosition: 'start',
+        persistSelection: true,
+        persistOnDataUpdate: false,
+        visual: {
+          highlightSelected: true,
+          showSelectionCount: true,
+        },
+      },
       filtering: {
         columnFilters: {
           enabled: true,
@@ -118,8 +151,231 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
       },
     },
   },
+  actions: [
+    {
+      id: 'reajustar-salarial',
+      action: 'reajustar-salarial',
+      label: 'Reajuste Coletivo de Vencimentos',
+      icon: 'trending_up',
+      execution: {
+        bulk: {
+          mode: 'DOMAIN_COMMAND',
+          atomicity: 'PER_ITEM',
+          selectionModes: ['EXPLICIT'],
+          executionModes: ['SYNC'],
+          limits: {
+            maxTargets: 100,
+            maxRequestBytes: 1048576,
+            proposalLifetimeMillis: 300000,
+            unitDeadlineMillis: 15000,
+          },
+          evaluationOperation: {
+            operation: {
+              operationId: 'evaluate-reajuste',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/evaluate',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-reajuste-proposal',
+              schemaType: 'response',
+              url: '/schemas/bulk-reajuste-proposal',
+            },
+          },
+          confirmationOperation: {
+            operation: {
+              operationId: 'confirm-reajuste',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/confirm',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-reajuste-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-reajuste-execution',
+            },
+          },
+          proposalOperation: {
+            operation: {
+              operationId: 'get-reajuste-proposal',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/proposal/{proposalId}',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-reajuste-proposal',
+              schemaType: 'response',
+              url: '/schemas/bulk-reajuste-proposal',
+            },
+          },
+          proposalResultsOperation: {
+            operation: {
+              operationId: 'get-reajuste-proposal-results',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/proposal/{proposalId}/results',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-reajuste-proposal-results',
+              schemaType: 'response',
+              url: '/schemas/bulk-reajuste-proposal-results',
+            },
+          },
+          executionOperation: {
+            operation: {
+              operationId: 'get-reajuste-execution',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/execution/{executionId}',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-reajuste-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-reajuste-execution',
+            },
+          },
+          resultsOperation: {
+            operation: {
+              operationId: 'get-reajuste-execution-results',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/execution/{executionId}/results',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-reajuste-execution-results',
+              schemaType: 'response',
+              url: '/schemas/bulk-reajuste-execution-results',
+            },
+          },
+          cancelOperation: {
+            operation: {
+              operationId: 'cancel-reajuste-execution',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/execution/{executionId}/cancel',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-reajuste-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-reajuste-execution',
+            },
+          },
+        },
+      },
+    },
+    {
+      id: 'atualizacao-cadastral',
+      action: 'atualizacao-cadastral',
+      label: 'Atualização de Registros em Massa',
+      icon: 'edit_note',
+      execution: {
+        bulk: {
+          mode: 'UNIFORM_UPDATE',
+          atomicity: 'PER_ITEM',
+          selectionModes: ['EXPLICIT'],
+          executionModes: ['SYNC'],
+          limits: {
+            maxTargets: 100,
+            maxRequestBytes: 1048576,
+            proposalLifetimeMillis: 300000,
+            unitDeadlineMillis: 15000,
+          },
+          editableFields: {
+            sourceOperation: {
+              operationId: 'bulk-update-folha-fields',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/evaluate',
+              method: 'POST',
+            },
+            requestSchema: {
+              schemaId: 'bulk-folha-update-schema',
+              schemaType: 'request',
+              url: '/schemas/bulk-folha-update',
+            },
+            writableFields: ['salarioBruto', 'totalDescontos', 'dataPagamento'],
+            clearableFields: ['totalDescontos'],
+          },
+          evaluationOperation: {
+            operation: {
+              operationId: 'evaluate-uniform-update',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/evaluate',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-update-proposal',
+              schemaType: 'response',
+              url: '/schemas/bulk-update-proposal',
+            },
+          },
+          confirmationOperation: {
+            operation: {
+              operationId: 'confirm-uniform-update',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/confirm',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-update-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-update-execution',
+            },
+          },
+          proposalOperation: {
+            operation: {
+              operationId: 'get-update-proposal',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/proposal/{proposalId}',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-update-proposal',
+              schemaType: 'response',
+              url: '/schemas/bulk-update-proposal',
+            },
+          },
+          proposalResultsOperation: {
+            operation: {
+              operationId: 'get-update-proposal-results',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/proposal/{proposalId}/results',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-update-proposal-results',
+              schemaType: 'response',
+              url: '/schemas/bulk-update-proposal-results',
+            },
+          },
+          executionOperation: {
+            operation: {
+              operationId: 'get-update-execution',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/execution/{executionId}',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-update-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-update-execution',
+            },
+          },
+          resultsOperation: {
+            operation: {
+              operationId: 'get-update-execution-results',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/execution/{executionId}/results',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-update-execution-results',
+              schemaType: 'response',
+              url: '/schemas/bulk-update-execution-results',
+            },
+          },
+          cancelOperation: {
+            operation: {
+              operationId: 'cancel-update-execution',
+              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/execution/{executionId}/cancel',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-update-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-update-execution',
+            },
+          },
+        },
+      },
+    },
+  ],
   defaults: {
     openMode: 'drawer',
   },
 };
-
