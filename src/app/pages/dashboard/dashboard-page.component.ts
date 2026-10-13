@@ -11,13 +11,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import {
-  type WidgetEventEnvelope,
   type PageIdentity,
   type WidgetPagePersistenceState,
 } from '@praxisui/core';
 import { DynamicPageBuilderComponent } from '@praxisui/page-builder';
 import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
-import { DashboardStatsService } from './dashboard-stats.service';
 import { AuthSimulationService } from '../../core/auth-simulation.service';
 
 @Component({
@@ -110,10 +108,8 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
           [pageIdentity]="pageIdentity()"
           [autoPersist]="true"
           (persistenceChange)="persistence.set($event)"
-          [context]="dashboardContext()"
           [enableCustomization]="isCustomizing() && persistence().status !== 'error' && persistence().status !== 'loading'"
           [showSettingsButton]="isCustomizing()"
-          (widgetEvent)="handleWidgetEvent($event)"
         />
       </main>
     </div>
@@ -379,7 +375,6 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
 export class DashboardPageComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly statsService = inject(DashboardStatsService);
   protected readonly authService = inject(AuthSimulationService);
 
   protected readonly authDeniedResource = toSignal(
@@ -430,67 +425,7 @@ export class DashboardPageComponent {
     });
   }
 
-  protected readonly dashboardKpis = toSignal(this.statsService.getTacticalKpis(), { initialValue: null });
-
-  protected readonly dashboardContext = computed(() => {
-    const k = this.dashboardKpis();
-    if (!k) {
-      return {
-        kpis: {
-          readinessRate: 98.4,
-          activeHeroes: 21,
-          totalHeroes: 21,
-          inProgressMissions: 7,
-          inProgressMissionsBadge: '07',
-          plannedMissions: 14,
-          totalMissions: 21,
-          missoesPercent: 70,
-          latestPayrollMonth: 'Outubro / 2026',
-          latestPayrollNetMillion: '4,85',
-          latestPayrollEmployees: 98,
-          folhaPercent: 78.5,
-          totalIncidents: 24,
-          criticalIncidents: 2,
-          criticalIncidentsBadge: '02',
-          highIncidents: 5,
-          riscosPercent: 15,
-        },
-      };
-    }
-    const missoesPercent = Math.min(
-      100,
-      Math.round((k.inProgressMissions / Math.max(1, k.totalMissions)) * 100),
-    );
-    const riscosPercent = Math.min(
-      100,
-      Math.round((k.criticalIncidents / Math.max(1, k.totalIncidents)) * 100),
-    );
-    return {
-      kpis: {
-        ...k,
-        inProgressMissionsBadge:
-          k.inProgressMissions < 10 ? `0${k.inProgressMissions}` : String(k.inProgressMissions),
-        criticalIncidentsBadge:
-          k.criticalIncidents < 10 ? `0${k.criticalIncidents}` : String(k.criticalIncidents),
-        missoesPercent,
-        riscosPercent,
-        folhaPercent: 78.5,
-      },
-    };
-  });
-
   protected toggleCustomization(): void {
     if (!this.busy()) this.isCustomizing.update((value) => !value);
-  }
-
-  protected handleWidgetEvent(event: WidgetEventEnvelope): void {
-    if (event.output !== 'navigate') return;
-    const payload = event.payload;
-    if (!payload || typeof payload !== 'object') return;
-    const target = payload as Record<string, unknown>;
-    const path = target['path'] ?? target['url'] ?? target['route'];
-    if (typeof path === 'string' && path.startsWith('/') && !path.startsWith('//')) {
-      void this.router.navigateByUrl(path);
-    }
   }
 }

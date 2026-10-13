@@ -97,7 +97,41 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         ],
       },
     },
+    actions: {
+      bulk: {
+        enabled: true,
+        position: 'both',
+        actions: [
+          {
+            id: 'bulk-dispatch',
+            action: 'bulk-dispatch',
+            label: 'Autorizar Despacho em Lote',
+            icon: 'flight_takeoff',
+            color: 'primary',
+          },
+          {
+            id: 'bulk-update-missoes',
+            action: 'bulk-update-missoes',
+            label: 'Atualização de Missões em Massa',
+            icon: 'edit_note',
+          },
+        ],
+      },
+    },
     behavior: {
+      selection: {
+        enabled: true,
+        type: 'multiple',
+        mode: 'checkbox',
+        allowSelectAll: true,
+        checkboxPosition: 'start',
+        persistSelection: true,
+        persistOnDataUpdate: false,
+        visual: {
+          highlightSelected: true,
+          showSelectionCount: true,
+        },
+      },
       filtering: {
         enabled: true,
         columnFilters: {
@@ -134,10 +168,231 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
       openMode: 'modal',
       formId: 'missoes-create',
     },
+    {
+      id: 'bulk-dispatch',
+      action: 'bulk-dispatch',
+      label: 'Autorização e Despacho de Missões em Lote',
+      icon: 'flight_takeoff',
+      execution: {
+        bulk: {
+          mode: 'DOMAIN_COMMAND',
+          atomicity: 'PER_ITEM',
+          selectionModes: ['EXPLICIT'],
+          executionModes: ['SYNC'],
+          limits: {
+            maxTargets: 100,
+            maxRequestBytes: 1048576,
+            proposalLifetimeMillis: 300000,
+            unitDeadlineMillis: 15000,
+          },
+          evaluationOperation: {
+            operation: {
+              operationId: 'evaluate-dispatch-missoes',
+              path: '/api/operations/missoes/bulk/dispatch/evaluation',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-dispatch-proposal',
+              schemaType: 'response',
+              url: '/schemas/bulk-dispatch-proposal',
+            },
+          },
+          confirmationOperation: {
+            operation: {
+              operationId: 'confirm-dispatch-missoes',
+              path: '/api/operations/missoes/bulk/dispatch/confirmation',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-dispatch-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-dispatch-execution',
+            },
+          },
+          proposalOperation: {
+            operation: {
+              operationId: 'get-dispatch-proposal',
+              path: '/api/operations/missoes/bulk/dispatch/proposal/{proposalId}',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-dispatch-proposal',
+              schemaType: 'response',
+              url: '/schemas/bulk-dispatch-proposal',
+            },
+          },
+          proposalResultsOperation: {
+            operation: {
+              operationId: 'get-dispatch-proposal-results',
+              path: '/api/operations/missoes/bulk/dispatch/proposal/{proposalId}/results',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-dispatch-proposal-results',
+              schemaType: 'response',
+              url: '/schemas/bulk-dispatch-proposal-results',
+            },
+          },
+          executionOperation: {
+            operation: {
+              operationId: 'get-dispatch-execution',
+              path: '/api/operations/missoes/bulk/dispatch/execution/{executionId}',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-dispatch-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-dispatch-execution',
+            },
+          },
+          resultsOperation: {
+            operation: {
+              operationId: 'get-dispatch-execution-results',
+              path: '/api/operations/missoes/bulk/dispatch/execution/{executionId}/results',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-dispatch-execution-results',
+              schemaType: 'response',
+              url: '/schemas/bulk-dispatch-execution-results',
+            },
+          },
+          cancelOperation: {
+            operation: {
+              operationId: 'cancel-dispatch-execution',
+              path: '/api/operations/missoes/bulk/dispatch/execution/{executionId}/cancel',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-dispatch-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-dispatch-execution',
+            },
+          },
+        },
+      },
+    },
+    {
+      id: 'bulk-update-missoes',
+      action: 'bulk-update-missoes',
+      label: 'Atualização de Missões em Massa',
+      icon: 'edit_note',
+      execution: {
+        bulk: {
+          mode: 'UNIFORM_UPDATE',
+          atomicity: 'PER_ITEM',
+          selectionModes: ['EXPLICIT'],
+          executionModes: ['SYNC'],
+          limits: {
+            maxTargets: 100,
+            maxRequestBytes: 1048576,
+            proposalLifetimeMillis: 300000,
+            unitDeadlineMillis: 15000,
+          },
+          editableFields: {
+            sourceOperation: {
+              operationId: 'bulk-update-missoes-fields',
+              path: '/api/operations/missoes/bulk/update/evaluation',
+              method: 'POST',
+            },
+            requestSchema: {
+              schemaId: 'bulk-missoes-update-schema',
+              schemaType: 'request',
+              url: '/schemas/bulk-missoes-update',
+            },
+            writableFields: ['prioridade', 'status', 'local'],
+            clearableFields: ['local'],
+          },
+          evaluationOperation: {
+            operation: {
+              operationId: 'evaluate-update-missoes',
+              path: '/api/operations/missoes/bulk/update/evaluation',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-missoes-update-proposal',
+              schemaType: 'response',
+              url: '/schemas/bulk-missoes-update-proposal',
+            },
+          },
+          confirmationOperation: {
+            operation: {
+              operationId: 'confirm-update-missoes',
+              path: '/api/operations/missoes/bulk/update/confirmation',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-missoes-update-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-missoes-update-execution',
+            },
+          },
+          proposalOperation: {
+            operation: {
+              operationId: 'get-update-missoes-proposal',
+              path: '/api/operations/missoes/bulk/update/proposal/{proposalId}',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-missoes-update-proposal',
+              schemaType: 'response',
+              url: '/schemas/bulk-missoes-update-proposal',
+            },
+          },
+          proposalResultsOperation: {
+            operation: {
+              operationId: 'get-update-missoes-proposal-results',
+              path: '/api/operations/missoes/bulk/update/proposal/{proposalId}/results',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-missoes-update-proposal-results',
+              schemaType: 'response',
+              url: '/schemas/bulk-missoes-update-proposal-results',
+            },
+          },
+          executionOperation: {
+            operation: {
+              operationId: 'get-update-missoes-execution',
+              path: '/api/operations/missoes/bulk/update/execution/{executionId}',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-missoes-update-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-missoes-update-execution',
+            },
+          },
+          resultsOperation: {
+            operation: {
+              operationId: 'get-update-missoes-execution-results',
+              path: '/api/operations/missoes/bulk/update/execution/{executionId}/results',
+              method: 'GET',
+            },
+            responseSchema: {
+              schemaId: 'bulk-missoes-update-execution-results',
+              schemaType: 'response',
+              url: '/schemas/bulk-missoes-update-execution-results',
+            },
+          },
+          cancelOperation: {
+            operation: {
+              operationId: 'cancel-update-missoes-execution',
+              path: '/api/operations/missoes/bulk/update/execution/{executionId}/cancel',
+              method: 'POST',
+            },
+            responseSchema: {
+              schemaId: 'bulk-missoes-update-execution',
+              schemaType: 'response',
+              url: '/schemas/bulk-missoes-update-execution',
+            },
+          },
+        },
+      },
+    },
   ],
   defaults: {
     openMode: 'modal',
     modal: { width: '920px', maxWidth: '95vw' },
   },
 };
-

@@ -5,6 +5,126 @@
       "title": "Centro de Comando Executivo",
       "purpose": "dashboard"
     },
+    "state": {
+      "values": {
+        "kpis": {
+          "readinessRate": 52.5,
+          "activeHeroes": 53,
+          "totalHeroes": 101,
+          "inProgressMissions": 9,
+          "inProgressMissionsBadge": "09",
+          "plannedMissions": 15,
+          "totalMissions": 39,
+          "missoesPercent": 23,
+          "latestPayrollMonth": "Março / 2026",
+          "latestPayrollNetMillion": "3,09",
+          "latestPayrollEmployees": 98,
+          "folhaPercent": 78.5,
+          "totalIncidents": 74,
+          "criticalIncidents": 18,
+          "criticalIncidentsBadge": "18",
+          "highIncidents": 19,
+          "riscosPercent": 24
+        }
+      }
+    },
+    "dataSources": [
+      {
+        "id": "heroesStats",
+        "kind": "stats-query",
+        "resourcePath": "human-resources/funcionarios/stats/group-by",
+        "method": "POST",
+        "query": {
+          "filter": {},
+          "field": "ativo",
+          "metrics": [
+            {
+              "operation": "COUNT",
+              "alias": "total"
+            }
+          ]
+        },
+        "targetStatePath": "kpis",
+        "fallbackValue": {
+          "activeHeroes": 53,
+          "totalHeroes": 101,
+          "readinessRate": 52.5
+        }
+      },
+      {
+        "id": "missionsStats",
+        "kind": "stats-query",
+        "resourcePath": "operations/vw-resumo-missoes/stats/group-by",
+        "method": "POST",
+        "query": {
+          "filter": {},
+          "field": "status",
+          "metrics": [
+            {
+              "operation": "COUNT",
+              "alias": "total"
+            }
+          ]
+        },
+        "targetStatePath": "kpis",
+        "fallbackValue": {
+          "plannedMissions": 15,
+          "inProgressMissions": 9,
+          "inProgressMissionsBadge": "09",
+          "totalMissions": 39,
+          "missoesPercent": 23
+        }
+      },
+      {
+        "id": "payrollStats",
+        "kind": "stats-query",
+        "resourcePath": "human-resources/vw-analytics-folha-pagamento/stats/timeseries",
+        "method": "POST",
+        "query": {
+          "filter": {},
+          "field": "competencia",
+          "granularity": "MONTH",
+          "metrics": [
+            {
+              "operation": "SUM",
+              "field": "salarioLiquido",
+              "alias": "salarioLiquido"
+            }
+          ]
+        },
+        "targetStatePath": "kpis",
+        "fallbackValue": {
+          "latestPayrollNetMillion": "3,09",
+          "latestPayrollMonth": "Março / 2026",
+          "latestPayrollEmployees": 98,
+          "folhaPercent": 78.5
+        }
+      },
+      {
+        "id": "incidentsStats",
+        "kind": "stats-query",
+        "resourcePath": "risk-intelligence/vw-indicadores-incidentes/stats/group-by",
+        "method": "POST",
+        "query": {
+          "filter": {},
+          "field": "severidade",
+          "metrics": [
+            {
+              "operation": "COUNT",
+              "alias": "total"
+            }
+          ]
+        },
+        "targetStatePath": "kpis",
+        "fallbackValue": {
+          "criticalIncidents": 18,
+          "criticalIncidentsBadge": "18",
+          "highIncidents": 19,
+          "totalIncidents": 74,
+          "riscosPercent": 24
+        }
+      }
+    ],
     "layout": {
       "orientation": "columns",
       "columns": 12,

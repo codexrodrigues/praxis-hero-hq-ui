@@ -285,8 +285,19 @@ async function runBulkVisualValidation() {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05-uniform-update-step1-fields.png') });
     console.log('  [SCREENSHOT] 05-uniform-update-step1-fields.png capturado.');
 
-    // Avaliar alterações
+    // Testar validação corporativa de integridade: tentar avaliar com valor em branco
     const evaluateEditBtn = editDialogPane.locator('button').filter({ hasText: /Avaliar/i }).first();
+    await evaluateEditBtn.click();
+    await page.waitForTimeout(500);
+    const validationAlert = editDialogPane.locator('.praxis-bulk-edit-dialog__alert--error').first();
+    assert((await validationAlert.count()) > 0, 'Validação de integridade bloqueou submissão com valor em branco');
+
+    // Preencher valor corporativo válido
+    const valueInput = editDialogPane.locator('input').first();
+    await valueInput.fill('48000');
+    await page.waitForTimeout(400);
+
+    // Avaliar alterações
     await evaluateEditBtn.click();
     await page.waitForTimeout(1200);
 
@@ -316,6 +327,46 @@ async function runBulkVisualValidation() {
     await closeEditBtn.click();
     await page.waitForTimeout(800);
     assert((await editDialogPane.count()) === 0, 'Modal de Atualização em Massa fechado com sucesso');
+
+    // 5. Testar Recurso Enriquecido: Missões Táticas
+    console.log('\n[Cenário 5] Testando Operações em Lote em Missões Táticas...');
+    await page.goto(`${BASE_URL}/operacoes/missoes`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+
+    const missoesCheckboxes = page.locator('praxis-table tbody tr td.mat-column-_select mat-checkbox input');
+    await missoesCheckboxes.first().waitFor({ state: 'attached', timeout: 10000 });
+    const missoesCount = await missoesCheckboxes.count();
+    assert(missoesCount >= 2, `Checkboxes presentes na tabela de Missões Táticas (${missoesCount} encontrados)`);
+
+    await missoesCheckboxes.nth(0).check({ force: true });
+    await page.waitForTimeout(300);
+    await missoesCheckboxes.nth(1).check({ force: true });
+    await page.waitForTimeout(800);
+
+    const dispatchBtn = page.locator('button').filter({ hasText: /Autorizar Despacho em Lote/i }).first();
+    await dispatchBtn.waitFor({ state: 'visible', timeout: 5000 });
+    assert((await dispatchBtn.count()) > 0, 'Botão "Autorizar Despacho em Lote" presente na barra de ações');
+    await dispatchBtn.click();
+    await page.waitForTimeout(1000);
+
+    const dispatchDialogPane = page.locator('.cdk-overlay-pane.praxis-bulk-dialog-panel').first();
+    assert((await dispatchDialogPane.count()) > 0, 'Modal de Despacho de Missões aberto no DOM');
+    const dispatchTitle = await dispatchDialogPane.locator('#praxis-bulk-dialog-title').innerText();
+    assert(/Autorização e Despacho de Missões em Lote/i.test(dispatchTitle), 'Título executivo de despacho de missões verificado');
+
+    // Confirmar execução
+    const confirmDispatchBtn = dispatchDialogPane.locator('button').filter({ hasText: /Confirmar/i }).first();
+    await confirmDispatchBtn.click();
+    await page.waitForTimeout(1200);
+
+    const dispatchSuccessAlert = dispatchDialogPane.locator('.praxis-bulk-dialog__alert--success').first();
+    assert((await dispatchSuccessAlert.count()) > 0, 'Despacho tático de missões homologado com êxito');
+
+    const closeDispatchBtn = dispatchDialogPane.locator('button').filter({ hasText: /Concluir/i }).first();
+    await closeDispatchBtn.click();
+    await page.waitForTimeout(800);
+    assert((await dispatchDialogPane.count()) === 0, 'Modal de Despacho de Missões concluído e fechado');
 
   } catch (err) {
     console.error(`[E2E-BULK] Erro durante a validação:`, err);
