@@ -36,14 +36,13 @@ export const INCIDENT_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
         { label: 'Vítimas Não Fatais', icon: 'healing', valueExpr: "(row.feridos || 0) + ' lesões catalogadas'" },
         { label: 'Vítimas Fatais', icon: 'heart_broken', valueExpr: "(row.mortos || 0) + ' civis falecidos'" },
         { label: 'Laudo Técnico Forense & Análise Circunstancial', icon: 'feed', valueExpr: "row.descricao", spanFull: true },
-      ] as any,
+      ],
     },
     {
       id: 'financeiro',
       label: 'Mitigação & Indenizações',
       icon: 'payments',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -93,7 +92,7 @@ export const INCIDENT_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
         { label: 'Primeira Resposta', icon: 'timer', valueExpr: "'T+4 min: Contenção de perímetro acionada pela S.H.I.E.L.D.'" },
         { label: 'Evacuação Civil', icon: 'groups', valueExpr: "'Evacuação tática concluída sem baixas civis adicionais'" },
         { label: 'Status Operacional', icon: 'task_alt', valueExpr: "'Área estabilizada sob supervisão tática'", spanFull: true },
-      ] as any,
+      ],
     },
   ],
 };
@@ -133,14 +132,13 @@ export const MISSION_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
         { label: 'Janela de Início Previsto', icon: 'schedule', valueExpr: "row.inicioPrev || row.dataInicioPrevista || 'Imediato'" },
         { label: 'Janela de Fim Previsto', icon: 'event_available', valueExpr: "row.fimPrev || row.dataFimPrevista || 'Sob demanda tática'" },
         { label: 'Objetivo Estratégico & Diretrizes', icon: 'flag', valueExpr: "row.objetivo || row.descricao || 'Conter a ameaça com mínima sinistralidade civil.'", spanFull: true },
-      ] as any,
+      ],
     },
     {
       id: 'squad',
       label: 'Esquadrão Tático',
       icon: 'groups',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -169,7 +167,6 @@ export const MISSION_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
       label: 'Sinistros & Danos',
       icon: 'emergency',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -224,14 +221,13 @@ export const BASE_FACILITY_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchem
         { label: 'Teatro Planetário', icon: 'public', valueExpr: "row.planeta || 'TERRA'" },
         { label: 'Coordenadas Geodésicas', icon: 'location_on', valueExpr: "(row.latitude || 0) + '° Lat, ' + (row.longitude || 0) + '° Long'" },
         { label: 'Status da Instalação', icon: 'verified', valueExpr: "'100% Operacional e Guarnecida'" },
-      ] as any,
+      ],
     },
     {
       id: 'acessos',
       label: 'Credenciamento & Pessoal',
       icon: 'badge',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -260,7 +256,6 @@ export const BASE_FACILITY_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchem
       label: 'Defesa & Protocolos',
       icon: 'shield',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -330,14 +325,13 @@ export const HERO_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
         { label: 'Comunicação Segura', icon: 'alternate_email', valueExpr: "row.email || 'confidencial@praxis.org'" },
         { label: 'Telemetria / Telefone', icon: 'call', valueExpr: "row.telefone || '+55 (11) 98888-0000'" },
         { label: 'Data de Ingresso', icon: 'event', valueExpr: "row.dataAdmissao || 'Não informada'" },
-      ] as any,
+      ],
     },
     {
       id: 'skills',
       label: 'Aptidões & Prontidão',
       icon: 'psychology',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -384,7 +378,6 @@ export const HERO_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
       label: 'Folha & Remuneração',
       icon: 'payments',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -413,7 +406,6 @@ export const HERO_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
       label: 'Histórico de Missões',
       icon: 'military_tech',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -442,7 +434,6 @@ export const HERO_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
       label: 'Arsenal & Equipamentos',
       icon: 'shield',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -497,14 +488,13 @@ export const THREAT_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
         { label: 'Origem Planetária', icon: 'public', valueExpr: "row.planeta" },
         { label: 'Status Operacional', icon: 'verified', valueExpr: "row.status" },
         { label: 'Fundo de Captura / Recompensa', icon: 'payments', valueExpr: "row.recompensa", format: 'currency:BRL' },
-      ] as any,
+      ],
     },
     {
       id: 'missions',
       label: 'Operações de Engajamento',
       icon: 'military_tech',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
@@ -533,7 +523,6 @@ export const THREAT_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
       label: 'Protocolos de Contenção',
       icon: 'security',
       content: {
-        type: 'cardGrid',
         columns: 2,
         cards: [
           {
