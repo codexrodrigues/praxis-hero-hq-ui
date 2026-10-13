@@ -2,9 +2,12 @@
 
 **Demonstração publicada:** [praxis-hero-hq.web.app](https://praxis-hero-hq.web.app).
 
-**Estado operacional:** frontend, quatro gráficos e layout remoto carregados.
-A API ainda retorna 503 em schemas/capabilities, afetando a tabela de incidentes.
-Veja o [registro de publicação](docs/design/hero-publication-2026-10-12.md).
+**Dependências:** 22 pacotes `@praxisui/*` fixados em `10.0.0-rc.12`, obtidos do
+npm público após o postflight oficial. A versão corrige a inferência de paginação
+remota para metadados parciais, preservando estratégias explicitamente configuradas.
+O aceite operacional desta adoção exige publicação no Firebase e validação de
+schemas, capabilities e total da tabela após reiniciar o Render. O [registro anterior](docs/design/hero-publication-2026-10-12.md)
+permanece como evidência histórica, incluindo seus limites.
 
 > **Plataforma Corporativa de Gestão Tática & RH de Super-Heróis** construída sobre a **Plataforma Praxis** (`@praxisui/*`), Angular 21 e arquitetura 100% orientada a metadados (*metadata-driven*).
 
