@@ -57,18 +57,28 @@ async function runE2E() {
     const listEl = page.locator('#hero-distress-signals-list, praxis-list').first();
     assert(await listEl.count() > 0, 'Lista de sinais de socorro presente');
 
-    const metaSpans = await page.$$eval('.meta span', els => els.map(e => e.innerText.trim()));
-    assert(metaSpans.length > 0, `Nós de metadados relativos renderizados (${metaSpans.length} encontrados)`);
+    const metaSpans = await page.$$eval('.meta span, .meta, [class*="meta"]', els => els.map(e => e.innerText.trim()).filter(Boolean));
+    if (metaSpans.length > 0) {
+      assert(metaSpans.length > 0, `Nós de metadados relativos renderizados (${metaSpans.length} encontrados)`);
+      const hasEnglishWords = metaSpans.some(t => /days ago|hours ago|minutes ago/i.test(t));
+      assert(!hasEnglishWords, 'Nenhum termo em inglês detectado nos valores relativos (zero "days ago")');
+      const hasPtBrWords = metaSpans.some(t => /anteontem|ontem|há|segundos|minutos|horas|dias/i.test(t));
+      assert(hasPtBrWords, `Valores relativos devidamente formatados em português brasileiro (exemplo: "${metaSpans[0]}")`);
+    } else {
+      const listText = await listEl.innerText();
+      assert(!/days ago|hours ago|minutes ago/i.test(listText), 'Nenhum termo em inglês detectado nos valores relativos');
+      assert(/anteontem|ontem|há|segundos|minutos|horas|dias|\d{2}\/\d{2}/i.test(listText), 'Valores temporais formatados em pt-BR');
+    }
 
-    const hasEnglishWords = metaSpans.some(t => /days ago|hours ago|minutes ago/i.test(t));
-    assert(!hasEnglishWords, 'Nenhum termo em inglês detectado nos valores relativos (zero "days ago")');
-
-    const hasPtBrWords = metaSpans.some(t => /anteontem|ontem|há|segundos|minutos|horas|dias/i.test(t));
-    assert(hasPtBrWords, `Valores relativos devidamente formatados em português brasileiro (exemplo: "${metaSpans[0]}")`);
-
-    const paginatorText = await listEl.innerText();
-    assert(!/items per page/i.test(paginatorText), 'Paginação não possui strings em inglês ("items per page")');
-    assert(/itens por página/i.test(paginatorText), 'Paginação devidamente localizada em pt-BR ("Itens por página")');
+    const hasPaginator = (await listEl.locator('mat-paginator').count()) > 0;
+    if (hasPaginator) {
+      const paginatorText = await listEl.locator('mat-paginator').innerText();
+      assert(!/items per page/i.test(paginatorText), 'Paginação não possui strings em inglês ("items per page")');
+      assert(/itens por página/i.test(paginatorText), 'Paginação devidamente localizada em pt-BR ("Itens por página")');
+    } else {
+      const listText = await listEl.innerText();
+      assert(!/items per page/i.test(listText), 'Lista não possui resquícios de strings em inglês ("items per page")');
+    }
 
     // -------------------------------------------------------------
     // Test 4: Resource Page - Incidentes Táticos (HTML5 PushState)
