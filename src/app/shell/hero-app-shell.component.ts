@@ -8,7 +8,9 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import {
   PraxisAppShellComponent,
   type PraxisBrandConfig,
@@ -129,6 +131,24 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
       </div>
 
       <!-- Main Dynamic Content Routed from Modules -->
+      @if (authDeniedResource(); as deniedRes) {
+        <div class="tactical-auth-alert glass-panel" role="alert" data-testid="tactical-auth-alert">
+          <div class="alert-content">
+            <span class="material-symbols-outlined alert-icon">shield_lock</span>
+            <div class="alert-text">
+              <strong class="alert-title">Acesso Tático Restrito (Credencial DEFCON 1 Requerida)</strong>
+              <p class="alert-desc">
+                A credencial de segurança de <strong>{{ authService.currentPersona().name }}</strong> ({{ authService.currentPersona().clearanceLevel }})
+                não possui autorização executiva para acessar <em>{{ deniedRes }}</em>. Alterne para <strong>Nick Fury</strong> no menu superior para autorizar o acesso.
+              </p>
+            </div>
+          </div>
+          <button type="button" class="alert-dismiss-btn" (click)="dismissAuthDenied()" aria-label="Fechar alerta">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      }
+
       <!-- Persona simulation belongs to this host; rebuild its routed view on selection. -->
       @for (personaId of [authService.currentPersona().id]; track personaId) {
         <router-outlet></router-outlet>
@@ -177,6 +197,22 @@ export class HeroAppShellComponent {
   protected readonly themeService = inject(ThemeService);
   protected readonly authService = inject(AuthSimulationService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly authDeniedResource = toSignal(
+    this.route.queryParams.pipe(
+      map((params) => (params['authDenied'] === 'true' ? params['resource'] || 'Recurso Restrito' : null)),
+    ),
+    { initialValue: null },
+  );
+
+  protected dismissAuthDenied(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { authDenied: null, resource: null },
+      queryParamsHandling: 'merge',
+    });
+  }
 
   protected readonly brand: PraxisBrandConfig = {
     title: 'Praxis Hero HQ',
