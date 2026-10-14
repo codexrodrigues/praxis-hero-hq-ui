@@ -26,6 +26,103 @@
           "highIncidents": 19,
           "riscosPercent": 24
         }
+      },
+      "derived": {
+        "kpis.readinessRate": {
+          "dependsOn": ["kpis.activeHeroes", "kpis.totalHeroes"],
+          "compute": {
+            "kind": "json-logic",
+            "expression": {
+              "if": [
+                { ">": [{ "var": "state.kpis.totalHeroes" }, 0] },
+                {
+                  "round": [
+                    {
+                      "*": [
+                        { "/": [{ "var": "state.kpis.activeHeroes" }, { "var": "state.kpis.totalHeroes" }] },
+                        100
+                      ]
+                    },
+                    1
+                  ]
+                },
+                0
+              ]
+            }
+          }
+        },
+        "kpis.missoesPercent": {
+          "dependsOn": ["kpis.plannedMissions", "kpis.totalMissions"],
+          "compute": {
+            "kind": "json-logic",
+            "expression": {
+              "if": [
+                { ">": [{ "var": "state.kpis.totalMissions" }, 0] },
+                {
+                  "round": [
+                    {
+                      "*": [
+                        { "/": [{ "var": "state.kpis.plannedMissions" }, { "var": "state.kpis.totalMissions" }] },
+                        100
+                      ]
+                    },
+                    0
+                  ]
+                },
+                0
+              ]
+            }
+          }
+        },
+        "kpis.riscosPercent": {
+          "dependsOn": ["kpis.criticalIncidents", "kpis.totalIncidents"],
+          "compute": {
+            "kind": "json-logic",
+            "expression": {
+              "if": [
+                { ">": [{ "var": "state.kpis.totalIncidents" }, 0] },
+                {
+                  "round": [
+                    {
+                      "*": [
+                        { "/": [{ "var": "state.kpis.criticalIncidents" }, { "var": "state.kpis.totalIncidents" }] },
+                        100
+                      ]
+                    },
+                    0
+                  ]
+                },
+                0
+              ]
+            }
+          }
+        },
+        "kpis.inProgressMissionsBadge": {
+          "dependsOn": ["kpis.inProgressMissions"],
+          "compute": {
+            "kind": "json-logic",
+            "expression": {
+              "if": [
+                { "<": [{ "var": "state.kpis.inProgressMissions" }, 10] },
+                { "cat": ["0", { "var": "state.kpis.inProgressMissions" }] },
+                { "cat": ["", { "var": "state.kpis.inProgressMissions" }] }
+              ]
+            }
+          }
+        },
+        "kpis.criticalIncidentsBadge": {
+          "dependsOn": ["kpis.criticalIncidents"],
+          "compute": {
+            "kind": "json-logic",
+            "expression": {
+              "if": [
+                { "<": [{ "var": "state.kpis.criticalIncidents" }, 10] },
+                { "cat": ["0", { "var": "state.kpis.criticalIncidents" }] },
+                { "cat": ["", { "var": "state.kpis.criticalIncidents" }] }
+              ]
+            }
+          }
+        }
       }
     },
     "dataSources": [
@@ -45,6 +142,14 @@
           ]
         },
         "targetStatePath": "kpis",
+        "transform": {
+          "kind": "group-by-map",
+          "mappings": {
+            "true": "activeHeroes",
+            "false": "inactiveHeroes"
+          },
+          "totalField": "totalHeroes"
+        },
         "fallbackValue": {
           "activeHeroes": 53,
           "totalHeroes": 101,
@@ -67,6 +172,16 @@
           ]
         },
         "targetStatePath": "kpis",
+        "transform": {
+          "kind": "group-by-map",
+          "mappings": {
+            "PLANEJADA": "plannedMissions",
+            "EM_ANDAMENTO": "inProgressMissions",
+            "CONCLUIDA": "completedMissions",
+            "CANCELADA": "cancelledMissions"
+          },
+          "totalField": "totalMissions"
+        },
         "fallbackValue": {
           "plannedMissions": 15,
           "inProgressMissions": 9,
@@ -93,7 +208,16 @@
           ]
         },
         "targetStatePath": "kpis",
+        "transform": {
+          "kind": "timeseries-last",
+          "mappings": {
+            "values.salarioLiquido": "latestPayrollNet",
+            "count": "latestPayrollEmployees",
+            "label": "latestPayrollMonth"
+          }
+        },
         "fallbackValue": {
+          "latestPayrollNet": 3090000,
           "latestPayrollNetMillion": "3,09",
           "latestPayrollMonth": "Março / 2026",
           "latestPayrollEmployees": 98,
@@ -116,6 +240,16 @@
           ]
         },
         "targetStatePath": "kpis",
+        "transform": {
+          "kind": "group-by-map",
+          "mappings": {
+            "CRITICA": "criticalIncidents",
+            "ALTA": "highIncidents",
+            "MEDIA": "mediumIncidents",
+            "BAIXA": "lowIncidents"
+          },
+          "totalField": "totalIncidents"
+        },
         "fallbackValue": {
           "criticalIncidents": 18,
           "criticalIncidentsBadge": "18",
