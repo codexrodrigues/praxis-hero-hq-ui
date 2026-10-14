@@ -117,7 +117,26 @@ async function runE2E() {
     // -------------------------------------------------------------
     // Test 5: Resource Page - Heróis & Colaboradores (HTML5 PushState)
     // -------------------------------------------------------------
-    console.log('\n[Test 5] Validando Página de Recurso: Heróis & Colaboradores...');
+    console.log('\n[Test 5] Validando Página de Recurso: Heróis & Colaboradores + Reconciliação CONFIG_STORAGE...');
+    // Semear localStorage com snapshot legado (apenas 1 campo inline) para provar reconciliação de alwaysVisibleFields
+    await page.evaluate(() => {
+      const legacyConfig = {
+        columns: [],
+        behavior: {
+          filtering: {
+            enabled: true,
+            advancedFilters: {
+              enabled: true,
+              settings: {
+                alwaysVisibleFields: ['nomeCompleto'],
+              },
+            },
+          },
+        },
+      };
+      localStorage.setItem('table-config:crud-human-resources-funcionarios', JSON.stringify(legacyConfig));
+    });
+
     await page.goto(`${BASE_URL}/rh/funcionarios`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     const heroesTitle = page.locator('h1, [class*="title"]').filter({ hasText: /Heróis & Colaboradores/i }).first();
     await heroesTitle.waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
@@ -125,8 +144,31 @@ async function runE2E() {
 
     await page.waitForTimeout(3000);
     const heroesBody = await page.innerText('body');
-    assert(heroesBody.includes('EFETIVO TOTAL') || heroesBody.includes('24 Cadastrados'), 'KPI de Efetivo Total presente');
-    assert(heroesBody.includes('21 Ativos'), 'KPI de Prontidão Ativa presente');
+    assert(heroesBody.includes('EFETIVO TOTAL') || heroesBody.includes('101 Cadastrados'), 'KPI de Efetivo Total ("101 Cadastrados") presente');
+    assert(heroesBody.includes('101 Ativos'), 'KPI de Prontidão Ativa ("101 Ativos") presente');
+
+    // Validar que os 3 filtros inline declarados pelo host continuam presentes mesmo após snapshot legado no localStorage
+    const inlineFilterFields = page.locator('praxis-filter .compact-fields .pfx-field-shell');
+    assert((await inlineFilterFields.count()) >= 3, 'Todos os 3 filtros inline declarados pelo host permanecem visíveis após reconciliação de CONFIG_STORAGE');
+
+    // Test 5.1: Sincronismo Bidirecional KPI <-> ScopeBar e Preservação de Capabilities
+    console.log('\n[Test 5.1] Validando Sincronismo Bidirecional KPI <-> ScopeBar e Preservação de Capabilities...');
+    const activeKpiCard = page.locator('praxis-kpi-band .praxis-kpi-card').filter({ hasText: /Em Prontidão Ativa/i }).first();
+    await activeKpiCard.click();
+    await page.waitForTimeout(1000);
+
+    const isKpiMarkedActive = await activeKpiCard.evaluate((el) => el.classList.contains('active') && el.getAttribute('aria-pressed') === 'true');
+    assert(isKpiMarkedActive, 'Card KPI "Em Prontidão Ativa" recebe classe .active e aria-pressed="true" ao ser clicado');
+
+    const newHeroBtn = page.locator('praxis-table .praxis-toolbar button').filter({ hasText: /Novo Herói|Adicionar/i }).first();
+    assert((await newHeroBtn.count()) > 0, 'Botão de criação da coleção permanece visível após filtrar por KPI/ScopeBar (collectionCapabilities preservadas)');
+
+    const totalKpiCard = page.locator('praxis-kpi-band .praxis-kpi-card').filter({ hasText: /Efetivo Total/i }).first();
+    await totalKpiCard.click();
+    await page.waitForTimeout(1000);
+
+    const isTotalKpiActive = await totalKpiCard.evaluate((el) => el.classList.contains('active') && el.getAttribute('aria-pressed') === 'true');
+    assert(isTotalKpiActive, 'Card KPI "Efetivo Total" (filter: {}) reativa escopo "Todos" e recebe estado ativo');
 
     // -------------------------------------------------------------
     // Test 6: Tactical Clearance Guard & Governança de Autorização
