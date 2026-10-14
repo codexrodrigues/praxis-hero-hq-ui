@@ -128,20 +128,12 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         advancedFilters: {
           settings: {
             inline: true,
+            alwaysVisibleFields: ['nomeCompleto', 'departamentoNome', 'ativo'],
             useInlineSearchableSelectVariant: true,
           },
         },
       },
     },
-  },
-  filterBar: {
-    inlineFields: ['nomeCompleto', 'departamentoNome', 'ativo'],
-    quickFilters: [
-      { id: 'all', label: 'Todos os Heróis', icon: 'group', filter: {} },
-      { id: 'ativos', label: 'Em Prontidão', icon: 'verified_user', filter: { ativo: true } },
-      { id: 'inativos', label: 'Reserva / Licença', icon: 'person_off', filter: { ativo: false } },
-    ],
-    showAdvanced: true,
   },
   actions: [
     {
