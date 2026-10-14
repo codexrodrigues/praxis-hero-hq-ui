@@ -235,6 +235,12 @@ html[data-theme] praxis-table .mat-mdc-paginator {
     align-items: center !important;
   }
 
+  html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-query:not(.praxis-toolbar--has-scope):not(.praxis-toolbar--has-identity):has(praxis-filter, [advancedFilter], [toolbar]):not(:has(.toolbar-actions button)) {
+    grid-template-columns: max-content minmax(0, 1fr) auto !important;
+    grid-template-areas: 'query query query' !important;
+    align-items: center !important;
+  }
+
   html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-query:not(.praxis-toolbar--has-scope):not(.praxis-toolbar--has-identity):not(.praxis-toolbar--compact-actions):has(.praxis-filter-bar.has-compact):has(.toolbar-actions .action-btn) {
     grid-template-columns: max-content minmax(0, 1fr) auto !important;
     grid-template-areas:
@@ -268,6 +274,20 @@ html[data-theme] praxis-table .mat-mdc-paginator {
 }
 
 html[data-theme] body praxis-table .praxis-toolbar:not(:has(praxis-filter, [advancedFilter], [toolbar])) .toolbar-query {
+  display: none !important;
+}
+
+/* Suppress vertical right divider on .toolbar-query and hide .toolbar-actions/.end-actions when they contain no visible buttons */
+html[data-theme] body praxis-table .praxis-toolbar:not(:has(.toolbar-actions button)) .toolbar-query {
+  padding-inline-end: 0 !important;
+  border-inline-end: none !important;
+}
+
+html[data-theme] body praxis-table .praxis-toolbar:not(:has(.toolbar-actions button)) .toolbar-actions {
+  display: none !important;
+}
+
+html[data-theme] body praxis-table .praxis-toolbar .end-actions:not(:has(button, [mat-button], [mat-icon-button], [praxisIconButton])) {
   display: none !important;
 }
 
@@ -339,26 +359,6 @@ html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-
     min-width: 190px !important;
     max-width: 300px !important;
   }
-
-  /* Inline toggle pills (e.g. "Status: Todos") size tightly to their content without cyclic 100%-width stretching or truncation */
-  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields :is(.pfx-field-shell[data-control-type='inlineToggle'], .pfx-field-shell:has(pdx-inline-toggle)),
-  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields :is(.pfx-field-shell[data-control-type='inlineToggle'], .pfx-field-shell:has(pdx-inline-toggle)) :is(.pfx-field-shell-wrapper, .pfx-field-shell-host, pdx-inline-toggle, .pdx-inline-toggle-pill) {
-    flex: 0 0 auto !important;
-    width: fit-content !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-}
-
-html[data-theme] pdx-inline-toggle .pdx-inline-toggle-label-stack {
-  grid-template-columns: minmax(0, max-content) !important;
-}
-
-html[data-theme] pdx-inline-toggle .pdx-inline-toggle-label {
-  width: max-content !important;
-  max-width: min(240px, 60vw) !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
 }
 
 /* Page Builder Governance Toggle Button ("Customizar Layout") theme integration across light and dark modes */
