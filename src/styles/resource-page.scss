@@ -119,7 +119,7 @@
     border-radius: 16px !important;
     padding: 18px !important;
     border: 1px solid var(--border) !important;
-    background: var(--card) !important;
+    background: var(--dark-panel-gradient, var(--card)) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     display: flex !important;

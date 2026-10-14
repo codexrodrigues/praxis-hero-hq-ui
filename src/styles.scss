@@ -31,7 +31,7 @@ body {
 
 /* Glassmorphism Panel */
 .glass-panel {
-  background: var(--card);
+  background: var(--dark-panel-gradient, var(--card));
   border: 1px solid var(--border);
   box-shadow: var(--shadow-panel);
   backdrop-filter: none;

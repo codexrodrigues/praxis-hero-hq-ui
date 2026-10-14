@@ -215,7 +215,7 @@
   border-radius: 20px !important;
   padding: 22px !important;
   border: 1px solid var(--border) !important;
-  background: var(--card) !important;
+  background: var(--dark-panel-gradient, var(--card)) !important;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   transition: transform 0.2s ease, border-color 0.2s ease;
@@ -403,7 +403,7 @@
   border-radius: 16px !important;
   padding: 22px !important;
   border: 1px solid var(--border) !important;
-  background: var(--card) !important;
+  background: var(--dark-panel-gradient, var(--card)) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   cursor: pointer;

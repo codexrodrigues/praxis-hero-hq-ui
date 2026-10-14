@@ -69,20 +69,33 @@ $surfaces: (
   --pdx-shell-header-bg: var(--surface-gradient);
   --pdx-shell-header-border: var(--border);
   --pdx-shell-title-color: var(--foreground);
+  --p-table-toolbar-bg: var(--surface-gradient);
+  --p-table-toolbar-border-color: var(--border);
+  --p-table-header-bg: var(--surface-gradient);
 }
 
 :root[data-theme='dark-tech'] {
   --pdx-shell-card-bg: var(--dark-panel-gradient);
   --pdx-dashboard-card-bg: var(--dark-panel-gradient);
+  --pdx-shell-header-bg: var(--surface-gradient);
 }
 
-/* Ensure the workspace canvas exhibits the ambient gradient in dark mode */
-.praxis-shell__main {
-  background-color: var(--background);
-  background-image: var(--dark-canvas-gradient, none);
+/* Ensure the workspace canvas exhibits the ambient gradient in dark mode (overriding component emulated encapsulation) */
+html[data-theme] .praxis-shell__main {
+  background-color: var(--background) !important;
+  background-image: var(--dark-canvas-gradient, none) !important;
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+/* Ensure WidgetShell headers and Modal/Dialog title bars exhibit the signature surface gradient */
+html[data-theme] .pdx-shell-header,
+html[data-theme] .pdx-shell--sticky-header > .pdx-shell-header,
+html[data-theme] praxis-dynamic-form-dialog-host .dialog-header,
+html[data-theme] .praxis-bulk-edit-dialog__header {
+  background: var(--pdx-shell-header-bg, var(--surface-gradient)) !important;
+  border-bottom: 1px solid var(--pdx-shell-header-border, var(--border)) !important;
 }
 
 @include praxis.praxis-shell-styles();
@@ -92,6 +105,8 @@ $surfaces: (
 /* Table defines defaults on :host; specificity must override those same tokens. */
 html[data-theme] praxis-table {
   --p-table-bg: var(--card);
+  --p-table-toolbar-bg: var(--surface-gradient);
+  --p-table-toolbar-border-color: var(--border);
   --p-table-header-bg: var(--surface-gradient);
   --p-table-header-fg: var(--foreground);
   --p-table-row-bg: var(--card);
@@ -105,20 +120,38 @@ html[data-theme] praxis-table {
   --p-table-state-danger-fg: var(--destructive);
 }
 
+/* Ensure top Table Toolbar (title bar) and Column Header Row exhibit the continuous surface gradient */
+html[data-theme] praxis-table praxis-table-toolbar:not(.praxis-toolbar-footer) .praxis-toolbar {
+  background: var(--surface-gradient) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+html[data-theme] praxis-table .mat-mdc-header-row {
+  background: var(--surface-gradient) !important;
+}
+
+html[data-theme] praxis-table .mat-mdc-header-cell {
+  background: transparent !important;
+}
+
 /* Primary Command Action CTA (single bold primary action per viewport) */
-.praxis-table-action-primary,
-.praxis-toolbar-action--filled-primary,
-button.primary-action-pill,
-button.mat-mdc-unelevated-button.mat-primary,
-button.mat-mdc-raised-button.mat-primary {
+html[data-theme] .praxis-table-action-primary:not(:disabled):not([aria-disabled='true']),
+html[data-theme] .praxis-toolbar-action--filled-primary:not(:disabled):not([aria-disabled='true']),
+html[data-theme] body praxis-table .praxis-toolbar .action-btn.mat-mdc-unelevated-button.mat-primary:not(:disabled):not([aria-disabled='true']),
+html[data-theme] body praxis-table .praxis-toolbar .action-btn.praxis-toolbar-action--filled-primary:not(:disabled):not([aria-disabled='true']),
+html[data-theme] button.primary-action-pill:not(:disabled):not([aria-disabled='true']),
+html[data-theme] button.mat-mdc-unelevated-button.mat-primary:not(:disabled):not([aria-disabled='true']),
+html[data-theme] button.mat-mdc-raised-button.mat-primary:not(:disabled):not([aria-disabled='true']) {
   background: var(--command-gradient) !important;
   color: var(--primary-foreground) !important;
   border: none !important;
   font-weight: 600 !important;
-  box-shadow: var(--float-shadow, 0 4px 14px rgba(0, 0, 0, 0.25));
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease !important;
+  box-shadow: var(--float-shadow, 0 4px 14px rgba(0, 0, 0, 0.25)) !important;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease, filter 0.15s ease !important;
 
-  &:hover:not([disabled]) {
+  &:hover {
+    background: var(--command-gradient) !important;
+    filter: brightness(1.06);
     transform: translateY(-1px);
     box-shadow: 0 6px 20px color-mix(in oklab, var(--primary) 35%, transparent) !important;
   }
