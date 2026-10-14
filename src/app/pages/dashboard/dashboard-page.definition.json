@@ -16,6 +16,7 @@
           "plannedMissions": 15,
           "totalMissions": 39,
           "missoesPercent": 23,
+          "latestPayrollNet": 3090000,
           "latestPayrollMonth": "Março / 2026",
           "latestPayrollNetMillion": "3,09",
           "latestPayrollEmployees": 98,
@@ -122,6 +123,24 @@
               ]
             }
           }
+        },
+        "kpis.latestPayrollNetMillion": {
+          "dependsOn": ["kpis.latestPayrollNet"],
+          "compute": {
+            "kind": "json-logic",
+            "expression": {
+              "if": [
+                { ">": [{ "var": "state.kpis.latestPayrollNet" }, 0] },
+                {
+                  "round": [
+                    { "/": [{ "var": "state.kpis.latestPayrollNet" }, 1000000] },
+                    2
+                  ]
+                },
+                0
+              ]
+            }
+          }
         }
       }
     },
@@ -152,8 +171,7 @@
         },
         "fallbackValue": {
           "activeHeroes": 53,
-          "totalHeroes": 101,
-          "readinessRate": 52.5
+          "totalHeroes": 101
         }
       },
       {
@@ -185,9 +203,7 @@
         "fallbackValue": {
           "plannedMissions": 15,
           "inProgressMissions": 9,
-          "inProgressMissionsBadge": "09",
-          "totalMissions": 39,
-          "missoesPercent": 23
+          "totalMissions": 39
         }
       },
       {
@@ -218,7 +234,6 @@
         },
         "fallbackValue": {
           "latestPayrollNet": 3090000,
-          "latestPayrollNetMillion": "3,09",
           "latestPayrollMonth": "Março / 2026",
           "latestPayrollEmployees": 98,
           "folhaPercent": 78.5
@@ -252,10 +267,8 @@
         },
         "fallbackValue": {
           "criticalIncidents": 18,
-          "criticalIncidentsBadge": "18",
           "highIncidents": 19,
-          "totalIncidents": 74,
-          "riscosPercent": 24
+          "totalIncidents": 74
         }
       }
     ],
