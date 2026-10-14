@@ -35,7 +35,7 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
         caption: 'Custodiados em estase de força',
         icon: 'lock',
         tone: 'success',
-        filter: { status: 'CONTIDO' },
+        filter: { status: 'CAPTURADO' },
       },
       {
         id: 'recompensas',
@@ -90,19 +90,17 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
           { id: 'all', label: 'Todas as Ameaças', filter: {}, icon: 'radar' },
           { id: 'confronto', label: 'Em Confronto Ativo', filter: { status: 'CONFRONTO' }, icon: 'crisis_alert' },
           { id: 'critico', label: 'Nível Ômega / Crítico', filter: { nivelBetween: [5, 10] }, icon: 'warning' },
-          { id: 'contidos', label: 'Neutralizados / Raft', filter: { status: 'CONTIDO' }, icon: 'lock' },
+          { id: 'contidos', label: 'Neutralizados / Raft', filter: { status: 'CAPTURADO' }, icon: 'lock' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'classe', 'status', 'planeta'],

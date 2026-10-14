@@ -35,7 +35,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
         caption: 'Squad em ciclo de integração',
         icon: 'shield',
         tone: 'neutral',
-        filter: { status: 'STANDBY' },
+        filter: { status: 'RESERVA' },
       },
       {
         id: 'bases',
@@ -87,7 +87,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
         quickFilters: [
           { id: 'all', label: 'Todos os Esquadrões', filter: {}, icon: 'diversity_3' },
           { id: 'ativa', label: 'Prontidão Ativa', filter: { status: 'ATIVA' }, icon: 'verified_user' },
-          { id: 'reserva', label: 'Reserva Tática', filter: { status: 'STANDBY' }, icon: 'shield' },
+          { id: 'reserva', label: 'Reserva Tática', filter: { status: 'RESERVA' }, icon: 'shield' },
           { id: 'missoes', label: 'Em Missão', filter: { status: 'EM_MISSAO' }, icon: 'flight_takeoff' },
         ],
         showAdvancedButton: true,
@@ -95,12 +95,10 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'status', 'sigla'],

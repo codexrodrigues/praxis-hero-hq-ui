@@ -39,11 +39,12 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
       },
       {
         id: 'eficiencia',
-        label: 'Taxa Operacional',
-        value: '62,5% Ativo',
-        caption: 'Capacidade de transporte de squads',
+        label: 'Frota Aérea & Orbital',
+        value: '14 Unidades',
+        caption: 'Capacidade de projeção aeroespacial',
         icon: 'speed',
         tone: 'neutral',
+        filter: { tiposIn: ['AEREO', 'ESPACIAL'] },
       },
     ],
   },
@@ -89,19 +90,17 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
           { id: 'all', label: 'Toda a Frota', filter: {}, icon: 'rocket_launch' },
           { id: 'operacional', label: 'Em Operação / Prontidão', filter: { status: 'OPERACIONAL' }, icon: 'verified' },
           { id: 'manutencao', label: 'Em Manutenção / Hangar', filter: { status: 'MANUTENCAO' }, icon: 'build' },
-          { id: 'aerea', label: 'Aeronaves & Espaciais', filter: { tiposIn: ['AERONAVE', 'ESPACIAL'] }, icon: 'flight' },
+          { id: 'aerea', label: 'Aeronaves & Espaciais', filter: { tiposIn: ['AEREO', 'ESPACIAL'] }, icon: 'flight' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'tipo', 'status', 'proprietarioId'],

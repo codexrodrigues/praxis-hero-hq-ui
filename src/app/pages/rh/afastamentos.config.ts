@@ -22,16 +22,16 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'criticos',
         label: 'Casos Críticos / Graves',
-        value: '51 Ocorrências',
+        value: '55 Ocorrências',
         caption: 'Trauma de combate e regeneração',
         icon: 'health_and_safety',
         tone: 'danger',
-        filter: { tipo: 'LICENCA_MEDICA' },
+        filter: { tipo: 'AFASTAMENTO' },
       },
       {
         id: 'padrao',
         label: 'Licenças Padrão',
-        value: '60 Registros',
+        value: '56 Registros',
         caption: 'Descanso e suporte preventivo',
         icon: 'event_available',
         tone: 'info',
@@ -44,6 +44,7 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
         caption: 'Total acumulado em afastamento',
         icon: 'calendar_month',
         tone: 'warning',
+        filter: { dataInicioBetween: ['2026-01-01', '2026-12-31'] },
       },
     ],
   },
@@ -64,9 +65,9 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: "row.tipo === 'FERIAS' ? 85 : row.tipo === 'TREINAMENTO' ? 90 : 65",
+                valueExpr: "row.tipo === 'FERIAS' ? 85 : 65",
                 total: 100,
-                toneExpr: "row.tipo === 'FERIAS' ? 'info' : row.tipo === 'TREINAMENTO' ? 'success' : 'warning'",
+                toneExpr: "row.tipo === 'FERIAS' ? 'info' : 'warning'",
                 fallbackText: 'Progresso',
               },
             },
@@ -88,8 +89,8 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
         quickFilters: [
           { id: 'all', label: 'Todos os Registros', filter: {}, icon: 'history' },
           { id: 'ferias', label: 'Férias Regulamentares', filter: { tipo: 'FERIAS' }, icon: 'beach_access' },
-          { id: 'medica', label: 'Licença Médica / Recuperação', filter: { tipo: 'LICENCA_MEDICA' }, icon: 'health_and_safety' },
-          { id: 'treinamento', label: 'Treinamento Tático', filter: { tipo: 'TREINAMENTO' }, icon: 'model_training' },
+          { id: 'medica', label: 'Licença Médica / Recuperação', filter: { tipo: 'AFASTAMENTO' }, icon: 'health_and_safety' },
+          { id: 'ciclo2026', label: 'Vigência 2026', filter: { dataInicioBetween: ['2026-01-01', '2026-12-31'] }, icon: 'date_range' },
         ],
         showAdvancedButton: true,
       },
@@ -109,12 +110,10 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
         },
       },
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['tipo', 'funcionarioId', 'dataInicioBetween'],

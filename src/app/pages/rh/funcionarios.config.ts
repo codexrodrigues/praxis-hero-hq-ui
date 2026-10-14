@@ -96,6 +96,17 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         dataAdmissao: { width: '160px', header: 'Data de Admissão' },
       },
     },
+    toolbar: {
+      filters: {
+        enabled: true,
+        quickFilters: [
+          { id: 'all', label: 'Todos os Heróis', icon: 'group', filter: {} },
+          { id: 'ativos', label: 'Em Prontidão', icon: 'verified_user', filter: { ativo: true } },
+          { id: 'inativos', label: 'Reserva / Licença', icon: 'person_off', filter: { ativo: false } },
+        ],
+        showAdvancedButton: true,
+      },
+    },
     behavior: {
       selection: {
         enabled: true,
@@ -113,6 +124,12 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       filtering: {
         columnFilters: {
           enabled: true,
+        },
+        advancedFilters: {
+          settings: {
+            inline: true,
+            useInlineSearchableSelectVariant: true,
+          },
         },
       },
     },

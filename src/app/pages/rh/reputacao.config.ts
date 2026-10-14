@@ -90,12 +90,10 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['codinome', 'nomeCompleto', 'equipe'],

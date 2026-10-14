@@ -110,12 +110,10 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         },
       },
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['mes', 'ano', 'funcionarioId'],

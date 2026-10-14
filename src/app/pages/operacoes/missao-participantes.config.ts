@@ -44,7 +44,7 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
         caption: 'Participações concluídas com sucesso',
         icon: 'verified',
         tone: 'success',
-        filter: { resultado: 'SUCESSO' },
+        filter: { resultado: 'OK' },
       },
     ],
   },
@@ -70,7 +70,7 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
           { id: 'all', label: 'Todas as Escalas', filter: {}, icon: 'groups' },
           { id: 'lideres', label: 'Líderes de Missão', filter: { papel: 'LIDER' }, icon: 'military_tech' },
           { id: 'principais', label: 'Referência Principal', filter: { principal: true }, icon: 'star' },
-          { id: 'sucesso', label: 'Resultado: Sucesso', filter: { resultado: 'SUCESSO' }, icon: 'verified' },
+          { id: 'sucesso', label: 'Resultado: Sucesso', filter: { resultado: 'OK' }, icon: 'verified' },
         ],
         showAdvancedButton: true,
       },
@@ -90,12 +90,10 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
         },
       },
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['papel', 'principal', 'resultado'],

@@ -22,11 +22,11 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'sigilo',
         label: 'Segurança Máxima',
-        value: '4 Bases Sigilosas',
-        caption: 'Classificação Secreta ou Ultra-Secreta',
+        value: '3 Bases Sigilosas',
+        caption: 'Classificação Ultra-Secreta',
         icon: 'security',
         tone: 'danger',
-        filter: { sigilo: 'ULTRA_SECRETO' },
+        filter: { sigilo: 'ULTRA_SECRETA' },
       },
       {
         id: 'mundos',
@@ -35,6 +35,7 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
         caption: 'Operações terrestres e no espaço profundo',
         icon: 'public',
         tone: 'neutral',
+        filter: { planeta: 'Terra' },
       },
       {
         id: 'prontidao',
@@ -43,6 +44,7 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
         caption: 'Suporte imediato a todas as equipes',
         icon: 'verified_user',
         tone: 'success',
+        filter: { tipo: 'ORBITAL' },
       },
     ],
   },
@@ -85,7 +87,7 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
         enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Bases', filter: {}, icon: 'hub' },
-          { id: 'sigilo', label: 'Segurança Máxima', filter: { sigilo: 'ULTRA_SECRETO' }, icon: 'security' },
+          { id: 'sigilo', label: 'Segurança Máxima', filter: { sigilo: 'ULTRA_SECRETA' }, icon: 'security' },
           { id: 'terra', label: 'Bases Terrestres', filter: { planeta: 'Terra' }, icon: 'public' },
           { id: 'espaco', label: 'Órbita / Espaço', filter: { tipo: 'ORBITAL' }, icon: 'satellite_alt' },
         ],
@@ -94,12 +96,10 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'tipo', 'sigilo', 'planeta'],

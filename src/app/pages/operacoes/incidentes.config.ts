@@ -116,12 +116,10 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
         },
       },
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['local', 'severidade', 'descricao'],

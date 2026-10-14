@@ -26,6 +26,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         caption: 'Compensações acordadas com o judiciário',
         icon: 'payments',
         tone: 'warning',
+        filter: { totalPendenteBetween: [0, 0] },
       },
       {
         id: 'danos',
@@ -34,6 +35,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         caption: 'Prejuízo material total auditado',
         icon: 'broken_image',
         tone: 'info',
+        filter: { severidade: 'CRITICA' },
       },
       {
         id: 'saldo',
@@ -42,6 +44,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         caption: 'Em análise de perícia e fundos de seguro',
         icon: 'hourglass_top',
         tone: 'neutral',
+        filter: { totalPendenteBetween: [0.01, 999999999] },
       },
     ],
   },
@@ -98,7 +101,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         quickFilters: [
           { id: 'all', label: 'Todos os Sinistros', filter: {}, icon: 'account_balance' },
           { id: 'critico', label: 'Severidade Crítica', filter: { severidade: 'CRITICA' }, icon: 'warning' },
-          { id: 'pendente', label: 'Saldo Pendente', filter: { totalPendenteMin: 0.01 }, icon: 'pending' },
+          { id: 'pendente', label: 'Saldo Pendente', filter: { totalPendenteBetween: [0.01, 999999999] }, icon: 'pending' },
           { id: 'homologado', label: '100% Homologado', filter: { totalPendenteBetween: [0, 0] }, icon: 'verified' },
         ],
         showAdvancedButton: true,
@@ -106,12 +109,10 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['missao', 'local', 'severidade'],

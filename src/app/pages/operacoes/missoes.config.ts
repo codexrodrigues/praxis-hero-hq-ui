@@ -112,12 +112,10 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
         },
       },
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             showAdvanced: true,
             alwaysVisibleFields: ['titulo', 'status', 'prioridade', 'ameacaId', 'local'],

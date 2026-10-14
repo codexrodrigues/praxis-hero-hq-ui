@@ -277,20 +277,6 @@ html[data-theme] body praxis-table .praxis-toolbar:not(:has(praxis-filter, [adva
   display: none !important;
 }
 
-/* Suppress vertical right divider on .toolbar-query and hide .toolbar-actions/.end-actions when they contain no visible buttons */
-html[data-theme] body praxis-table .praxis-toolbar:not(:has(.toolbar-actions button)) .toolbar-query {
-  padding-inline-end: 0 !important;
-  border-inline-end: none !important;
-}
-
-html[data-theme] body praxis-table .praxis-toolbar:not(:has(.toolbar-actions button)) .toolbar-actions {
-  display: none !important;
-}
-
-html[data-theme] body praxis-table .praxis-toolbar .end-actions:not(:has(button, [mat-button], [mat-icon-button], [praxisIconButton])) {
-  display: none !important;
-}
-
 html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-query:not(.praxis-toolbar--has-scope):not(.praxis-toolbar--has-identity):not(.praxis-toolbar--compact-actions):has(.praxis-filter-bar.has-compact):has(.toolbar-actions .action-btn) .toolbar-actions {
   justify-self: end !important;
   justify-content: flex-end !important;
@@ -350,14 +336,23 @@ html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-
   margin-inline-start: auto !important;
 }
 
-/* Text and select filter controls get comfortable reading width on desktop/tablet, while shrinking gracefully on mobile */
+/* Compact filter pills (select, lookup, date-range, toggle) size tightly to their pill content
+   with a uniform 10px gap, while text input pills get a comfortable reading width on desktop/tablet */
 @media (min-width: 641px) {
-  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > :is(.pfx-field-shell, praxis-field-shell, dynamic-field-loader):not([data-control-type='inlineToggle']):not(:has(pdx-inline-toggle)),
-  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > dynamic-field-loader > :is(.pfx-field-shell, praxis-field-shell):not([data-control-type='inlineToggle']):not(:has(pdx-inline-toggle)) {
-    flex: 0 1 240px !important;
-    width: clamp(200px, 20vw, 280px) !important;
-    min-width: 190px !important;
-    max-width: 300px !important;
+  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > :is(.pfx-field-shell, praxis-field-shell, dynamic-field-loader),
+  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > dynamic-field-loader > :is(.pfx-field-shell, praxis-field-shell) {
+    flex: 0 0 auto !important;
+    width: fit-content !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > :is(.pfx-field-shell, praxis-field-shell, dynamic-field-loader):is([data-control-type='inlineInput'], [data-control-type='input'], :has(pdx-inline-input)),
+  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > dynamic-field-loader > :is(.pfx-field-shell, praxis-field-shell):is([data-control-type='inlineInput'], [data-control-type='input'], :has(pdx-inline-input)) {
+    flex: 0 1 220px !important;
+    width: clamp(190px, 18vw, 250px) !important;
+    min-width: 180px !important;
+    max-width: 260px !important;
   }
 }
 

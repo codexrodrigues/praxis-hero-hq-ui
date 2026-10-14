@@ -83,20 +83,19 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
         enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Divisões', filter: {}, icon: 'corporate_fare' },
-          { id: 'operacoes', label: 'Operações & Defesa', filter: { codigo: 'OP' }, icon: 'shield' },
-          { id: 'pesquisa', label: 'P&D e Tecnologia', filter: { codigo: 'RD' }, icon: 'science' },
+          { id: 'operacoes', label: 'Operações & Defesa', filter: { codigo: 'OPS' }, icon: 'shield' },
+          { id: 'pesquisa', label: 'P&D e Tecnologia', filter: { codigo: 'RND' }, icon: 'science' },
+          { id: 'engenharia', label: 'Engenharia & Sistemas', filter: { codigo: 'ENG' }, icon: 'engineering' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'codigo', 'responsavelId'],

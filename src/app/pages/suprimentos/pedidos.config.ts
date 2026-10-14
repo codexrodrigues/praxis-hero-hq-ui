@@ -99,12 +99,10 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['companyId', 'supplierId', 'status'],

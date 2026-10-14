@@ -89,12 +89,10 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
         },
       },
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['descricao', 'tipo', 'status'],

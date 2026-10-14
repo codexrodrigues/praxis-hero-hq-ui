@@ -40,11 +40,11 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'estoque',
         label: 'Em Reserva de Arsenal',
-        value: '4 Itens',
+        value: '2 Itens',
         caption: 'Disponíveis no cofre central',
         icon: 'inventory_2',
         tone: 'neutral',
-        filter: { status: 'DISPONIVEL' },
+        filter: { status: 'ESTOQUE' },
       },
     ],
   },
@@ -88,18 +88,16 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
           { id: 'all', label: 'Todos os Itens', icon: 'inventory_2', filter: {} },
           { id: 'custodia', label: 'Em Uso / Custódia', icon: 'verified_user', filter: { status: 'EM_USO' } },
           { id: 'manutencao', label: 'Em Manutenção', icon: 'build', filter: { status: 'MANUTENCAO' } },
-          { id: 'estoque', label: 'Disponível em Arsenal', icon: 'shelves', filter: { status: 'DISPONIVEL' } },
+          { id: 'estoque', label: 'Disponível em Arsenal', icon: 'shelves', filter: { status: 'ESTOQUE' } },
         ],
       },
     },
     behavior: {
       filtering: {
-        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
-          enabled: true,
           settings: {
             showAdvanced: true,
             alwaysVisibleFields: ['nome', 'tipo', 'status'],
