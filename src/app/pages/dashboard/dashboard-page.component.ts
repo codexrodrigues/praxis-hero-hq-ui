@@ -15,8 +15,7 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
         [page]="pageDefinition"
         [pageIdentity]="pageIdentity()"
         [autoPersist]="true"
-        [showGovernanceToolbar]="true"
-        governanceToolbarTitle="HQ TACTICAL OPERATIONAL MATRIX"
+        [showGovernanceToolbar]="false"
       />
     </div>
   `,

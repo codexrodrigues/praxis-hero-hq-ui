@@ -13,7 +13,8 @@
 .hud-extra-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 /* Tactical Readiness */
@@ -166,6 +167,7 @@
   font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .dropdown-icon {
@@ -177,6 +179,7 @@
   margin: 0;
   font-size: 10px;
   color: var(--muted-foreground);
+  white-space: nowrap;
 }
 
 /* Persona Dropdown Menu */

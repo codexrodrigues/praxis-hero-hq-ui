@@ -13,6 +13,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import {
   PraxisAppShellComponent,
+  PraxisCustomizationModeService,
   type PraxisBrandConfig,
   type PraxisNavGroup,
   type PraxisShellFooterStatus,
@@ -34,6 +35,7 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
       [footerStatus]="footerStatus"
       [isDarkTheme]="isDark()"
       [showThemeToggle]="false"
+      [showCustomizationToggle]="true"
       [showSearch]="true"
       searchPlaceholder="Buscar no comando... (Ctrl+K)"
       (searchSubmit)="openSearchModal()"
@@ -196,6 +198,7 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
 export class HeroAppShellComponent {
   protected readonly themeService = inject(ThemeService);
   protected readonly authService = inject(AuthSimulationService);
+  private readonly customizationMode = inject(PraxisCustomizationModeService, { optional: true });
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -256,6 +259,7 @@ export class HeroAppShellComponent {
   }
 
   protected selectPersona(personaId: string): void {
+    this.customizationMode?.setCustomizing(false);
     this.authService.switchPersona(personaId);
     this.personaMenuOpen.set(false);
     const currentUrl = this.router.url;

@@ -149,6 +149,7 @@ async function runE2E() {
 
     // Validar que os 3 filtros inline declarados pelo host continuam presentes mesmo após snapshot legado no localStorage
     const inlineFilterFields = page.locator('praxis-filter .compact-fields .pfx-field-shell');
+    await inlineFilterFields.nth(2).waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
     assert((await inlineFilterFields.count()) >= 3, 'Todos os 3 filtros inline declarados pelo host permanecem visíveis após reconciliação de CONFIG_STORAGE');
 
     // Test 5.1: Sincronismo Bidirecional KPI <-> ScopeBar e Preservação de Capabilities
@@ -160,7 +161,7 @@ async function runE2E() {
     const isKpiMarkedActive = await activeKpiCard.evaluate((el) => el.classList.contains('active') && el.getAttribute('aria-pressed') === 'true');
     assert(isKpiMarkedActive, 'Card KPI "Em Prontidão Ativa" recebe classe .active e aria-pressed="true" ao ser clicado');
 
-    const newHeroBtn = page.locator('praxis-table .praxis-toolbar button').filter({ hasText: /Novo Herói|Adicionar/i }).first();
+    const newHeroBtn = page.locator('praxis-table .praxis-toolbar button').filter({ hasText: /Novo Colaborador|Novo Herói|Adicionar/i }).first();
     assert((await newHeroBtn.count()) > 0, 'Botão de criação da coleção permanece visível após filtrar por KPI/ScopeBar (collectionCapabilities preservadas)');
 
     const totalKpiCard = page.locator('praxis-kpi-band .praxis-kpi-card').filter({ hasText: /Efetivo Total/i }).first();
@@ -169,6 +170,30 @@ async function runE2E() {
 
     const isTotalKpiActive = await totalKpiCard.evaluate((el) => el.classList.contains('active') && el.getAttribute('aria-pressed') === 'true');
     assert(isTotalKpiActive, 'Card KPI "Efetivo Total" (filter: {}) reativa escopo "Todos" e recebe estado ativo');
+
+    // Test 5.2: Modo de Customização Global na Barra Principal (Qualquer Rota)
+    console.log('\n[Test 5.2] Validando Modo de Customização na Barra Principal em Rota de Recurso (/rh/funcionarios)...');
+    const resourceConfigureBtn = page.locator('[data-testid="resource-page-configure-btn"]');
+    assert((await resourceConfigureBtn.count()) === 0, 'Botão "Configurar Página" oculto antes de ativar o modo de customização na barra principal');
+
+    const topbarCustomizeBtn = page.locator('praxis-app-shell .praxis-shell__topbar [data-testid="toggle-customization-btn"]').first();
+    assert((await topbarCustomizeBtn.count()) > 0, 'Botão "Customizar Layout" presente na barra superior principal (PraxisAppShellComponent)');
+    await topbarCustomizeBtn.click();
+    await page.waitForTimeout(600);
+
+    assert((await resourceConfigureBtn.count()) > 0, 'Botão "Configurar Página" torna-se visível na rota de recurso ao ativar Customizar Layout na barra principal');
+
+    // Validar que o modo de customização permanece ativo ao navegar via SPA para outra rota
+    const eventosFolhaLink = page.locator('a[href="/rh/eventos-folha"]').first();
+    if (await eventosFolhaLink.count() > 0) {
+      await eventosFolhaLink.click();
+      await page.waitForTimeout(1500);
+      assert((await resourceConfigureBtn.count()) > 0, 'Modo de customização permanece ativo ao navegar entre rotas via SPA (/rh/funcionarios -> /rh/eventos-folha)');
+    }
+
+    await topbarCustomizeBtn.click();
+    await page.waitForTimeout(500);
+    assert((await resourceConfigureBtn.count()) === 0, 'Botão "Configurar Página" ocultado ao finalizar o modo de customização na barra principal');
 
     // -------------------------------------------------------------
     // Test 6: Tactical Clearance Guard & Governança de Autorização

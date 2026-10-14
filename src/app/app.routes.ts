@@ -169,7 +169,6 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     domain: 'Suprimentos & Logística Tática',
     icon: 'shopping_cart_checkout',
     tone: 'warning',
-    enableCustomization: true,
     loadMetadata: () => import('./pages/suprimentos/pedidos.config').then((m) => m.PEDIDOS_CRUD_METADATA),
   },
   {
