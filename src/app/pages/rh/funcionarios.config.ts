@@ -13,7 +13,7 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'total',
         label: 'Efetivo Total',
-        value: '24 Cadastrados',
+        value: '101 Cadastrados',
         caption: 'Quadro ativo e reserva',
         icon: 'group',
         tone: 'info',
@@ -22,8 +22,8 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'ativos',
         label: 'Em Prontidão Ativa',
-        value: '21 Ativos',
-        caption: '87,5% da força operacional',
+        value: '101 Ativos',
+        caption: '100% da força operacional',
         icon: 'verified_user',
         tone: 'success',
         filter: { ativo: true },
@@ -31,7 +31,7 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'inativos',
         label: 'Em Reserva / Licença',
-        value: '03 Inativos',
+        value: '0 Inativos',
         caption: 'Reserva tática ou licença civil',
         icon: 'person_off',
         tone: 'warning',

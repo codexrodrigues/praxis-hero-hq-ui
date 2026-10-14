@@ -336,17 +336,8 @@ html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-
   margin-inline-start: auto !important;
 }
 
-/* Compact filter pills (select, lookup, date-range, toggle) size tightly to their pill content
-   with a uniform 10px gap, while text input pills get a comfortable reading width on desktop/tablet */
+/* Text input pills get a comfortable reading width on desktop/tablet while other compact pills use @praxisui/table intrinsic fit-content */
 @media (min-width: 641px) {
-  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > :is(.pfx-field-shell, praxis-field-shell, dynamic-field-loader),
-  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > dynamic-field-loader > :is(.pfx-field-shell, praxis-field-shell) {
-    flex: 0 0 auto !important;
-    width: fit-content !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-
   html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > :is(.pfx-field-shell, praxis-field-shell, dynamic-field-loader):is([data-control-type='inlineInput'], [data-control-type='input'], :has(pdx-inline-input)),
   html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > dynamic-field-loader > :is(.pfx-field-shell, praxis-field-shell):is([data-control-type='inlineInput'], [data-control-type='input'], :has(pdx-inline-input)) {
     flex: 0 1 220px !important;

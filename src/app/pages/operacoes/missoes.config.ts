@@ -13,7 +13,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'ativas',
         label: 'Missões Ativas em Campo',
-        value: '06 Incursões',
+        value: '09 Incursões',
         caption: 'Em andamento no radar operacional',
         icon: 'flight_takeoff',
         tone: 'info',
@@ -21,9 +21,9 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
       },
       {
         id: 'concluidas',
-        label: 'Taxa de Sucesso Histórica',
-        value: '66,7%',
-        caption: '4 missões concluídas com êxito',
+        label: 'Missões Concluídas',
+        value: '07 Concluídas',
+        caption: 'Operações finalizadas com êxito',
         icon: 'task_alt',
         tone: 'success',
         filter: { status: 'CONCLUIDA' },

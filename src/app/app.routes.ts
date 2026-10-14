@@ -18,7 +18,7 @@ interface ResourceRouteConfig {
 const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   {
     path: 'rh/funcionarios',
-    resource: 'rh/funcionarios',
+    resource: 'human-resources/funcionarios',
     title: 'Heróis & Colaboradores',
     subtitle: 'Gestão centralizada do quadro de heróis e colaboradores.',
     domain: 'Pessoas & Recursos Humanos',
@@ -28,7 +28,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   },
   {
     path: 'rh/folha-pagamento',
-    resource: 'rh/folha-pagamento',
+    resource: 'human-resources/folhas-pagamento',
     title: 'Folha de Pagamento',
     subtitle: 'Processamento de remunerações, eventos e pagamentos.',
     domain: 'Pessoas & Recursos Humanos',
@@ -49,7 +49,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   },
   {
     path: 'rh/afastamentos',
-    resource: 'rh/afastamentos',
+    resource: 'human-resources/ferias-afastamentos',
     title: 'Férias & Afastamentos',
     subtitle: 'Controle de disponibilidade, férias e afastamentos da força.',
     domain: 'Pessoas & Recursos Humanos',
@@ -59,7 +59,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   },
   {
     path: 'rh/cargos-departamentos',
-    resource: 'rh/cargos-departamentos',
+    resource: 'human-resources/departamentos',
     title: 'Cargos & Departamentos',
     subtitle: 'Estrutura organizacional, funções e centros de comando.',
     domain: 'Pessoas & Recursos Humanos',
@@ -69,7 +69,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   },
   {
     path: 'rh/reputacao',
-    resource: 'rh/reputacao',
+    resource: 'human-resources/vw-ranking-reputacao',
     title: 'Ranking de Reputação',
     subtitle: 'Análise dos índices públicos e governamentais dos heróis.',
     domain: 'Pessoas & Recursos Humanos',
@@ -150,7 +150,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   },
   {
     path: 'suprimentos/contratos',
-    resource: 'supplies/contratos',
+    resource: 'procurement/contracts',
     title: 'Fornecedores & Contratos',
     subtitle:
       'Gestão de parceiros industriais, acordos de nível de serviço, peças de reposição e contratos corporativos.',
@@ -162,7 +162,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   },
   {
     path: 'suprimentos/pedidos',
-    resource: 'supplies/pedidos',
+    resource: 'procurement/purchase-orders',
     title: 'Pedidos de Compra & Reposição',
     subtitle:
       'Ordens de fornecimento de ligas de vibranium, propulsores quânticos, tecidos balísticos e insumos de laboratório.',
@@ -174,7 +174,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   },
   {
     path: 'risco/ameacas',
-    resource: 'risk/ameacas',
+    resource: 'risk-intelligence/ameacas',
     title: 'Radar de Ameaças Globais',
     subtitle: 'Monitoramento contínuo de ameaças em escala global.',
     domain: 'Inteligência de Risco',
@@ -184,7 +184,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
   },
   {
     path: 'risco/indicadores',
-    resource: 'risk/indicadores',
+    resource: 'risk-intelligence/vw-indicadores-incidentes',
     title: 'Indicadores & Indenizações',
     subtitle: 'Métricas de risco, impacto e proteção financeira.',
     domain: 'Inteligência de Risco',

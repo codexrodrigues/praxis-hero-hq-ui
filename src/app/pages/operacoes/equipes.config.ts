@@ -13,7 +13,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'all',
         label: 'Esquadrões Registrados',
-        value: '5 Equipes',
+        value: '18 Equipes',
         caption: 'Compostas por heróis de ponta',
         icon: 'diversity_3',
         tone: 'info',
@@ -22,7 +22,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'ativas',
         label: 'Prontidão Máxima',
-        value: '4 Ativas',
+        value: '12 Ativas',
         caption: 'Mobilizáveis para resposta imediata',
         icon: 'verified_user',
         tone: 'success',
@@ -31,8 +31,8 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'reserva',
         label: 'Reserva & Suporte',
-        value: '1 em Treinamento',
-        caption: 'Squad em ciclo de integração',
+        value: '3 em Reserva',
+        caption: 'Squads em prontidão secundária',
         icon: 'shield',
         tone: 'neutral',
         filter: { status: 'RESERVA' },
@@ -40,7 +40,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'bases',
         label: 'Bases Interligadas',
-        value: '5 Complexos',
+        value: '16 Complexos',
         caption: 'Presença e ancoragem tática',
         icon: 'hub',
         tone: 'info',

@@ -13,7 +13,7 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'all',
         label: 'Unidades na Frota',
-        value: '8 Veículos',
+        value: '22 Veículos',
         caption: 'Aeronaves, hovercrafts e terrestres',
         icon: 'rocket_launch',
         tone: 'info',
@@ -22,7 +22,7 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'operacional',
         label: 'Prontidão de Voo',
-        value: '5 Disponíveis',
+        value: '17 Disponíveis',
         caption: 'Abastecidos e prontos para decolagem',
         icon: 'verified',
         tone: 'success',
@@ -31,7 +31,7 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'manutencao',
         label: 'Em Revisão / Hangar',
-        value: '2 em Manutenção',
+        value: '3 em Manutenção',
         caption: 'Calibragem de propulsores iônicos',
         icon: 'build',
         tone: 'warning',

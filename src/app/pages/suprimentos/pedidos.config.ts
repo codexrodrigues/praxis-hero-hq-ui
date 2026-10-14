@@ -13,7 +13,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'ordens',
         label: 'Ordens de Compra',
-        value: '10 Pedidos',
+        value: '19 Pedidos',
         caption: 'Ciclo de suprimento em andamento',
         icon: 'local_shipping',
         tone: 'info',
@@ -21,9 +21,9 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       },
       {
         id: 'aprovadas',
-        label: 'Aprovadas / Entregues',
-        value: '5 Ordens',
-        caption: 'Itens em expedição ou já recebidos',
+        label: 'Aprovadas / Em Expedição',
+        value: '12 Ordens',
+        caption: 'Pedidos aprovados pelo comando',
         icon: 'inventory',
         tone: 'success',
         filter: { status: 'APPROVED' },
@@ -31,7 +31,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'analise',
         label: 'Aguardando Aprovação',
-        value: '3 em Análise',
+        value: '4 em Análise',
         caption: 'Compliance de compras e finanças',
         icon: 'pending_actions',
         tone: 'warning',
@@ -40,7 +40,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'canceladas',
         label: 'Canceladas / Revogadas',
-        value: '2 Pedidos',
+        value: '1 Pedido',
         caption: 'Ordens reavaliadas pelo comando',
         icon: 'cancel',
         tone: 'neutral',
