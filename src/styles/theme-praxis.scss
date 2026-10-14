@@ -64,8 +64,27 @@ $surfaces: (
   --praxis-neutral: var(--muted-foreground);
   --praxis-page-title-color: var(--foreground);
   --pdx-shell-card-bg: var(--card);
+  --pdx-shell-card-border: var(--border);
   --pdx-shell-card-backdrop-filter: none;
+  --pdx-shell-header-bg: var(--surface-gradient);
+  --pdx-shell-header-border: var(--border);
+  --pdx-shell-title-color: var(--foreground);
 }
+
+:root[data-theme='dark-tech'] {
+  --pdx-shell-card-bg: var(--dark-panel-gradient);
+  --pdx-dashboard-card-bg: var(--dark-panel-gradient);
+}
+
+/* Ensure the workspace canvas exhibits the ambient gradient in dark mode */
+.praxis-shell__main {
+  background-color: var(--background);
+  background-image: var(--dark-canvas-gradient, none);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 @include praxis.praxis-shell-styles();
 @include praxis.praxis-tooltip-styles();
 @include praxis.praxis-menu-styles();
@@ -73,7 +92,7 @@ $surfaces: (
 /* Table defines defaults on :host; specificity must override those same tokens. */
 html[data-theme] praxis-table {
   --p-table-bg: var(--card);
-  --p-table-header-bg: var(--workspace-surface);
+  --p-table-header-bg: var(--surface-gradient);
   --p-table-header-fg: var(--foreground);
   --p-table-row-bg: var(--card);
   --p-table-text-color: var(--foreground);
@@ -84,6 +103,25 @@ html[data-theme] praxis-table {
   --p-table-state-success-fg: var(--ready);
   --p-table-state-warning-fg: var(--warning);
   --p-table-state-danger-fg: var(--destructive);
+}
+
+/* Primary Command Action CTA (single bold primary action per viewport) */
+.praxis-table-action-primary,
+.praxis-toolbar-action--filled-primary,
+button.primary-action-pill,
+button.mat-mdc-unelevated-button.mat-primary,
+button.mat-mdc-raised-button.mat-primary {
+  background: var(--command-gradient) !important;
+  color: var(--primary-foreground) !important;
+  border: none !important;
+  font-weight: 600 !important;
+  box-shadow: var(--float-shadow, 0 4px 14px rgba(0, 0, 0, 0.25));
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease !important;
+
+  &:hover:not([disabled]) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px color-mix(in oklab, var(--primary) 35%, transparent) !important;
+  }
 }
 .theme-swatch {
   display: inline-block; width: 16px; height: 16px; margin-inline-end: 10px;
