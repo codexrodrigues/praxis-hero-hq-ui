@@ -93,25 +93,30 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      search: {
-        enabled: true,
-        placeholder: 'Buscar sinistros por local, missão ou descrição...',
-      },
       filters: {
         enabled: true,
         quickFilters: [
-          { id: 'all', label: 'Todos os Sinistros', filter: '', icon: 'account_balance' },
-          { id: 'critico', label: 'Severidade Crítica', filter: "severidade='CRITICA'", icon: 'warning' },
-          { id: 'pendente', label: 'Saldo Pendente', filter: 'totalPendente > 0', icon: 'pending' },
-          { id: 'homologado', label: '100% Homologado', filter: 'totalPendente = 0', icon: 'verified' },
+          { id: 'all', label: 'Todos os Sinistros', filter: {}, icon: 'account_balance' },
+          { id: 'critico', label: 'Severidade Crítica', filter: { severidade: 'CRITICA' }, icon: 'warning' },
+          { id: 'pendente', label: 'Saldo Pendente', filter: { totalPendenteMin: 0.01 }, icon: 'pending' },
+          { id: 'homologado', label: '100% Homologado', filter: { totalPendenteBetween: [0, 0] }, icon: 'verified' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
+        enabled: true,
         columnFilters: {
           enabled: true,
+        },
+        advancedFilters: {
+          enabled: true,
+          settings: {
+            inline: true,
+            alwaysVisibleFields: ['missao', 'local', 'severidade'],
+            useInlineSearchableSelectVariant: true,
+          },
         },
       },
       expansion: {

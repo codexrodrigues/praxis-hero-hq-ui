@@ -83,30 +83,41 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      search: {
-        enabled: true,
-        placeholder: 'Buscar afastamentos por tipo, colaborador ou observações...',
-      },
       filters: {
         enabled: true,
         quickFilters: [
-          { id: 'all', label: 'Todos os Registros', filter: '', icon: 'history' },
-          { id: 'ferias', label: 'Férias Regulamentares', filter: "tipo='FERIAS'", icon: 'beach_access' },
-          { id: 'medica', label: 'Licença Médica / Recuperação', filter: "tipo='LICENCA_MEDICA' or tipo='MEDICA'", icon: 'health_and_safety' },
-          { id: 'treinamento', label: 'Treinamento Tático', filter: "tipo='TREINAMENTO'", icon: 'model_training' },
+          { id: 'all', label: 'Todos os Registros', filter: {}, icon: 'history' },
+          { id: 'ferias', label: 'Férias Regulamentares', filter: { tipo: 'FERIAS' }, icon: 'beach_access' },
+          { id: 'medica', label: 'Licença Médica / Recuperação', filter: { tipo: 'LICENCA_MEDICA' }, icon: 'health_and_safety' },
+          { id: 'treinamento', label: 'Treinamento Tático', filter: { tipo: 'TREINAMENTO' }, icon: 'model_training' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
+      selection: {
+        enabled: true,
+        type: 'multiple',
+        mode: 'checkbox',
+        allowSelectAll: true,
+        checkboxPosition: 'start',
+        persistSelection: true,
+        persistOnDataUpdate: false,
+        visual: {
+          highlightSelected: true,
+          showSelectionCount: true,
+        },
+      },
       filtering: {
+        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
+          enabled: true,
           settings: {
             inline: true,
-            alwaysVisibleFields: ['tipo', 'funcionarioId', 'dataInicio'],
+            alwaysVisibleFields: ['tipo', 'funcionarioId', 'dataInicioBetween'],
             useInlineSearchableSelectVariant: true,
           },
         },

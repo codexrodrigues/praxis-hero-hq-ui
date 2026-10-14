@@ -163,11 +163,20 @@
   }
 }
 
-/* CRUD Surface Glass Container */
-.crud-surface {
-  border-radius: 18px;
-  padding: 20px;
-  overflow: hidden;
+/* CRUD Surface Container — avoid redundant outer box ("caixa dentro de caixa") around KPI band + Table */
+.crud-surface,
+.praxis-resource-page__crud-surface.crud-surface.glass-panel {
+  border-radius: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.praxis-crud-runtime > praxis-kpi-band {
+  display: block;
+  margin-bottom: 20px;
 }
 
 /* Visual Chart Surface */

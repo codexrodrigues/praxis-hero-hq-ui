@@ -23,7 +23,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Gestão centralizada do quadro de heróis e colaboradores.',
     domain: 'Pessoas & Recursos Humanos',
     icon: 'group',
-    tone: 'rh',
+    tone: 'primary',
     loadMetadata: () => import('./pages/rh/funcionarios.config').then((m) => m.HEROES_CRUD_METADATA),
   },
   {
@@ -33,9 +33,19 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Processamento de remunerações, eventos e pagamentos.',
     domain: 'Pessoas & Recursos Humanos',
     icon: 'payments',
-    tone: 'rh',
+    tone: 'primary',
     clearance: 'DEFCON 1',
     loadMetadata: () => import('./pages/rh/folha-pagamento.config').then((m) => m.FOLHA_PAGAMENTO_CRUD_METADATA),
+  },
+  {
+    path: 'rh/eventos-folha',
+    resource: 'human-resources/eventos-folha',
+    title: 'Eventos de Folha',
+    subtitle: 'Rubricas, proventos, descontos e aprovação governada em lote.',
+    domain: 'Pessoas & Recursos Humanos',
+    icon: 'receipt_long',
+    tone: 'primary',
+    loadMetadata: () => import('./pages/rh/eventos-folha.config').then((m) => m.EVENTOS_FOLHA_CRUD_METADATA),
   },
   {
     path: 'rh/afastamentos',
@@ -44,7 +54,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Controle de disponibilidade, férias e afastamentos da força.',
     domain: 'Pessoas & Recursos Humanos',
     icon: 'event_busy',
-    tone: 'rh',
+    tone: 'primary',
     loadMetadata: () => import('./pages/rh/afastamentos.config').then((m) => m.AFASTAMENTOS_CRUD_METADATA),
   },
   {
@@ -54,7 +64,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Estrutura organizacional, funções e centros de comando.',
     domain: 'Pessoas & Recursos Humanos',
     icon: 'domain',
-    tone: 'rh',
+    tone: 'primary',
     loadMetadata: () => import('./pages/rh/departamentos.config').then((m) => m.DEPARTAMENTOS_CRUD_METADATA),
   },
   {
@@ -64,7 +74,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Análise dos índices públicos e governamentais dos heróis.',
     domain: 'Pessoas & Recursos Humanos',
     icon: 'monitoring',
-    tone: 'rh',
+    tone: 'primary',
     loadMetadata: () => import('./pages/rh/reputacao.config').then((m) => m.REPUTACAO_CRUD_METADATA),
   },
   {
@@ -74,8 +84,19 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Planejamento e acompanhamento de missões em campo.',
     domain: 'Operações & Missões Táticas',
     icon: 'military_tech',
-    tone: 'operations',
+    tone: 'info',
     loadMetadata: () => import('./pages/operacoes/missoes.config').then((m) => m.MISSOES_CRUD_METADATA),
+  },
+  {
+    path: 'operacoes/missao-participantes',
+    resource: 'operations/missao-participantes',
+    title: 'Escala de Missões',
+    subtitle: 'Alocação de heróis em missões, papéis táticos e resultados individuais.',
+    domain: 'Operações & Missões Táticas',
+    icon: 'groups',
+    tone: 'info',
+    loadMetadata: () =>
+      import('./pages/operacoes/missao-participantes.config').then((m) => m.MISSAO_PARTICIPANTES_CRUD_METADATA),
   },
   {
     path: 'operacoes/equipes',
@@ -84,7 +105,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Formação de equipes táticas e distribuição de competências.',
     domain: 'Operações & Missões Táticas',
     icon: 'shield',
-    tone: 'operations',
+    tone: 'info',
     loadMetadata: () => import('./pages/operacoes/equipes.config').then((m) => m.EQUIPES_CRUD_METADATA),
   },
   {
@@ -94,7 +115,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Administração de bases e credenciais de segurança.',
     domain: 'Operações & Missões Táticas',
     icon: 'apartment',
-    tone: 'operations',
+    tone: 'info',
     loadMetadata: () => import('./pages/operacoes/bases.config').then((m) => m.BASES_CRUD_METADATA),
   },
   {
@@ -104,7 +125,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Registro e resposta coordenada a incidentes críticos.',
     domain: 'Operações & Missões Táticas',
     icon: 'crisis_alert',
-    tone: 'operations',
+    tone: 'info',
     loadMetadata: () => import('./pages/operacoes/incidentes.config').then((m) => m.INCIDENTES_CRUD_METADATA),
   },
   {
@@ -114,7 +135,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Inventário, manutenção e alocação de recursos táticos.',
     domain: 'Ativos Operacionais',
     icon: 'inventory_2',
-    tone: 'assets',
+    tone: 'neutral',
     loadMetadata: () => import('./pages/ativos/equipamentos.config').then((m) => m.EQUIPAMENTOS_CRUD_METADATA),
   },
   {
@@ -124,7 +145,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Disponibilidade e manutenção da frota operacional.',
     domain: 'Ativos Operacionais',
     icon: 'directions_car',
-    tone: 'assets',
+    tone: 'neutral',
     loadMetadata: () => import('./pages/ativos/veiculos.config').then((m) => m.VEICULOS_CRUD_METADATA),
   },
   {
@@ -135,7 +156,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
       'Gestão de parceiros industriais, acordos de nível de serviço, peças de reposição e contratos corporativos.',
     domain: 'Suprimentos & Aquisições Estratégicas',
     icon: 'contract',
-    tone: 'supplies',
+    tone: 'warning',
     clearance: 'DEFCON 1',
     loadMetadata: () => import('./pages/suprimentos/contratos.config').then((m) => m.CONTRATOS_CRUD_METADATA),
   },
@@ -147,7 +168,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
       'Ordens de fornecimento de ligas de vibranium, propulsores quânticos, tecidos balísticos e insumos de laboratório.',
     domain: 'Suprimentos & Logística Tática',
     icon: 'shopping_cart_checkout',
-    tone: 'supplies',
+    tone: 'warning',
     enableCustomization: true,
     loadMetadata: () => import('./pages/suprimentos/pedidos.config').then((m) => m.PEDIDOS_CRUD_METADATA),
   },
@@ -158,7 +179,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Monitoramento contínuo de ameaças em escala global.',
     domain: 'Inteligência de Risco',
     icon: 'radar',
-    tone: 'risk',
+    tone: 'danger',
     loadMetadata: () => import('./pages/risco/ameacas.config').then((m) => m.AMEACAS_CRUD_METADATA),
   },
   {
@@ -168,7 +189,7 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
     subtitle: 'Métricas de risco, impacto e proteção financeira.',
     domain: 'Inteligência de Risco',
     icon: 'emergency',
-    tone: 'risk',
+    tone: 'danger',
     loadMetadata: () => import('./pages/risco/indicadores.config').then((m) => m.INDICADORES_CRUD_METADATA),
   },
 ];

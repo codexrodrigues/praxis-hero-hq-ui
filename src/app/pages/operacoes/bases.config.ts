@@ -81,27 +81,25 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      search: {
-        enabled: true,
-        placeholder: 'Buscar bases por nome, setor ou teatro...',
-      },
       filters: {
         enabled: true,
         quickFilters: [
-          { id: 'all', label: 'Todas as Bases', filter: '', icon: 'hub' },
-          { id: 'sigilo', label: 'Segurança Máxima', filter: "sigilo='SECRETO' or sigilo='ULTRA_SECRETO' or sigilo='SECRETA' or sigilo='ULTRA_SECRETA'", icon: 'security' },
-          { id: 'terra', label: 'Bases Terrestres', filter: "planeta='Terra' or planeta='TERRA'", icon: 'public' },
-          { id: 'espaco', label: 'Órbita / Espaço', filter: "tipo='ORBITAL' or planeta='ESPACO'", icon: 'satellite_alt' },
+          { id: 'all', label: 'Todas as Bases', filter: {}, icon: 'hub' },
+          { id: 'sigilo', label: 'Segurança Máxima', filter: { sigilo: 'ULTRA_SECRETO' }, icon: 'security' },
+          { id: 'terra', label: 'Bases Terrestres', filter: { planeta: 'Terra' }, icon: 'public' },
+          { id: 'espaco', label: 'Órbita / Espaço', filter: { tipo: 'ORBITAL' }, icon: 'satellite_alt' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
+        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
+          enabled: true,
           settings: {
             inline: true,
             alwaysVisibleFields: ['nome', 'tipo', 'sigilo', 'planeta'],

@@ -83,30 +83,28 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      search: {
-        enabled: true,
-        placeholder: 'Buscar veículos por nome, categoria ou piloto...',
-      },
       filters: {
         enabled: true,
         quickFilters: [
-          { id: 'all', label: 'Toda a Frota', filter: '', icon: 'rocket_launch' },
-          { id: 'operacional', label: 'Em Operação / Prontidão', filter: "status='OPERACIONAL'", icon: 'verified' },
-          { id: 'manutencao', label: 'Em Manutenção / Hangar', filter: "status='MANUTENCAO'", icon: 'build' },
-          { id: 'aerea', label: 'Aeronaves & Espaciais', filter: "tipo='AERONAVE' or tipo='ESPACIAL'", icon: 'flight' },
+          { id: 'all', label: 'Toda a Frota', filter: {}, icon: 'rocket_launch' },
+          { id: 'operacional', label: 'Em Operação / Prontidão', filter: { status: 'OPERACIONAL' }, icon: 'verified' },
+          { id: 'manutencao', label: 'Em Manutenção / Hangar', filter: { status: 'MANUTENCAO' }, icon: 'build' },
+          { id: 'aerea', label: 'Aeronaves & Espaciais', filter: { tiposIn: ['AERONAVE', 'ESPACIAL'] }, icon: 'flight' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
+        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
+          enabled: true,
           settings: {
             inline: true,
-            alwaysVisibleFields: ['nome', 'tipo', 'status', 'proprietarioNome'],
+            alwaysVisibleFields: ['nome', 'tipo', 'status', 'proprietarioId'],
             useInlineSearchableSelectVariant: true,
           },
         },

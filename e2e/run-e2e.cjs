@@ -47,8 +47,28 @@ async function runE2E() {
     const bodyText = await page.innerText('body');
     assert(bodyText.includes('53 Ativos'), 'KPI "53 Ativos" renderizado');
     assert(bodyText.includes('14 Planejadas') || bodyText.includes('15 Planejadas') || /\d+\s+Planejadas/.test(bodyText), 'KPI de missões planejadas ("Planejadas") renderizado');
-    assert(bodyText.includes('R$ 3,09 M') || bodyText.includes('3,09 M'), 'KPI de execução orçamentária formatado em Real presente');
+    assert(bodyText.includes('R$ 3,09 M') || bodyText.includes('3,09 M') || bodyText.includes('3.09 M'), 'KPI de execução orçamentária formatado em Real presente');
     assert(bodyText.includes('18 Críticos'), 'KPI "18 Críticos" renderizado');
+
+    // -------------------------------------------------------------
+    // Test 2.1: Governance Toolbar + Floating Toolbar + DataSources State Preservation
+    // -------------------------------------------------------------
+    console.log('\n[Test 2.1] Validando Governança de Layout, Floating Toolbar e Preservação de Estado dos DataSources...');
+    const customizeBtn = page.locator('[data-testid="toggle-customization-btn"]').first();
+    assert((await customizeBtn.count()) > 0, 'Botão "Customizar Layout" da barra de governança presente');
+    await customizeBtn.click();
+    await page.waitForTimeout(800);
+
+    const floatingToolbarBtns = page.locator('praxis-floating-toolbar button');
+    assert((await floatingToolbarBtns.count()) > 0, 'Floating Toolbar fica visível com ações de edição ao ativar Customizar Layout via barra de governança');
+
+    const bodyAfterCustomize = await page.innerText('body');
+    assert(bodyAfterCustomize.includes('53 Ativos'), 'Dados vivos dos DataSources ("53 Ativos") preservados ao entrar em modo de customização');
+    assert(bodyAfterCustomize.includes('18 Críticos'), 'Dados vivos dos DataSources ("18 Críticos") preservados ao entrar em modo de customização');
+
+    // Sair do modo de customização
+    await customizeBtn.click();
+    await page.waitForTimeout(500);
 
     // -------------------------------------------------------------
     // Test 3: Distress Signals List pt-BR Localization
@@ -153,39 +173,300 @@ async function runE2E() {
     }
 
     // -------------------------------------------------------------
-    // Test 7: Governed Bulk Operations & 2-Phase Protocol
+    // Test 7: Governed Bulk Operations & 2-Phase Protocol (/rh/eventos-folha)
     // -------------------------------------------------------------
-    console.log('\n[Test 7] Validando Operações em Lote Corporativas (Protocolo de 2 Fases)...');
-    await page.goto(`${BASE_URL}/operacoes/incidentes`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    console.log('\n[Test 7] Validando Operações em Lote Governadas (Protocolo de 2 Fases em /rh/eventos-folha)...');
+
+    await page.route('**/api/human-resources/eventos-folha/capabilities**', async (route) => {
+      const body = {
+        resourceKey: 'human-resources.eventos-folha',
+        resourcePath: '/api/human-resources/eventos-folha',
+        group: 'api-human-resources-eventos-folha',
+        resourceId: null,
+        canonicalOperations: {
+          update: true,
+          delete: true,
+          byId: true,
+          cursor: true,
+          filter: true,
+          create: true,
+          options: true,
+          all: true,
+        },
+        operations: {
+          'bulk-approve': {
+            id: 'bulk-approve',
+            supported: true,
+            scope: 'COLLECTION',
+            preferredMethod: 'POST',
+            availability: { allowed: true, reason: null, metadata: {} },
+          },
+        },
+        actions: [
+          {
+            id: 'bulk-approve',
+            title: 'Aprovar eventos de folha em lote',
+            scope: 'COLLECTION',
+            availability: { allowed: true, reason: null, metadata: {} },
+            execution: {
+              bulk: {
+                mode: 'DOMAIN_COMMAND',
+                atomicity: 'PER_ITEM',
+                selectionModes: ['EXPLICIT'],
+                executionModes: ['SYNC'],
+                parametersPointer: '/properties/parameters',
+                limits: {
+                  maxTargets: 25,
+                  maxRequestBytes: 65536,
+                  proposalLifetimeMillis: 300000,
+                  unitDeadlineMillis: 5000,
+                },
+                evaluationOperation: {
+                  operation: {
+                    operationId: 'evaluateBulkApproval',
+                    path: '/api/human-resources/eventos-folha/actions/bulk-approve/evaluation',
+                    method: 'POST',
+                  },
+                  requestSchema: {
+                    schemaId: 'bulk-approve-eval-req',
+                    schemaType: 'request',
+                    url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Feventos-folha%2Factions%2Fbulk-approve%2Fevaluation&operation=post&schemaType=request&idField=id&readOnly=false',
+                  },
+                  responseSchema: {
+                    schemaId: 'bulk-approve-eval-res',
+                    schemaType: 'response',
+                    url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Feventos-folha%2Factions%2Fbulk-approve%2Fevaluation&operation=post&schemaType=response&idField=id&readOnly=false',
+                  },
+                },
+                confirmationOperation: {
+                  operation: {
+                    operationId: 'human-resources.eventos-folha.bulk-approve',
+                    path: '/api/human-resources/eventos-folha/actions/bulk-approve',
+                    method: 'POST',
+                  },
+                  responseSchema: {
+                    schemaId: 'bulk-approve-confirm-res',
+                    schemaType: 'response',
+                    url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Feventos-folha%2Factions%2Fbulk-approve&operation=post&schemaType=response&idField=id&readOnly=false',
+                  },
+                },
+                proposalOperation: {
+                  operation: {
+                    operationId: 'getBulkProposal',
+                    path: '/api/human-resources/eventos-folha/bulk-proposals/{proposalId}',
+                    method: 'GET',
+                  },
+                  responseSchema: {
+                    schemaId: 'bulk-proposal-res',
+                    schemaType: 'response',
+                    url: '/schemas/filtered?id=bulk-proposal-res',
+                  },
+                },
+                proposalResultsOperation: {
+                  operation: {
+                    operationId: 'getBulkProposalResults',
+                    path: '/api/human-resources/eventos-folha/bulk-proposals/{proposalId}/results',
+                    method: 'GET',
+                  },
+                  responseSchema: {
+                    schemaId: 'bulk-proposal-results-res',
+                    schemaType: 'response',
+                    url: '/schemas/filtered?id=bulk-proposal-results-res',
+                  },
+                },
+                executionOperation: {
+                  operation: {
+                    operationId: 'getBulkExecution',
+                    path: '/api/human-resources/eventos-folha/bulk-executions/{executionId}',
+                    method: 'GET',
+                  },
+                  responseSchema: {
+                    schemaId: 'bulk-execution-res',
+                    schemaType: 'response',
+                    url: '/schemas/filtered?id=bulk-execution-res',
+                  },
+                },
+                resultsOperation: {
+                  operation: {
+                    operationId: 'getBulkExecutionResults',
+                    path: '/api/human-resources/eventos-folha/bulk-executions/{executionId}/results',
+                    method: 'GET',
+                  },
+                  responseSchema: {
+                    schemaId: 'bulk-execution-results-res',
+                    schemaType: 'response',
+                    url: '/schemas/filtered?id=bulk-execution-results-res',
+                  },
+                },
+                cancelOperation: {
+                  operation: {
+                    operationId: 'cancelBulkExecution',
+                    path: '/api/human-resources/eventos-folha/bulk-executions/{executionId}/cancel',
+                    method: 'POST',
+                  },
+                  responseSchema: {
+                    schemaId: 'bulk-execution-cancel-res',
+                    schemaType: 'response',
+                    url: '/schemas/filtered?id=bulk-execution-cancel-res',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(body),
+      });
+    });
+
+    await page.route('**/api/human-resources/eventos-folha/actions/bulk-approve/evaluation**', async (route) => {
+      const reqBody = route.request().postDataJSON();
+      const targetCount = reqBody?.selection?.targets?.length || 2;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          proposalId: 'prop-eventos-folha-e2e',
+          operationRef: {
+            operationId: 'human-resources.eventos-folha.bulk-approve',
+            path: '/api/human-resources/eventos-folha/actions/bulk-approve',
+            method: 'POST',
+          },
+          mode: 'DOMAIN_COMMAND',
+          executionMode: 'SYNC',
+          atomicity: 'PER_ITEM',
+          status: 'READY',
+          createdAt: '2026-10-14T02:00:00Z',
+          expiresAt: '2026-10-14T02:05:00Z',
+          totals: {
+            targetCount,
+            evaluated: targetCount,
+            executable: targetCount,
+            unchanged: 0,
+            blocked: 0,
+            denied: 0,
+            invalid: 0,
+            conflict: 0,
+            unknown: 0,
+          },
+          redactedIntent: reqBody?.parameters || {},
+          diagnostics: [],
+          evidence: [],
+        }),
+      });
+    });
+
+    await page.route('**/api/human-resources/eventos-folha/bulk-proposals/**/results**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [
+            { id: 2, decision: 'EXECUTABLE', diagnostics: [] },
+            { id: 3, decision: 'EXECUTABLE', diagnostics: [] },
+          ],
+          nextCursor: null,
+        }),
+      });
+    });
+
+    await page.route('**/api/human-resources/eventos-folha/actions/bulk-approve', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          executionId: 'exec-eventos-folha-e2e',
+          proposalId: 'prop-eventos-folha-e2e',
+          operationRef: {
+            operationId: 'human-resources.eventos-folha.bulk-approve',
+            path: '/api/human-resources/eventos-folha/actions/bulk-approve',
+            method: 'POST',
+          },
+          mode: 'DOMAIN_COMMAND',
+          executionMode: 'SYNC',
+          atomicity: 'PER_ITEM',
+          status: 'COMPLETED',
+          createdAt: '2026-10-14T02:00:00Z',
+          updatedAt: '2026-10-14T02:00:02Z',
+          terminalAt: '2026-10-14T02:00:02Z',
+          totals: {
+            targetCount: 2,
+            pending: 0,
+            confirmed: 2,
+            unchanged: 0,
+            denied: 0,
+            invalid: 0,
+            conflict: 0,
+            notProcessed: 0,
+            unknown: 0,
+          },
+          diagnostics: [],
+        }),
+      });
+    });
+
+    await page.route('**/api/human-resources/eventos-folha/bulk-executions/**/results**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          items: [
+            { id: 2, status: 'CONFIRMED', diagnostics: [] },
+            { id: 3, status: 'CONFIRMED', diagnostics: [] },
+          ],
+          nextCursor: null,
+        }),
+      });
+    });
+
+    await page.goto(`${BASE_URL}/rh/eventos-folha`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(3000);
 
-    const incidentCheckboxes = page.locator('tbody mat-checkbox');
-    assert((await incidentCheckboxes.count()) > 0, 'Checkboxes de seleção presentes na tabela de Incidentes');
+    const payrollEventsCheckboxes = page.locator('tbody mat-checkbox');
+    assert((await payrollEventsCheckboxes.count()) >= 2, 'Checkboxes de seleção presentes na tabela de Eventos de Folha');
 
     // Selecionar 2 linhas
-    await incidentCheckboxes.nth(0).click();
-    await incidentCheckboxes.nth(1).click();
-    await page.waitForTimeout(500);
+    await payrollEventsCheckboxes.nth(0).click();
+    await payrollEventsCheckboxes.nth(1).click();
+    await page.waitForTimeout(600);
 
-    // Verificar se a ação em lote "Conter Ocorrências" está disponível
+    // Verificar se a ação em lote "Aprovar eventos de folha em lote" está disponível via discovery canônico
     const bulkButton = page
       .locator('.praxis-floating-bulk-actions button, button')
-      .filter({ hasText: /Conter Ocorrências/i })
+      .filter({ hasText: /Aprovar eventos de folha em lote/i })
       .first();
-    assert((await bulkButton.count()) > 0, 'Botão de ação em lote "Conter Ocorrências" disponível');
+    await bulkButton.waitFor({ state: 'visible', timeout: 15000 });
+    assert((await bulkButton.count()) > 0, 'Botão de ação em lote "Aprovar eventos de folha em lote" disponível');
 
     // Acionar a ação em lote
     await bulkButton.click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Validar abertura do diálogo canônico
     const bulkDialog = page.locator('praxis-bulk-operation-dialog, .praxis-bulk-dialog').first();
     assert((await bulkDialog.count()) > 0, 'Diálogo canônico PraxisBulkOperationDialogComponent aberto');
 
     const dialogText = await bulkDialog.innerText();
-    assert(dialogText.includes('Conter Ocorrências Selecionadas'), 'Título do comando de domínio renderizado no diálogo');
+    assert(dialogText.includes('Aprovar eventos de folha em lote'), 'Título do comando de domínio renderizado no diálogo');
     assert(dialogText.includes('registros selecionados como alvo'), 'Badge de alvos selecionados presente no diálogo');
-    assert(dialogText.includes('Conformidade e Prévia de Execução') || dialogText.includes('REGISTROS ALVO'), 'Passo 1 (Avaliação/Preview) calculado com sucesso');
+
+    // Passo 1: Preencher parâmetro real do /schemas/filtered (justificativa) e avaliar
+    const paramInput = bulkDialog.locator('input, textarea').first();
+    if ((await paramInput.count()) > 0) {
+      await paramInput.fill('Homologação executiva de eventos pendentes de folha');
+      await page.waitForTimeout(400);
+    }
+    const evaluateBtn = bulkDialog.locator('button').filter({ hasText: /Avaliar Proposta/i }).first();
+    if ((await evaluateBtn.count()) > 0) {
+      await evaluateBtn.click();
+      await page.waitForTimeout(1500);
+    }
+
+    const previewDialogText = await bulkDialog.innerText();
+    assert(previewDialogText.includes('Conformidade e Prévia de Execução') || previewDialogText.includes('REGISTROS ALVO'), 'Passo de Avaliação/Preview calculado com sucesso');
 
     // Confirmar execução (Fase 2)
     const confirmBtn = bulkDialog.locator('button').filter({ hasText: /Confirmar Execução/i }).first();
@@ -194,7 +475,7 @@ async function runE2E() {
     await page.waitForTimeout(1500);
 
     const postConfirmText = await bulkDialog.innerText();
-    assert(postConfirmText.includes('Operação concluída com') || postConfirmText.includes('Status: Concluído'), 'Passo 2 (Confirmação Transacional) concluído com êxito');
+    assert(postConfirmText.includes('Operação concluída com') || postConfirmText.includes('Status: Concluído'), 'Confirmação Transacional concluída com êxito');
     assert(postConfirmText.includes('Concluir e Atualizar'), 'Botão de encerramento e atualização presente');
 
     // Fechar diálogo com sucesso

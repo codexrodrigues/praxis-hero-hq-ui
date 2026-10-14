@@ -42,6 +42,12 @@ export const HERO_NAVIGATION: NavGroup[] = [
         badgeTone: 'warning',
       },
       {
+        label: 'Eventos de Folha',
+        path: '/rh/eventos-folha',
+        icon: 'receipt_long',
+        description: 'Rubricas, proventos, descontos e aprovação governada em lote.',
+      },
+      {
         label: 'Férias & Afastamentos',
         path: '/rh/afastamentos',
         icon: 'event_busy',
@@ -70,6 +76,12 @@ export const HERO_NAVIGATION: NavGroup[] = [
         path: '/operacoes/missoes',
         icon: 'military_tech',
         description: 'Planejamento e acompanhamento de missões em campo.',
+      },
+      {
+        label: 'Escala de Missões',
+        path: '/operacoes/missao-participantes',
+        icon: 'groups',
+        description: 'Alocação de heróis em missões, papéis táticos e resultados individuais.',
       },
       {
         label: 'Equipes & Squads',

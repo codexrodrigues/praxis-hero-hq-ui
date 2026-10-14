@@ -33,129 +33,782 @@ async function runBulkVisualValidation() {
     }
   }
 
-  // Interceptar chamadas da API de Folha de Pagamento
-  await page.route('**/human-resources/folhas-pagamento**', async (route) => {
-    if (route.request().method() === 'GET') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          data: [
-            {
-              id: 'fp-001',
-              funcionarioId: 'iron-man',
-              mes: 3,
-              ano: 2026,
-              salarioBruto: 45000,
-              totalDescontos: 9500,
-              salarioLiquido: 35500,
-              dataPagamento: '2026-03-28',
-              resourceVersion: 'v1.0.0',
+  // ---------------------------------------------------------------------------
+  // 1. Capabilities + 2-Phase Evaluation/Confirmation routes for /rh/eventos-folha
+  //    (Collection rows and /schemas/filtered come from the real backend)
+  // ---------------------------------------------------------------------------
+  await page.route('**/api/human-resources/eventos-folha/capabilities**', async (route) => {
+    const body = {
+      resourceKey: 'human-resources.eventos-folha',
+      resourcePath: '/api/human-resources/eventos-folha',
+      group: 'api-human-resources-eventos-folha',
+      resourceId: null,
+      canonicalOperations: {
+        update: true,
+        delete: true,
+        byId: true,
+        cursor: true,
+        filter: true,
+        create: true,
+        options: true,
+        all: true,
+      },
+      operations: {
+        'bulk-approve': {
+          id: 'bulk-approve',
+          supported: true,
+          scope: 'COLLECTION',
+          preferredMethod: 'POST',
+          availability: { allowed: true, reason: null, metadata: {} },
+        },
+      },
+      actions: [
+        {
+          id: 'bulk-approve',
+          title: 'Aprovar eventos de folha em lote',
+          scope: 'COLLECTION',
+          availability: { allowed: true, reason: null, metadata: {} },
+          execution: {
+            bulk: {
+              mode: 'DOMAIN_COMMAND',
+              atomicity: 'PER_ITEM',
+              selectionModes: ['EXPLICIT'],
+              executionModes: ['SYNC'],
+              parametersPointer: '/properties/parameters',
+              limits: {
+                maxTargets: 25,
+                maxRequestBytes: 65536,
+                proposalLifetimeMillis: 300000,
+                unitDeadlineMillis: 5000,
+              },
+              evaluationOperation: {
+                operation: {
+                  operationId: 'evaluateBulkApproval',
+                  path: '/api/human-resources/eventos-folha/actions/bulk-approve/evaluation',
+                  method: 'POST',
+                },
+                requestSchema: {
+                  schemaId: 'bulk-approve-eval-req',
+                  schemaType: 'request',
+                  url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Feventos-folha%2Factions%2Fbulk-approve%2Fevaluation&operation=post&schemaType=request&idField=id&readOnly=false',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-approve-eval-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Feventos-folha%2Factions%2Fbulk-approve%2Fevaluation&operation=post&schemaType=response&idField=id&readOnly=false',
+                },
+              },
+              confirmationOperation: {
+                operation: {
+                  operationId: 'human-resources.eventos-folha.bulk-approve',
+                  path: '/api/human-resources/eventos-folha/actions/bulk-approve',
+                  method: 'POST',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-approve-confirm-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Feventos-folha%2Factions%2Fbulk-approve&operation=post&schemaType=response&idField=id&readOnly=false',
+                },
+              },
+              proposalOperation: {
+                operation: {
+                  operationId: 'getBulkProposal',
+                  path: '/api/human-resources/eventos-folha/bulk-proposals/{proposalId}',
+                  method: 'GET',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-proposal-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-proposal-res',
+                },
+              },
+              proposalResultsOperation: {
+                operation: {
+                  operationId: 'getBulkProposalResults',
+                  path: '/api/human-resources/eventos-folha/bulk-proposals/{proposalId}/results',
+                  method: 'GET',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-proposal-results-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-proposal-results-res',
+                },
+              },
+              executionOperation: {
+                operation: {
+                  operationId: 'getBulkExecution',
+                  path: '/api/human-resources/eventos-folha/bulk-executions/{executionId}',
+                  method: 'GET',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-execution-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-execution-res',
+                },
+              },
+              resultsOperation: {
+                operation: {
+                  operationId: 'getBulkExecutionResults',
+                  path: '/api/human-resources/eventos-folha/bulk-executions/{executionId}/results',
+                  method: 'GET',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-execution-results-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-execution-results-res',
+                },
+              },
+              cancelOperation: {
+                operation: {
+                  operationId: 'cancelBulkExecution',
+                  path: '/api/human-resources/eventos-folha/bulk-executions/{executionId}/cancel',
+                  method: 'POST',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-execution-cancel-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-execution-cancel-res',
+                },
+              },
             },
-            {
-              id: 'fp-002',
-              funcionarioId: 'captain-america',
-              mes: 3,
-              ano: 2026,
-              salarioBruto: 32000,
-              totalDescontos: 6800,
-              salarioLiquido: 25200,
-              dataPagamento: '2026-03-28',
-              resourceVersion: 'v1.0.0',
-            },
-            {
-              id: 'fp-003',
-              funcionarioId: 'thor',
-              mes: 3,
-              ano: 2026,
-              salarioBruto: 38000,
-              totalDescontos: 8100,
-              salarioLiquido: 29900,
-              dataPagamento: '2026-03-28',
-              resourceVersion: 'v1.0.0',
-            },
-          ],
-          total: 3,
-        }),
-      });
-    } else {
-      await route.continue();
-    }
+          },
+        },
+      ],
+    };
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    });
   });
 
-  // Mock evaluate reajuste
-  await page.route('**/bulk-operations/reajuste/evaluate', async (route) => {
+  await page.route('**/api/human-resources/eventos-folha/actions/bulk-approve/evaluation**', async (route) => {
+    const reqBody = route.request().postDataJSON();
+    const targets = reqBody?.selection?.targets || [];
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        proposalId: 'prop-reajuste-2026',
-        status: 'APPROVED',
+        proposalId: 'prop-eventos-folha-2026',
+        operationRef: {
+          operationId: 'human-resources.eventos-folha.bulk-approve',
+          path: '/api/human-resources/eventos-folha/actions/bulk-approve',
+          method: 'POST',
+        },
+        mode: 'DOMAIN_COMMAND',
+        executionMode: 'SYNC',
+        atomicity: 'PER_ITEM',
+        status: 'READY',
+        createdAt: '2026-10-14T02:00:00Z',
+        expiresAt: '2026-10-14T02:05:00Z',
+        totals: {
+          targetCount: targets.length || 2,
+          evaluated: targets.length || 2,
+          executable: targets.length || 2,
+          unchanged: 0,
+          blocked: 0,
+          denied: 0,
+          invalid: 0,
+          conflict: 0,
+          unknown: 0,
+        },
+        redactedIntent: reqBody?.parameters || {},
+        diagnostics: [],
+        evidence: [],
+      }),
+    });
+  });
+
+  await page.route('**/api/human-resources/eventos-folha/bulk-proposals/**/results**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [
+          { id: 2, decision: 'EXECUTABLE', diagnostics: [] },
+          { id: 3, decision: 'EXECUTABLE', diagnostics: [] },
+        ],
+        nextCursor: null,
+      }),
+    });
+  });
+
+  await page.route('**/api/human-resources/eventos-folha/actions/bulk-approve', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        executionId: 'exec-eventos-folha-2026',
+        proposalId: 'prop-eventos-folha-2026',
+        operationRef: {
+          operationId: 'human-resources.eventos-folha.bulk-approve',
+          path: '/api/human-resources/eventos-folha/actions/bulk-approve',
+          method: 'POST',
+        },
+        mode: 'DOMAIN_COMMAND',
+        executionMode: 'SYNC',
+        atomicity: 'PER_ITEM',
+        status: 'COMPLETED',
+        createdAt: '2026-10-14T02:00:00Z',
+        updatedAt: '2026-10-14T02:00:02Z',
+        terminalAt: '2026-10-14T02:00:02Z',
         totals: {
           targetCount: 2,
-          executable: 2,
-          blocked: 0,
+          pending: 0,
+          confirmed: 2,
+          unchanged: 0,
+          denied: 0,
+          invalid: 0,
+          conflict: 0,
+          notProcessed: 0,
+          unknown: 0,
         },
         diagnostics: [],
       }),
     });
   });
 
-  // Mock confirm reajuste
-  await page.route('**/bulk-operations/reajuste/confirm', async (route) => {
+  await page.route('**/api/human-resources/eventos-folha/bulk-executions/**/results**', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        executionId: 'exec-reajuste-2026',
-        proposalId: 'prop-reajuste-2026',
-        status: 'COMPLETED',
-        totals: {
-          targetCount: 2,
-          confirmed: 2,
-          unchanged: 0,
-          denied: 0,
-        },
+        items: [
+          { id: 2, status: 'CONFIRMED', diagnostics: [] },
+          { id: 3, status: 'CONFIRMED', diagnostics: [] },
+        ],
+        nextCursor: null,
       }),
     });
   });
 
-  // Mock evaluate uniform update
-  await page.route('**/bulk-operations/uniform-update/evaluate', async (route) => {
+  // ---------------------------------------------------------------------------
+  // 2. Capabilities + 2-Phase Evaluation/Confirmation routes for /operacoes/missao-participantes
+  //    (Real UNIFORM_UPDATE contract and /schemas/filtered come from the real backend)
+  // ---------------------------------------------------------------------------
+  await page.route('**/api/operations/missao-participantes/capabilities**', async (route) => {
+    const body = {
+      resourceKey: 'operations.missao-participantes',
+      resourcePath: '/api/operations/missao-participantes',
+      group: 'api-operations-missao-participantes',
+      resourceId: null,
+      canonicalOperations: {
+        update: true,
+        delete: true,
+        byId: true,
+        cursor: true,
+        filter: true,
+        create: true,
+        options: true,
+        all: true,
+      },
+      operations: {
+        'bulk-update': {
+          id: 'bulk-update',
+          supported: true,
+          scope: 'COLLECTION',
+          preferredMethod: 'POST',
+          preferredRel: 'bulk-update',
+          availability: {
+            allowed: true,
+            reason: null,
+            metadata: {},
+          },
+          bulk: {
+            mode: 'UNIFORM_UPDATE',
+            atomicity: 'PER_ITEM',
+            selectionModes: ['EXPLICIT'],
+            executionModes: ['SYNC', 'ASYNC'],
+            limits: {
+              maxTargets: 200,
+              maxRequestBytes: 8388608,
+              proposalLifetimeMillis: 300000,
+              unitDeadlineMillis: 5000,
+            },
+            evaluationOperation: {
+              operation: {
+                group: 'api-operations-missao-participantes',
+                operationId: 'operations.missao-participantes.bulk-update-evaluate',
+                path: '/api/operations/missao-participantes/bulk/update/evaluation',
+                method: 'POST',
+              },
+              requestSchema: {
+                schemaId: 'bulk-update-eval-req',
+                schemaType: 'request',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fupdate%2Fevaluation&operation=post&schemaType=request&idField=proposalId&readOnly=false',
+              },
+              responseSchema: {
+                schemaId: 'bulk-update-eval-res',
+                schemaType: 'response',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fupdate%2Fevaluation&operation=post&schemaType=response&idField=proposalId&readOnly=false',
+              },
+            },
+            confirmationOperation: {
+              operation: {
+                group: 'api-operations-missao-participantes',
+                operationId: 'operations.missao-participantes.bulk-update',
+                path: '/api/operations/missao-participantes/bulk/update',
+                method: 'POST',
+              },
+              requestSchema: {
+                schemaId: 'bulk-update-confirm-req',
+                schemaType: 'request',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fupdate&operation=post&schemaType=request&idField=executionId&readOnly=false',
+              },
+              responseSchema: {
+                schemaId: 'bulk-update-confirm-res',
+                schemaType: 'response',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fupdate&operation=post&schemaType=response&idField=executionId&readOnly=false',
+              },
+            },
+            proposalOperation: {
+              operation: {
+                group: 'api-operations-missao-participantes',
+                operationId: 'operations.missao-participantes.bulk-proposal-read',
+                path: '/api/operations/missao-participantes/bulk/proposals/{proposalId}',
+                method: 'GET',
+              },
+              responseSchema: {
+                schemaId: 'bulk-proposal-res',
+                schemaType: 'response',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fproposals%2F%7BproposalId%7D&operation=get&schemaType=response&idField=proposalId&readOnly=true',
+              },
+            },
+            proposalResultsOperation: {
+              operation: {
+                group: 'api-operations-missao-participantes',
+                operationId: 'operations.missao-participantes.bulk-proposal-results',
+                path: '/api/operations/missao-participantes/bulk/proposals/{proposalId}/results',
+                method: 'GET',
+              },
+              responseSchema: {
+                schemaId: 'bulk-proposal-results-res',
+                schemaType: 'response',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fproposals%2F%7BproposalId%7D%2Fresults&operation=get&schemaType=response&idField=id&readOnly=true',
+              },
+            },
+            executionOperation: {
+              operation: {
+                group: 'api-operations-missao-participantes',
+                operationId: 'operations.missao-participantes.bulk-execution-read',
+                path: '/api/operations/missao-participantes/bulk/executions/{executionId}',
+                method: 'GET',
+              },
+              responseSchema: {
+                schemaId: 'bulk-execution-res',
+                schemaType: 'response',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fexecutions%2F%7BexecutionId%7D&operation=get&schemaType=response&idField=executionId&readOnly=true',
+              },
+            },
+            resultsOperation: {
+              operation: {
+                group: 'api-operations-missao-participantes',
+                operationId: 'operations.missao-participantes.bulk-execution-results',
+                path: '/api/operations/missao-participantes/bulk/executions/{executionId}/results',
+                method: 'GET',
+              },
+              responseSchema: {
+                schemaId: 'bulk-execution-results-res',
+                schemaType: 'response',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fexecutions%2F%7BexecutionId%7D%2Fresults&operation=get&schemaType=response&idField=id&readOnly=true',
+              },
+            },
+            cancelOperation: {
+              operation: {
+                group: 'api-operations-missao-participantes',
+                operationId: 'operations.missao-participantes.bulk-execution-cancel',
+                path: '/api/operations/missao-participantes/bulk/executions/{executionId}/cancel',
+                method: 'POST',
+              },
+              responseSchema: {
+                schemaId: 'bulk-execution-cancel-res',
+                schemaType: 'response',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2Fbulk%2Fexecutions%2F%7BexecutionId%7D%2Fcancel&operation=post&schemaType=response&idField=executionId&readOnly=true',
+              },
+            },
+            editableFields: {
+              sourceOperation: {
+                group: 'api-operations-missao-participantes',
+                operationId: 'operations.missao-participantes.update',
+                path: '/api/operations/missao-participantes/{id}',
+                method: 'PUT',
+              },
+              requestSchema: {
+                schemaId: '/api/operations/missao-participantes/{id}|put|request|internal:false|idField:id|readOnly:false',
+                schemaType: 'request',
+                url: '/schemas/filtered?path=%2Fapi%2Foperations%2Fmissao-participantes%2F%7Bid%7D&operation=put&schemaType=request&idField=id&readOnly=false',
+              },
+              writableFields: ['papel', 'resultado'],
+              clearableFields: ['resultado'],
+            },
+          },
+        },
+      },
+      actions: [],
+    };
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    });
+  });
+
+  await page.route('**/api/operations/missao-participantes/bulk/update/evaluation**', async (route) => {
+    const reqBody = route.request().postDataJSON();
+    const targets = reqBody?.selection?.targets || [];
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        proposalId: 'prop-uniform-2026',
-        status: 'APPROVED',
+        proposalId: 'prop-missao-participantes-2026',
+        operationRef: {
+          operationId: 'confirmBulkUpdate',
+          path: '/api/operations/missao-participantes/bulk/update',
+          method: 'POST',
+        },
+        mode: 'UNIFORM_UPDATE',
+        executionMode: 'SYNC',
+        atomicity: 'PER_ITEM',
+        status: 'READY',
+        createdAt: '2026-10-14T02:00:00Z',
+        expiresAt: '2026-10-14T02:05:00Z',
+        totals: {
+          targetCount: targets.length || 2,
+          evaluated: targets.length || 2,
+          executable: targets.length || 2,
+          unchanged: 0,
+          blocked: 0,
+          denied: 0,
+          invalid: 0,
+          conflict: 0,
+          unknown: 0,
+        },
+        redactedIntent: { changes: reqBody?.changes || [] },
+        diagnostics: [],
+        evidence: [],
+      }),
+    });
+  });
+
+  const fulfillMissaoProposalResults = async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [
+          { id: 329, decision: 'EXECUTABLE', diagnostics: [] },
+          { id: 330, decision: 'EXECUTABLE', diagnostics: [] },
+        ],
+        nextCursor: null,
+      }),
+    });
+  };
+  await page.route('**/api/operations/missao-participantes/bulk-proposals/**/results**', fulfillMissaoProposalResults);
+  await page.route('**/api/operations/missao-participantes/bulk/proposals/**/results**', fulfillMissaoProposalResults);
+
+  await page.route('**/api/operations/missao-participantes/bulk/update', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        executionId: 'exec-missao-participantes-2026',
+        proposalId: 'prop-missao-participantes-2026',
+        operationRef: {
+          operationId: 'confirmBulkUpdate',
+          path: '/api/operations/missao-participantes/bulk/update',
+          method: 'POST',
+        },
+        mode: 'UNIFORM_UPDATE',
+        executionMode: 'SYNC',
+        atomicity: 'PER_ITEM',
+        status: 'COMPLETED',
+        createdAt: '2026-10-14T02:00:00Z',
+        updatedAt: '2026-10-14T02:00:02Z',
+        terminalAt: '2026-10-14T02:00:02Z',
         totals: {
           targetCount: 2,
-          executable: 2,
-          blocked: 0,
+          pending: 0,
+          confirmed: 2,
+          unchanged: 0,
+          denied: 0,
+          invalid: 0,
+          conflict: 0,
+          notProcessed: 0,
+          unknown: 0,
         },
         diagnostics: [],
       }),
     });
   });
 
-  // Mock confirm uniform update
-  await page.route('**/bulk-operations/uniform-update/confirm', async (route) => {
+  const fulfillMissaoExecutionResults = async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        executionId: 'exec-uniform-2026',
-        proposalId: 'prop-uniform-2026',
-        status: 'COMPLETED',
-        totals: {
-          targetCount: 2,
-          confirmed: 2,
-          unchanged: 0,
-          denied: 0,
+        items: [
+          { id: 329, status: 'CONFIRMED', diagnostics: [] },
+          { id: 330, status: 'CONFIRMED', diagnostics: [] },
+        ],
+        nextCursor: null,
+      }),
+    });
+  };
+  await page.route('**/api/operations/missao-participantes/bulk-executions/**/results**', fulfillMissaoExecutionResults);
+  await page.route('**/api/operations/missao-participantes/bulk/executions/**/results**', fulfillMissaoExecutionResults);
+
+  // ---------------------------------------------------------------------------
+  // 3. Capabilities + 2-Phase Evaluation/Confirmation routes for /rh/afastamentos
+  //    (Collection rows and /schemas/filtered come from the real backend)
+  // ---------------------------------------------------------------------------
+  await page.route('**/api/human-resources/ferias-afastamentos/capabilities**', async (route) => {
+    const body = {
+      resourceKey: 'human-resources.ferias-afastamentos',
+      resourcePath: '/api/human-resources/ferias-afastamentos',
+      group: 'api-human-resources-ferias-afastamentos',
+      resourceId: null,
+      canonicalOperations: {
+        update: true,
+        delete: true,
+        byId: true,
+        cursor: true,
+        filter: true,
+        create: true,
+        options: true,
+        all: true,
+      },
+      operations: {
+        'bulk-plan-coverage': {
+          id: 'bulk-plan-coverage',
+          supported: true,
+          scope: 'COLLECTION',
+          preferredMethod: 'POST',
+          availability: { allowed: true, reason: null, metadata: {} },
         },
+      },
+      actions: [
+        {
+          id: 'bulk-plan-coverage',
+          title: 'Planejar cobertura de ausências em lote',
+          scope: 'COLLECTION',
+          availability: { allowed: true, reason: null, metadata: {} },
+          execution: {
+            bulk: {
+              mode: 'DOMAIN_COMMAND',
+              atomicity: 'PER_ITEM',
+              selectionModes: ['EXPLICIT'],
+              executionModes: ['SYNC'],
+              parametersPointer: '/properties/parameters',
+              limits: {
+                maxTargets: 25,
+                maxRequestBytes: 65536,
+                proposalLifetimeMillis: 300000,
+                unitDeadlineMillis: 5000,
+              },
+              evaluationOperation: {
+                operation: {
+                  operationId: 'evaluateBulkCoveragePlan',
+                  path: '/api/human-resources/ferias-afastamentos/actions/bulk-plan-coverage/evaluation',
+                  method: 'POST',
+                },
+                requestSchema: {
+                  schemaId: 'bulk-plan-coverage-eval-req',
+                  schemaType: 'request',
+                  url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Fferias-afastamentos%2Factions%2Fbulk-plan-coverage%2Fevaluation&operation=post&schemaType=request&idField=id&readOnly=false',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-plan-coverage-eval-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Fferias-afastamentos%2Factions%2Fbulk-plan-coverage%2Fevaluation&operation=post&schemaType=response&idField=id&readOnly=false',
+                },
+              },
+              confirmationOperation: {
+                operation: {
+                  operationId: 'human-resources.ferias-afastamentos.bulk-plan-coverage',
+                  path: '/api/human-resources/ferias-afastamentos/actions/bulk-plan-coverage',
+                  method: 'POST',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-plan-coverage-confirm-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Fferias-afastamentos%2Factions%2Fbulk-plan-coverage&operation=post&schemaType=response&idField=id&readOnly=false',
+                },
+              },
+              proposalOperation: {
+                operation: {
+                  operationId: 'getBulkProposal',
+                  path: '/api/human-resources/ferias-afastamentos/bulk-proposals/{proposalId}',
+                  method: 'GET',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-proposal-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-proposal-res',
+                },
+              },
+              proposalResultsOperation: {
+                operation: {
+                  operationId: 'getBulkProposalResults',
+                  path: '/api/human-resources/ferias-afastamentos/bulk-proposals/{proposalId}/results',
+                  method: 'GET',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-proposal-results-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-proposal-results-res',
+                },
+              },
+              executionOperation: {
+                operation: {
+                  operationId: 'getBulkExecution',
+                  path: '/api/human-resources/ferias-afastamentos/bulk-executions/{executionId}',
+                  method: 'GET',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-execution-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-execution-res',
+                },
+              },
+              resultsOperation: {
+                operation: {
+                  operationId: 'getBulkExecutionResults',
+                  path: '/api/human-resources/ferias-afastamentos/bulk-executions/{executionId}/results',
+                  method: 'GET',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-execution-results-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-execution-results-res',
+                },
+              },
+              cancelOperation: {
+                operation: {
+                  operationId: 'cancelBulkExecution',
+                  path: '/api/human-resources/ferias-afastamentos/bulk-executions/{executionId}/cancel',
+                  method: 'POST',
+                },
+                responseSchema: {
+                  schemaId: 'bulk-execution-cancel-res',
+                  schemaType: 'response',
+                  url: '/schemas/filtered?id=bulk-execution-cancel-res',
+                },
+              },
+            },
+          },
+        },
+      ],
+    };
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    });
+  });
+
+  await page.route('**/api/human-resources/ferias-afastamentos/actions/bulk-plan-coverage/evaluation**', async (route) => {
+    const reqBody = route.request().postDataJSON();
+    const targets = reqBody?.selection?.targets || [];
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        proposalId: 'prop-ferias-afastamentos-2026',
+        operationRef: {
+          operationId: 'human-resources.ferias-afastamentos.bulk-plan-coverage',
+          path: '/api/human-resources/ferias-afastamentos/actions/bulk-plan-coverage',
+          method: 'POST',
+        },
+        mode: 'DOMAIN_COMMAND',
+        executionMode: 'SYNC',
+        atomicity: 'PER_ITEM',
+        status: 'READY',
+        createdAt: '2026-10-14T02:00:00Z',
+        expiresAt: '2026-10-14T02:05:00Z',
+        totals: {
+          targetCount: targets.length || 2,
+          evaluated: targets.length || 2,
+          executable: targets.length || 2,
+          unchanged: 0,
+          blocked: 0,
+          denied: 0,
+          invalid: 0,
+          conflict: 0,
+          unknown: 0,
+        },
+        redactedIntent: reqBody?.parameters || {},
+        diagnostics: [],
+        evidence: [],
       }),
     });
   });
+
+  const fulfillFaProposalResults = async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [
+          { id: 109, decision: 'EXECUTABLE', diagnostics: [] },
+          { id: 111, decision: 'EXECUTABLE', diagnostics: [] },
+        ],
+        nextCursor: null,
+      }),
+    });
+  };
+  await page.route('**/api/human-resources/ferias-afastamentos/bulk-proposals/**/results**', fulfillFaProposalResults);
+  await page.route('**/api/human-resources/ferias-afastamentos/bulk/proposals/**/results**', fulfillFaProposalResults);
+
+  await page.route('**/api/human-resources/ferias-afastamentos/actions/bulk-plan-coverage', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        executionId: 'exec-ferias-afastamentos-2026',
+        proposalId: 'prop-ferias-afastamentos-2026',
+        operationRef: {
+          operationId: 'human-resources.ferias-afastamentos.bulk-plan-coverage',
+          path: '/api/human-resources/ferias-afastamentos/actions/bulk-plan-coverage',
+          method: 'POST',
+        },
+        mode: 'DOMAIN_COMMAND',
+        executionMode: 'SYNC',
+        atomicity: 'PER_ITEM',
+        status: 'COMPLETED',
+        createdAt: '2026-10-14T02:00:00Z',
+        updatedAt: '2026-10-14T02:00:02Z',
+        terminalAt: '2026-10-14T02:00:02Z',
+        totals: {
+          targetCount: 2,
+          pending: 0,
+          confirmed: 2,
+          unchanged: 0,
+          denied: 0,
+          invalid: 0,
+          conflict: 0,
+          notProcessed: 0,
+          unknown: 0,
+        },
+        diagnostics: [],
+      }),
+    });
+  });
+
+  const fulfillFaExecutionResults = async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        items: [
+          { id: 109, status: 'CONFIRMED', diagnostics: [] },
+          { id: 111, status: 'CONFIRMED', diagnostics: [] },
+        ],
+        nextCursor: null,
+      }),
+    });
+  };
+  await page.route('**/api/human-resources/ferias-afastamentos/bulk-executions/**/results**', fulfillFaExecutionResults);
+  await page.route('**/api/human-resources/ferias-afastamentos/bulk/executions/**/results**', fulfillFaExecutionResults);
 
   try {
     // 1. Configurar persona e tema
@@ -167,21 +820,20 @@ async function runBulkVisualValidation() {
       document.documentElement.dataset.theme = 'dark-tech';
     });
 
-    console.log('\n[Cenário 1] Acessando Folha de Pagamento com DEFCON 1...');
-    await page.goto(`${BASE_URL}/rh/folha-pagamento`, { waitUntil: 'networkidle', timeout: 30000 });
-    await page.waitForTimeout(2000);
+    console.log('\n[Cenário 1] Acessando Eventos de Folha (/rh/eventos-folha)...');
+    await page.goto(`${BASE_URL}/rh/eventos-folha`, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(2500);
 
     const titleEl = page.locator('h1, .praxis-resource-page__title').first();
-    assert((await titleEl.count()) > 0, 'Página Folha de Pagamento carregada');
+    assert((await titleEl.count()) > 0, 'Página Eventos de Folha carregada');
 
     // 2. Selecionar linhas na tabela
-    console.log('\n[Cenário 2] Selecionando registros para operação em lote...');
+    console.log('\n[Cenário 2] Selecionando registros reais para operação em lote...');
     const rowCheckboxes = page.locator('praxis-table tbody tr td.mat-column-_select mat-checkbox');
     const checkboxCount = await rowCheckboxes.count();
     console.log(`  Encontrados ${checkboxCount} checkboxes de linha na tabela.`);
     assert(checkboxCount >= 2, 'Ao menos 2 checkboxes de linha disponíveis na tabela');
 
-    // Clicar no primeiro e segundo checkbox de linha
     await rowCheckboxes.nth(0).click();
     await page.waitForTimeout(400);
     await rowCheckboxes.nth(1).click();
@@ -193,31 +845,37 @@ async function runBulkVisualValidation() {
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01-table-selection.png') });
     console.log('  [SCREENSHOT] 01-table-selection.png capturado.');
 
-    // 3. Testar Operação de Comando de Domínio: Reajuste Coletivo
-    console.log('\n[Cenário 3] Disparando comando de domínio (Reajuste Coletivo)...');
-    const reajusteBtn = page.locator('button').filter({ hasText: /Reajuste Coletivo/i }).first();
-    await reajusteBtn.waitFor({ state: 'visible', timeout: 5000 });
-    assert((await reajusteBtn.count()) > 0, 'Botão "Reajuste Coletivo" visível na barra de ações');
-    await reajusteBtn.click();
-    await page.waitForTimeout(1000);
+    // 3. Testar Comando de Domínio Canônico: Aprovar eventos de folha em lote (bulk-approve)
+    console.log('\n[Cenário 3] Disparando comando de domínio real (Aprovar eventos de folha em lote)...');
+    const approveBtn = page.locator('button').filter({ hasText: /Aprovar eventos de folha em lote/i }).first();
+    await approveBtn.waitFor({ state: 'visible', timeout: 15000 });
+    assert((await approveBtn.count()) > 0, 'Botão "Aprovar eventos de folha em lote" visível na barra de ações');
+    await approveBtn.click();
+    await page.waitForTimeout(2000);
 
-    // Validar modal aberto
     const dialogPane = page.locator('.cdk-overlay-pane.praxis-bulk-dialog-panel').first();
     assert((await dialogPane.count()) > 0, 'Modal de operação em lote aberto no DOM');
 
-    // Se estiver no passo de parâmetros, avaliar proposta. Caso contrário, já auto-avaliou e está na prévia.
-    const evaluateBtn = dialogPane.locator('button').filter({ hasText: /Avaliar/i }).first();
-    if (await evaluateBtn.count() > 0) {
-      // Screenshot Passo 1: Parâmetros
-      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02-domain-command-step1.png') });
-      console.log('  [SCREENSHOT] 02-domain-command-step1.png capturado.');
-      await evaluateBtn.click();
-      await page.waitForTimeout(1200);
-    } else {
-      // Já avaliado automaticamente, capturar prévia como Step 2
-      await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02-domain-command-step1.png') });
-      console.log('  [SCREENSHOT] 02-domain-command-step1.png capturado.');
+    // Validar Passo 1: Parâmetros reais desempacotados de /properties/parameters (effectiveAt, reasonCode, comment)
+    const paramInputs = dialogPane.locator('input, textarea');
+    await paramInputs.first().waitFor({ state: 'visible', timeout: 25000 });
+    assert((await paramInputs.count()) >= 2, 'Campos de parâmetros reais (effectiveAt, reasonCode, comment) renderizados via /schemas/filtered');
+    await paramInputs.nth(0).fill('2026-10-14');
+    if ((await paramInputs.count()) >= 2) {
+      await paramInputs.nth(1).fill('FECHAMENTO_CONFERIDO');
     }
+    const commentTextarea = dialogPane.locator('textarea').first();
+    if ((await commentTextarea.count()) > 0) {
+      await commentTextarea.fill('Homologação em lote de eventos auditados da folha mensal');
+    }
+    await page.waitForTimeout(400);
+
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '02-domain-command-step1.png') });
+    console.log('  [SCREENSHOT] 02-domain-command-step1.png capturado.');
+
+    const evaluateBtn = dialogPane.locator('button').filter({ hasText: /Avaliar/i }).first();
+    await evaluateBtn.click();
+    await page.waitForTimeout(1200);
 
     // Validar Passo 2: Prévia e Conformidade
     const previewTitle = dialogPane.locator('.praxis-bulk-dialog__section-title').first();
@@ -227,7 +885,6 @@ async function runBulkVisualValidation() {
     const totalCards = dialogPane.locator('.praxis-bulk-dialog__total-card');
     assert((await totalCards.count()) === 3, 'Grid com 3 cartões de métricas renderizado');
 
-    // Screenshot Passo 2: Prévia com métricas executivas
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '03-domain-command-step2-preview.png') });
     console.log('  [SCREENSHOT] 03-domain-command-step2-preview.png capturado.');
 
@@ -246,44 +903,39 @@ async function runBulkVisualValidation() {
     const efetivadosLabel = dialogPane.locator('.total-label').first();
     assert(/Efetivados/i.test(await efetivadosLabel.innerText()), 'Rótulo executivo "Efetivados" presente');
 
-    // Screenshot Passo 3: Resultado
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '04-domain-command-step3-result.png') });
     console.log('  [SCREENSHOT] 04-domain-command-step3-result.png capturado.');
 
-    // Concluir e Atualizar
     const closeBtn = dialogPane.locator('button').filter({ hasText: /Concluir/i }).first();
     await closeBtn.click();
     await page.waitForTimeout(1000);
     assert((await dialogPane.count()) === 0, 'Modal fechado com sucesso');
 
-    // 4. Testar Atualização de Registros em Massa (Uniform Update)
-    console.log('\n[Cenário 4] Testando Atualização de Registros em Massa (Uniform Update)...');
-    await page.waitForTimeout(1500);
-    const refreshedCheckboxes = page.locator('praxis-table tbody tr td.mat-column-_select mat-checkbox input');
-    await refreshedCheckboxes.first().waitFor({ state: 'attached', timeout: 10000 });
-    
-    // Garantir que as duas primeiras linhas estejam marcadas
-    await refreshedCheckboxes.nth(0).check({ force: true });
+    // 4. Testar Atualização de Registros em Massa (UNIFORM_UPDATE) em /operacoes/missao-participantes
+    console.log('\n[Cenário 4] Testando Atualização em Massa (UNIFORM_UPDATE) em /operacoes/missao-participantes...');
+    await page.goto(`${BASE_URL}/operacoes/missao-participantes`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(2500);
+
+    const mpCheckboxes = page.locator('praxis-table tbody tr td.mat-column-_select mat-checkbox');
+    await mpCheckboxes.first().waitFor({ state: 'visible', timeout: 15000 });
+    assert((await mpCheckboxes.count()) >= 2, 'Checkboxes presentes na tabela de Participantes de Missão');
+
+    await mpCheckboxes.nth(0).click();
     await page.waitForTimeout(300);
-    await refreshedCheckboxes.nth(1).check({ force: true });
+    await mpCheckboxes.nth(1).click();
     await page.waitForTimeout(800);
 
-    const uniformBtn = page.locator('button').filter({ hasText: /Atualização de Registros em Massa/i }).first();
-    await uniformBtn.waitFor({ state: 'visible', timeout: 5000 });
-    assert((await uniformBtn.count()) > 0, 'Botão de Atualização em Massa presente');
+    const uniformBtn = page.locator('button').filter({ hasText: /Editar Selecionados/i }).first();
+    await uniformBtn.waitFor({ state: 'visible', timeout: 15000 });
+    assert((await uniformBtn.count()) > 0, 'Botão "Editar Selecionados" (UNIFORM_UPDATE) presente');
     await uniformBtn.click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     const editDialogPane = page.locator('.cdk-overlay-pane.praxis-bulk-dialog-panel').first();
     assert((await editDialogPane.count()) > 0, 'Modal de Edição em Massa aberto no DOM');
 
-    // Validar título executivo
     const editTitle = await editDialogPane.locator('#praxis-bulk-edit-dialog-title').innerText();
     assert(/Atualização de Registros em Massa/i.test(editTitle), 'Título executivo "Atualização de Registros em Massa" verificado');
-
-    // Screenshot Passo 1: Edição em Massa
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05-uniform-update-step1-fields.png') });
-    console.log('  [SCREENSHOT] 05-uniform-update-step1-fields.png capturado.');
 
     // Testar validação corporativa de integridade: tentar avaliar com valor em branco
     const evaluateEditBtn = editDialogPane.locator('button').filter({ hasText: /Avaliar/i }).first();
@@ -292,10 +944,38 @@ async function runBulkVisualValidation() {
     const validationAlert = editDialogPane.locator('.praxis-bulk-edit-dialog__alert--error').first();
     assert((await validationAlert.count()) > 0, 'Validação de integridade bloqueou submissão com valor em branco');
 
-    // Preencher valor corporativo válido
-    const valueInput = editDialogPane.locator('input').first();
-    await valueInput.fill('48000');
-    await page.waitForTimeout(400);
+    // Selecionar valor válido no enum "Papel" hidratado do /schemas/filtered
+    const valueSelect = editDialogPane.locator('.value-input mat-select').first();
+    if ((await valueSelect.count()) > 0) {
+      await valueSelect.click();
+      await page.waitForTimeout(300);
+      const option = page.locator('mat-option').filter({ hasText: /LIDER/i }).first();
+      await option.click();
+      await page.waitForTimeout(400);
+    } else {
+      const valueInput = editDialogPane.locator('.value-input input').first();
+      await valueInput.fill('LIDER');
+      await page.waitForTimeout(400);
+    }
+
+    // Adicionar o segundo campo homologado (resultado) com operador CLEAR
+    const addFieldBtn = editDialogPane.locator('button').filter({ hasText: /Adicionar Campo/i }).first();
+    if ((await addFieldBtn.count()) > 0 && !(await addFieldBtn.isDisabled())) {
+      await addFieldBtn.click();
+      await page.waitForTimeout(300);
+      const secondOperatorSelect = editDialogPane.locator('.field-row').nth(1).locator('.operator-select mat-select');
+      await secondOperatorSelect.click();
+      await page.waitForTimeout(300);
+      const clearOption = page.locator('mat-option').filter({ hasText: /Limpar \(CLEAR\)/i }).first();
+      if ((await clearOption.count()) > 0) {
+        await clearOption.click();
+        await page.waitForTimeout(400);
+      }
+    }
+
+    // Screenshot Passo 1: Edição em Massa com campos reais (papel=LIDER, resultado=CLEAR)
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '05-uniform-update-step1-fields.png') });
+    console.log('  [SCREENSHOT] 05-uniform-update-step1-fields.png capturado.');
 
     // Avaliar alterações
     await evaluateEditBtn.click();
@@ -328,45 +1008,60 @@ async function runBulkVisualValidation() {
     await page.waitForTimeout(800);
     assert((await editDialogPane.count()) === 0, 'Modal de Atualização em Massa fechado com sucesso');
 
-    // 5. Testar Recurso Enriquecido: Missões Táticas
-    console.log('\n[Cenário 5] Testando Operações em Lote em Missões Táticas...');
-    await page.goto(`${BASE_URL}/operacoes/missoes`);
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    // 5. Testar Comando de Domínio Multi-Parâmetro: Férias e Afastamentos (/rh/afastamentos -> bulk-plan-coverage)
+    console.log('\n[Cenário 5] Testando Planejamento de Cobertura em Lote em /rh/afastamentos...');
+    await page.goto(`${BASE_URL}/rh/afastamentos`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(2500);
 
-    const missoesCheckboxes = page.locator('praxis-table tbody tr td.mat-column-_select mat-checkbox input');
-    await missoesCheckboxes.first().waitFor({ state: 'attached', timeout: 10000 });
-    const missoesCount = await missoesCheckboxes.count();
-    assert(missoesCount >= 2, `Checkboxes presentes na tabela de Missões Táticas (${missoesCount} encontrados)`);
+    const faCheckboxes = page.locator('praxis-table tbody tr td.mat-column-_select mat-checkbox');
+    await faCheckboxes.first().waitFor({ state: 'visible', timeout: 15000 });
+    const faCount = await faCheckboxes.count();
+    assert(faCount >= 2, `Checkboxes presentes na tabela de Férias e Afastamentos (${faCount} encontrados)`);
 
-    await missoesCheckboxes.nth(0).check({ force: true });
+    await faCheckboxes.nth(0).click();
     await page.waitForTimeout(300);
-    await missoesCheckboxes.nth(1).check({ force: true });
+    await faCheckboxes.nth(1).click();
     await page.waitForTimeout(800);
 
-    const dispatchBtn = page.locator('button').filter({ hasText: /Autorizar Despacho em Lote/i }).first();
-    await dispatchBtn.waitFor({ state: 'visible', timeout: 5000 });
-    assert((await dispatchBtn.count()) > 0, 'Botão "Autorizar Despacho em Lote" presente na barra de ações');
-    await dispatchBtn.click();
-    await page.waitForTimeout(1000);
+    const coverageBtn = page.locator('button').filter({ hasText: /Planejar cobertura de ausências em lote/i }).first();
+    await coverageBtn.waitFor({ state: 'visible', timeout: 15000 });
+    assert((await coverageBtn.count()) > 0, 'Botão "Planejar cobertura de ausências em lote" presente na barra de ações');
+    await coverageBtn.click();
+    await page.waitForTimeout(2000);
 
-    const dispatchDialogPane = page.locator('.cdk-overlay-pane.praxis-bulk-dialog-panel').first();
-    assert((await dispatchDialogPane.count()) > 0, 'Modal de Despacho de Missões aberto no DOM');
-    const dispatchTitle = await dispatchDialogPane.locator('#praxis-bulk-dialog-title').innerText();
-    assert(/Autorização e Despacho de Missões em Lote/i.test(dispatchTitle), 'Título executivo de despacho de missões verificado');
+    const coverageDialogPane = page.locator('.cdk-overlay-pane.praxis-bulk-dialog-panel').first();
+    assert((await coverageDialogPane.count()) > 0, 'Modal de Planejamento de Cobertura aberto no DOM');
+    const coverageTitle = await coverageDialogPane.locator('#praxis-bulk-dialog-title').innerText();
+    assert(/Planejar cobertura de ausências em lote/i.test(coverageTitle), 'Título de planejamento de cobertura verificado');
 
-    // Confirmar execução
-    const confirmDispatchBtn = dispatchDialogPane.locator('button').filter({ hasText: /Confirmar/i }).first();
-    await confirmDispatchBtn.click();
+    // Preencher parâmetros reais do /schemas/filtered (coveragePlan, operationalNotes)
+    const coverageInputs = coverageDialogPane.locator('textarea, input');
+    await coverageInputs.first().waitFor({ state: 'visible', timeout: 25000 });
+    assert((await coverageInputs.count()) >= 1, 'Campos de parâmetros reais de cobertura renderizados via /schemas/filtered');
+    const coverageTextareas = coverageDialogPane.locator('textarea');
+    if ((await coverageTextareas.count()) > 0) {
+      await coverageTextareas.first().fill('Redistribuição tática entre esquadrão reserva');
+    } else {
+      await coverageInputs.first().fill('Redistribuição tática entre esquadrão reserva');
+    }
+    await page.waitForTimeout(400);
+
+    const evaluateCoverageBtn = coverageDialogPane.locator('button').filter({ hasText: /Avaliar/i }).first();
+    await evaluateCoverageBtn.click();
     await page.waitForTimeout(1200);
 
-    const dispatchSuccessAlert = dispatchDialogPane.locator('.praxis-bulk-dialog__alert--success').first();
-    assert((await dispatchSuccessAlert.count()) > 0, 'Despacho tático de missões homologado com êxito');
+    // Confirmar execução
+    const confirmCoverageBtn = coverageDialogPane.locator('button').filter({ hasText: /Confirmar/i }).first();
+    await confirmCoverageBtn.click();
+    await page.waitForTimeout(1200);
 
-    const closeDispatchBtn = dispatchDialogPane.locator('button').filter({ hasText: /Concluir/i }).first();
-    await closeDispatchBtn.click();
+    const coverageSuccessAlert = coverageDialogPane.locator('.praxis-bulk-dialog__alert--success').first();
+    assert((await coverageSuccessAlert.count()) > 0, 'Planejamento de cobertura de ausências homologado com êxito');
+
+    const closeCoverageBtn = coverageDialogPane.locator('button').filter({ hasText: /Concluir/i }).first();
+    await closeCoverageBtn.click();
     await page.waitForTimeout(800);
-    assert((await dispatchDialogPane.count()) === 0, 'Modal de Despacho de Missões concluído e fechado');
+    assert((await coverageDialogPane.count()) === 0, 'Modal de Planejamento de Cobertura concluído e fechado');
 
   } catch (err) {
     console.error(`[E2E-BULK] Erro durante a validação:`, err);

@@ -61,6 +61,7 @@ O objetivo deste catálogo é fornecer ao **Agente Executor de Plataforma** um p
 | [**#47**](#-issue-47-suporte-declarativo-a-mediaaspectratio-e-mediaobjectfit-em-cards-ricos-para-eliminação-de-cls-e-custom-css) | Suporte Declarativo a `media.aspectRatio` e `media.objectFit` em Cards Ricos para Eliminação de CLS | `@praxisui/rich-content`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/core`, `@praxisui/rich-content` (`7037d4ecd`) | 2026-10-11 | Validado (proporções normalizadas, CSS nativo e variáveis customizadas sem CLS, 179/179 specs rich-content e 2.037/2.037 specs core verdes) |
 | [**#48**](#-issue-48-suporte-canônico-a-virtual-scrolling-angularcdkscrolling-e-ações-declarativas-de-item-com-hateoas-em-feeds-corporativos) | Suporte Canônico a Virtual Scrolling (`@angular/cdk/scrolling`) e Ações Declarativas de Item com HATEOAS em Feeds | `@praxisui/list`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `@praxisui/list` (`08da7559c`) | 2026-10-11 | Validado (virtual scroll CDK integrado, ações declarativas com HATEOAS e GlobalActionService, kebab menu, 346/346 specs verdes, build OK) |
 | [**#49**](#-issue-49-validação-estática-em-tempo-de-inicialização-spring-boot-e-build-de-expressões-computadas-e-jsonlogic-de-domínio) | Validação Estática em Tempo de Inicialização (Spring Boot) de Expressões Computadas e JsonLogic de Domínio | `praxis-metadata-starter`<br>`@praxisui/core` | 🟡 Média | `[x] Resolvida` | `praxis-metadata-starter` (`be0f2c93dc`) | 2026-10-11 | Validado (validador léxico e sintático estático, OpenApiCustomizer, governança dev/test/ci vs prod com InvalidDomainExpressionException, 9/9 specs aprovados) |
+| [**#50**](#-issue-50-arquitetura-canônica-de-tokens-visuais-em-3-níveis-moldura-contínua-de-tabela-resiliência-de-grid-da-toolbar-e-auto-ativação-de-filtros-inline) | Arquitetura Canônica de Tokens Visuais em 3 Níveis, Moldura Contínua de Tabela, Resiliência de Grid da Toolbar e Auto-Ativação de Filtros Inline | `@praxisui/core`<br>`@praxisui/table`<br>`@praxisui/dynamic-fields`<br>`@praxisui/widget-shell`<br>`@praxisui/crud` | 🟡 Média | `[ ] Aberta (Mitigada no Host)` | `praxis-hero-hq-ui` (`workspace-themes.scss`, `theme-praxis.scss`, `*.config.ts`) | 2026-10-14 | Validado visualmente nos temas Órbita e Aurora (Dashboard, Folha de Pagamento, Heróis & Colaboradores) e em 17 recursos CRUD |
 
 
 
@@ -3025,6 +3026,67 @@ Com as recentes evoluções de plataforma (Issue #34 com `computedFields` e Issu
 - [x] Identificação automática de propriedades inexistentes referenciadas nas expressões em relação à classe do DTO.
 - [x] Falha em testes de integração com mensagem legível e acionável para o desenvolvedor (`InvalidDomainExpressionException` em perfis `dev`, `test`, `ci` ou `strict=true`).
 - [x] Zero overhead em tempo de execução para requisições HTTP normais de usuários (executa exclusivamente durante a construção/customização do OpenAPI pelo SpringDoc no bootstrap).
+
+---
+
+## 📌 Issue #50: Arquitetura Canônica de Tokens Visuais em 3 Níveis, Moldura Contínua de Tabela, Resiliência de Grid da Toolbar e Auto-Ativação de Filtros Inline
+
+### Classificação
+- **Módulos Afetados:** `@praxisui/core`, `@praxisui/table`, `@praxisui/dynamic-fields`, `@praxisui/widget-shell`, `@praxisui/crud`
+- **Severidade:** 🟡 Média (fadiga visual de gradiente em dashboards densos, descontinuidade estrutural entre toolbar e cabeçalho de tabela, colisão de layout na toolbar com múltiplos filtros inline e omissão silenciosa de filtros inline sem flag `enabled: true`)
+- **Tipo:** Design System & Tokens / Layout Estrutural de Tabela / Ergonomia Declarativa de Filtros
+- **Status:** `[ ] Aberta (Mitigada e Validada no Host Praxis Hero HQ)`
+
+### Diagnóstico Detalhado da Causa Raiz
+Durante a auditoria visual e arquitetural nos temas escuros (**Órbita**) e claros (**Aurora**) em telas corporativas de alta densidade (Dashboards Executivos com 6+ widgets e Centros de Comando CRUD com KPIs, filtros rápidos, filtros inline e ações em massa), identificaram-se quatro pontos estruturais de plataforma:
+
+1. **Sobrecarga Visual de Gradientes em Cabeçalhos de WidgetsRepetidos (`--gradient-header` vs `--gradient-surface-subtle`):**
+   - Quando diversos `<praxis-widget-shell>` compartilham o mesmo canvas de dashboard e utilizam `--gradient-header` (gradiente diagonal intenso com destaque primário pensado para topbars ou elementos focais únicos), o acúmulo cromático torna o ambiente pesado, especialmente em temas escuros como **Órbita**.
+   - A plataforma necessita formalizar uma hierarquia canônica em **3 níveis de superfície**:
+     - `--gradient-surface-subtle`: elevação sutil de superfície para containers recorrentes e cabeçalhos de widgets lado a lado.
+     - `--gradient-header`: destaque estrutural moderado para barras únicas de topo ou seções principais.
+     - `--gradient-command`: destaque de alta ênfase para banners focais e centros de comando.
+
+2. **Descontinuidade Visual de Bordas entre `.praxis-table-toolbar`, `.table-scroll-container` e `.mat-mdc-paginator`:**
+   - Em `@praxisui/table`, `.praxis-table-toolbar` aplica `border: 1px solid` nos 4 lados com `border-radius: 12px 12px 0 0`, enquanto `.table-scroll-container` e `.mat-mdc-header-row` abaixo não compartilham a mesma moldura lateral contínua (ou duplicam a linha horizontal entre o rodapé da toolbar e o topo do cabeçalho).
+   - O resultado visual aparenta duas caixas desconectadas em vez de uma peça única e coesa de software corporativo.
+
+3. **Colisão de Grid na Toolbar da Tabela (`.praxis-toolbar`) e Estiramento do `pdx-inline-toggle`:**
+   - Em `praxis-table-toolbar.ts`, quando `.praxis-toolbar--has-query` coexiste com `.praxis-toolbar--has-scope` (sem `.praxis-toolbar--has-identity`), nenhuma regra específica de `grid-template-areas` era ativada em desktop, mantendo `'identity query actions'` na mesma linha e esmagando os chips de escopo, os campos de filtro inline e os botões de ação.
+   - Similarmente, quando o `PraxisResourcePage` promove `quickFilters` para `<praxis-scope-bar>` acima da banda de KPIs (removendo `.praxis-toolbar--has-scope` da tabela), a presença simultânea de 3–4 filtros inline (`.praxis-filter-bar.has-compact`) e múltiplos botões de ação em massa (`.toolbar-actions .action-btn`) em uma única linha (`'query query actions'`) provoca truncamento ou quebras desalinhadas.
+   - Adicionalmente, no componente `InlineToggleComponent` (`@praxisui/dynamic-fields`), `.pdx-inline-toggle { width: 100% }` faz com que filtros booleanos inline estiquem ocupando toda a largura disponível na barra de filtros em vez de adotarem largura intrínseca de pílula (`width: fit-content`), além de truncar o estado `"Inativo"` em colunas de tabela estreitas (`< 128px`).
+
+4. **Inativação Silenciosa de Filtros Inline (`alwaysVisibleFields`), Não Promoção de `filterBar.quickFilters` e Dessincronização de `quickFilters` String vs Objeto no `PraxisResourcePage`:**
+   - Em `PraxisCrudComponent.buildEffectiveTableConfig`, quando o recurso declara `table.behavior.filtering.advancedFilters.settings.alwaysVisibleFields` diretamente sem explicitar `filtering.enabled: true` e `advancedFilters.enabled: true`, `PraxisTable.shouldRenderAdvancedFilter()` avalia `false` e descarta silenciosamente os filtros inline configurados.
+   - Em `PraxisResourcePage.effectiveScopeBar`, a auto-promoção de `quickFilters` para `<praxis-scope-bar>` inspeciona apenas `meta?.table?.toolbar?.filters?.quickFilters`, ignorando `meta?.filterBar?.quickFilters` introduzido na Issue #6.
+   - Em `PraxisResourcePage.applyItemFilter()`, strings DSL legadas (ex.: `"status='ATIVA'"`) em `quickFilters[].filter` eram empacotadas em `{ query: "status='ATIVA'" }`, que não existe nos `*FilterDTO` do backend (`praxis-metadata-starter`) e quebra a comparação `JSON.stringify(item.filter) === JSON.stringify(currentFilter)` entre `<praxis-scope-bar>` e `<praxis-resource-kpi-band>`.
+   - Em `PraxisFilterComponent`, nomes em `alwaysVisibleFields` que divergem das propriedades `@Filterable` do `*FilterDTO` (ex.: `departamento` em vez de `departamentoId`, `dataInicio` em vez de `dataInicioBetween`) são descartados silenciosamente sem diagnóstico em modo de desenvolvimento (`isDevMode()`).
+
+### Solução Canônica Recomendada de Plataforma
+1. **Em `@praxisui/core` e `@praxisui/widget-shell`:**
+   - Adotar a arquitetura de tokens em 3 níveis (`--gradient-surface-subtle`, `--gradient-header`, `--gradient-command`) com fallbacks em `:root`.
+   - Em `praxis-widget-shell.component.scss`, utilizar `--gradient-surface-subtle` como default do cabeçalho do widget e unificar a moldura card do widget (`border: 1px solid var(--border)`), suprimindo bordas redundantes quando uma `<praxis-table>` estiver aninhada dentro do widget.
+2. **Em `@praxisui/table` (`praxis-table.ts`, `praxis-table-toolbar.ts`, `praxis-filter.component.ts/.scss`):**
+   - Unificar a moldura externa em `.praxis-table-container:not(.in-card)` (`border: 1px solid var(--border); border-radius: 12px; overflow: hidden`), utilizando apenas divisórias horizontais internas (`1px solid var(--border)`) entre toolbar, cabeçalho (`mat-mdc-header-row`) e paginador (`mat-mdc-paginator`), preservando integralmente os contratos do Settings Panel (`--p-table-toolbar-bg`, `.p-table-toolbar--integrated`, variáveis de densidade e alinhamento).
+   - Em `@container praxis-table-toolbar (min-width: 721px)`, organizar deterministicamente as linhas da toolbar para combinações de `scope + query + actions` e `query (compact) + actions (com .action-btn e sem .praxis-toolbar--compact-actions)` em 2 linhas com divisória horizontal sutil (`border-top`), suprimindo a borda vertical direita (`.p-table-toolbar--divider-start` -> `border-inline-end: none; padding-inline-end: 0`) quando `.toolbar-query` ocupar 100% da largura da linha.
+   - Em `PraxisFilterComponent`, emitir aviso diagnóstico em `isDevMode()` quando algum campo de `alwaysVisibleFields` não existir no schema `/schemas/filtered` de requisição (`schemaType=request`).
+3. **Em `@praxisui/dynamic-fields` (`inline-toggle.component.scss`):**
+   - Alterar `.pdx-inline-toggle` para `width: fit-content; max-width: 100%` quando inserido em barras de filtro compactas, evitando estiramento desproporcional.
+4. **Em `@praxisui/crud` (`praxis-crud.component.ts` e `praxis-resource-page.component.ts`):**
+   - Auto-inferir `filtering.enabled = true` e `advancedFilters.enabled = true` sempre que `advancedFilters.settings.alwaysVisibleFields` possuir campos declarados.
+   - Em `PraxisResourcePage.effectiveScopeBar`, ler `meta?.table?.toolbar?.filters?.quickFilters ?? meta?.filterBar?.quickFilters`.
+   - Em `PraxisResourcePage.applyItemFilter()`, priorizar objetos estruturados `Record<string, unknown>` em `quickFilters[].filter` e normalizar expressões simples legadas para objetos chave-valor compatíveis com o `*FilterDTO` e com a sincronização bidirecional de KPIs.
+
+### Mitigação e Padronização Aplicadas no Host (`praxis-hero-hq-ui`)
+- Documentada e implementada a arquitetura de 3 níveis de tokens em `src/styles/workspace-themes.scss`.
+- Implementadas as regras canônicas de moldura contínua de tabela, container queries de toolbar (`@container praxis-table-toolbar (min-width: 721px)`), supressão de `border-inline-end` órfã em `.toolbar-query` full-width, preservação dos contratos de densidade/alinhamento do Settings Panel e dimensionamento `fit-content` do `pdx-inline-toggle` em `src/styles/theme-praxis.scss`.
+- Ativados `filtering.enabled: true` e `advancedFilters.enabled: true` em todas as 16 páginas de recursos em `src/app/pages/**/*.config.ts`, alinhando 100% dos `alwaysVisibleFields` e `quickFilters[].filter` (como objetos DTO estruturados) com os respectivos `*FilterDTO.java` do backend (`praxis-api-quickstart`).
+
+### Critérios de Aceite para Resolução
+- [ ] Tokens `--gradient-surface-subtle`, `--gradient-header` e `--gradient-command` promovidos para `@praxisui/core` e consumidos nativamente pelo `@praxisui/widget-shell`.
+- [ ] Moldura contínua de tabela, grid multi-linha determinístico da toolbar e supressão de `.p-table-toolbar--divider-start` em linha dedicada incorporados nativamente em `@praxisui/table`.
+- [ ] `InlineToggleComponent` com `width: fit-content` em barras de filtro compactas em `@praxisui/dynamic-fields`.
+- [ ] Auto-ativação de `advancedFilters` quando `alwaysVisibleFields` não for vazio, diagnóstico em `isDevMode()` para campos ausentes no FilterDTO e suporte a `meta.filterBar.quickFilters` em `PraxisResourcePage` no `@praxisui/crud`.
 
 ---
 

@@ -66,18 +66,18 @@ $surfaces: (
   --pdx-shell-card-bg: var(--card);
   --pdx-shell-card-border: var(--border);
   --pdx-shell-card-backdrop-filter: none;
-  --pdx-shell-header-bg: var(--surface-gradient);
+  --pdx-shell-header-bg: var(--header-surface-gradient, var(--surface-gradient));
   --pdx-shell-header-border: var(--border);
   --pdx-shell-title-color: var(--foreground);
-  --p-table-toolbar-bg: var(--surface-gradient);
+  --p-table-toolbar-bg: var(--header-surface-gradient, var(--surface-gradient));
   --p-table-toolbar-border-color: var(--border);
-  --p-table-header-bg: var(--surface-gradient);
+  --p-table-header-bg: var(--table-column-header-bg, var(--muted));
 }
 
 :root[data-theme='dark-tech'] {
   --pdx-shell-card-bg: var(--dark-panel-gradient);
   --pdx-dashboard-card-bg: var(--dark-panel-gradient);
-  --pdx-shell-header-bg: var(--surface-gradient);
+  --pdx-shell-header-bg: var(--header-surface-gradient);
 }
 
 /* Ensure the workspace canvas exhibits the ambient gradient in dark mode (overriding component emulated encapsulation) */
@@ -89,25 +89,34 @@ html[data-theme] .praxis-shell__main {
   background-size: cover;
 }
 
-/* Ensure WidgetShell headers and Modal/Dialog title bars exhibit the signature surface gradient */
-html[data-theme] .pdx-shell-header,
-html[data-theme] .pdx-shell--sticky-header > .pdx-shell-header,
-html[data-theme] praxis-dynamic-form-dialog-host .dialog-header,
-html[data-theme] .praxis-bulk-edit-dialog__header {
-  background: var(--pdx-shell-header-bg, var(--surface-gradient)) !important;
-  border-bottom: 1px solid var(--pdx-shell-header-border, var(--border)) !important;
-}
-
 @include praxis.praxis-shell-styles();
 @include praxis.praxis-tooltip-styles();
 @include praxis.praxis-menu-styles();
 
-/* Table defines defaults on :host; specificity must override those same tokens. */
+/* Ensure WidgetShell headers (including fullscreen/expanded states) and Modal/Dialog title bars
+   exhibit the balanced header surface gradient */
+html[data-theme] .pdx-shell-header,
+html[data-theme] .pdx-shell--sticky-header > .pdx-shell-header,
+html[data-theme] .pdx-shell.fullscreen > .pdx-shell-header,
+html[data-theme] .pdx-shell.expanded > .pdx-shell-header,
+html[data-theme] praxis-dynamic-form-dialog-host .dialog-header,
+html[data-theme] .praxis-bulk-edit-dialog__header,
+html[data-theme] .praxis-bulk-operation-dialog__header {
+  background: var(--pdx-shell-header-bg, var(--header-surface-gradient, var(--surface-gradient))) !important;
+  border-bottom: 1px solid var(--pdx-shell-header-border, var(--border)) !important;
+}
+
+/* Table defines defaults on :host; unify outer table contour (Toolbar + Column Header + Rows + Paginator)
+   while preserving Settings Panel density, alignment, and custom background contracts */
 html[data-theme] praxis-table {
   --p-table-bg: var(--card);
-  --p-table-toolbar-bg: var(--surface-gradient);
+  --p-table-toolbar-bg: var(--header-surface-gradient, var(--surface-gradient));
   --p-table-toolbar-border-color: var(--border);
-  --p-table-header-bg: var(--surface-gradient);
+  --p-table-toolbar-padding-block: 10px;
+  --p-table-toolbar-padding-inline: 16px;
+  --p-table-toolbar-gap: 12px;
+  --p-table-toolbar-identity-filter-gap: 10px;
+  --p-table-header-bg: var(--table-column-header-bg, var(--muted));
   --p-table-header-fg: var(--foreground);
   --p-table-row-bg: var(--card);
   --p-table-text-color: var(--foreground);
@@ -118,20 +127,251 @@ html[data-theme] praxis-table {
   --p-table-state-success-fg: var(--ready);
   --p-table-state-warning-fg: var(--warning);
   --p-table-state-danger-fg: var(--destructive);
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl, 14px);
+  overflow: clip;
+  background: var(--card);
+  box-shadow: var(--shadow-panel);
 }
 
-/* Ensure top Table Toolbar (title bar) and Column Header Row exhibit the continuous surface gradient */
+/* Avoid double elevation shadow when praxis-table is nested inside a WidgetShell card */
+html[data-theme] praxis-widget-shell praxis-table {
+  box-shadow: none;
+}
+
+/* Disable outer card wrapper when table switches to mobile card mode */
+html[data-theme] praxis-table.pfx-mobile-card-mode {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+/* Keep schema reconciliation / column reorder banners inset from the clipped table frame */
+html[data-theme] praxis-table > :is(.ptable-info-banner, .praxis-column-reorder-status) {
+  margin: 8px 12px !important;
+}
+
+html[data-theme] praxis-table .praxis-table-header {
+  margin: 0 !important;
+}
+
+/* Top Table Toolbar: flush with unified table frame, separated from column headers by a single continuous border.
+   Uses --p-table-toolbar-bg so Settings Panel actionsBackgroundColor and integrated variant remain functional. */
 html[data-theme] praxis-table praxis-table-toolbar:not(.praxis-toolbar-footer) .praxis-toolbar {
-  background: var(--surface-gradient) !important;
+  border: none !important;
   border-bottom: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
+html[data-theme] praxis-table praxis-table-toolbar:not(.praxis-toolbar-footer) .praxis-toolbar:not(.p-table-toolbar--integrated) {
+  background: var(--p-table-toolbar-bg, var(--header-surface-gradient, var(--surface-gradient)));
+}
+
+html[data-theme] praxis-table .mat-mdc-table {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Column Header Row: horizontally uniform elevated surface to eliminate per-cell vertical gradient seams */
 html[data-theme] praxis-table .mat-mdc-header-row {
-  background: var(--surface-gradient) !important;
+  background: var(--table-column-header-bg, var(--muted)) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: none !important;
 }
 
 html[data-theme] praxis-table .mat-mdc-header-cell {
-  background: transparent !important;
+  background: var(--table-column-header-bg, var(--muted)) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+/* Keep column resize handles invisible at rest so they don't look like disconnected vertical borders */
+html[data-theme] praxis-table .mat-mdc-header-cell .praxis-column-resize-handle::after {
+  opacity: 0 !important;
+}
+
+html[data-theme] praxis-table .mat-mdc-header-row:hover .mat-mdc-header-cell .praxis-column-resize-handle::after {
+  opacity: 0.45 !important;
+}
+
+/* Paginator footer: flush inside the unified table frame */
+html[data-theme] praxis-table .mat-mdc-paginator {
+  border: none !important;
+  border-top: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+}
+
+/* Organized Table Toolbar Layout (Desktop & Tablet > 720px; <= 720px preserves canonical 3-row mobile stacking):
+   1. Scope + Query (without Identity):
+      Row 1: Quick Filter Chips (left) + Action Buttons (right)
+      Row 2: Full-width Filter Bar (inputs left + auxiliary actions right)
+   2. Query + Actions (without Scope and without Identity):
+      Single row when actions are compact, or 2 rows when multiple business actions coexist with filters
+   3. Identity without active Filter inputs:
+      Single sleek header row ('identity identity actions') with empty .toolbar-query hidden
+   4. Identity + active Filter inputs (with or without Scope):
+      Deterministic multi-row header + filter bar with subtle horizontal divider */
+@container praxis-table-toolbar (min-width: 721px) {
+  html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-query.praxis-toolbar--has-scope:not(.praxis-toolbar--has-identity) {
+    grid-template-columns: max-content minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      'scope scope actions'
+      'query query query' !important;
+    align-items: center !important;
+  }
+
+  html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-query:not(.praxis-toolbar--has-scope):not(.praxis-toolbar--has-identity):not(:has(praxis-filter, [advancedFilter], [toolbar])) {
+    grid-template-columns: max-content minmax(0, 1fr) auto !important;
+    grid-template-areas: 'actions actions actions' !important;
+    align-items: center !important;
+  }
+
+  html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-query:not(.praxis-toolbar--has-scope):not(.praxis-toolbar--has-identity):has(praxis-filter, [advancedFilter], [toolbar]) {
+    grid-template-columns: max-content minmax(0, 1fr) auto !important;
+    grid-template-areas: 'query query actions' !important;
+    align-items: center !important;
+  }
+
+  html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-query:not(.praxis-toolbar--has-scope):not(.praxis-toolbar--has-identity):not(.praxis-toolbar--compact-actions):has(.praxis-filter-bar.has-compact):has(.toolbar-actions .action-btn) {
+    grid-template-columns: max-content minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      'actions actions actions'
+      'query query query' !important;
+    align-items: center !important;
+  }
+
+  html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-identity:not(.praxis-toolbar--has-scope):not(:has(praxis-filter, [advancedFilter], [toolbar])) {
+    grid-template-columns: max-content minmax(0, 1fr) auto !important;
+    grid-template-areas: 'identity identity actions' !important;
+    align-items: center !important;
+  }
+
+  html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-identity:has(praxis-filter, [advancedFilter], [toolbar]):not(.praxis-toolbar--has-scope) {
+    grid-template-columns: max-content minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      'identity identity actions'
+      'query query query' !important;
+    align-items: center !important;
+  }
+
+  html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-identity.praxis-toolbar--has-scope:has(praxis-filter, [advancedFilter], [toolbar]) {
+    grid-template-columns: max-content minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      'identity identity actions'
+      'scope scope scope'
+      'query query query' !important;
+    align-items: center !important;
+  }
+}
+
+html[data-theme] body praxis-table .praxis-toolbar:not(:has(praxis-filter, [advancedFilter], [toolbar])) .toolbar-query {
+  display: none !important;
+}
+
+html[data-theme] body praxis-table .praxis-toolbar.praxis-toolbar--has-query:not(.praxis-toolbar--has-scope):not(.praxis-toolbar--has-identity):not(.praxis-toolbar--compact-actions):has(.praxis-filter-bar.has-compact):has(.toolbar-actions .action-btn) .toolbar-actions {
+  justify-self: end !important;
+  justify-content: flex-end !important;
+  width: 100% !important;
+}
+
+/* When .toolbar-query occupies a full-width second row ('query query query'), replace the vertical
+   right-side divider (.p-table-toolbar--divider-start) with a clean horizontal top divider */
+html[data-theme] body praxis-table .praxis-toolbar:is(
+  .praxis-toolbar--has-scope,
+  .praxis-toolbar--has-identity,
+  .praxis-toolbar--has-query:not(.praxis-toolbar--has-scope):not(.praxis-toolbar--has-identity):not(.praxis-toolbar--compact-actions):has(.praxis-filter-bar.has-compact):has(.toolbar-actions .action-btn)
+):has(praxis-filter, [advancedFilter], [toolbar]) .toolbar-query {
+  width: 100% !important;
+  padding-top: 10px !important;
+  padding-inline-end: 0 !important;
+  border-inline-end: none !important;
+  border-top: 1px solid color-mix(in oklab, var(--border) 65%, transparent) !important;
+}
+
+/* Horizontal organization of praxis-filter (.praxis-filter-bar.has-compact) so fields and auxiliary buttons
+   share the row cleanly without crushing compact chips or stretching binary toggles */
+html[data-theme] body praxis-table .praxis-toolbar praxis-filter {
+  --pfx-compact-field-min: 200px;
+  --pfx-compact-field-max: 280px;
+}
+
+html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding-block: 0 !important;
+}
+
+html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .query-auxiliary {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  justify-content: flex-end !important;
+  align-self: center !important;
+  margin-inline-start: auto !important;
+}
+
+/* Text and select filter controls get comfortable reading width on desktop/tablet, while shrinking gracefully on mobile */
+@media (min-width: 641px) {
+  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > :is(.pfx-field-shell, praxis-field-shell, dynamic-field-loader):not([data-control-type='inlineToggle']):not(:has(pdx-inline-toggle)),
+  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields > dynamic-field-loader > :is(.pfx-field-shell, praxis-field-shell):not([data-control-type='inlineToggle']):not(:has(pdx-inline-toggle)) {
+    flex: 0 1 240px !important;
+    width: clamp(200px, 20vw, 280px) !important;
+    min-width: 190px !important;
+    max-width: 300px !important;
+  }
+
+  /* Inline toggle pills (e.g. "Status: Todos") size tightly to their content without cyclic 100%-width stretching or truncation */
+  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields :is(.pfx-field-shell[data-control-type='inlineToggle'], .pfx-field-shell:has(pdx-inline-toggle)),
+  html[data-theme] body praxis-table .praxis-toolbar praxis-filter .praxis-filter-bar.has-compact .compact-fields :is(.pfx-field-shell[data-control-type='inlineToggle'], .pfx-field-shell:has(pdx-inline-toggle)) :is(.pfx-field-shell-wrapper, .pfx-field-shell-host, pdx-inline-toggle, .pdx-inline-toggle-pill) {
+    flex: 0 0 auto !important;
+    width: fit-content !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+html[data-theme] pdx-inline-toggle .pdx-inline-toggle-label-stack {
+  grid-template-columns: minmax(0, max-content) !important;
+}
+
+html[data-theme] pdx-inline-toggle .pdx-inline-toggle-label {
+  width: max-content !important;
+  max-width: min(240px, 60vw) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Page Builder Governance Toggle Button ("Customizar Layout") theme integration across light and dark modes */
+html[data-theme] .builder-governance-toggle-btn {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-xs) !important;
+}
+
+html[data-theme] .builder-governance-toggle-btn:hover {
+  background: var(--accent) !important;
+  border-color: color-mix(in oklab, var(--primary) 38%, var(--border)) !important;
 }
 
 /* Primary Command Action CTA (single bold primary action per viewport) */

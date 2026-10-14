@@ -84,30 +84,28 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      search: {
-        enabled: true,
-        placeholder: 'Buscar contratos por número, fornecedor ou motivo...',
-      },
       filters: {
         enabled: true,
         quickFilters: [
-          { id: 'all', label: 'Todos os Contratos', filter: '', icon: 'description' },
-          { id: 'active', label: 'Vigentes & Assinados', filter: "status='ACTIVE' or status='SIGNED'", icon: 'verified' },
-          { id: 'expired', label: 'Contratos Expirados', filter: "status='EXPIRED'", icon: 'event_busy' },
-          { id: 'draft', label: 'Em Minuta / Draft', filter: "status='DRAFT'", icon: 'edit_note' },
+          { id: 'all', label: 'Todos os Contratos', filter: {}, icon: 'description' },
+          { id: 'active', label: 'Vigentes & Assinados', filter: { status: 'ACTIVE' }, icon: 'verified' },
+          { id: 'expired', label: 'Contratos Expirados', filter: { status: 'EXPIRED' }, icon: 'event_busy' },
+          { id: 'draft', label: 'Em Minuta / Draft', filter: { status: 'DRAFT' }, icon: 'edit_note' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
+        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
+          enabled: true,
           settings: {
             inline: true,
-            alwaysVisibleFields: ['supplierName', 'status', 'number'],
+            alwaysVisibleFields: ['companyId', 'supplierId', 'number', 'status'],
             useInlineSearchableSelectVariant: true,
           },
         },

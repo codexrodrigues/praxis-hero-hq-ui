@@ -78,24 +78,29 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      search: {
-        enabled: true,
-        placeholder: 'Buscar heróis por codinome, nome civil ou equipe...',
-      },
       filters: {
         enabled: true,
         quickFilters: [
-          { id: 'all', label: 'Todos os Heróis', filter: '', icon: 'groups' },
-          { id: 'top90', label: 'Score 90%+', filter: 'media >= 90', icon: 'military_tech' },
-          { id: 'top80', label: 'Score 80%+', filter: 'media >= 80', icon: 'trending_up' },
+          { id: 'all', label: 'Todos os Heróis', filter: {}, icon: 'groups' },
+          { id: 'top90', label: 'Score 90%+', filter: { mediaBetween: [90, 100] }, icon: 'military_tech' },
+          { id: 'top80', label: 'Score 80%+', filter: { mediaBetween: [80, 100] }, icon: 'trending_up' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
+        enabled: true,
         columnFilters: {
           enabled: true,
+        },
+        advancedFilters: {
+          enabled: true,
+          settings: {
+            inline: true,
+            alwaysVisibleFields: ['codinome', 'nomeCompleto', 'equipe'],
+            useInlineSearchableSelectVariant: true,
+          },
         },
       },
       expansion: {

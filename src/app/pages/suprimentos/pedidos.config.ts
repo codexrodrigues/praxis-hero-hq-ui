@@ -86,30 +86,28 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      search: {
-        enabled: true,
-        placeholder: 'Buscar pedidos de compra por status ou observações...',
-      },
       filters: {
         enabled: true,
         quickFilters: [
-          { id: 'all', label: 'Todas as Ordens', filter: '', icon: 'local_shipping' },
-          { id: 'aprovadas', label: 'Aprovadas / Entregues', filter: "status='APPROVED' or status='RECEIVED'", icon: 'inventory' },
-          { id: 'analise', label: 'Aguardando Aprovação', filter: "status='PENDING' or status='DRAFT'", icon: 'pending_actions' },
-          { id: 'canceladas', label: 'Canceladas / Revogadas', filter: "status='CANCELLED'", icon: 'cancel' },
+          { id: 'all', label: 'Todas as Ordens', filter: {}, icon: 'local_shipping' },
+          { id: 'aprovadas', label: 'Aprovadas / Entregues', filter: { status: 'APPROVED' }, icon: 'inventory' },
+          { id: 'analise', label: 'Aguardando Aprovação', filter: { status: 'DRAFT' }, icon: 'pending_actions' },
+          { id: 'canceladas', label: 'Canceladas / Revogadas', filter: { status: 'CANCELLED' }, icon: 'cancel' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
+        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
+          enabled: true,
           settings: {
             inline: true,
-            alwaysVisibleFields: ['status', 'orderDate', 'quantity'],
+            alwaysVisibleFields: ['companyId', 'supplierId', 'status'],
             useInlineSearchableSelectVariant: true,
           },
         },

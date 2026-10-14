@@ -44,7 +44,7 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
         caption: 'Garantido pelo Acordo de Sokovia',
         icon: 'payments',
         tone: 'info',
-        filter: { nivel: 5 },
+        filter: { nivelBetween: [5, 10] },
       },
     ],
   },
@@ -84,30 +84,28 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      search: {
-        enabled: true,
-        placeholder: 'Buscar alvos por designação, classe ou planeta...',
-      },
       filters: {
         enabled: true,
         quickFilters: [
-          { id: 'all', label: 'Todas as Ameaças', filter: '', icon: 'radar' },
-          { id: 'confronto', label: 'Em Confronto Ativo', filter: "status='CONFRONTO'", icon: 'crisis_alert' },
-          { id: 'critico', label: 'Nível Ômega / Crítico', filter: 'nivel >= 5', icon: 'warning' },
-          { id: 'contidos', label: 'Neutralizados / Raft', filter: "status='CAPTURADO' or status='CONTIDO' or status='NEUTRALIZADO'", icon: 'lock' },
+          { id: 'all', label: 'Todas as Ameaças', filter: {}, icon: 'radar' },
+          { id: 'confronto', label: 'Em Confronto Ativo', filter: { status: 'CONFRONTO' }, icon: 'crisis_alert' },
+          { id: 'critico', label: 'Nível Ômega / Crítico', filter: { nivelBetween: [5, 10] }, icon: 'warning' },
+          { id: 'contidos', label: 'Neutralizados / Raft', filter: { status: 'CONTIDO' }, icon: 'lock' },
         ],
         showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
+        enabled: true,
         columnFilters: {
           enabled: true,
         },
         advancedFilters: {
+          enabled: true,
           settings: {
             inline: true,
-            alwaysVisibleFields: ['nome', 'classe', 'status', 'nivel'],
+            alwaysVisibleFields: ['nome', 'classe', 'status', 'planeta'],
             useInlineSearchableSelectVariant: true,
           },
         },
