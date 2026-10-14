@@ -1,0 +1,4008 @@
+diff --git a/.gitignore b/.gitignore
+index a3e72ff..8d49ba4 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -31,6 +31,7 @@ yarn-error.log
+ .sass-cache/
+ /connect.lock
+ /coverage
++/test-results
+ /libpeerconnection.log
+ test.log
+ .DS_Store
+diff --git a/README.md b/README.md
+index 35ef8aa..b962df1 100644
+--- a/README.md
++++ b/README.md
+@@ -1,183 +1,82 @@
+ # Praxis Hero HQ UI
+ 
+-**Demonstração publicada:** [praxis-hero-hq.web.app](https://praxis-hero-hq.web.app).
++Host Angular de referência para RH e operações táticas, consumindo as bibliotecas públicas `@praxisui/*` e os contratos do API Quickstart. A API define campos, validações, superfícies, ações, disponibilidade e regras de negócio; o Hero cuida da apresentação e da navegação.
+ 
+-**Dependências:** 22 pacotes `@praxisui/*` fixados em `10.0.0-rc.12`, obtidos do
+-npm público após o postflight oficial. A versão corrige a inferência de paginação
+-remota para metadados parciais, preservando estratégias explicitamente configuradas.
+-Em 13/10/2026, o Hero foi publicado no Firebase e validado após reinício oficial do
+-Render com SDK `8.0.0-rc.169`: schemas, filtros, capabilities e actions carregaram,
+-e a tabela de Heróis & Colaboradores manteve total 101 no percurso
+-`1–10 → 11–20 → 1–10`. A nova JVM recuperou `RESTORED`, preservando
+-READY13/PUBLISHED21. O [recibo de aceite e seus limites](https://github.com/codexrodrigues/praxis-api-quickstart/blob/fadf0ca4/docs/engineering/evidence/render-startup-recovery-live-rc169-20261013/acceptance.json)
+-registra respostas críticas e términos, inclusive a requisição 304 cancelada com
+-duplicata 200 concluída. Isso prova esse percurso de leitura, sem alegar SLA ou
+-escrita de negócio. O [registro anterior](docs/design/hero-publication-2026-10-12.md)
+-permanece como evidência histórica.
++**Site publicado:** [praxis-hero-hq.web.app](https://praxis-hero-hq.web.app). A implantação anterior usa os 22 pacotes `10.0.0-rc.12`. O incremento de integração real de lotes deste checkout ainda depende dos gates descritos no [plano de integração](docs/engineering/real-bulk-integration.md); essa implantação anterior não comprova as novas operações de escrita.
+ 
+-> **Plataforma Corporativa de Gestão Tática & RH de Super-Heróis** construída sobre a **Plataforma Praxis** (`@praxisui/*`), Angular 21 e arquitetura 100% orientada a metadados (*metadata-driven*).
++## Executar e validar
+ 
+----
++Use Node.js compatível com Angular 21.2 e o lockfile versionado.
+ 
+-## 🎯 Princípios Fundamentais
+-
+-1. **Zero Formulários Manuais:** Nenhum campo ou validação é codificado em templates HTML. Todos os fluxos de criação e edição são governados por `<praxis-dynamic-form>` e `/schemas/filtered`.
+-2. **Zero Tabelas Estáticas:** Todas as listagens analíticas utilizam `<praxis-table>` e `<praxis-crud>` com paginação server-side, ordenação e filtros remotos.
+-3. **Superfícies Dinâmicas:** As visões de detalhe (Dossiê 360) projetam contratos `@UiSurface` do backend ([`FuncionarioController`](file:///D:/Developer/praxis-plataform/praxis-api-quickstart/src/main/java/com/example/praxis/apiquickstart/hr/controller/FuncionarioController.java)).
+-4. **Governança de Workflow:** Ações de ciclo de vida utilizam `@WorkflowAction` com controle de concorrência por ETag (`If-Match`).
+-5. **Design System & HUD Tático:** Tokens OKLCH para temas Claro e Escuro, glassmorphism, indicador de prontidão (98,4%) e Defcon 5.
+-
+----
+-
+-## 🚀 Como Executar
++```sh
++npm ci
++npm start
++```
+ 
+-### Pré-requisitos
+-- Node.js >= 20.x
+-- npm >= 10.x
++A origem oficial de desenvolvimento é **http://127.0.0.1:4302**. O proxy encaminha `/api`, `/schemas` e `/auth`, preserva o `Origin` do navegador e verifica certificados TLS. Seu destino padrão é o Render. Para ensaiar com o host oficial isolado:
+ 
+-### Instalação
+-```bash
+-npm install
++```sh
++PAX_PROXY_TARGET=http://127.0.0.1:8088 npm start
+ ```
+ 
+-### Desenvolvimento
+-```bash
+-npm start
+-# Aplicação disponível em: http://127.0.0.1:4302
+-```
++Essa opção altera apenas o destino do proxy de desenvolvimento. Não cria dados, credenciais, autorização ou publicação de operações. O host escolhido precisa autorizar a origem 4302, apresentar seus contratos reais e ter a composição de segurança correspondente ao ambiente. Não substituir `Origin`, desabilitar TLS nem copiar políticas de cookie de desenvolvimento para produção.
+ 
+-### Build de Produção
+-```bash
++```sh
++npm test -- --watch=false
+ npm run build
++npm run test:e2e
+ ```
+ 
+----
+-
+-## 🛡️ Customização Avançada & Persistência Multi-Usuário
+-
+-A aplicação implementa um case corporativo de governança com persistência remota no `praxis-config-starter` (`https://praxis-api-quickstart.onrender.com/api/praxis/config/ui`):
++O teste unitário usa o builder oficial Angular/Vitest e verifica sessão, limites de origem, expiração, respostas tardias, paginação de contextos e logout incerto. HTTP simulado em testes verifica o comportamento do consumidor; não constitui prova de escrita em banco. A prova positiva de negócio exige API real e branches Neon isoladas atribuídas ao ensaio. Consulte o plano para estado, evidências e limites dos gates.
+ 
+-1. **Dashboard Executivo (Page Builder):**
+-   - Gráficos customizados com dados reais de agregação: **Área Volumétrica** (`type: 'area'`) e **Barras Horizontais** (`type: 'horizontal-bar'`).
+-   - Novo widget governado com **Formulário Dinâmico Tático** (`praxis-dynamic-form`) integrado ao grid.
+-2. **Tabela de Suprimentos / Pedidos (`praxis-table` & `praxis-crud`):**
+-   - **Coluna Composta (`compose` renderer):** Unificação de `id` e `currency` na coluna *"Ordem & Moeda"*.
+-   - **Ocultação Seletiva de Colunas:** Projeção canônica via `columnProjection.include`.
+-   - **Regras Condicionais de Célula e Linha:** Badges temáticos com ícones, realces para lotes volumosos e opacidade em ordens canceladas via JsonLogic.
+-   - **Densidade Compacta e Animações:** Layout otimizado para visão executiva.
+-3. **Isolamento Estrito entre Personas:**
+-   - **Nick Fury (`nick.fury`):** Visualiza e persiste seus layouts customizados (HTTP 200).
+-   - **Tony Stark (`tony.stark`):** Recebe o baseline 100% de fábrica / governança limpo (HTTP 404).
+-   - **Restauração de Fábrica:** Botão que dispara `HTTP DELETE 204` e retorna aos padrões de governança.
++## Sessão e contexto corporativo
+ 
+-### 🧪 Executando a Bateria E2E Automatizada (Playwright)
++O botão de sessão no cabeçalho abre o login do API Quickstart. `/auth/login` emite o cookie HttpOnly `SESSION`; `/auth/session` verifica se o navegador realmente o aceitou. Senhas e tokens não são gravados em `localStorage`, `sessionStorage` ou assets. Nenhuma credencial está incluída no projeto.
+ 
+-Com `npm start` ativo na porta oficial 4302 e `@playwright/test` disponível no
+-ambiente de testes (ou via `NODE_PATH` apontando para o `node_modules` do workspace Angular):
++`EnterpriseRuntimeContextService` consulta opcionalmente `/api/praxis/runtime/context`. Nome, usuário, tenant e contexto da interface vêm desse snapshot confirmado. Quando é necessário escolher um contexto, são exibidas somente as escolhas fornecidas pelo servidor, incluindo sua paginação. O comando de seleção envia `choiceRef` e `expectedSelectionVersion`, conforme o contrato canônico.
+ 
+-```bash
+-node test-e2e/test-multiuser-persistence.cjs
+-```
+-
+-O ensaio cobre dez cenários de Dashboard pelo DOM público: carga sem gravação,
+-edição/salvar/reabrir, isolamento de persona, conflito e recuperação, documento vazio,
+-retry de save sem perder o rascunho, reset confirmado/falho, falha de carga e viewport estreito. Todas as chamadas `/api/**`
+-são interceptadas; não acessa o backend remoto nem comprova persistência em banco.
+-Uma prova operacional de banco exige branch Neon isolada, conforme a governança do workspace.
+-
+-Para mais detalhes sobre as propostas e evoluções canônicas de plataforma, consulte:
+-- [`docs/PRAXIS_PLATFORM_EVOLUTIONS.md`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/docs/PRAXIS_PLATFORM_EVOLUTIONS.md)
+-- [`../docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md`](file:///d:/Developer/praxis-plataform/docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md)
++A ausência inicial do provider corporativo (503) não invalida uma sessão confirmada: os lotes BASIC continuam sujeitos aos grants operacionais atuais do servidor. Nenhum usuário, tenant ou estado READY é inventado. Personalizações do dashboard permanecem desabilitadas. Se um contexto já confirmado deixar de estar disponível, o shell suspende suas projeções até nova confirmação; esse histórico vive no serviço de sessão e sobrevive à recriação das páginas.
+ 
++O interceptor remove claims contextuais não confirmados, preserva ETag, idempotência e CSRF, e envia cookies e contexto exclusivamente à origem configurada da API. Não lê os antigos `pax.api.token`, `pax.api.user` nem personas demonstrativas. Perfis visuais e nomes de personagens não concedem autorização. A API continua responsável pelos grants e pela disponibilidade de cada operação.
+ 
++Durante login, logout ou seleção de contexto, o conteúdo roteado fica suspenso. Um 401 atual invalida a projeção da sessão; uma resposta antiga não invalida uma sessão mais recente. Se a resposta do logout se perder, o conteúdo permanece suspenso até uma verificação explícita ou repetição do encerramento.
+ 
+-## Dashboard: página canônica e persistência
++No desenvolvimento, o proxy de mesma origem permite o transporte XSRF normal do Angular quando a API exige CSRF. Na implantação entre Firebase e Render, cookies dependem da política do navegador e dos atributos publicados pela API. A política CSRF efetiva precisa ser validada antes de cada adoção; não assumir que o transporte XSRF entre origens está disponível nem enfraquecer a segurança como solução de integração.
+ 
+-O dashboard usa `DynamicPageBuilderComponent` (`praxis-dynamic-page-builder`) sobre
+-`WidgetPageDefinition`. Não depende de `PraxisDashboardPage`. A toolbar e os indicadores
+-são apresentação do HQ; identidade, carga, gravação, confirmação e reset pertencem ao
+-runtime Core, via `pageIdentity`, `autoPersist` e `persistenceChange`.
+-O host registra `providePraxisDialogGlobalActions()` para as confirmações de remoção
+-e configura o storage com `errorPolicy: 'fail'` para exibir falhas de carga.
++## Operações em lote
+ 
+-A identidade usa app `praxis-hero-hq`, tenant e usuário da persona ativa, e rota `/`.
+-O adapter remoto continua usando a identidade HTTP do host. Não há cache de layout
+-paralelo nem hooks globais `PAX_*`. Uma definição salva é reaberta integralmente, inclusive
+-quando todos os widgets foram removidos; não há merge implícito com novos widgets de fábrica.
++A tela **Operações & Missões → Participantes de Missão** lista `operations/missao-participantes` pela página de recurso nativa Praxis. Sua seleção múltipla é apresentação; contratos de avaliação, confirmação, campos editáveis, limites e disponibilidade vêm do discovery da API.
+ 
+-A chave antiga `dynamic-page:hq-dashboard` e os caches locais antigos não são lidos pelo
+-novo fluxo. Nenhum registro antigo é apagado automaticamente. A adoção beta inicia o layout
+-na nova identidade canônica; importar dados antigos exige uma migração com dono/escopo
+-verificados, não a cópia de um cache compartilhado. “Restaurar Fábrica” só conclui após o
+-backend confirmar; erros e conflitos permanecem visíveis. “Descartar alterações e recarregar”
+-é uma ação explícita para recuperar o documento salvo.
++O caminho de atualização uniforme usa avaliação, preview, confirmação explícita e acompanhamento da execução. O runtime deve distinguir `SYNC` de `ASYNC`, respeitar `EXPLICIT/PER_ITEM`, capturar o ETag forte de cada recurso pelo seu `self` e omitir `value` para `CLEAR`. Uma resposta 202 indica processamento aceito; não comprova conclusão.
+ 
+-Os 22 pacotes `@praxisui/*` estão fixados em **10.0.0-rc.9**, com lockfile
+-resolvido no npm público. Esta versão contém as correções canônicas de shell,
+-cores/tooltip dos gráficos e ciclo de contexto do CRUD.
++A confirmação envia apenas a referência da proposta e sua chave de idempotência. A custódia técnica mínima é preservada antes do POST. Recuperação exige metadados atuais e leitura autenticada do servidor; não restaura autorização a partir do navegador nem confirma automaticamente. Resultado desconhecido ou reconciliação pendente conserva a custódia e impede um novo intento.
+ 
+-```sh
+-npm ci --registry=https://registry.npmjs.org/
+-npm run build
+-npm start
+-```
++A API também possui aprovação coletiva de **eventos de folha**, distinta de aprovar uma folha ou reajustar salários. Sua adoção exige disponibilidade, READY/grants e prova específicos. Os antigos mocks de contenção de incidentes e reajuste de folhas foram removidos; não existem contratos equivalentes verificados para essas ações. O Hero não inventa endpoints nem transforma loops de PUT em um lote governado.
+ 
+-A release oficial por tag `praxis-ui-v10.0.0-rc.9` passou por build, publicação OIDC
+-e postflight dos 22 pacotes. A adoção deste host passou por instalação limpa e
+-build; não depende de tarballs locais, paths para `dist` ou flags de peer legado.
+-O canal `latest` permanece na linha estável; o host fixa a versão RC exata para
+-reproduzir a apresentação.
++## Dashboard e personalização
+ 
+-A troca de persona é uma simulação privada: o host recria sua rota ao escolher
+-outra persona, sem emitir evento global para as bibliotecas. Isso não equivale
+-a uma sessão corporativa confirmada no Core.
++O Dashboard usa `DynamicPageBuilderComponent`, `WidgetPageDefinition` e o storage canônico do Core. `pageIdentity` contém app `praxis-hero-hq`, tenant e usuário confirmados pelo contexto, e rota `/`. Persistência e edição de layout ficam indisponíveis sem contexto confirmado.
+ 
+-## Aparência do workspace
++Carga, gravação, reset, conflito e recuperação pertencem ao runtime. `errorPolicy: 'fail'` preserva erros visíveis. “Restaurar Fábrica” depende da confirmação do backend; não remove dados silenciosamente. Uma definição salva é reaberta integralmente, inclusive quando todos os widgets foram removidos.
+ 
+-O menu **Aparência** no cabeçalho oferece **Essência**, **Aurora** e **Órbita**,
+-com as paletas do Ergon Workflow Designer. Órbita permanece o padrão deste host.
+-A preferência é local ao navegador e sincronizada entre abas; não altera a persona,
+-o dashboard salvo ou dados de negócio. Work Sans é a fonte principal.
++Cards e textos táticos ilustrativos não certificam disponibilidade da API nem efeito de negócio. O aceite operacional deve usar rede e readback protegido. Ensaios antigos de personas simuladas permanecem históricos e não validam a nova sessão corporativa.
+ 
+-A folha privada `src/styles/workspace-themes.scss` define as paletas;
+-`src/styles/theme-praxis.scss` traduz esses valores para Material e os tokens dos
+-componentes Praxis, incluindo tabela, CRUD/KPI e overlays. Não adicionar cores
+-isoladas em cada página para ajustar o tema.
++## Temas e composição
+ 
+-Validação focal sem backend/banco:
++O menu **Aparência** oferece **Essência**, **Aurora** e **Órbita**, com as paletas do Workflow Designer. Órbita é o padrão. A preferência é local e não altera identidade, permissões nem dados. Work Sans é a fonte principal.
+ 
+-```bash
+-node scripts/workspace/verify-workspace-themes.mjs
+-npm run build
+-```
++- `src/styles/workspace-themes.scss`: paletas do host.
++- `src/styles/theme-praxis.scss`: tradução para Material e tokens Praxis de tabela, CRUD/KPI e overlays.
++- `src/app/core/platform.config.ts`: origem da API e defaults de apresentação.
++- `src/app/core/hero-session.service.ts`: ciclo da sessão e consumo do contexto canônico.
++- `src/app/pages/**`: projeções de apresentação por recurso; não são fonte de regras.
+ 
+-Consulte o [estudo e evidências dos temas](docs/design/workspace-themes-2026-10-11.md)
+-para conhecer os tokens investigados, os estados conferidos e os limites de fidelidade.
++Não adicionar cores isoladas por página nem regras de autorização em configs locais.
+ 
+-## Publicação no Firebase Hosting
++## Publicação e evidências
+ 
+-O frontend usa o projeto Firebase `praxis-hero-hq`, definido em `.firebaserc`,
+-e publica `dist/praxis-hero-hq-ui/browser`, conforme `firebase.json`. A primeira
+-publicação de Praxis rc.9 foi feita com a CLI oficial Firebase 15.33.0, após
+-instalação limpa e build, usando a sessão já autenticada do operador:
++As bibliotecas são publicadas pelo fluxo oficial de tags/OIDC da Praxis, seguido de postflight dos 22 pacotes. O Hero adota a versão exata publicada no npm e seu lockfile, passa pelos gates do incremento e só então é publicado no Firebase. Tarballs de ensaio, aliases locais e credenciais de validação não pertencem à entrega pública.
+ 
+-```sh
+-npm ci --registry=https://registry.npmjs.org/
+-npm run build
+-npx --yes --registry=https://registry.npmjs.org/ firebase-tools@15.33.0 deploy --only hosting --project praxis-hero-hq
+-```
++A API pública é [API Quickstart no Render](https://praxis-api-quickstart.onrender.com). A origem exata do Hero deve constar nas políticas de CORS e de configuração protegida do backend; não usar wildcard para contornar recusas.
+ 
+-O workflow GitHub `firebase-deploy.yml` executa instalação/build após push em
+-`main`, mas seu deploy depende do secret
+-`FIREBASE_SERVICE_ACCOUNT_PRAXIS_HERO_HQ`. No run `38310673919`, instalação e
+-build passaram e o deploy foi ignorado pela ausência desse secret. Não considere
+-um workflow verde, por si só, prova de publicação: confira a etapa de deploy.
+-A automação futura precisa de autenticação própria; nenhuma chave de serviço
+-foi criada nesta publicação.
+-
+-A API pública usada pelo host é `https://praxis-api-quickstart.onrender.com`.
+-Seu proprietário é o Quickstart. A origem exata `https://praxis-hero-hq.web.app`
+-deve estar em `CORS_ALLOWED_ORIGINS` e
+-`APP_SECURITY_CONFIG_ORIGIN_RESTRICTION_ALLOWED_ORIGINS`. Não use wildcard nem
+-desative autenticação, CSRF ou o filtro de origem para contornar bloqueios.
+-A persona do host continua uma simulação; ela não concede autoridade corporativa.
++A [prova anterior de leitura após reinício do Render](https://github.com/codexrodrigues/praxis-api-quickstart/blob/fadf0ca4/docs/engineering/evidence/render-startup-recovery-live-rc169-20261013/acceptance.json) registrou recuperação `RESTORED`, READY13/PUBLISHED21 e paginação de 101 colaboradores. Ela permanece histórica e não substitui a validação atual de lotes. Consulte também o [registro de publicação anterior](docs/design/hero-publication-2026-10-12.md) e o [mapa de evoluções](docs/PRAXIS_PLATFORM_EVOLUTIONS.md).
+diff --git a/angular.json b/angular.json
+index 543ef48..e7ec010 100644
+--- a/angular.json
++++ b/angular.json
+@@ -85,6 +85,16 @@
+             }
+           },
+           "defaultConfiguration": "development"
++        },
++        "test": {
++          "builder": "@angular/build:unit-test",
++          "options": {
++            "tsConfig": "tsconfig.spec.json",
++            "include": [
++              "src/app/core/*.spec.ts"
++            ],
++            "watch": false
++          }
+         }
+       }
+     }
+diff --git a/docs/PRAXIS_PLATFORM_EVOLUTIONS.md b/docs/PRAXIS_PLATFORM_EVOLUTIONS.md
+index 5dc5d6a..4b11183 100644
+--- a/docs/PRAXIS_PLATFORM_EVOLUTIONS.md
++++ b/docs/PRAXIS_PLATFORM_EVOLUTIONS.md
+@@ -42,6 +42,7 @@
+ | **ISSUE-026** | `@praxisui/charts` | Visual / Contrato | Contrato Canônico de Gráficos de Área (`area`) e Barras Horizontais (`horizontal-bar`) com Inversão Automática de Eixos | `[DONE]` |
+ | **ISSUE-027** | `@praxisui/table` & `@praxisui/crud` | Estrutural / Governança | Projeção Canônica de Colunas Schema-Driven (`columnProjection`), Composição de Células (`compose`) e Regras Condicionais | `[DONE]` |
+ | **ISSUE-028** | `@praxisui/dynamic-form` & `@praxisui/page-builder` | Composição / DX | Instanciação e Governança de Formulários Dinâmicos como Widgets Nativos no Canvas do Page Builder | `[DONE]` |
++| **ISSUE-029** | `@praxisui/core`, `table`, `crud` e Hero | Governança / Integração | Sessão confirmada e lotes reais com custódia, ASYNC, recuperação e readback | `[IN PROGRESS]` |
+ 
+ ---
+ 
+@@ -1774,3 +1775,12 @@ O agente responsável pela evolução da plataforma deve validar sua implementa
+      - Suporte a seções (`sections`), linhas de formulário (`rows`) com sistema de 12 colunas proporcionais (`width: 6`, `width: 12`), e metadados de campos tipados (`input`, `select`, `textarea`).
+   3. **Isolamento de Estado:**
+      - Os dados do formulário dinâmico são persistidos e renderizados com total compatibilidade na árvore JSON do Page Builder.
++
++
++### ISSUE-029: Sessão confirmada e operações em lote reais
++
++O runtime compartilhado passa a materializar os contratos do backend com descoberta de disponibilidade atual, ETags fortes por recurso, confirmação explícita e custódia da proposta/chave antes do POST. Core é dono do cliente/sessão; Table e CRUD consomem o mesmo mecanismo. 202 e resultado desconhecido permanecem pendentes; recuperação lê o servidor e conserva o intento original.
++
++No Hero, a sessão HttpOnly e o contexto corporativo confirmado substituem personas e tokens fictícios. Foram removidos os contratos locais de contenção de incidentes/reajuste de folhas que não têm operação correspondente verificada na API. Participantes de missão utiliza a página de recurso nativa.
++
++O status ainda é `[IN PROGRESS]`: implementação e gates locais não equivalem a publicação npm, validação Neon ou efeito operacional. O [plano de integração](engineering/real-bulk-integration.md) registra fontes, limites e próximo gate. A demanda ISSUE-025 descreve a infraestrutura de persistência entregue anteriormente; sua demonstração antiga por personas não certifica esta nova integração corporativa.
+diff --git a/docs/engineering/handoff-real-bulk-20261013.md b/docs/engineering/handoff-real-bulk-20261013.md
+new file mode 100644
+index 0000000..383b59d
+--- /dev/null
++++ b/docs/engineering/handoff-real-bulk-20261013.md
+@@ -0,0 +1,53 @@
++# Passagem de trabalho — integração real de operações em lote do Hero
++
++**Encerrado por solicitação explícita do usuário em 13/10/2026 (America/Sao_Paulo). Não retomar automaticamente.**
++
++## Forma de entrega e preservação
++
++Esta pasta contém o estado exato das alterações deste agente em `changes.patch`, incluindo arquivos novos e exclusões, e um manifesto SHA-256. O patch parte da baseline indicada, NÃO da main atual. Ele foi entregue como artefato de revisão na main, sem aplicar alterações de runtime sobre mudanças concorrentes dos outros agentes. NÃO executar `git apply` cegamente, sobrescrever a main ou escolher `ours/theirs` indiscriminadamente. Revisar o diff contra a main atual e integrar manualmente os conflitos. Os checkouts originais, as mudanças do usuário e seus commits remotos foram preservados.
++
++## Objetivo, arquitetura e trabalho feito
++
++Substituir os mocks de operações em lote do Hero por SESSION real, discovery/capabilities/schema atuais, ETags de recurso, avaliação sem efeito, prévia protegida e confirmação humana com idempotência. Sem inventar endpoints, grants, contexto corporativo READY ou efeitos de backend.
++
++- Hero: removidos interceptor de mocks e identidade/clearance simulados; adicionados sessão/login/logout reais, interceptor de origem confiável, rota de participantes e testes. Casos fictícios de reajuste/containment foram retirados; não foi criada operação substituta inexistente. Contexto corporativo é opcional no host BASIC atual, com histórico confirmado preservado para bloquear downgrade.
++- Angular Core: unificação em BulkOperationClient/State/Session; remoção das classes BulkSync/PraxisBulkClient antigas, custody técnica em sessionStorage, ETags fortes, chave interna, fases ASYNC e fences de autorização/resposta tardia. Migração beta altera API pública: revisar consumidores.
++- Table: atualização uniforme publicada, seleção explícita, preview, confirmação, close/resume, recuperação por leitura fresca e mesma chave; HTTP202 não é sucesso terminal. Contexto obrigatório somente quando realmente configurado ou previamente confirmado.
++- CRUD: comandos e edição uniforme pelo runtime Core, descoberta fresca, validação, parâmetros serializados, status/results/cancel e custody. Revisão final dos parâmetros ainda incompleta.
++- Landing: READMEs vendorizados e guias de Table/CRUD; sync oficial seletivo com testes.
++- Skills: Core, Table, CRUD e Host atualizadas em checkout canônico; NÃO integradas/instaladas como guidance ativo. Há guidance transitório pendente de implementação na DynamicForm.
++
++## Evidência válida e limites
++
++Antes dos últimos ajustes: Hero 11 unitários/build/E2E controlado nos três temas; Core33, Table32, CRUD104 aprovados. Closure de14libs, packs locais oficiais e E2E Table focais passaram. Ingestion20/20 e snapshot Config10/10: nenhuma mudança semântica Config identificada nesse ponto. Os pacotes candidatos têm rótulo rc.12, mas bytes não publicados; NÃO inferir release pelo número.
++
++Último Table: 33 testes focais e build passaram com política authored/command/transient. Novo teste CRUD real encontrou DI incompleta na fixture, depois NG0103 e formulário sem geometria. O autor acrescentou GenericCrudService real, retirou feedback initialValue e começou a usar materializeFormLayoutFromMetadata. **A fonte final desses ajustes não foi validada nem revisada integralmente.** Revisar estabilidade do FormConfig produzido no template (não criar novo objeto a cada detecção), renderização dos parâmetros e payload date-only. Não tratar os104 testes antigos como aprovação do último diff.
++
++Toda prova com banco usou branches Neon exclusivas: API br-twilight-breeze-adq1cqaq (dark-mountain-25788969) e Config br-noisy-mouse-a4vgfjag (ancient-leaf-72055027), PG17/TLS e perfis ordinários verificados. Owner somente para provisionamento/inspeção; não como prova operacional.
++
++12 comandos oficiais de capacidade foram confirmados, identidade de9campos íntegra, duas instalações e dois slots livres. Primeira publicação503: timeout do controle3s, rollback/readback UNCOMPOSED/geração0 e zeroexecuções. Saturação posterior não prova causa. Nova tentativa serial, sem navegador concorrente: HTTP200, controle localREADY/geração1. Readback posterior: publicação globalPUBLISHED/geração2 e digest correspondente. Restart/reconcile oficial posteriorHTTP200 preservou geração local1.
++
++Hero real: SESSION204, filtro200, total195 no paginador/10linhas carregadas. Após aguardar discovery:11checkboxes, bulk-update allowed. O ensaio selecionou37/38 e abriu a operação, mas parou antes de EVAL/CONFIRM aguardando formulário. **Nenhuma prova positiva de mutação de negócio, retomada ou ausência de duplicação foi concluída.**
++
++Participantes37/38: missão2PLANEJADA, versões0; papelINTEL eNEGOCIACAO. Resultado não pode mudar em missão planejada; candidato FERIDO não executado. Prova proposta passou a papelSUPORTE, permitido nessa fase, mantendo principal único/equipe/grants. Não alterar fixtures para forçar um teste verde.
++
++## Onde parou / próximos passos do sucessor
++
++1. Revisar este patch e mudanças concorrentes da main; preservar ambas, comparar baselines e consumidores antes de integrar.
++2. Concluir parâmetros CRUD: formulário real renderizado, configuração estável, sem feedbackloop, sem submit implícito, serializer canônico e contrato fresco. Repetir testes focais após correção.
++3. DynamicForm: foi apenas PLANEJADO, **não implementado**. A política transient existente já evita layout normal, mas ngOnInit ainda lê form-inputs e outras preferências/fallbacks. Auditar ngOnInit2165/2201, fallback2633, persist/conflict2753/2765, presentation, storedschema metadata e ações de authoring. Corrigir fonte canônica, preservando modos persistentes, schema/ETag governados, mudanças de política/destroy e detach explícito. Nenhum novo flag/DTO/endpoint necessário. Testar ngOnInit real com storage indisponível, schema erro, late callbacks e regressões não transitórias.
++4. Atualizar skills de runtime/layout de formulário e guidance Table/CRUD: não instalar instrução de isolamento completo enquanto a implementação continuar parcial. Atualizar manifesto/drafts e validar scripts canônicos. Não sobrescrever drifts locais de List/UI-product-design.
++5. Reconstruir dependências e packs oficiais após o diff final; gerar nova proveniência incluindo arquivos novos. Packs anteriores não incluem os últimos ajustes.
++6. Repetir E2E focal e Hero com HTTP real/Neon: snapshot BEFORE_PLANNING, avaliação sem alteração de alvos/missão/193não-alvos, confirmação única, resultados, versões+1, mesma chave/replay, recuperação após resposta perdida e autorização delegada vs confirmação de outro criador. Sem mocks como prova operacional.
++7. Rever README/roadmap/json-api/publicdocs/ingestion. READMEs vendorizados podem estar anteriores aos últimos ajustes. Config snapshot/release só se houver delta semântico real após regeneração.
++8. Somente após revisão independente e gates: integrar fonte, publicar Angular pelo workflow oficial, adotar versão publicada no Hero, sincronizar somente skills afetadas e deploy oficial com smokes. NÃO publicar a partir deste snapshot incompleto.
++
++Pedido intermediário de revisar destaque de conexões (entradas/saídas, Cmd/Ctrl, pulso, persistência e temas) **não foi iniciado**, porque o usuário encerrou a tarefa. Confirmar o repositório do Workflow Designer antes de assumir que isso pertence ao Hero.
++
++## Recursos locais e segurança
++
++Checkouts e registros detalhados: /tmp/praxis-hero-real-bulk-20261013/docs/engineering/real-bulk-integration.md; /tmp/praxis-hero-bulk-runtime-20261013; /tmp/praxis-hero-real-bulk-skills-20261013; /tmp/praxis-hero-real-bulk-landing-20261013.
++
++Evidência privada: /private/tmp/praxis-hero-bulk-neon-20261013 (0700). Contém credenciais/cookies/chaves: NÃO anexar, versionar, imprimir ou copiar para GitHub. Scripts e receipts de main12, witnesses e supervisores estão ali para inspeção local autorizada. Chaves/budgets têm prazo finito: consultar validade atual antes de qualquer retomada; não renovar/resetar budgets antigos nem ativar capacidade copiada de outra branch. Branches isoladas foram preservadas; não excluir sem autorização.
++
++Hosts/backend/frontend e testes da tarefa foram encerrados; agentes interrompidos. Logout do operador foi comprovado na origem correta:204, depois401 e cookie removido; não equivale à revogação de cópias doJWT. Uma tentativa anterior de cleanup usou origem diferente e não comprovou remoção; recibos negativos preservados. Não houve release npm, tag ou deploy deste incremento.
+diff --git a/docs/engineering/real-bulk-integration.md b/docs/engineering/real-bulk-integration.md
+new file mode 100644
+index 0000000..7bc94df
+--- /dev/null
++++ b/docs/engineering/real-bulk-integration.md
+@@ -0,0 +1,130 @@
++# Operações em lote com API real
++
++## Objetivo e baseline
++
++Substituir simulações do Hero por operações publicadas pelo backend, com prévia,
++confirmação explícita, idempotência e acompanhamento do resultado real.
++
++Baselines: Hero `2081c87`, Angular público `10.0.0-rc.12` (`ad6c01e31`),
++Quickstart `c390dd74` e Metadata público `8.0.0-rc.169`. Checkouts primários
++com alterações locais permanecem preservados. A mudança é **transversal**,
++com impacto na API pública do runtime Angular; não requer inventar endpoints Java.
++
++## Inventário de aderência
++
++| Necessidade | Fonte existente | Classificação e decisão |
++| --- | --- | --- |
++| Atualizar participantes de missões | `CapabilityOperation.bulk`, avaliação, confirmação, execução e resultados; perfil ASYNC/EXPLICIT/PER_ITEM | `ja-suportado-mal-materializado`: adicionar o recurso real e materializar o protocolo |
++| Aprovar eventos de folha | Action `bulk-approve`, DOMAIN_COMMAND/SYNC/EXPLICIT/PER_ITEM, autoridade PAYROLL_APPROVE | `suportado-parcialmente` no consumidor; não confundir com lote de folhas nem anunciar READY sem disponibilidade atual |
++| Conter incidentes e reajustar folhas | Bindings locais inventados, sem operação correspondente na API | `lacuna-real-de-contrato`: remover as ações fictícias; regras desses negócios exigem definição e implementação próprias |
++| Recuperar confirmação incerta | Core já possui sessão, proposta, chave e readback; CRUD usa um segundo cliente e perde a custódia ao fechar | `suportado-parcialmente`: consolidar o caminho canônico e preservar referências de recuperação, sem armazenar autorização |
++| Autenticar o consumidor | `/auth/login`, `/auth/session`, `/auth/logout`, cookie HttpOnly e política CSRF do host | `ja-suportado-mal-materializado`: consumir sessão real; persona visual não concede acesso nem grava tokens |
++
++## Plano e mapa de impacto
++
++1. Core/Table: ampliar o perfil já modelado para ASYNC/EXPLICIT/PER_ITEM e
++   acompanhar estados reais, resultados e cancelamento cooperativo. Uma intenção
++   mantém uma proposta e uma chave; falha incerta não permite criar outra intenção
++   silenciosamente. Reautorizar a recuperação pela API; não guardar ACL, grants,
++   READY ou dados de negócio como autoridade no navegador.
++2. CRUD: substituir o cliente paralelo pelos mesmos controles de contrato,
++   ETag do recurso, custódia e estado usados pelo caminho canônico. Nenhum
++   202/RUNNING/RECONCILIATION_REQUIRED pode virar mensagem de sucesso.
++3. Hero: retirar interceptor e contratos fictícios; oferecer participantes de
++   missões e ações reais descobertas. Usar sessão do servidor, credenciais fora
++   dos assets e headers somente na origem confiável. Corrigir o proxy local:
++   verificar TLS, preservar Origin e incluir os endpoints oficiais de auth.
++4. Atualizar documentação e skills canônicas afetadas. Revisar corpus/recipes e
++   snapshot derivado quando o runtime público ou seus exemplos mudarem.
++5. Validar e revisar independentemente antes de integrar e publicar pelo fluxo
++   oficial. A prova positiva de negócio usará Neon isolado atribuído ao ensaio;
++   nenhuma mutação de dados/grants/publicação de produção pertence a essa prova.
++
++Core é dono do cliente e da custódia; Table/CRUD são consumidores; Hero é dono
++do shell, sessão e integração de origem; Metadata permanece dono dos contratos,
++e Quickstart prova o protocolo. Não haverá nova API de negócio, alias de endpoint,
++loop de PUT como lote, modo de compatibilidade ou sucesso simulado.
++
++Mudanças de nomes/assinaturas públicas em beta devem migrar os consumidores,
++docs e testes no mesmo incremento, sem exportar dois caminhos concorrentes.
++
++## Critérios de aceite
++
++- Operações vêm de metadata/capabilities/actions atuais, com campos editáveis e
++  bindings publicados. Ausência, negação ou indisponibilidade permanecem fechadas.
++- Seleção explícita usa identidade exata e ETag forte obtido do recurso; CLEAR
++  não envia value. Limites e modes são os declarados pelo servidor.
++- Preview não altera domínio. Confirmação envia somente proposalId e a chave
++  retida; resposta perdida, 503 e recuperação não duplicam efeitos.
++- Execução 202 permanece em acompanhamento. Resultado, contagens e mensagens
++  distinguem sucesso, falha parcial, cancelamento, STOP e reconciliação incerta.
++- Sessão/cookie, CSRF, tenant, grants e disponibilidade continuam governados
++  pelo backend. Troca visual de persona não substitui identidade autenticada.
++- Testes focais Core/Table/CRUD e builds dos consumidores; E2E focal de falhas,
++  retomada e respostas tardias; jornada Hero com HTTP real em Neon isolado,
++  incluindo estado persistido antes/depois e replay sem efeito adicional.
++- Publicação somente após fonte congelada, revisão diferente do autor e gates
++  aplicáveis; versões públicas resolvidas e smoke de leitura após deploy.
++
++## Coordenação
++
++Root fixa o contrato e escreve Hero, sessão e documentação. `theme_review`
++investiga/implementa Core e Table; `charts_theme` investiga backend e revisa a
++governança. Durante o inventário ambos são somente leitores. Recursos de build,
++arquivos e branch Neon serão atribuídos explicitamente antes de qualquer mutação.
++Modelos/esforços seguem a configuração herdada dos agentes existentes; followup
++não oferece override. Não há delegação recursiva autorizada.
++
++## Estado
++
++Atualização em 13/10/2026: mocks e contratos locais de contenção/reajuste removidos;
++sessão HttpOnly, consumo opcional de contexto corporativo sem identidade inventada, interceptor limitado à origem,
++proxy TLS/Origin e rota de participantes implementados. Testes do host: 11/11
++unitários, build e E2E de protocolo/visual aprovados nos três temas, incluindo
++diálogo estreito e logout incerto. O E2E do host usa fixture explícita e não prova
++efeitos de banco. Revisão independente do código da sessão aprovada.
++
++Core: 33/33; Table: 32/32 focais; CRUD: 104/104 focais aprovados. Closure de 14 bibliotecas aprovada, com rebuild final de Table e consumidor CRUD após o ajuste de contexto. E2E Table: seis cenários e um cenário ASYNC em execução focal separada, aprovados no mesmo runtime. As quatro skills foram
++atualizadas em checkout canônico isolado, com validação estrutural; integração e
++sincronização ainda pendentes. Não houve publicação deste incremento.
++
++Branches iniciais atribuídas exclusivamente ao ensaio `root/hero-real-bulk`:
++API `br-twilight-breeze-adq1cqaq` e Config `br-noisy-mouse-a4vgfjag`. PostgreSQL 17,
++TLS verify-full/channel binding e cinco identidades owner/runtime/control/Config
++foram atestados, com conexões fechadas. A foto do primeiro baseline é UNCOMPOSED,
++sem instalação de capacidade ASYNC; portanto ela não conta como prova positiva.
++Autoridade dedicada nova criada na API child, com três callers ordinários e ACL restrita. Identidade/epoch atestados por leitura protegida e validação integral pública SDK169 (exit0 e marcador após fechamento). A primeira tentativa de transporte travou em SSL close após migração, foi encerrada e preservada; migração não repetida. Os 12 comandos oficiais Main foram confirmados, com dois slots livres e nenhuma execução de domínio. A primeira publicação governada retornou 503 por timeout da transação de controle de 3s; readback protegido confirmou operação local e publicação global UNCOMPOSED, geração 0, sem efeitos de domínio. O host foi encerrado pelo supervisor. Nesse primeiro ensaio, publicação e jornada não foram comprovadas; não houve retry automático nem relaxamento dos limites. Saturação registrada 54s depois não comprova a causa do timeout. Uma nova prova explicitamente serializada preservou identidade, chave, orçamento e validade e reduziu o teto do host para 8min, sem reprovisionar capacidade: publicação HTTP 200 e controle da operação READY, geração 1. A sessão real foi confirmada; o filtro respondeu HTTP 200 e o paginador exibiu o total de 195 participantes, com 10 linhas carregadas. Depois de aguardar o discovery completo, a tabela exibiu 11 checkboxes e a capacidade bulk-update autorizada. Capturas anteriores ao carregamento não certificam falha de seleção. O supervisor encerrou o host; a jornada com efeitos de domínio continua pendente. O próximo ensaio recebe chave e orçamento próprios, sem resetar nem renovar o orçamento anterior, na mesma branch exclusiva.
++
++Inventário e plano concluídos. Implementação em gates/revisão; validação remota,
++integração/publicação e sincronização das skills ainda pendentes. Nenhuma prova antiga certifica
++o novo consumidor.
++
++### Revisão de composição operacional
++
++Classificação transversal; aderência `ja-suportado-mal-nomeado-ou-mal-materializado`. O host Quickstart atual não compõe `QuickstartEnterpriseRuntimeContextProvider`: o default corporativo retorna503, mas a operação BASIC usa principal SESSION, binding operacional servidor e grants atuais. Removida a exigência de provider corporativo do Hero; dashboard sem persistência/edição sem contexto confirmado. ApiConfigStorage usa headersFactory vazia, e o interceptor remove claims fictícios mesmo sem contexto. Histórico de contexto confirmado no serviço do host suspende projeções após perda, inclusive após remount. Table distingue token configurado/histórico de serviço providedInroot; CRUD já distingue essa integração.
++
++Leitura protegida de proposta/execução pode ser delegada a outro ator autorizado sobre todos os alvos. Não prova continuidade do criador. A confirmação continua sujeita ao scope autenticado original; custódia técnica nunca autoriza confirmação automática, nem se apaga por negação/404. Prova Neon deve cobrir leitura autorizada/negada e confirmação por ator distinto.
++
++### Gates do candidato e derivados
++
++Pack oficial local de12 pacotes, sem publicação, instalado no Hero com `--no-save --package-lock=false`. A proveniência inclui hashes dos tarballs e4288arquivos de fonte, incluindo arquivos novos; a versão do candidato não é prova de release público. Hero repetido contra esses bytes:11/11unitários, build e E2E de sessão/três temas aprovados. Bundle14.11MB excede budget14MB em108KB (warning existente, não falha).
++
++Ingestion oficial: catálogo PASS, authoring20/20, snapshot Config10/10. Comparação independente confirmou107components/definitions/version idênticos; somente generatedAt mudou. Timestamp-only restaurado: não há alteração semântica do Config a publicar. Landing derivada usa cópias exatas dos três READMEs e duas revisões editoriais; integração/deploy somente após runtime publicado e gates de negócio concluídos. O filtro seletivo no sync oficial é local-pequena, permitido apenas para imports/overview canônicos, com6tests; não redefine contratos. Skills: atualizar-existente (Core/Table/CRUD/host), canônico validado; sincronização ainda pendente.
++
++
++### Ensaio real de planejamento e formulários transitórios
++
++Readback atual confirmou capacidade ACTIVE, identidade de nove campos íntegra, duas instalações e dois slots livres. O controle local estava READY na geração 1 e o ledger global PUBLISHED na geração 2, com o mesmo digest referenciado pelo controle. O reconcile oficial no novo host retornou HTTP 200 e preservou a geração local.
++
++Os participantes 37 e 38 pertencem à missão 2, em estado PLANEJADA. Por isso, o candidato de alteração de resultado não foi executado. A prova foi planejada para papel=SUPORTE, permitido pela regra canônica de planejamento; as duas revisões estavam em zero e a equipe mantinha suas invariantes. Nenhum grant ou estado da missão foi alterado para habilitar o ensaio.
++
++O navegador selecionou os dois registros e abriu a operação, mas o ensaio terminou antes da avaliação e da confirmação, aguardando o formulário. A captura de 15 segundos não prova a causa desse carregamento. O inventário identificou uma correção independente de governança: Table e parâmetros de comando CRUD devem consumir a política existente de layout authored/command/transient, preservando a projeção dos campos e evitando persistir preferências de uma operação efêmera. Não há contrato novo em DynamicForm. Implementação e nova validação estão em andamento.
++
++A sessão do operador foi confirmada antes do logout na origem correta; logout HTTP 204, sessão subsequente HTTP 401 e cookie removido. Isso comprova limpeza do cliente, não revogação de outras cópias do JWT. O host e o servidor de desenvolvimento foram encerrados para reconstruir os pacotes candidatos. A prova de efeitos, retomada e não duplicação continua pendente; nenhuma publicação deste incremento está autorizada pelos gates atuais.
++
++
++### Complemento canônico da política transitória
++
++Classificação: contrato-publico de comportamento existente, sem novo input, tipo, endpoint ou modo. Aderência: suportado-parcialmente. DynamicForm é a fonte canônica afetada: a política transient já suprime layout gerado, mas a inicialização ainda pode ler preferências de inputs e caminhos de fallback. O ajuste deve impedir hidratação e persistência automáticas dessas preferências quando a instância for transitória, mantendo os modos persistentes e a leitura governada do schema.
++
++Consumidores diretos: revisão de atualização em lote da Table e parâmetros de comandos da CRUD; demais superfícies transitórias exigem regressão focal de inicialização e mudança de política. Derivados: README e json-api da DynamicForm, READMEs de Table/CRUD, documentação pública vendorizada e skills de runtime/layout de formulário, Table e CRUD. Gates: testes focais de inicialização com storage indisponível e respostas tardias, schema falho, regressão dos modos persistentes, build DynamicForm e consumidor direto, E2E focal e prova real Hero/Neon. O risco de mudança é restrito a instâncias que já declaram transient; nenhuma produção ou banco de negócio foi alterado pelo ensaio.
+diff --git a/e2e/run-e2e.cjs b/e2e/run-e2e.cjs
+index dcd3278..442a0fd 100644
+--- a/e2e/run-e2e.cjs
++++ b/e2e/run-e2e.cjs
+@@ -1,215 +1,74 @@
+-const { chromium } = require('D:/Developer/praxis-plataform/.worktrees/hero-hq-batch8/node_modules/@playwright/test');
+-
++const { chromium, expect } = require('@playwright/test');
++const { mkdir, writeFile } = require('node:fs/promises');
++const { resolve } = require('node:path');
+ const BASE_URL = process.env.TEST_BASE_URL || 'http://127.0.0.1:4302';
+-
+-async function runE2E() {
+-  console.log(`[E2E] Iniciando validação E2E e regressão visual contra ${BASE_URL}...`);
+-  const browser = await chromium.launch({
+-    headless: true,
+-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+-  });
+-
+-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+-  let failures = 0;
+-
+-  function assert(condition, message) {
+-    if (condition) {
+-      console.log(`  [PASS] ${message}`);
+-    } else {
+-      console.error(`  [FAIL] ${message}`);
+-      failures++;
++const OUTPUT = resolve(process.env.TEST_OUTPUT_DIR || 'test-results/host-session');
++
++// Protocol/visual fixture only. No business write or real database proof occurs here.
++async function run() {
++  await mkdir(OUTPUT, { recursive: true });
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
++  const page = await context.newPage();
++  let active = false;
++  let uncertainLogout = false;
++  const requests = [];
++  const runtime = {
++    schemaVersion: 'praxis-enterprise-runtime-context.v1', state: 'ready', selectionVersion: 'fixture-v1',
++    user: { userId: 'fixture-operator', displayName: 'Operador do ensaio', resolvedFromServerPrincipal: true },
++    effectiveContext: { contextVersion: 'fixture-c1', activeTenant: { tenantId: 'fixture', label: 'Ensaio isolado' },
++      activeOrganizationId: null, environment: 'test', locale: 'pt-BR', timezone: 'UTC',
++      activeProfileId: null, activeModuleKey: null, capabilities: [], authorities: [] },
++    reasonCode: null, resolvedAt: '2026-10-13T00:00:00Z',
++  };
++  await page.route('**/*', async (route) => {
++    const req = route.request();
++    const path = new URL(req.url()).pathname;
++    if (!/^\/(api|auth|schemas)(\/|$)/.test(path)) return route.continue();
++    requests.push({ path, method: req.method(), identity: req.headers()['x-user-id'], authorization: !!req.headers().authorization });
++    if (path === '/auth/login') { active = true; return route.fulfill({ status: 204 }); }
++    if (path === '/auth/session') return route.fulfill({ status: active ? 204 : 401 });
++    if (path === '/auth/logout') {
++      if (uncertainLogout) return route.fulfill({ status: 503 });
++      active = false; return route.fulfill({ status: 204 });
+     }
+-  }
+-
++    if (path === '/api/praxis/runtime/context') return route.fulfill({ json: runtime });
++    // Absence is explicit; this fixture never fabricates metadata availability or execution success.
++    return route.fulfill({ status: 404, json: { message: 'No business contract in the host protocol fixture' } });
++  });
+   try {
+-    // -------------------------------------------------------------
+-    // Test 1: Dashboard Navigation & Hero Executive Banner
+-    // -------------------------------------------------------------
+-    console.log('\n[Test 1] Validando Hero Executive Banner & Telemetria...');
+-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle', timeout: 30000 });
+-    await page.waitForTimeout(2500);
+-
+-    const banner = page.locator('.hero-executive-banner').first();
+-    assert(await banner.count() > 0, 'Componente .hero-executive-banner está presente no DOM');
+-
+-    const bannerTitle = await banner.innerText();
+-    assert(/Centro de Comando & Prontidão/i.test(bannerTitle), 'Título executivo do banner renderizado');
+-    assert(/Sistemas Táticos Ativos/i.test(bannerTitle), 'Badge de sistemas ativos presente no banner');
+-    assert(/Praxis Platform 9\.0/i.test(bannerTitle), 'Badge da plataforma presente no banner');
+-
+-    const radarMedia = page.locator('.hero-executive-banner .prx-rich-card-media, .hero-executive-banner [class*="media"]').first();
+-    assert(await radarMedia.count() > 0, 'Container de telemetria presente no banner');
+-
+-    // -------------------------------------------------------------
+-    // Test 2: Bento KPIs & Governed Data
+-    // -------------------------------------------------------------
+-    console.log('\n[Test 2] Validando Bento KPIs no Dashboard...');
+-    const bodyText = await page.innerText('body');
+-    assert(bodyText.includes('53 Ativos'), 'KPI "53 Ativos" renderizado');
+-    assert(bodyText.includes('14 Planejadas') || bodyText.includes('15 Planejadas') || /\d+\s+Planejadas/.test(bodyText), 'KPI de missões planejadas ("Planejadas") renderizado');
+-    assert(bodyText.includes('R$ 3,09 M') || bodyText.includes('3,09 M'), 'KPI de execução orçamentária formatado em Real presente');
+-    assert(bodyText.includes('18 Críticos'), 'KPI "18 Críticos" renderizado');
+-
+-    // -------------------------------------------------------------
+-    // Test 3: Distress Signals List pt-BR Localization
+-    // -------------------------------------------------------------
+-    console.log('\n[Test 3] Validando Sinais de Socorro com formatação canônica pt-BR...');
+-    const listEl = page.locator('#hero-distress-signals-list, praxis-list').first();
+-    assert(await listEl.count() > 0, 'Lista de sinais de socorro presente');
+-
+-    const metaSpans = await page.$$eval('.meta span', els => els.map(e => e.innerText.trim()));
+-    assert(metaSpans.length > 0, `Nós de metadados relativos renderizados (${metaSpans.length} encontrados)`);
+-
+-    const hasEnglishWords = metaSpans.some(t => /days ago|hours ago|minutes ago/i.test(t));
+-    assert(!hasEnglishWords, 'Nenhum termo em inglês detectado nos valores relativos (zero "days ago")');
+-
+-    const hasPtBrWords = metaSpans.some(t => /anteontem|ontem|há|segundos|minutos|horas|dias/i.test(t));
+-    assert(hasPtBrWords, `Valores relativos devidamente formatados em português brasileiro (exemplo: "${metaSpans[0]}")`);
+-
+-    const paginatorText = await listEl.innerText();
+-    assert(!/items per page/i.test(paginatorText), 'Paginação não possui strings em inglês ("items per page")');
+-    assert(/itens por página/i.test(paginatorText), 'Paginação devidamente localizada em pt-BR ("Itens por página")');
+-
+-    // -------------------------------------------------------------
+-    // Test 4: Resource Page - Incidentes Táticos (HTML5 PushState)
+-    // -------------------------------------------------------------
+-    console.log('\n[Test 4] Validando Página de Recurso: Incidentes Táticos...');
+-    await page.goto(`${BASE_URL}/operacoes/incidentes`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+-    const incidentsTitle = page.locator('h1, [class*="title"]').filter({ hasText: /Incidentes Táticos/i }).first();
+-    await incidentsTitle.waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
+-    assert(await incidentsTitle.count() > 0, 'Página de Incidentes Táticos carregou com sucesso');
+-
+-    await page.waitForTimeout(3000);
+-    const incidentsBody = await page.innerText('body');
+-    assert(incidentsBody.includes('TOTAL DE OCORRÊNCIAS') || incidentsBody.includes('74 Registros'), 'KPI de Total de Ocorrências presente');
+-    assert(incidentsBody.includes('R$ 154,4 M') || incidentsBody.includes('154,4 M'), 'KPI de Danos Materiais formatado em Real presente');
+-
+-    // -------------------------------------------------------------
+-    // Test 5: Resource Page - Heróis & Colaboradores (HTML5 PushState)
+-    // -------------------------------------------------------------
+-    console.log('\n[Test 5] Validando Página de Recurso: Heróis & Colaboradores...');
+-    await page.goto(`${BASE_URL}/rh/funcionarios`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+-    const heroesTitle = page.locator('h1, [class*="title"]').filter({ hasText: /Heróis & Colaboradores/i }).first();
+-    await heroesTitle.waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
+-    assert(await heroesTitle.count() > 0, 'Página de Heróis & Colaboradores carregou com sucesso');
+-
+-    await page.waitForTimeout(3000);
+-    const heroesBody = await page.innerText('body');
+-    assert(heroesBody.includes('EFETIVO TOTAL') || heroesBody.includes('24 Cadastrados'), 'KPI de Efetivo Total presente');
+-    assert(heroesBody.includes('21 Ativos'), 'KPI de Prontidão Ativa presente');
+-
+-    // -------------------------------------------------------------
+-    // Test 6: Tactical Clearance Guard & Governança de Autorização
+-    // -------------------------------------------------------------
+-    console.log('\n[Test 6] Validando Tactical Clearance Guard & Governança de Autorização...');
+-    const personaBtn = page.locator('[data-testid="persona-switcher"]').first();
+-    if (await personaBtn.count() > 0) {
+-      await personaBtn.click();
+-      await page.waitForTimeout(500);
+-
+-      const tonyOption = page.locator('[data-testid="persona-option-tony.stark"]').first();
+-      assert(await tonyOption.count() > 0, 'Opção Tony Stark presente no switcher de persona');
+-      await tonyOption.click();
+-      await page.waitForTimeout(1000);
+-
+-      // Tentar acessar recurso restrito a DEFCON 1 (/rh/folha-pagamento)
+-      console.log('  Tentando navegar para /rh/folha-pagamento com credencial DEFCON 2...');
+-      await page.goto(`${BASE_URL}/rh/folha-pagamento`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+-      await page.waitForTimeout(2000);
+-
+-      const currentUrl = page.url();
+-      assert(currentUrl.includes('authDenied=true') || currentUrl.endsWith('/'), 'Navegação bloqueada pelo Tactical Clearance Guard e redirecionada ao Dashboard');
+-
+-      const authAlert = page.locator('[data-testid="tactical-auth-alert"]').first();
+-      assert(await authAlert.count() > 0, 'Alerta tático de acesso restrito renderizado no Dashboard');
+-
+-      // Reverter para Nick Fury (DEFCON 1)
+-      await personaBtn.click();
+-      await page.waitForTimeout(500);
+-      const furyOption = page.locator('[data-testid="persona-option-nick.fury"]').first();
+-      await furyOption.click();
+-      await page.waitForTimeout(1000);
+-
+-      // Acessar novamente /rh/folha-pagamento com DEFCON 1
+-      console.log('  Navegando para /rh/folha-pagamento com credencial DEFCON 1 (Nick Fury)...');
+-      await page.goto(`${BASE_URL}/rh/folha-pagamento`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+-      await page.waitForTimeout(3000);
+-      const payrollTitle = page.locator('h1, [class*="title"]').filter({ hasText: /Folha de Pagamento/i }).first();
+-      assert(await payrollTitle.count() > 0, 'Acesso autorizado com sucesso para Nick Fury (DEFCON 1)');
+-
+-      // Validar badges visuais de restrição tática DEFCON 1 na navegação
+-      const defconBadges = page.locator('.praxis-shell__nav-badge').filter({ hasText: /DEFCON 1/i });
+-      assert(await defconBadges.count() >= 2, 'Badges táticos "DEFCON 1" visíveis nos itens de menu restritos (Folha de Pagamento e Contratos)');
++    await page.goto(BASE_URL);
++    await expect(page.getByTestId('current-user-display')).toHaveText('Visitante');
++    await page.getByTestId('session-switcher').click();
++    await page.getByTestId('session-user').fill('fixture-operator');
++    await page.getByTestId('session-password').fill('fixture-password');
++    await page.getByTestId('session-login').click();
++    await expect(page.getByTestId('session-identity')).toContainText('Operador do ensaio');
++    await expect(page.getByText('Contexto: Ensaio isolado')).toBeVisible();
++    for (const [theme, label] of [['classic', 'Essência'], ['light-tech', 'Aurora'], ['dark-tech', 'Órbita']]) {
++      await page.getByRole('button', { name: 'Fechar', exact: true }).click();
++      await page.getByRole('button', { name: /Aparência/ }).click();
++      await page.getByRole('menuitemradio', { name: new RegExp(label) }).click();
++      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
++      await page.getByTestId('session-switcher').click();
++      await page.screenshot({ animations: 'disabled', path: resolve(OUTPUT, `session-${theme}.png`) });
+     }
+-
+-    // -------------------------------------------------------------
+-    // Test 7: Governed Bulk Operations & 2-Phase Protocol
+-    // -------------------------------------------------------------
+-    console.log('\n[Test 7] Validando Operações em Lote Corporativas (Protocolo de 2 Fases)...');
+-    await page.goto(`${BASE_URL}/operacoes/incidentes`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+-    await page.waitForTimeout(3000);
+-
+-    const incidentCheckboxes = page.locator('tbody mat-checkbox');
+-    assert((await incidentCheckboxes.count()) > 0, 'Checkboxes de seleção presentes na tabela de Incidentes');
+-
+-    // Selecionar 2 linhas
+-    await incidentCheckboxes.nth(0).click();
+-    await incidentCheckboxes.nth(1).click();
+-    await page.waitForTimeout(500);
+-
+-    // Verificar se a ação em lote "Conter Ocorrências" está disponível
+-    const bulkButton = page
+-      .locator('.praxis-floating-bulk-actions button, button')
+-      .filter({ hasText: /Conter Ocorrências/i })
+-      .first();
+-    assert((await bulkButton.count()) > 0, 'Botão de ação em lote "Conter Ocorrências" disponível');
+-
+-    // Acionar a ação em lote
+-    await bulkButton.click();
+-    await page.waitForTimeout(1500);
+-
+-    // Validar abertura do diálogo canônico
+-    const bulkDialog = page.locator('praxis-bulk-operation-dialog, .praxis-bulk-dialog').first();
+-    assert((await bulkDialog.count()) > 0, 'Diálogo canônico PraxisBulkOperationDialogComponent aberto');
+-
+-    const dialogText = await bulkDialog.innerText();
+-    assert(dialogText.includes('Conter Ocorrências Selecionadas'), 'Título do comando de domínio renderizado no diálogo');
+-    assert(dialogText.includes('registros selecionados como alvo'), 'Badge de alvos selecionados presente no diálogo');
+-    assert(dialogText.includes('Conformidade e Prévia de Execução') || dialogText.includes('REGISTROS ALVO'), 'Passo 1 (Avaliação/Preview) calculado com sucesso');
+-
+-    // Confirmar execução (Fase 2)
+-    const confirmBtn = bulkDialog.locator('button').filter({ hasText: /Confirmar Execução/i }).first();
+-    assert((await confirmBtn.count()) > 0, 'Botão "Confirmar Execução" habilitado na proposta');
+-    await confirmBtn.click();
+-    await page.waitForTimeout(1500);
+-
+-    const postConfirmText = await bulkDialog.innerText();
+-    assert(postConfirmText.includes('Operação concluída com') || postConfirmText.includes('Status: Concluído'), 'Passo 2 (Confirmação Transacional) concluído com êxito');
+-    assert(postConfirmText.includes('Concluir e Atualizar'), 'Botão de encerramento e atualização presente');
+-
+-    // Fechar diálogo com sucesso
+-    const concludeBtn = bulkDialog.locator('button').filter({ hasText: /Concluir e Atualizar/i }).first();
+-    await concludeBtn.click();
+-    await page.waitForTimeout(1000);
+-
+-    assert((await page.locator('praxis-bulk-operation-dialog').count()) === 0, 'Diálogo fechado e tabela pronta para novo ciclo');
+-  } catch (err) {
+-    console.error(`[E2E] Erro inesperado na execução:`, err);
+-    failures++;
+-  } finally {
+-    await browser.close();
+-  }
+-
+-  console.log('\n' + '='.repeat(60));
+-  if (failures === 0) {
+-    console.log(' [SUCESSO] Todos os testes E2E e invariantes visuais foram validados com êxito!');
+-    console.log('='.repeat(60) + '\n');
+-    process.exit(0);
+-  } else {
+-    console.error(` [FALHA] ${failures} teste(s) falharam!`);
+-    console.log('='.repeat(60) + '\n');
+-    process.exit(1);
+-  }
++    uncertainLogout = true;
++    await page.getByRole('button', { name: 'Encerrar sessão', exact: true }).click();
++    await expect(page.getByRole('button', { name: 'Repetir encerramento' })).toBeVisible();
++    await expect(page.getByTestId('current-user-display')).toHaveText('Encerramento pendente');
++    await expect(page.locator('router-outlet')).toHaveCount(0);
++    await page.setViewportSize({ width: 390, height: 844 });
++    await page.screenshot({ animations: 'disabled', path: resolve(OUTPUT, 'session-uncertain-narrow.png') });
++    uncertainLogout = false;
++    await page.getByRole('button', { name: 'Repetir encerramento' }).click();
++    await expect(page.getByTestId('session-login')).toBeVisible();
++    await expect(page.getByTestId('current-user-display')).toHaveText('Visitante');
++    expect(requests.some((req) => req.authorization)).toBe(false);
++    expect(requests.filter((req) => req.path.startsWith('/auth/')).some((req) => req.identity)).toBe(false);
++    expect(requests.filter((req) => req.method === 'POST' && (/\/bulk(?:\/|$)/.test(req.path) || /\/actions(?:\/|$)/.test(req.path)))).toEqual([]);
++    await writeFile(resolve(OUTPUT, 'acceptance.json'), JSON.stringify({ status: 'PASS', evidenceClass: 'host-protocol-fixture-not-database-proof', themes: 3, narrow: true, businessWrites: 0, requests }, null, 2));
++    console.log('PASS: host session protocol, uncertain logout, trusted identity, three themes and narrow dialog. Not a database proof.');
++  } finally { await browser.close(); }
+ }
+-
+-runE2E();
++run().catch((error) => { console.error(error); process.exitCode = 1; });
+diff --git a/package-lock.json b/package-lock.json
+index ee05011..485e481 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -48,7 +48,10 @@
+         "@angular/build": "21.2.14",
+         "@angular/cli": "21.2.14",
+         "@angular/compiler-cli": "21.2.14",
+-        "typescript": "~5.9.2"
++        "@playwright/test": "1.54.2",
++        "jsdom": "27.0.1",
++        "typescript": "~5.9.2",
++        "vitest": "4.0.8"
+       }
+     },
+     "node_modules/@algolia/abtesting": {
+@@ -688,6 +691,61 @@
+         "rxjs": "^6.5.3 || ^7.4.0"
+       }
+     },
++    "node_modules/@asamuzakjp/css-color": {
++      "version": "4.1.2",
++      "resolved": "https://registry.npmjs.org/@asamuzakjp/css-color/-/css-color-4.1.2.tgz",
++      "integrity": "sha512-NfBUvBaYgKIuq6E/RBLY1m0IohzNHAYyaJGuTK79Z23uNwmz2jl1mPsC5ZxCCxylinKhT1Amn5oNTlx1wN8cQg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@csstools/css-calc": "^3.0.0",
++        "@csstools/css-color-parser": "^4.0.1",
++        "@csstools/css-parser-algorithms": "^4.0.0",
++        "@csstools/css-tokenizer": "^4.0.0",
++        "lru-cache": "^11.2.5"
++      }
++    },
++    "node_modules/@asamuzakjp/css-color/node_modules/lru-cache": {
++      "version": "11.5.3",
++      "resolved": "https://registry.npmjs.org/lru-cache/-/lru-cache-11.5.3.tgz",
++      "integrity": "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==",
++      "dev": true,
++      "license": "BlueOak-1.0.0",
++      "engines": {
++        "node": "20 || >=22"
++      }
++    },
++    "node_modules/@asamuzakjp/dom-selector": {
++      "version": "6.8.1",
++      "resolved": "https://registry.npmjs.org/@asamuzakjp/dom-selector/-/dom-selector-6.8.1.tgz",
++      "integrity": "sha512-MvRz1nCqW0fsy8Qz4dnLIvhOlMzqDVBabZx6lH+YywFDdjXhMY37SmpV1XFX3JzG5GWHn63j6HX6QPr3lZXHvQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@asamuzakjp/nwsapi": "^2.3.9",
++        "bidi-js": "^1.0.3",
++        "css-tree": "^3.1.0",
++        "is-potential-custom-element-name": "^1.0.1",
++        "lru-cache": "^11.2.6"
++      }
++    },
++    "node_modules/@asamuzakjp/dom-selector/node_modules/lru-cache": {
++      "version": "11.5.3",
++      "resolved": "https://registry.npmjs.org/lru-cache/-/lru-cache-11.5.3.tgz",
++      "integrity": "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==",
++      "dev": true,
++      "license": "BlueOak-1.0.0",
++      "engines": {
++        "node": "20 || >=22"
++      }
++    },
++    "node_modules/@asamuzakjp/nwsapi": {
++      "version": "2.3.9",
++      "resolved": "https://registry.npmjs.org/@asamuzakjp/nwsapi/-/nwsapi-2.3.9.tgz",
++      "integrity": "sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/@babel/code-frame": {
+       "version": "7.29.7",
+       "resolved": "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.29.7.tgz",
+@@ -981,6 +1039,146 @@
+         "node": ">=6.9.0"
+       }
+     },
++    "node_modules/@csstools/color-helpers": {
++      "version": "6.1.2",
++      "resolved": "https://registry.npmjs.org/@csstools/color-helpers/-/color-helpers-6.1.2.tgz",
++      "integrity": "sha512-grhRy3OKmniaAEKXMjua5z/EODX0MSqBGjunw8+j/3HQjOnahs2AGhvEOIYVUWcU6ScApbhLhVrQTX8XqrMrow==",
++      "dev": true,
++      "funding": [
++        {
++          "type": "github",
++          "url": "https://github.com/sponsors/csstools"
++        },
++        {
++          "type": "opencollective",
++          "url": "https://opencollective.com/csstools"
++        }
++      ],
++      "license": "MIT-0",
++      "engines": {
++        "node": ">=20.19.0"
++      }
++    },
++    "node_modules/@csstools/css-calc": {
++      "version": "3.4.3",
++      "resolved": "https://registry.npmjs.org/@csstools/css-calc/-/css-calc-3.4.3.tgz",
++      "integrity": "sha512-iex20d8CHVkyvg6B7UKV7uHnI2Bqo9g+EFfT9E0y+GvTvhZ/DwONJ+9aKb1dlqm0ZiGsL5RXjp0fCoJYnkeDjA==",
++      "dev": true,
++      "funding": [
++        {
++          "type": "github",
++          "url": "https://github.com/sponsors/csstools"
++        },
++        {
++          "type": "opencollective",
++          "url": "https://opencollective.com/csstools"
++        }
++      ],
++      "license": "MIT",
++      "engines": {
++        "node": ">=20.19.0"
++      },
++      "peerDependencies": {
++        "@csstools/css-parser-algorithms": "^4.0.2",
++        "@csstools/css-tokenizer": "^4.0.2"
++      }
++    },
++    "node_modules/@csstools/css-color-parser": {
++      "version": "4.2.6",
++      "resolved": "https://registry.npmjs.org/@csstools/css-color-parser/-/css-color-parser-4.2.6.tgz",
++      "integrity": "sha512-iiPQ3iRWwnJkeEn6RIu6SJPr7hYrLz6XZ9s/QZl+2/LI5KQVjpl2fdmDSZKuD4xP6GMmMPgHFFXg6k1Wkz0Trg==",
++      "dev": true,
++      "funding": [
++        {
++          "type": "github",
++          "url": "https://github.com/sponsors/csstools"
++        },
++        {
++          "type": "opencollective",
++          "url": "https://opencollective.com/csstools"
++        }
++      ],
++      "license": "MIT",
++      "dependencies": {
++        "@csstools/color-helpers": "^6.1.2",
++        "@csstools/css-calc": "^3.4.3"
++      },
++      "engines": {
++        "node": ">=20.19.0"
++      },
++      "peerDependencies": {
++        "@csstools/css-parser-algorithms": "^4.0.2",
++        "@csstools/css-tokenizer": "^4.0.2"
++      }
++    },
++    "node_modules/@csstools/css-parser-algorithms": {
++      "version": "4.0.2",
++      "resolved": "https://registry.npmjs.org/@csstools/css-parser-algorithms/-/css-parser-algorithms-4.0.2.tgz",
++      "integrity": "sha512-40cSKyMvK+tq4qz6Awrlye2WGuOKt3FwPgtGg6KTfbHOWNw+Rk1rzbAtZnZ6IBhsY491HLRnDXwoyBAijmmILA==",
++      "dev": true,
++      "funding": [
++        {
++          "type": "github",
++          "url": "https://github.com/sponsors/csstools"
++        },
++        {
++          "type": "opencollective",
++          "url": "https://opencollective.com/csstools"
++        }
++      ],
++      "license": "MIT",
++      "engines": {
++        "node": ">=20.19.0"
++      },
++      "peerDependencies": {
++        "@csstools/css-tokenizer": "^4.0.2"
++      }
++    },
++    "node_modules/@csstools/css-syntax-patches-for-csstree": {
++      "version": "1.1.15",
++      "resolved": "https://registry.npmjs.org/@csstools/css-syntax-patches-for-csstree/-/css-syntax-patches-for-csstree-1.1.15.tgz",
++      "integrity": "sha512-J0u7HkVl2nzSlhsiTOp4AmwcUQ3D+mGEEKfBy/7To5/y7F2OHwyLrXfrhR0SMgr4p5Lo+eaMVSeai24zUcBIxA==",
++      "dev": true,
++      "funding": [
++        {
++          "type": "github",
++          "url": "https://github.com/sponsors/csstools"
++        },
++        {
++          "type": "opencollective",
++          "url": "https://opencollective.com/csstools"
++        }
++      ],
++      "license": "MIT-0",
++      "peerDependencies": {
++        "css-tree": "^3.2.1"
++      },
++      "peerDependenciesMeta": {
++        "css-tree": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@csstools/css-tokenizer": {
++      "version": "4.0.2",
++      "resolved": "https://registry.npmjs.org/@csstools/css-tokenizer/-/css-tokenizer-4.0.2.tgz",
++      "integrity": "sha512-OoKoR0f76dCY666JlcbhmVTs2drYj1GUXZTYTcbUgJjh9Nv41aFfZ21bPQTERm5+L5cBDo466NltB2lplS5GBw==",
++      "dev": true,
++      "funding": [
++        {
++          "type": "github",
++          "url": "https://github.com/sponsors/csstools"
++        },
++        {
++          "type": "opencollective",
++          "url": "https://opencollective.com/csstools"
++        }
++      ],
++      "license": "MIT",
++      "engines": {
++        "node": ">=20.19.0"
++      }
++    },
+     "node_modules/@emnapi/core": {
+       "version": "1.11.3",
+       "resolved": "https://registry.npmjs.org/@emnapi/core/-/core-1.11.3.tgz",
+@@ -3037,6 +3235,22 @@
+       "license": "MIT",
+       "optional": true
+     },
++    "node_modules/@playwright/test": {
++      "version": "1.54.2",
++      "resolved": "https://registry.npmjs.org/@playwright/test/-/test-1.54.2.tgz",
++      "integrity": "sha512-A+znathYxPf+72riFd1r1ovOLqsIIB0jKIoPjyK2kqEIe30/6jF6BC7QNluHuwUmsD2tv1XZVugN8GqfTMOxsA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "playwright": "1.54.2"
++      },
++      "bin": {
++        "playwright": "cli.js"
++      },
++      "engines": {
++        "node": ">=18"
++      }
++    },
+     "node_modules/@praxisui/ai": {
+       "version": "10.0.0-rc.12",
+       "resolved": "https://registry.npmjs.org/@praxisui/ai/-/ai-10.0.0-rc.12.tgz",
+@@ -4226,6 +4440,24 @@
+         "tslib": "^2.4.0"
+       }
+     },
++    "node_modules/@types/chai": {
++      "version": "5.2.3",
++      "resolved": "https://registry.npmjs.org/@types/chai/-/chai-5.2.3.tgz",
++      "integrity": "sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@types/deep-eql": "*",
++        "assertion-error": "^2.0.1"
++      }
++    },
++    "node_modules/@types/deep-eql": {
++      "version": "4.0.2",
++      "resolved": "https://registry.npmjs.org/@types/deep-eql/-/deep-eql-4.0.2.tgz",
++      "integrity": "sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/@types/estree": {
+       "version": "1.0.9",
+       "resolved": "https://registry.npmjs.org/@types/estree/-/estree-1.0.9.tgz",
+@@ -4246,6 +4478,117 @@
+         "vite": "^6.0.0 || ^7.0.0"
+       }
+     },
++    "node_modules/@vitest/expect": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/@vitest/expect/-/expect-4.0.8.tgz",
++      "integrity": "sha512-Rv0eabdP/xjAHQGr8cjBm+NnLHNoL268lMDK85w2aAGLFoVKLd8QGnVon5lLtkXQCoYaNL0wg04EGnyKkkKhPA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@standard-schema/spec": "^1.0.0",
++        "@types/chai": "^5.2.2",
++        "@vitest/spy": "4.0.8",
++        "@vitest/utils": "4.0.8",
++        "chai": "^6.2.0",
++        "tinyrainbow": "^3.0.3"
++      },
++      "funding": {
++        "url": "https://opencollective.com/vitest"
++      }
++    },
++    "node_modules/@vitest/mocker": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/@vitest/mocker/-/mocker-4.0.8.tgz",
++      "integrity": "sha512-9FRM3MZCedXH3+pIh+ME5Up2NBBHDq0wqwhOKkN4VnvCiKbVxddqH9mSGPZeawjd12pCOGnl+lo/ZGHt0/dQSg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@vitest/spy": "4.0.8",
++        "estree-walker": "^3.0.3",
++        "magic-string": "^0.30.21"
++      },
++      "funding": {
++        "url": "https://opencollective.com/vitest"
++      },
++      "peerDependencies": {
++        "msw": "^2.4.9",
++        "vite": "^6.0.0 || ^7.0.0-0"
++      },
++      "peerDependenciesMeta": {
++        "msw": {
++          "optional": true
++        },
++        "vite": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@vitest/pretty-format": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/@vitest/pretty-format/-/pretty-format-4.0.8.tgz",
++      "integrity": "sha512-qRrjdRkINi9DaZHAimV+8ia9Gq6LeGz2CgIEmMLz3sBDYV53EsnLZbJMR1q84z1HZCMsf7s0orDgZn7ScXsZKg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "tinyrainbow": "^3.0.3"
++      },
++      "funding": {
++        "url": "https://opencollective.com/vitest"
++      }
++    },
++    "node_modules/@vitest/runner": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/@vitest/runner/-/runner-4.0.8.tgz",
++      "integrity": "sha512-mdY8Sf1gsM8hKJUQfiPT3pn1n8RF4QBcJYFslgWh41JTfrK1cbqY8whpGCFzBl45LN028g0njLCYm0d7XxSaQQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@vitest/utils": "4.0.8",
++        "pathe": "^2.0.3"
++      },
++      "funding": {
++        "url": "https://opencollective.com/vitest"
++      }
++    },
++    "node_modules/@vitest/snapshot": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/@vitest/snapshot/-/snapshot-4.0.8.tgz",
++      "integrity": "sha512-Nar9OTU03KGiubrIOFhcfHg8FYaRaNT+bh5VUlNz8stFhCZPNrJvmZkhsr1jtaYvuefYFwK2Hwrq026u4uPWCw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@vitest/pretty-format": "4.0.8",
++        "magic-string": "^0.30.21",
++        "pathe": "^2.0.3"
++      },
++      "funding": {
++        "url": "https://opencollective.com/vitest"
++      }
++    },
++    "node_modules/@vitest/spy": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/@vitest/spy/-/spy-4.0.8.tgz",
++      "integrity": "sha512-nvGVqUunyCgZH7kmo+Ord4WgZ7lN0sOULYXUOYuHr55dvg9YvMz3izfB189Pgp28w0vWFbEEfNc/c3VTrqrXeA==",
++      "dev": true,
++      "license": "MIT",
++      "funding": {
++        "url": "https://opencollective.com/vitest"
++      }
++    },
++    "node_modules/@vitest/utils": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/@vitest/utils/-/utils-4.0.8.tgz",
++      "integrity": "sha512-pdk2phO5NDvEFfUTxcTP8RFYjVj/kfLSPIN5ebP2Mu9kcIMeAQTbknqcFEyBcC4z2pJlJI9aS5UQjcYfhmKAow==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@vitest/pretty-format": "4.0.8",
++        "tinyrainbow": "^3.0.3"
++      },
++      "funding": {
++        "url": "https://opencollective.com/vitest"
++      }
++    },
+     "node_modules/@yarnpkg/lockfile": {
+       "version": "1.1.0",
+       "resolved": "https://registry.npmjs.org/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz",
+@@ -4390,6 +4733,16 @@
+         "url": "https://github.com/chalk/ansi-styles?sponsor=1"
+       }
+     },
++    "node_modules/assertion-error": {
++      "version": "2.0.1",
++      "resolved": "https://registry.npmjs.org/assertion-error/-/assertion-error-2.0.1.tgz",
++      "integrity": "sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=12"
++      }
++    },
+     "node_modules/balanced-match": {
+       "version": "4.0.4",
+       "resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-4.0.4.tgz",
+@@ -4434,6 +4787,16 @@
+         "node": ">=18.0.0"
+       }
+     },
++    "node_modules/bidi-js": {
++      "version": "1.1.0",
++      "resolved": "https://registry.npmjs.org/bidi-js/-/bidi-js-1.1.0.tgz",
++      "integrity": "sha512-fX1Onk0tdVPC7obPWB5EbJ1z7NVhLq4m2xZLq2YXBkxzMXIGRpNMU88n0EPgWseKl12J7zXs7qrDxPK4sRs2fg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "require-from-string": "^2.0.2"
++      }
++    },
+     "node_modules/body-parser": {
+       "version": "2.3.0",
+       "resolved": "https://registry.npmjs.org/body-parser/-/body-parser-2.3.0.tgz",
+@@ -4628,6 +4991,16 @@
+       ],
+       "license": "CC-BY-4.0"
+     },
++    "node_modules/chai": {
++      "version": "6.3.0",
++      "resolved": "https://registry.npmjs.org/chai/-/chai-6.3.0.tgz",
++      "integrity": "sha512-XWAtwJ6OHO+tj0EKCs0Y2UamnyOxseZWltU4x2U2wh8g4AigdjwvtUjvLP2tqkA/avxHEtzxNaqGq/YGNwckKg==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=18"
++      }
++    },
+     "node_modules/chalk": {
+       "version": "5.6.2",
+       "resolved": "https://registry.npmjs.org/chalk/-/chalk-5.6.2.tgz",
+@@ -4936,6 +5309,20 @@
+         "url": "https://github.com/sponsors/fb55"
+       }
+     },
++    "node_modules/css-tree": {
++      "version": "3.2.1",
++      "resolved": "https://registry.npmjs.org/css-tree/-/css-tree-3.2.1.tgz",
++      "integrity": "sha512-X7sjQzceUhu1u7Y/ylrRZFU2FS6LRiFVp6rKLPg23y3x3c3DOKAwuXGDp+PAGjh6CSnCjYeAul8pcT8bAl+lSA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "mdn-data": "2.27.1",
++        "source-map-js": "^1.2.1"
++      },
++      "engines": {
++        "node": "^10 || ^12.20.0 || ^14.13.0 || >=15.0.0"
++      }
++    },
+     "node_modules/css-what": {
+       "version": "7.0.0",
+       "resolved": "https://registry.npmjs.org/css-what/-/css-what-7.0.0.tgz",
+@@ -4949,36 +5336,93 @@
+         "url": "https://github.com/sponsors/fb55"
+       }
+     },
+-    "node_modules/debug": {
+-      "version": "4.4.3",
+-      "resolved": "https://registry.npmjs.org/debug/-/debug-4.4.3.tgz",
+-      "integrity": "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==",
++    "node_modules/cssstyle": {
++      "version": "5.3.7",
++      "resolved": "https://registry.npmjs.org/cssstyle/-/cssstyle-5.3.7.tgz",
++      "integrity": "sha512-7D2EPVltRrsTkhpQmksIu+LxeWAIEk6wRDMJ1qljlv+CKHJM+cJLlfhWIzNA44eAsHXSNe3+vO6DW1yCYx8SuQ==",
+       "dev": true,
+       "license": "MIT",
+       "dependencies": {
+-        "ms": "^2.1.3"
++        "@asamuzakjp/css-color": "^4.1.1",
++        "@csstools/css-syntax-patches-for-csstree": "^1.0.21",
++        "css-tree": "^3.1.0",
++        "lru-cache": "^11.2.4"
+       },
+       "engines": {
+-        "node": ">=6.0"
+-      },
+-      "peerDependenciesMeta": {
+-        "supports-color": {
+-          "optional": true
+-        }
++        "node": ">=20"
+       }
+     },
+-    "node_modules/depd": {
+-      "version": "2.0.0",
+-      "resolved": "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz",
+-      "integrity": "sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==",
++    "node_modules/cssstyle/node_modules/lru-cache": {
++      "version": "11.5.3",
++      "resolved": "https://registry.npmjs.org/lru-cache/-/lru-cache-11.5.3.tgz",
++      "integrity": "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==",
+       "dev": true,
+-      "license": "MIT",
++      "license": "BlueOak-1.0.0",
+       "engines": {
+-        "node": ">= 0.8"
++        "node": "20 || >=22"
+       }
+     },
+-    "node_modules/detect-libc": {
+-      "version": "2.1.2",
++    "node_modules/data-urls": {
++      "version": "6.0.1",
++      "resolved": "https://registry.npmjs.org/data-urls/-/data-urls-6.0.1.tgz",
++      "integrity": "sha512-euIQENZg6x8mj3fO6o9+fOW8MimUI4PpD/fZBhJfeioZVy9TUpM4UY7KjQNVZFlqwJ0UdzRDzkycB997HEq1BQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "whatwg-mimetype": "^5.0.0",
++        "whatwg-url": "^15.1.0"
++      },
++      "engines": {
++        "node": ">=20"
++      }
++    },
++    "node_modules/data-urls/node_modules/whatwg-mimetype": {
++      "version": "5.0.0",
++      "resolved": "https://registry.npmjs.org/whatwg-mimetype/-/whatwg-mimetype-5.0.0.tgz",
++      "integrity": "sha512-sXcNcHOC51uPGF0P/D4NVtrkjSU2fNsm9iog4ZvZJsL3rjoDAzXZhkm2MWt1y+PUdggKAYVoMAIYcs78wJ51Cw==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=20"
++      }
++    },
++    "node_modules/debug": {
++      "version": "4.4.3",
++      "resolved": "https://registry.npmjs.org/debug/-/debug-4.4.3.tgz",
++      "integrity": "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "ms": "^2.1.3"
++      },
++      "engines": {
++        "node": ">=6.0"
++      },
++      "peerDependenciesMeta": {
++        "supports-color": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/decimal.js": {
++      "version": "10.6.0",
++      "resolved": "https://registry.npmjs.org/decimal.js/-/decimal.js-10.6.0.tgz",
++      "integrity": "sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/depd": {
++      "version": "2.0.0",
++      "resolved": "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz",
++      "integrity": "sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">= 0.8"
++      }
++    },
++    "node_modules/detect-libc": {
++      "version": "2.1.2",
+       "resolved": "https://registry.npmjs.org/detect-libc/-/detect-libc-2.1.2.tgz",
+       "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==",
+       "dev": true,
+@@ -5172,6 +5616,13 @@
+         "node": ">= 0.4"
+       }
+     },
++    "node_modules/es-module-lexer": {
++      "version": "1.7.0",
++      "resolved": "https://registry.npmjs.org/es-module-lexer/-/es-module-lexer-1.7.0.tgz",
++      "integrity": "sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/es-object-atoms": {
+       "version": "1.1.2",
+       "resolved": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.2.tgz",
+@@ -5244,6 +5695,16 @@
+       "dev": true,
+       "license": "MIT"
+     },
++    "node_modules/estree-walker": {
++      "version": "3.0.3",
++      "resolved": "https://registry.npmjs.org/estree-walker/-/estree-walker-3.0.3.tgz",
++      "integrity": "sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@types/estree": "^1.0.0"
++      }
++    },
+     "node_modules/etag": {
+       "version": "1.8.1",
+       "resolved": "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz",
+@@ -5284,6 +5745,16 @@
+         "node": ">=18.0.0"
+       }
+     },
++    "node_modules/expect-type": {
++      "version": "1.4.0",
++      "resolved": "https://registry.npmjs.org/expect-type/-/expect-type-1.4.0.tgz",
++      "integrity": "sha512-KfYbmpRm0VbLjEvVa9yGwCi9GI34xvi7A/HXYWQO65CSD2u3MczUJSuwXKFIxlGsgBQizV9q5J9NHj4VG0n+pA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "engines": {
++        "node": ">=12.0.0"
++      }
++    },
+     "node_modules/exponential-backoff": {
+       "version": "3.1.3",
+       "resolved": "https://registry.npmjs.org/exponential-backoff/-/exponential-backoff-3.1.3.tgz",
+@@ -5653,6 +6124,19 @@
+         "node": "20 || >=22"
+       }
+     },
++    "node_modules/html-encoding-sniffer": {
++      "version": "4.0.0",
++      "resolved": "https://registry.npmjs.org/html-encoding-sniffer/-/html-encoding-sniffer-4.0.0.tgz",
++      "integrity": "sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "whatwg-encoding": "^3.1.1"
++      },
++      "engines": {
++        "node": ">=18"
++      }
++    },
+     "node_modules/htmlparser2": {
+       "version": "10.1.0",
+       "resolved": "https://registry.npmjs.org/htmlparser2/-/htmlparser2-10.1.0.tgz",
+@@ -5880,6 +6364,13 @@
+         "url": "https://github.com/sponsors/sindresorhus"
+       }
+     },
++    "node_modules/is-potential-custom-element-name": {
++      "version": "1.0.1",
++      "resolved": "https://registry.npmjs.org/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.1.tgz",
++      "integrity": "sha512-bCYeRA2rVibKZd+s2625gGnGF/t7DSqDs4dP7CrLA1m7jKWz6pps0LpYLJN8Q64HtmPKJ1hrN3nzPNKFEKOUiQ==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/is-promise": {
+       "version": "4.0.0",
+       "resolved": "https://registry.npmjs.org/is-promise/-/is-promise-4.0.0.tgz",
+@@ -5951,6 +6442,46 @@
+       "dev": true,
+       "license": "MIT"
+     },
++    "node_modules/jsdom": {
++      "version": "27.0.1",
++      "resolved": "https://registry.npmjs.org/jsdom/-/jsdom-27.0.1.tgz",
++      "integrity": "sha512-SNSQteBL1IlV2zqhwwolaG9CwhIhTvVHWg3kTss/cLE7H/X4644mtPQqYvCfsSrGQWt9hSZcgOXX8bOZaMN+kA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@asamuzakjp/dom-selector": "^6.7.2",
++        "cssstyle": "^5.3.1",
++        "data-urls": "^6.0.0",
++        "decimal.js": "^10.6.0",
++        "html-encoding-sniffer": "^4.0.0",
++        "http-proxy-agent": "^7.0.2",
++        "https-proxy-agent": "^7.0.6",
++        "is-potential-custom-element-name": "^1.0.1",
++        "parse5": "^8.0.0",
++        "rrweb-cssom": "^0.8.0",
++        "saxes": "^6.0.0",
++        "symbol-tree": "^3.2.4",
++        "tough-cookie": "^6.0.0",
++        "w3c-xmlserializer": "^5.0.0",
++        "webidl-conversions": "^8.0.0",
++        "whatwg-encoding": "^3.1.1",
++        "whatwg-mimetype": "^4.0.0",
++        "whatwg-url": "^15.1.0",
++        "ws": "^8.18.3",
++        "xml-name-validator": "^5.0.0"
++      },
++      "engines": {
++        "node": ">=20"
++      },
++      "peerDependencies": {
++        "canvas": "^3.0.0"
++      },
++      "peerDependenciesMeta": {
++        "canvas": {
++          "optional": true
++        }
++      }
++    },
+     "node_modules/jsesc": {
+       "version": "3.1.0",
+       "resolved": "https://registry.npmjs.org/jsesc/-/jsesc-3.1.0.tgz",
+@@ -6260,6 +6791,13 @@
+         "node": ">= 0.4"
+       }
+     },
++    "node_modules/mdn-data": {
++      "version": "2.27.1",
++      "resolved": "https://registry.npmjs.org/mdn-data/-/mdn-data-2.27.1.tgz",
++      "integrity": "sha512-9Yubnt3e8A0OKwxYSXyhLymGW4sCufcLG6VdiDdUGVkPhpqLxlvP5vl1983gQjJl3tqbrM731mjaZaP68AgosQ==",
++      "dev": true,
++      "license": "CC0-1.0"
++    },
+     "node_modules/media-typer": {
+       "version": "1.1.1",
+       "resolved": "https://registry.npmjs.org/media-typer/-/media-typer-1.1.1.tgz",
+@@ -7074,6 +7612,13 @@
+         "url": "https://opencollective.com/express"
+       }
+     },
++    "node_modules/pathe": {
++      "version": "2.0.3",
++      "resolved": "https://registry.npmjs.org/pathe/-/pathe-2.0.3.tgz",
++      "integrity": "sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/picocolors": {
+       "version": "1.1.1",
+       "resolved": "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz",
+@@ -7117,6 +7662,53 @@
+         "node": ">=16.20.0"
+       }
+     },
++    "node_modules/playwright": {
++      "version": "1.54.2",
++      "resolved": "https://registry.npmjs.org/playwright/-/playwright-1.54.2.tgz",
++      "integrity": "sha512-Hu/BMoA1NAdRUuulyvQC0pEqZ4vQbGfn8f7wPXcnqQmM+zct9UliKxsIkLNmz/ku7LElUNqmaiv1TG/aL5ACsw==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "playwright-core": "1.54.2"
++      },
++      "bin": {
++        "playwright": "cli.js"
++      },
++      "engines": {
++        "node": ">=18"
++      },
++      "optionalDependencies": {
++        "fsevents": "2.3.2"
++      }
++    },
++    "node_modules/playwright-core": {
++      "version": "1.54.2",
++      "resolved": "https://registry.npmjs.org/playwright-core/-/playwright-core-1.54.2.tgz",
++      "integrity": "sha512-n5r4HFbMmWsB4twG7tJLDN9gmBUeSPcsBZiWSE4DnYz9mJMAFqr2ID7+eGC9kpEnxExJ1epttwR59LEWCk8mtA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "bin": {
++        "playwright-core": "cli.js"
++      },
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/playwright/node_modules/fsevents": {
++      "version": "2.3.2",
++      "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz",
++      "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==",
++      "dev": true,
++      "hasInstallScript": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ],
++      "engines": {
++        "node": "^8.16.0 || ^10.6.0 || >=11.0.0"
++      }
++    },
+     "node_modules/postcss": {
+       "version": "8.5.28",
+       "resolved": "https://registry.npmjs.org/postcss/-/postcss-8.5.28.tgz",
+@@ -7222,6 +7814,16 @@
+         "url": "https://opencollective.com/express"
+       }
+     },
++    "node_modules/punycode": {
++      "version": "2.3.1",
++      "resolved": "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz",
++      "integrity": "sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=6"
++      }
++    },
+     "node_modules/qs": {
+       "version": "6.16.0",
+       "resolved": "https://registry.npmjs.org/qs/-/qs-6.16.0.tgz",
+@@ -7429,6 +8031,13 @@
+         "node": ">= 18"
+       }
+     },
++    "node_modules/rrweb-cssom": {
++      "version": "0.8.0",
++      "resolved": "https://registry.npmjs.org/rrweb-cssom/-/rrweb-cssom-0.8.0.tgz",
++      "integrity": "sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/rxjs": {
+       "version": "7.8.2",
+       "resolved": "https://registry.npmjs.org/rxjs/-/rxjs-7.8.2.tgz",
+@@ -7496,6 +8105,19 @@
+         "url": "https://paulmillr.com/funding/"
+       }
+     },
++    "node_modules/saxes": {
++      "version": "6.0.0",
++      "resolved": "https://registry.npmjs.org/saxes/-/saxes-6.0.0.tgz",
++      "integrity": "sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==",
++      "dev": true,
++      "license": "ISC",
++      "dependencies": {
++        "xmlchars": "^2.2.0"
++      },
++      "engines": {
++        "node": ">=v12.22.7"
++      }
++    },
+     "node_modules/semver": {
+       "version": "7.7.4",
+       "resolved": "https://registry.npmjs.org/semver/-/semver-7.7.4.tgz",
+@@ -7662,6 +8284,13 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/siginfo": {
++      "version": "2.0.0",
++      "resolved": "https://registry.npmjs.org/siginfo/-/siginfo-2.0.0.tgz",
++      "integrity": "sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==",
++      "dev": true,
++      "license": "ISC"
++    },
+     "node_modules/signal-exit": {
+       "version": "4.1.0",
+       "resolved": "https://registry.npmjs.org/signal-exit/-/signal-exit-4.1.0.tgz",
+@@ -7830,6 +8459,13 @@
+         "node": "^20.17.0 || >=22.9.0"
+       }
+     },
++    "node_modules/stackback": {
++      "version": "0.0.2",
++      "resolved": "https://registry.npmjs.org/stackback/-/stackback-0.0.2.tgz",
++      "integrity": "sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/statuses": {
+       "version": "2.0.2",
+       "resolved": "https://registry.npmjs.org/statuses/-/statuses-2.0.2.tgz",
+@@ -7840,6 +8476,13 @@
+         "node": ">= 0.8"
+       }
+     },
++    "node_modules/std-env": {
++      "version": "3.10.0",
++      "resolved": "https://registry.npmjs.org/std-env/-/std-env-3.10.0.tgz",
++      "integrity": "sha512-5GS12FdOZNliM5mAOxFRg7Ir0pWz8MdpYm6AY6VPkGpbA7ZzmbzNcBJQ0GPvvyWgcY7QAhCgf9Uy89I03faLkg==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/stdin-discarder": {
+       "version": "0.3.2",
+       "resolved": "https://registry.npmjs.org/stdin-discarder/-/stdin-discarder-0.3.2.tgz",
+@@ -7886,6 +8529,13 @@
+         "url": "https://github.com/chalk/strip-ansi?sponsor=1"
+       }
+     },
++    "node_modules/symbol-tree": {
++      "version": "3.2.4",
++      "resolved": "https://registry.npmjs.org/symbol-tree/-/symbol-tree-3.2.4.tgz",
++      "integrity": "sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/tar": {
+       "version": "7.5.22",
+       "resolved": "https://registry.npmjs.org/tar/-/tar-7.5.22.tgz",
+@@ -7913,6 +8563,20 @@
+         "node": ">=18"
+       }
+     },
++    "node_modules/tinybench": {
++      "version": "2.9.0",
++      "resolved": "https://registry.npmjs.org/tinybench/-/tinybench-2.9.0.tgz",
++      "integrity": "sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/tinyexec": {
++      "version": "0.3.2",
++      "resolved": "https://registry.npmjs.org/tinyexec/-/tinyexec-0.3.2.tgz",
++      "integrity": "sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/tinyglobby": {
+       "version": "0.2.15",
+       "resolved": "https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.15.tgz",
+@@ -7930,6 +8594,36 @@
+         "url": "https://github.com/sponsors/SuperchupuDev"
+       }
+     },
++    "node_modules/tinyrainbow": {
++      "version": "3.2.0",
++      "resolved": "https://registry.npmjs.org/tinyrainbow/-/tinyrainbow-3.2.0.tgz",
++      "integrity": "sha512-LgO3D9yZJjApUiuUfl9iFAwrtaX4+lok3wJIqttGoKCHlWUqHqbQpnxCf82L8FjgKsh4iGo78hqJwgL8F6To2A==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=14.0.0"
++      }
++    },
++    "node_modules/tldts": {
++      "version": "7.4.18",
++      "resolved": "https://registry.npmjs.org/tldts/-/tldts-7.4.18.tgz",
++      "integrity": "sha512-somxA8xKAUzlAxl0TX/jMSYIbRNFIVGnI96pVGJPeMc5BsHmfVXn6mOJT6U++ELnl04eGfzpfcEuZe8WiASkXg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "tldts-core": "^7.4.18"
++      },
++      "bin": {
++        "tldts": "bin/cli.js"
++      }
++    },
++    "node_modules/tldts-core": {
++      "version": "7.4.18",
++      "resolved": "https://registry.npmjs.org/tldts-core/-/tldts-core-7.4.18.tgz",
++      "integrity": "sha512-KI2PKvCmvQI/xD6ypPqkU0i7oxNXR/O58RLRaHR4svsgVUQ2JE/XC8BtMbG6PSehD27I8sZJRcC1ASnCy6lp3g==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/toidentifier": {
+       "version": "1.0.1",
+       "resolved": "https://registry.npmjs.org/toidentifier/-/toidentifier-1.0.1.tgz",
+@@ -7940,6 +8634,32 @@
+         "node": ">=0.6"
+       }
+     },
++    "node_modules/tough-cookie": {
++      "version": "6.0.2",
++      "resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-6.0.2.tgz",
++      "integrity": "sha512-exgYmnmL/sJpR3upZfXG5PoatXQii55xAiXGXzY+sROLZ/Y+SLcp9PgJNI9Vz37HpQ74WvDcLT8eqm+kV3FzrA==",
++      "dev": true,
++      "license": "BSD-3-Clause",
++      "dependencies": {
++        "tldts": "^7.0.5"
++      },
++      "engines": {
++        "node": ">=16"
++      }
++    },
++    "node_modules/tr46": {
++      "version": "6.0.0",
++      "resolved": "https://registry.npmjs.org/tr46/-/tr46-6.0.0.tgz",
++      "integrity": "sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "punycode": "^2.3.1"
++      },
++      "engines": {
++        "node": ">=20"
++      }
++    },
+     "node_modules/tslib": {
+       "version": "2.8.1",
+       "resolved": "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz",
+@@ -8167,6 +8887,97 @@
+         }
+       }
+     },
++    "node_modules/vitest": {
++      "version": "4.0.8",
++      "resolved": "https://registry.npmjs.org/vitest/-/vitest-4.0.8.tgz",
++      "integrity": "sha512-urzu3NCEV0Qa0Y2PwvBtRgmNtxhj5t5ULw7cuKhIHh3OrkKTLlut0lnBOv9qe5OvbkMH2g38G7KPDCTpIytBVg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@vitest/expect": "4.0.8",
++        "@vitest/mocker": "4.0.8",
++        "@vitest/pretty-format": "4.0.8",
++        "@vitest/runner": "4.0.8",
++        "@vitest/snapshot": "4.0.8",
++        "@vitest/spy": "4.0.8",
++        "@vitest/utils": "4.0.8",
++        "debug": "^4.4.3",
++        "es-module-lexer": "^1.7.0",
++        "expect-type": "^1.2.2",
++        "magic-string": "^0.30.21",
++        "pathe": "^2.0.3",
++        "picomatch": "^4.0.3",
++        "std-env": "^3.10.0",
++        "tinybench": "^2.9.0",
++        "tinyexec": "^0.3.2",
++        "tinyglobby": "^0.2.15",
++        "tinyrainbow": "^3.0.3",
++        "vite": "^6.0.0 || ^7.0.0",
++        "why-is-node-running": "^2.3.0"
++      },
++      "bin": {
++        "vitest": "vitest.mjs"
++      },
++      "engines": {
++        "node": "^20.0.0 || ^22.0.0 || >=24.0.0"
++      },
++      "funding": {
++        "url": "https://opencollective.com/vitest"
++      },
++      "peerDependencies": {
++        "@edge-runtime/vm": "*",
++        "@types/debug": "^4.1.12",
++        "@types/node": "^20.0.0 || ^22.0.0 || >=24.0.0",
++        "@vitest/browser-playwright": "4.0.8",
++        "@vitest/browser-preview": "4.0.8",
++        "@vitest/browser-webdriverio": "4.0.8",
++        "@vitest/ui": "4.0.8",
++        "happy-dom": "*",
++        "jsdom": "*"
++      },
++      "peerDependenciesMeta": {
++        "@edge-runtime/vm": {
++          "optional": true
++        },
++        "@types/debug": {
++          "optional": true
++        },
++        "@types/node": {
++          "optional": true
++        },
++        "@vitest/browser-playwright": {
++          "optional": true
++        },
++        "@vitest/browser-preview": {
++          "optional": true
++        },
++        "@vitest/browser-webdriverio": {
++          "optional": true
++        },
++        "@vitest/ui": {
++          "optional": true
++        },
++        "happy-dom": {
++          "optional": true
++        },
++        "jsdom": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/w3c-xmlserializer": {
++      "version": "5.0.0",
++      "resolved": "https://registry.npmjs.org/w3c-xmlserializer/-/w3c-xmlserializer-5.0.0.tgz",
++      "integrity": "sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "xml-name-validator": "^5.0.0"
++      },
++      "engines": {
++        "node": ">=18"
++      }
++    },
+     "node_modules/watchpack": {
+       "version": "2.5.1",
+       "resolved": "https://registry.npmjs.org/watchpack/-/watchpack-2.5.1.tgz",
+@@ -8189,6 +9000,67 @@
+       "license": "MIT",
+       "optional": true
+     },
++    "node_modules/webidl-conversions": {
++      "version": "8.0.1",
++      "resolved": "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-8.0.1.tgz",
++      "integrity": "sha512-BMhLD/Sw+GbJC21C/UgyaZX41nPt8bUTg+jWyDeg7e7YN4xOM05YPSIXceACnXVtqyEw/LMClUQMtMZ+PGGpqQ==",
++      "dev": true,
++      "license": "BSD-2-Clause",
++      "engines": {
++        "node": ">=20"
++      }
++    },
++    "node_modules/whatwg-encoding": {
++      "version": "3.1.1",
++      "resolved": "https://registry.npmjs.org/whatwg-encoding/-/whatwg-encoding-3.1.1.tgz",
++      "integrity": "sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==",
++      "deprecated": "Use @exodus/bytes instead for a more spec-conformant and faster implementation",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "iconv-lite": "0.6.3"
++      },
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/whatwg-encoding/node_modules/iconv-lite": {
++      "version": "0.6.3",
++      "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz",
++      "integrity": "sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "safer-buffer": ">= 2.1.2 < 3.0.0"
++      },
++      "engines": {
++        "node": ">=0.10.0"
++      }
++    },
++    "node_modules/whatwg-mimetype": {
++      "version": "4.0.0",
++      "resolved": "https://registry.npmjs.org/whatwg-mimetype/-/whatwg-mimetype-4.0.0.tgz",
++      "integrity": "sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/whatwg-url": {
++      "version": "15.1.0",
++      "resolved": "https://registry.npmjs.org/whatwg-url/-/whatwg-url-15.1.0.tgz",
++      "integrity": "sha512-2ytDk0kiEj/yu90JOAp44PVPUkO9+jVhyf+SybKlRHSDlvOOZhdPIrr7xTH64l4WixO2cP+wQIcgujkGBPPz6g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "tr46": "^6.0.0",
++        "webidl-conversions": "^8.0.0"
++      },
++      "engines": {
++        "node": ">=20"
++      }
++    },
+     "node_modules/which": {
+       "version": "2.0.2",
+       "resolved": "https://registry.npmjs.org/which/-/which-2.0.2.tgz",
+@@ -8205,6 +9077,23 @@
+         "node": ">= 8"
+       }
+     },
++    "node_modules/why-is-node-running": {
++      "version": "2.3.0",
++      "resolved": "https://registry.npmjs.org/why-is-node-running/-/why-is-node-running-2.3.0.tgz",
++      "integrity": "sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "siginfo": "^2.0.0",
++        "stackback": "0.0.2"
++      },
++      "bin": {
++        "why-is-node-running": "cli.js"
++      },
++      "engines": {
++        "node": ">=8"
++      }
++    },
+     "node_modules/wrap-ansi": {
+       "version": "6.2.0",
+       "resolved": "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-6.2.0.tgz",
+@@ -8298,6 +9187,45 @@
+       "dev": true,
+       "license": "ISC"
+     },
++    "node_modules/ws": {
++      "version": "8.22.0",
++      "resolved": "https://registry.npmjs.org/ws/-/ws-8.22.0.tgz",
++      "integrity": "sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=10.0.0"
++      },
++      "peerDependencies": {
++        "bufferutil": "^4.0.1",
++        "utf-8-validate": ">=5.0.2"
++      },
++      "peerDependenciesMeta": {
++        "bufferutil": {
++          "optional": true
++        },
++        "utf-8-validate": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/xml-name-validator": {
++      "version": "5.0.0",
++      "resolved": "https://registry.npmjs.org/xml-name-validator/-/xml-name-validator-5.0.0.tgz",
++      "integrity": "sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/xmlchars": {
++      "version": "2.2.0",
++      "resolved": "https://registry.npmjs.org/xmlchars/-/xmlchars-2.2.0.tgz",
++      "integrity": "sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==",
++      "dev": true,
++      "license": "MIT"
++    },
+     "node_modules/y18n": {
+       "version": "5.0.8",
+       "resolved": "https://registry.npmjs.org/y18n/-/y18n-5.0.8.tgz",
+diff --git a/package.json b/package.json
+index 3e5a4c2..0ca41e4 100644
+--- a/package.json
++++ b/package.json
+@@ -52,6 +52,9 @@
+     "@angular/build": "21.2.14",
+     "@angular/cli": "21.2.14",
+     "@angular/compiler-cli": "21.2.14",
+-    "typescript": "~5.9.2"
++    "@playwright/test": "1.54.2",
++    "jsdom": "27.0.1",
++    "typescript": "~5.9.2",
++    "vitest": "4.0.8"
+   }
+ }
+diff --git a/proxy.conf.js b/proxy.conf.js
+index fe4b98c..45be539 100644
+--- a/proxy.conf.js
++++ b/proxy.conf.js
+@@ -1,29 +1,7 @@
+ const target = process.env.PAX_PROXY_TARGET || 'https://praxis-api-quickstart.onrender.com';
+-const origin = process.env.PAX_PROXY_ORIGIN || 'http://localhost:4003';
+-
+-module.exports = {
+-  '/api': {
+-    target,
+-    changeOrigin: true,
+-    secure: false,
+-    headers: {
+-      Origin: origin,
+-    },
+-    onProxyReq: (proxyReq) => {
+-      proxyReq.setHeader('Origin', origin);
+-      proxyReq.setHeader('origin', origin);
+-    },
+-  },
+-  '/schemas': {
+-    target,
+-    changeOrigin: true,
+-    secure: false,
+-    headers: {
+-      Origin: origin,
+-    },
+-    onProxyReq: (proxyReq) => {
+-      proxyReq.setHeader('Origin', origin);
+-      proxyReq.setHeader('origin', origin);
+-    },
+-  },
+-};
++// Preserve the browser Origin; the API checks its official allowlist.
++module.exports = Object.fromEntries(['/api', '/schemas', '/auth'].map((path) => [path, {
++  target,
++  changeOrigin: true,
++  secure: true,
++}]));
+diff --git a/src/app/app.config.ts b/src/app/app.config.ts
+index ac4cfcb..f43b518 100644
+--- a/src/app/app.config.ts
++++ b/src/app/app.config.ts
+@@ -4,7 +4,6 @@ import {
+   inject,
+   LOCALE_ID,
+   provideBrowserGlobalErrorListeners,
+-  provideEnvironmentInitializer,
+   provideZoneChangeDetection,
+ } from '@angular/core';
+ import { MatDialogModule } from '@angular/material/dialog';
+@@ -69,12 +68,12 @@ import {
+ import { providePraxisTableMetadata, providePraxisAnalyticalDrawerSchemas } from '@praxisui/table';
+ import { providePraxisListMetadata } from '@praxisui/list';
+ import { HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS } from './core/analytical-drawer-schemas.catalog';
+-import { praxisBulkOperationsMockInterceptor } from './core/bulk-operations-mock.interceptor';
++import { heroApiSessionInterceptor } from './core/hero-api.interceptor';
+ import { routes } from './app.routes';
+-import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
++import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL, PRAXIS_API_TRUSTED_REFERENCE_ORIGINS } from './core/platform.config';
+ 
+ const API_URL_VALUE: ApiUrlConfig = {
+-  default: { baseUrl: PRAXIS_API_BASE_URL },
++  default: { baseUrl: PRAXIS_API_BASE_URL, trustedOrigins: PRAXIS_API_TRUSTED_REFERENCE_ORIGINS },
+ };
+ 
+ const praxisApiLoadingBridgeInterceptor: HttpInterceptorFn = (req, next) => {
+@@ -118,36 +117,8 @@ export const appConfig: ApplicationConfig = {
+     provideHttpClient(
+       withPraxisHttpLoading(),
+       withInterceptors([
+-        (req, next) => {
+-          const tenant =
+-            typeof localStorage !== 'undefined'
+-              ? localStorage.getItem('pax.api.tenant') || 'shield-hq'
+-              : 'shield-hq';
+-          const user =
+-            typeof localStorage !== 'undefined'
+-              ? localStorage.getItem('praxis.demoUserId') ||
+-                localStorage.getItem('pax.api.user') ||
+-                'nick.fury'
+-              : 'nick.fury';
+-          const token =
+-            typeof localStorage !== 'undefined'
+-              ? localStorage.getItem('pax.api.token')
+-              : null;
+-          const headers: Record<string, string> = {
+-            'X-Tenant-ID': tenant,
+-            'X-Tenant': tenant,
+-            'X-User-ID': user,
+-          };
+-          if (token) {
+-            headers['Authorization'] = `Bearer ${token}`;
+-          }
+-          const cloned = req.clone({
+-            setHeaders: headers,
+-          });
+-          return next(cloned);
+-        },
++        heroApiSessionInterceptor,
+         praxisApiLoadingBridgeInterceptor,
+-        praxisBulkOperationsMockInterceptor,
+       ]),
+     ),
+     ...providePraxisDynamicFieldsCore(),
+@@ -184,27 +155,7 @@ export const appConfig: ApplicationConfig = {
+       useValue: {
+         baseUrl: `${PRAXIS_API_BASE_URL}/praxis/config/ui`,
+         errorPolicy: 'fail',
+-        headersFactory: () => {
+-          if (typeof localStorage === 'undefined') {
+-            return {
+-              'X-User-ID': 'nick.fury',
+-              'X-Tenant-ID': 'shield-hq',
+-              'X-Env': 'local',
+-            };
+-          }
+-          const user =
+-            localStorage.getItem('praxis.demoUserId') ||
+-            localStorage.getItem('pax.api.user') ||
+-            'nick.fury';
+-          const tenant =
+-            localStorage.getItem('pax.api.tenant') ||
+-            'shield-hq';
+-          return {
+-            'X-User-ID': user,
+-            'X-Tenant-ID': tenant,
+-            'X-Env': 'local',
+-          };
+-        },
++        headersFactory: () => ({}),
+       } as ApiConfigStorageOptions,
+     },
+     DatePipe,
+@@ -214,26 +165,6 @@ export const appConfig: ApplicationConfig = {
+     UpperCasePipe,
+     LowerCasePipe,
+     TitleCasePipe,
+-    provideEnvironmentInitializer(() => {
+-      (globalThis as any).PAX_FETCH_HEADERS = () => {
+-        if (typeof window === 'undefined') {
+-          return {};
+-        }
+ 
+-        const tenant = localStorage.getItem('pax.api.tenant') || 'demo';
+-        const token = localStorage.getItem('pax.api.token') || '';
+-        const headers: Record<string, string> = {
+-          'X-Tenant-ID': tenant,
+-          'X-Tenant': tenant,
+-          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+-        };
+-
+-        if (token) {
+-          headers['Authorization'] = `Bearer ${token}`;
+-        }
+-
+-        return headers;
+-      };
+-    }),
+   ],
+ };
+diff --git a/src/app/app.routes.ts b/src/app/app.routes.ts
+index ae23eb9..bb023ed 100644
+--- a/src/app/app.routes.ts
++++ b/src/app/app.routes.ts
+@@ -1,6 +1,5 @@
+ import { Routes } from '@angular/router';
+ import type { CrudMetadata } from '@praxisui/crud';
+-import { tacticalClearanceGuard } from './core/tactical-clearance.guard';
+ 
+ interface ResourceRouteConfig {
+   path: string;
+@@ -12,7 +11,6 @@ interface ResourceRouteConfig {
+   tone: string;
+   loadMetadata: () => Promise<CrudMetadata>;
+   enableCustomization?: boolean;
+-  clearance?: 'DEFCON 1' | 'DEFCON 2';
+ }
+ 
+ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
+@@ -34,7 +32,6 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
+     domain: 'Pessoas & Recursos Humanos',
+     icon: 'payments',
+     tone: 'rh',
+-    clearance: 'DEFCON 1',
+     loadMetadata: () => import('./pages/rh/folha-pagamento.config').then((m) => m.FOLHA_PAGAMENTO_CRUD_METADATA),
+   },
+   {
+@@ -77,6 +74,16 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
+     tone: 'operations',
+     loadMetadata: () => import('./pages/operacoes/missoes.config').then((m) => m.MISSOES_CRUD_METADATA),
+   },
++  {
++    path: 'operacoes/participantes',
++    resource: 'operations/missao-participantes',
++    title: 'Participantes de Missão',
++    subtitle: 'Escalas, papéis e resultados. Alterações em lote passam por avaliação e confirmação da API.',
++    domain: 'Operações & Missões Táticas',
++    icon: 'groups',
++    tone: 'operations',
++    loadMetadata: () => import('./pages/operacoes/participantes.config').then((m) => m.PARTICIPANTES_CRUD_METADATA),
++  },
+   {
+     path: 'operacoes/equipes',
+     resource: 'operations/equipes',
+@@ -136,7 +143,6 @@ const RESOURCE_ROUTES: ResourceRouteConfig[] = [
+     domain: 'Suprimentos & Aquisições Estratégicas',
+     icon: 'contract',
+     tone: 'supplies',
+-    clearance: 'DEFCON 1',
+     loadMetadata: () => import('./pages/suprimentos/contratos.config').then((m) => m.CONTRATOS_CRUD_METADATA),
+   },
+   {
+@@ -183,7 +189,6 @@ export const routes: Routes = [
+   ...RESOURCE_ROUTES.map((r) => ({
+     path: r.path,
+     loadComponent: () => import('@praxisui/crud').then((m) => m.PraxisResourcePage),
+-    canActivate: r.clearance ? [tacticalClearanceGuard] : [],
+     resolve: {
+       metadata: () => r.loadMetadata(),
+     },
+@@ -196,7 +201,6 @@ export const routes: Routes = [
+         icon: r.icon,
+         tone: r.tone,
+       },
+-      ...(r.clearance ? { clearance: r.clearance } : {}),
+       ...(r.enableCustomization ? { enableCustomization: true } : {}),
+     },
+     title: `Praxis Hero HQ | ${r.title}`,
+diff --git a/src/app/core/auth-simulation.service.ts b/src/app/core/auth-simulation.service.ts
+deleted file mode 100644
+index 25f52a2..0000000
+--- a/src/app/core/auth-simulation.service.ts
++++ /dev/null
+@@ -1,97 +0,0 @@
+-import { Injectable, computed, signal } from '@angular/core';
+-
+-export interface PersonaProfile {
+-  readonly id: string;
+-  readonly name: string;
+-  readonly role: string;
+-  readonly initials: string;
+-  readonly tenant: string;
+-  readonly token: string;
+-  readonly clearanceLevel: string;
+-  readonly badgeColor: string;
+-}
+-
+-export const HERO_PERSONAS: readonly PersonaProfile[] = [
+-  {
+-    id: 'nick.fury',
+-    name: 'Nick Fury',
+-    role: 'Diretor Geral de RH & Operações',
+-    initials: 'NF',
+-    tenant: 'shield-hq',
+-    token: 'tactical-token-nick-fury-alpha',
+-    clearanceLevel: 'DEFCON 1 · Direção Executiva',
+-    badgeColor: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
+-  },
+-  {
+-    id: 'tony.stark',
+-    name: 'Tony Stark',
+-    role: 'Engenheiro Chefe & Consultor Tático',
+-    initials: 'TS',
+-    tenant: 'shield-hq',
+-    token: 'tactical-token-tony-stark-arc',
+-    clearanceLevel: 'DEFCON 2 · Engenharia & P&D',
+-    badgeColor: 'linear-gradient(135deg, #b91c1c, #f59e0b)',
+-  },
+-];
+-
+-const STORAGE_KEYS = {
+-  USER_ID: 'praxis.demoUserId',
+-  USER_NAME: 'pax.api.user',
+-  TENANT: 'pax.api.tenant',
+-  TOKEN: 'pax.api.token',
+-} as const;
+-
+-@Injectable({ providedIn: 'root' })
+-export class AuthSimulationService {
+-  private readonly activeUserId = signal<string>(this.resolveInitialUserId());
+-
+-  readonly personas = HERO_PERSONAS;
+-
+-  readonly currentPersona = computed<PersonaProfile>(() => {
+-    const id = this.activeUserId();
+-    return HERO_PERSONAS.find((p) => p.id === id) ?? HERO_PERSONAS[0];
+-  });
+-
+-  constructor() {
+-    this.syncStorage(this.currentPersona());
+-  }
+-
+-  private resolveInitialUserId(): string {
+-    if (typeof localStorage === 'undefined') {
+-      return HERO_PERSONAS[0].id;
+-    }
+-    const stored =
+-      localStorage.getItem(STORAGE_KEYS.USER_ID) ||
+-      localStorage.getItem(STORAGE_KEYS.USER_NAME);
+-    if (stored && HERO_PERSONAS.some((p) => p.id === stored)) {
+-      return stored;
+-    }
+-    return HERO_PERSONAS[0].id;
+-  }
+-
+-  switchPersona(personaId: string): void {
+-    const target = HERO_PERSONAS.find((p) => p.id === personaId);
+-    if (!target || target.id === this.activeUserId()) {
+-      return;
+-    }
+-
+-    this.activeUserId.set(target.id);
+-    this.syncStorage(target);
+-
+-
+-  }
+-
+-  private syncStorage(persona: PersonaProfile): void {
+-    if (typeof localStorage === 'undefined') {
+-      return;
+-    }
+-    try {
+-      localStorage.setItem(STORAGE_KEYS.USER_ID, persona.id);
+-      localStorage.setItem(STORAGE_KEYS.USER_NAME, persona.id);
+-      localStorage.setItem(STORAGE_KEYS.TENANT, persona.tenant);
+-      localStorage.setItem(STORAGE_KEYS.TOKEN, persona.token);
+-    } catch {
+-      // Ignora falhas de storage em ambientes restritos
+-    }
+-  }
+-}
+diff --git a/src/app/core/bulk-operations-mock.interceptor.ts b/src/app/core/bulk-operations-mock.interceptor.ts
+deleted file mode 100644
+index 55fab3f..0000000
+--- a/src/app/core/bulk-operations-mock.interceptor.ts
++++ /dev/null
+@@ -1,164 +0,0 @@
+-import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpResponse } from '@angular/common/http';
+-import { Observable, of } from 'rxjs';
+-import { delay } from 'rxjs/operators';
+-import type { BulkExecution, BulkProposal, RestApiResponse } from '@praxisui/core';
+-
+-/**
+- * Interceptor mock corporativo para operações em lote governadas no host Praxis Hero HQ.
+- *
+- * Simula as 2 fases do protocolo de operações em lote da plataforma Praxis:
+- * 1. Avaliação prévia com retorno de proposta imutável (BulkProposal).
+- * 2. Confirmação atômica com chave de idempotência e snapshot final (BulkExecution).
+- */
+-export const praxisBulkOperationsMockInterceptor: HttpInterceptorFn = (
+-  req: HttpRequest<unknown>,
+-  next: HttpHandlerFn,
+-): Observable<HttpEvent<unknown>> => {
+-  const url = req.url;
+-
+-  // Fase 1 (Avaliação) - Comando de Domínio: Conter Incidentes Selecionados
+-  if (url.includes('/api/operations/incidentes/bulk/contain/evaluation') && req.method === 'POST') {
+-    const body = req.body as { selection?: { targets?: Array<{ id: string | number }> } } | null;
+-    const targetCount = body?.selection?.targets?.length || 1;
+-    const proposal: BulkProposal = {
+-      proposalId: `prop-contain-${Date.now()}`,
+-      operationRef: {
+-        operationId: 'contain-incidentes',
+-        path: '/api/operations/incidentes/bulk/contain/evaluation',
+-        method: 'POST',
+-      },
+-      mode: 'DOMAIN_COMMAND',
+-      executionMode: 'SYNC',
+-      atomicity: 'PER_ITEM',
+-      status: 'READY',
+-      createdAt: new Date().toISOString(),
+-      expiresAt: new Date(Date.now() + 300000).toISOString(),
+-      totals: {
+-        targetCount,
+-        evaluated: targetCount,
+-        executable: targetCount,
+-        blocked: 0,
+-      },
+-      redactedIntent: {},
+-      diagnostics: [],
+-      evidence: [],
+-    };
+-    const response: RestApiResponse<BulkProposal> = {
+-      status: 'success',
+-      data: proposal,
+-    };
+-    return of(new HttpResponse({ status: 200, body: response })).pipe(delay(150));
+-  }
+-
+-  // Fase 2 (Confirmação) - Comando de Domínio: Conter Incidentes Selecionados
+-  if (url.includes('/api/operations/incidentes/bulk/contain/confirmation') && req.method === 'POST') {
+-    const body = req.body as { proposalId?: string } | null;
+-    const execution: BulkExecution = {
+-      executionId: `exec-contain-${Date.now()}`,
+-      proposalId: body?.proposalId || 'prop-default',
+-      operationRef: {
+-        operationId: 'confirm-contain-incidentes',
+-        path: '/api/operations/incidentes/bulk/contain/confirmation',
+-        method: 'POST',
+-      },
+-      mode: 'DOMAIN_COMMAND',
+-      executionMode: 'SYNC',
+-      atomicity: 'PER_ITEM',
+-      status: 'COMPLETED',
+-      createdAt: new Date().toISOString(),
+-      updatedAt: new Date().toISOString(),
+-      terminalAt: new Date().toISOString(),
+-      totals: {
+-        targetCount: 2,
+-        pending: 0,
+-        confirmed: 2,
+-        unchanged: 0,
+-        denied: 0,
+-        invalid: 0,
+-        conflict: 0,
+-        notProcessed: 0,
+-        unknown: 0,
+-      },
+-      diagnostics: [],
+-    };
+-    const response: RestApiResponse<BulkExecution> = {
+-      status: 'success',
+-      data: execution,
+-    };
+-    return of(new HttpResponse({ status: 200, body: response })).pipe(delay(200));
+-  }
+-
+-  // Fase 1 (Avaliação) - Atualização Uniforme: Ajustar Severidade em Lote
+-  if (url.includes('/api/operations/incidentes/bulk/update/evaluation') && req.method === 'POST') {
+-    const body = req.body as { selection?: { targets?: Array<{ id: string | number }> } } | null;
+-    const targetCount = body?.selection?.targets?.length || 1;
+-    const proposal: BulkProposal = {
+-      proposalId: `prop-update-${Date.now()}`,
+-      operationRef: {
+-        operationId: 'evaluate-update-incidentes',
+-        path: '/api/operations/incidentes/bulk/update/evaluation',
+-        method: 'POST',
+-      },
+-      mode: 'UNIFORM_UPDATE',
+-      executionMode: 'SYNC',
+-      atomicity: 'PER_ITEM',
+-      status: 'READY',
+-      createdAt: new Date().toISOString(),
+-      expiresAt: new Date(Date.now() + 300000).toISOString(),
+-      totals: {
+-        targetCount,
+-        evaluated: targetCount,
+-        executable: targetCount,
+-        blocked: 0,
+-      },
+-      redactedIntent: {},
+-      diagnostics: [],
+-      evidence: [],
+-    };
+-    const response: RestApiResponse<BulkProposal> = {
+-      status: 'success',
+-      data: proposal,
+-    };
+-    return of(new HttpResponse({ status: 200, body: response })).pipe(delay(150));
+-  }
+-
+-  // Fase 2 (Confirmação) - Atualização Uniforme: Ajustar Severidade em Lote
+-  if (url.includes('/api/operations/incidentes/bulk/update/confirmation') && req.method === 'POST') {
+-    const body = req.body as { proposalId?: string } | null;
+-    const execution: BulkExecution = {
+-      executionId: `exec-update-${Date.now()}`,
+-      proposalId: body?.proposalId || 'prop-default',
+-      operationRef: {
+-        operationId: 'confirm-update-incidentes',
+-        path: '/api/operations/incidentes/bulk/update/confirmation',
+-        method: 'POST',
+-      },
+-      mode: 'UNIFORM_UPDATE',
+-      executionMode: 'SYNC',
+-      atomicity: 'PER_ITEM',
+-      status: 'COMPLETED',
+-      createdAt: new Date().toISOString(),
+-      updatedAt: new Date().toISOString(),
+-      terminalAt: new Date().toISOString(),
+-      totals: {
+-        targetCount: 2,
+-        pending: 0,
+-        confirmed: 2,
+-        unchanged: 0,
+-        denied: 0,
+-        invalid: 0,
+-        conflict: 0,
+-        notProcessed: 0,
+-        unknown: 0,
+-      },
+-      diagnostics: [],
+-    };
+-    const response: RestApiResponse<BulkExecution> = {
+-      status: 'success',
+-      data: execution,
+-    };
+-    return of(new HttpResponse({ status: 200, body: response })).pipe(delay(200));
+-  }
+-
+-  return next(req);
+-};
+diff --git a/src/app/core/hero-api.interceptor.ts b/src/app/core/hero-api.interceptor.ts
+new file mode 100644
+index 0000000..60c9731
+--- /dev/null
++++ b/src/app/core/hero-api.interceptor.ts
+@@ -0,0 +1,37 @@
++import { HttpErrorResponse, type HttpInterceptorFn } from '@angular/common/http';
++import { inject } from '@angular/core';
++import { catchError, throwError } from 'rxjs';
++import { PRAXIS_API_ORIGIN } from './platform.config';
++import { HeroSessionService } from './hero-session.service';
++
++/** Credentials and confirmed context are sent exclusively to the configured host. */
++export const heroApiSessionInterceptor: HttpInterceptorFn = (request, next) => {
++  if (typeof window === 'undefined') return next(request);
++  const url = new URL(request.url, window.location.origin);
++  const trustedOrigin = PRAXIS_API_ORIGIN || window.location.origin;
++  if (url.origin !== trustedOrigin || !/^\/(?:api|schemas|auth)(?:\/|$)/.test(url.pathname)) {
++    return next(request);
++  }
++  const session = inject(HeroSessionService);
++  const revision = session.revision();
++  const isBootstrap = url.pathname.startsWith('/auth/') || url.pathname === '/api/praxis/runtime/context';
++  // Strip caller/demo identity even when enterprise integration is unavailable.
++  // Preserve repeated unrelated headers (ETag, idempotency and CSRF included).
++  const confirmed = session.runtime.headers();
++  let headers = request.headers;
++  for (const name of headers.keys()) {
++    if (['x-tenant-id', 'x-tenant', 'x-user-id', 'x-env', 'x-updated-by',
++      'x-praxis-profile-id', 'x-praxis-context-version'].includes(name.toLowerCase())) {
++      headers = headers.delete(name);
++    }
++  }
++  if (!isBootstrap) {
++    for (const [name, value] of Object.entries(confirmed)) {
++      if (typeof value === 'string') headers = headers.set(name, value);
++    }
++  }
++  return next(request.clone({ headers, withCredentials: true })).pipe(catchError((error: unknown) => {
++    if (error instanceof HttpErrorResponse && error.status === 401 && url.pathname !== '/auth/login') session.expire(revision);
++    return throwError(() => error);
++  }));
++};
+diff --git a/src/app/core/hero-session-dialog.component.ts b/src/app/core/hero-session-dialog.component.ts
+new file mode 100644
+index 0000000..0148b37
+--- /dev/null
++++ b/src/app/core/hero-session-dialog.component.ts
+@@ -0,0 +1,86 @@
++import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
++import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
++import { MatButtonModule } from '@angular/material/button';
++import { MatDialogModule } from '@angular/material/dialog';
++import { MatFormFieldModule } from '@angular/material/form-field';
++import { MatInputModule } from '@angular/material/input';
++import { HeroSessionService } from './hero-session.service';
++
++@Component({
++  selector: 'app-hero-session-dialog',
++  standalone: true,
++  imports: [ReactiveFormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatInputModule],
++  changeDetection: ChangeDetectionStrategy.OnPush,
++  template: `
++    <h2 mat-dialog-title>Sessão da API</h2>
++    <mat-dialog-content>
++      <p>Use suas credenciais do API Quickstart. As permissões e o contexto são confirmados pelo servidor.</p>
++      @if (session.projectionBlocked()) {
++        <p role="alert">A resposta do encerramento não foi confirmada. O conteúdo ficará suspenso até verificarmos a sessão.</p>
++      } @else if (!session.active()) {
++        <form id="hero-login" [formGroup]="form" (ngSubmit)="login()">
++          <mat-form-field appearance="outline">
++            <mat-label>Usuário</mat-label>
++            <input matInput formControlName="username" autocomplete="username" required data-testid="session-user" />
++          </mat-form-field>
++          <mat-form-field appearance="outline">
++            <mat-label>Senha</mat-label>
++            <input matInput type="password" formControlName="password" autocomplete="current-password" required data-testid="session-password" />
++          </mat-form-field>
++        </form>
++      } @else {
++        <p data-testid="session-identity"><strong>{{ session.displayName() }}</strong></p>
++        @if (session.context()?.state === 'ready') {
++          <p>Contexto: {{ session.context()?.effectiveContext?.activeTenant?.label || session.context()?.effectiveContext?.activeTenant?.tenantId }}</p>
++        } @else if (session.context()) {
++          <p>Selecione um contexto autorizado para continuar.</p>
++          <div class="context-choices">
++            @for (choice of session.choices(); track choice.choiceRef) {
++              <button mat-stroked-button type="button" [disabled]="session.busy()" (click)="session.select(choice.choiceRef)">{{ choice.label }}</button>
++            } @empty {
++              <p>Nenhum contexto disponível. Consulte o administrador da API.</p>
++            }
++          </div>
++          @if (session.nextChoicesCursor()) {
++            <button mat-button type="button" [disabled]="session.busy()" (click)="session.moreChoices()">Carregar mais contextos</button>
++          }
++        }
++      }
++      @if (session.contextNotice()) { <p role="status">{{ session.contextNotice() }}</p> }
++      @if (session.error()) { <p role="alert" class="error">{{ session.error() }}</p> }
++      @if (session.busy()) { <p role="status">Validando a sessão…</p> }
++    </mat-dialog-content>
++    <mat-dialog-actions align="end">
++      <button mat-button mat-dialog-close>Fechar</button>
++      @if (session.projectionBlocked()) {
++        <button mat-stroked-button type="button" [disabled]="session.busy()" (click)="session.check()">Verificar sessão</button>
++        <button mat-flat-button type="button" [disabled]="session.busy()" (click)="session.logout()">Repetir encerramento</button>
++      } @else if (session.active()) {
++        <button mat-button type="button" [disabled]="session.busy()" (click)="session.check()">Verificar sessão</button>
++        <button mat-stroked-button type="button" [disabled]="session.busy()" (click)="session.logout()">Encerrar sessão</button>
++      } @else {
++        <button mat-flat-button type="submit" form="hero-login" [disabled]="form.invalid || session.busy()" data-testid="session-login">Entrar</button>
++      }
++    </mat-dialog-actions>
++  `,
++  styles: `
++    mat-dialog-content { color: var(--mat-sys-on-surface); }
++    form, .context-choices { display: grid; gap: 12px; }
++    mat-form-field { width: 100%; }
++    .error { color: var(--mat-sys-error); }
++  `,
++})
++export class HeroSessionDialogComponent {
++  readonly session = inject(HeroSessionService);
++  readonly form = new FormGroup({
++    username: new FormControl('', { nonNullable: true, validators: Validators.required }),
++    password: new FormControl('', { nonNullable: true, validators: Validators.required }),
++  });
++
++  async login(): Promise<void> {
++    if (this.form.invalid || this.session.busy()) return;
++    const { username, password } = this.form.getRawValue();
++    this.form.controls.password.reset();
++    await this.session.login(username.trim(), password);
++  }
++}
+diff --git a/src/app/core/hero-session.service.ts b/src/app/core/hero-session.service.ts
+new file mode 100644
+index 0000000..5ddbaf7
+--- /dev/null
++++ b/src/app/core/hero-session.service.ts
+@@ -0,0 +1,151 @@
++import { HttpClient, HttpErrorResponse } from '@angular/common/http';
++import { Injectable, computed, inject, signal } from '@angular/core';
++import { toSignal } from '@angular/core/rxjs-interop';
++import { EnterpriseRuntimeContextService, type EnterpriseRuntimeContextChoice } from '@praxisui/core';
++import { firstValueFrom } from 'rxjs';
++import { PRAXIS_API_ORIGIN } from './platform.config';
++
++/** SESSION and effective identity belong to the server. No credential is kept in web storage. */
++@Injectable({ providedIn: 'root' })
++export class HeroSessionService {
++  private readonly http = inject(HttpClient);
++  readonly runtime = inject(EnterpriseRuntimeContextService);
++  readonly context = toSignal(this.runtime.contextChanges$, { initialValue: null });
++  readonly active = signal(false);
++  readonly projectionBlocked = signal(false);
++  private readonly contextWasConfirmed = signal(false);
++  readonly corporateProjectionBlocked = computed(() => this.contextWasConfirmed() && this.context()?.state !== 'ready');
++  readonly contextNotice = signal<string | null>(null);
++  readonly busy = signal(false);
++  readonly error = signal<string | null>(null);
++  readonly choices = signal<readonly EnterpriseRuntimeContextChoice[]>([]);
++  readonly nextChoicesCursor = signal<string | null>(null);
++  readonly revision = signal(0);
++  readonly displayName = computed(() => this.context()?.user.displayName
++    || this.context()?.user.userId || (this.projectionBlocked() ? 'Encerramento pendente' : this.active() ? 'Sessão ativa' : 'Visitante'));
++
++  /** An older request cannot revoke the projection established by a newer login/context. */
++  expire(expectedRevision: number): void {
++    if (this.revision() !== expectedRevision) return;
++    this.clearProjection();
++    this.contextWasConfirmed.set(false);
++  }
++
++  async check(): Promise<void> {
++    await this.perform(async () => {
++      try { await firstValueFrom(this.http.get<void>(`${PRAXIS_API_ORIGIN}/auth/session`)); }
++      catch (error) {
++        if (error instanceof HttpErrorResponse && error.status === 401) {
++          this.projectionBlocked.set(false);
++          this.contextWasConfirmed.set(false);
++        }
++        throw error;
++      }
++      this.active.set(true);
++      await this.refreshContext();
++      this.projectionBlocked.set(false);
++    }, true);
++  }
++
++  async login(username: string, password: string): Promise<void> {
++    if (this.projectionBlocked()) return;
++    await this.perform(async () => {
++      this.clearProjection();
++      await firstValueFrom(this.http.post<void>(`${PRAXIS_API_ORIGIN}/auth/login`, { username, password }));
++      // A successful login response alone does not prove the browser accepted its cookie.
++      await firstValueFrom(this.http.get<void>(`${PRAXIS_API_ORIGIN}/auth/session`));
++      this.active.set(true);
++      await this.refreshContext();
++    });
++  }
++
++  async logout(): Promise<void> {
++    await this.perform(async () => {
++      this.clearProjection();
++      this.projectionBlocked.set(true);
++      await firstValueFrom(this.http.post<void>(`${PRAXIS_API_ORIGIN}/auth/logout`, {}));
++      this.projectionBlocked.set(false);
++      this.contextWasConfirmed.set(false);
++    });
++  }
++
++  async select(choiceRef: string): Promise<void> {
++    const current = this.context();
++    if (!this.active() || !current) return;
++    await this.perform(async () => {
++      const selected = await this.runtime.switchContext({ choiceRef, expectedSelectionVersion: current.selectionVersion });
++      this.contextWasConfirmed.set(true);
++      this.contextNotice.set(selected.state === 'ready' ? null : 'Escolha um contexto autorizado para habilitar as personalizações corporativas.');
++      this.revision.update((value) => value + 1);
++      this.choices.set([]);
++      this.nextChoicesCursor.set(null);
++    });
++  }
++
++  private async refreshContext(): Promise<void> {
++    let context = null;
++    try { context = await this.runtime.refresh(); }
++    catch (error) {
++      if (error instanceof HttpErrorResponse && error.status === 401) throw error;
++    }
++    if (!context) {
++      this.contextNotice.set(this.contextWasConfirmed()
++        ? 'O contexto corporativo deixou de estar disponível. Verifique a sessão antes de continuar.'
++        : 'Este host não disponibiliza contexto corporativo. A API continua governando as operações pela sessão; personalizações corporativas estão indisponíveis.');
++      this.choices.set([]);
++      this.nextChoicesCursor.set(null);
++      this.revision.update((value) => value + 1);
++      return;
++    }
++    this.contextWasConfirmed.set(true);
++    this.contextNotice.set(context.state === 'ready' ? null : 'Escolha um contexto autorizado para habilitar as personalizações corporativas.');
++    this.revision.update((value) => value + 1);
++    this.choices.set([]);
++    this.nextChoicesCursor.set(null);
++    if (context.state !== 'ready') await this.appendChoices();
++  }
++
++  async moreChoices(): Promise<void> {
++    if (!this.active() || this.busy() || !this.nextChoicesCursor()) return;
++    this.busy.set(true);
++    this.error.set(null);
++    try { await this.appendChoices(this.nextChoicesCursor()!); }
++    catch { this.error.set('Não foi possível carregar mais contextos. Tente novamente.'); }
++    finally { this.busy.set(false); }
++  }
++
++  private async appendChoices(cursor?: string): Promise<void> {
++    const revision = this.revision();
++    const page = await this.runtime.choices(cursor ? { cursor } : {});
++    if (revision !== this.revision()) return;
++    this.choices.update((items) => [...items, ...page.items.filter((next) => !items.some((prior) => prior.choiceRef === next.choiceRef))]);
++    this.nextChoicesCursor.set(page.nextCursor);
++  }
++
++  private clearProjection(): void {
++    this.active.set(false);
++    this.contextNotice.set(null);
++    this.choices.set([]);
++    this.nextChoicesCursor.set(null);
++    this.runtime.invalidate();
++    this.revision.update((value) => value + 1);
++  }
++
++  private async perform(task: () => Promise<void>, silentAnonymous = false): Promise<void> {
++    if (this.busy()) return;
++    this.busy.set(true);
++    this.error.set(null);
++    try {
++      await task();
++    } catch (error) {
++      this.clearProjection();
++      if (!(silentAnonymous && error instanceof HttpErrorResponse && error.status === 401)) {
++        this.error.set(error instanceof HttpErrorResponse && error.status === 401
++          ? 'Não foi possível validar a sessão. Confira suas credenciais e a permissão de cookies deste site.'
++          : 'Não foi possível confirmar a sessão ou seu contexto. Tente novamente; as operações continuam protegidas pela API.');
++      }
++    } finally {
++      this.busy.set(false);
++    }
++  }
++}
+diff --git a/src/app/core/hero-session.spec.ts b/src/app/core/hero-session.spec.ts
+new file mode 100644
+index 0000000..f3d7bb3
+--- /dev/null
++++ b/src/app/core/hero-session.spec.ts
+@@ -0,0 +1,204 @@
++import { provideHttpClient, HttpClient, withInterceptors } from '@angular/common/http';
++import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
++import { TestBed } from '@angular/core/testing';
++import { API_URL, ResourceDiscoveryService } from '@praxisui/core';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { heroApiSessionInterceptor } from './hero-api.interceptor';
++import { HeroSessionService } from './hero-session.service';
++import { PRAXIS_API_ORIGIN, PRAXIS_API_TRUSTED_REFERENCE_ORIGINS } from './platform.config';
++
++const url = (path: string) => `${PRAXIS_API_ORIGIN}${path}`;
++const ready = {
++  schemaVersion: 'praxis-enterprise-runtime-context.v1', state: 'ready', selectionVersion: 'v1',
++  user: { userId: 'operator', displayName: 'Operador', resolvedFromServerPrincipal: true },
++  effectiveContext: { contextVersion: 'c1', activeTenant: { tenantId: 'isolated', label: 'Ensaio' },
++    activeOrganizationId: null, environment: 'test', locale: 'pt-BR', timezone: 'UTC',
++    activeProfileId: null, activeModuleKey: null, capabilities: [], authorities: [] },
++  reasonCode: null, resolvedAt: '2026-10-13T00:00:00Z',
++};
++
++describe('Hero server session and trusted HTTP boundary', () => {
++  let http: HttpTestingController;
++  let session: HeroSessionService;
++  beforeEach(() => {
++    TestBed.configureTestingModule({ providers: [
++      provideHttpClient(withInterceptors([heroApiSessionInterceptor])), provideHttpClientTesting(),
++      { provide: API_URL, useValue: { default: { baseUrl: url('/api'), trustedOrigins: PRAXIS_API_TRUSTED_REFERENCE_ORIGINS } } },
++    ] });
++    http = TestBed.inject(HttpTestingController);
++    session = TestBed.inject(HeroSessionService);
++    localStorage.clear();
++  });
++  afterEach(() => { http.verify(); localStorage.clear(); });
++
++  async function finishCheck(context = ready): Promise<void> {
++    http.expectOne(url('/auth/session')).flush(null, { status: 204, statusText: 'No Content' });
++    await Promise.resolve();
++    http.expectOne(url('/api/praxis/runtime/context')).flush(context);
++  }
++
++  it('uses cookie credentials and server context without reading fabricated web-storage tokens', async () => {
++    localStorage.setItem('pax.api.token', 'tactical-token-do-not-send');
++    localStorage.setItem('pax.api.user', 'nick.fury');
++    const pending = session.check();
++    const request = http.expectOne(url('/auth/session'));
++    expect(request.request.withCredentials).toBe(true);
++    expect(request.request.headers.has('Authorization')).toBe(false);
++    expect(request.request.headers.has('X-User-ID')).toBe(false);
++    request.flush(null, { status: 204, statusText: 'No Content' });
++    await Promise.resolve();
++    http.expectOne(url('/api/praxis/runtime/context')).flush(ready);
++    await pending;
++    expect(session.displayName()).toBe('Operador');
++    TestBed.inject(HttpClient).get(url('/api/operations/missao-participantes')).subscribe();
++    const business = http.expectOne(url('/api/operations/missao-participantes'));
++    expect(business.request.headers.get('X-User-ID')).toBe('operator');
++    expect(business.request.headers.get('X-Tenant-ID')).toBe('isolated');
++    expect(business.request.headers.has('Authorization')).toBe(false);
++    business.flush({ data: [] });
++  });
++
++  it('keeps a verified SESSION when the optional corporate provider returns 503, with no fabricated identity', async () => {
++    const pending = session.check();
++    http.expectOne(url('/auth/session')).flush(null, { status: 204, statusText: 'No Content' });
++    await Promise.resolve();
++    http.expectOne(url('/api/praxis/runtime/context')).flush({ code: 'RUNTIME_PROVIDER_UNAVAILABLE' }, { status: 503, statusText: 'Unavailable' });
++    await pending;
++    expect(session.active()).toBe(true);
++    expect(session.context()).toBe(null);
++    expect(session.corporateProjectionBlocked()).toBe(false);
++    expect(session.contextNotice()).toContain('não disponibiliza');
++    TestBed.inject(HttpClient).get(url('/api/operations/missao-participantes'), { headers: {
++      'X-User-ID': 'fake-user', 'X-Tenant-ID': 'demo', 'X-Env': 'local',
++      'If-Match': '"strong"', 'Idempotency-Key': 'preserve-key',
++    } }).subscribe();
++    const business = http.expectOne(url('/api/operations/missao-participantes'));
++    expect(business.request.headers.has('X-User-ID')).toBe(false);
++    expect(business.request.headers.has('X-Tenant-ID')).toBe(false);
++    expect(business.request.headers.has('X-Env')).toBe(false);
++    expect(business.request.headers.get('If-Match')).toBe('"strong"');
++    expect(business.request.headers.get('Idempotency-Key')).toBe('preserve-key');
++    expect(localStorage.length).toBe(0);
++    business.flush({ data: [] });
++  });
++
++  it('retains corporate suspension across consumers remounting after previously confirmed context is lost', async () => {
++    const first = session.check(); await finishCheck(); await first;
++    const next = session.check();
++    http.expectOne(url('/auth/session')).flush(null, { status: 204, statusText: 'No Content' });
++    await Promise.resolve();
++    http.expectOne(url('/api/praxis/runtime/context')).flush(null, { status: 503, statusText: 'Unavailable' });
++    await next;
++    expect(session.active()).toBe(true);
++    expect(session.corporateProjectionBlocked()).toBe(true);
++    expect(TestBed.inject(HeroSessionService).corporateProjectionBlocked()).toBe(true);
++    const retry = session.check(); await finishCheck(); await retry;
++    expect(session.corporateProjectionBlocked()).toBe(false);
++  });
++
++  it('does not discard confirmed-context history after an uncertain check and rejected replacement login', async () => {
++    const first = session.check(); await finishCheck(); await first;
++    const check = session.check();
++    http.expectOne(url('/auth/session')).flush(null, { status: 503, statusText: 'Unavailable' });
++    await check;
++    expect(session.corporateProjectionBlocked()).toBe(true);
++    const rejected = session.login('other', 'wrong');
++    http.expectOne(url('/auth/login')).flush(null, { status: 401, statusText: 'Unauthorized' });
++    await rejected;
++    expect(session.corporateProjectionBlocked()).toBe(true);
++    http.expectNone(url('/auth/session'));
++    const settled = session.check();
++    http.expectOne(url('/auth/session')).flush(null, { status: 401, statusText: 'Unauthorized' });
++    await settled;
++    expect(session.corporateProjectionBlocked()).toBe(false);
++  });
++
++  it('sends neither credential policy nor contextual identity to a different origin', () => {
++    TestBed.inject(HttpClient).get('https://foreign.example/api/operations/missao-participantes').subscribe();
++    const foreign = http.expectOne('https://foreign.example/api/operations/missao-participantes');
++    expect(foreign.request.withCredentials).toBe(false);
++    expect(foreign.request.headers.keys()).toEqual([]);
++    foreign.flush({});
++  });
++
++  it('resolves official backend HATEOAS references through the development proxy', () => {
++    const discovery = TestBed.inject(ResourceDiscoveryService);
++    const resource = '/api/operations/missao-participantes/37';
++    const resolved = discovery.resolveHref(`http://127.0.0.1:8088${resource}`);
++    expect(new URL(resolved, window.location.origin).origin).toBe(window.location.origin);
++    expect(new URL(resolved, window.location.origin).pathname).toBe(resource);
++    expect(discovery.resolveHref(`https://foreign.example${resource}`)).toBe(`https://foreign.example${resource}`);
++  });
++
++  it('does not accept login until the cookie is verified by the server', async () => {
++    const pending = session.login('operator', 'private-password');
++    http.expectOne(url('/auth/login')).flush(null, { status: 204, statusText: 'No Content' });
++    await Promise.resolve();
++    http.expectOne(url('/auth/session')).flush(null, { status: 401, statusText: 'Unauthorized' });
++    await pending;
++    expect(session.active()).toBe(false);
++    expect(session.context()).toBe(null);
++    expect(session.error()).toContain('Não foi possível validar');
++    expect(localStorage.length).toBe(0);
++  });
++
++  it('expires the visual session on a current 401, but ignores an older request after a new session', async () => {
++    const checked = session.check(); await finishCheck(); await checked;
++    const client = TestBed.inject(HttpClient);
++    client.get(url('/api/old')).subscribe({ error: () => undefined });
++    const old = http.expectOne(url('/api/old'));
++    const next = session.check(); await finishCheck(); await next;
++    old.flush(null, { status: 401, statusText: 'Unauthorized' });
++    expect(session.active()).toBe(true);
++    client.get(url('/api/current')).subscribe({ error: () => undefined });
++    http.expectOne(url('/api/current')).flush(null, { status: 401, statusText: 'Unauthorized' });
++    expect(session.active()).toBe(false);
++    expect(session.context()).toBe(null);
++    expect(session.displayName()).toBe('Visitante');
++  });
++
++  it('invalidates projections before logout and keeps the transition busy until revocation finishes', async () => {
++    const checked = session.check(); await finishCheck(); await checked;
++    const pending = session.logout();
++    expect(session.busy()).toBe(true);
++    expect(session.active()).toBe(false);
++    expect(session.context()).toBe(null);
++    http.expectOne(url('/auth/logout')).flush(null, { status: 204, statusText: 'No Content' });
++    await pending;
++    expect(session.busy()).toBe(false);
++    expect(session.active()).toBe(false);
++  });
++
++  it('loads all authorized context pages using the opaque server cursor', async () => {
++    const pending = session.check();
++    await finishCheck({ ...ready, state: 'selection-required', effectiveContext: null } as unknown as typeof ready);
++    await Promise.resolve();
++    (await vi.waitFor(() => http.expectOne((req) => req.url === url('/api/praxis/runtime/context/choices')))).flush({
++      items: [{ choiceRef: 'choice-1', label: 'Primeiro', facets: {} }], nextCursor: 'opaque-next',
++    });
++    await pending;
++    const more = session.moreChoices();
++    const page = http.expectOne((req) => req.url === url('/api/praxis/runtime/context/choices'));
++    expect(page.request.params.get('cursor')).toBe('opaque-next');
++    page.flush({ items: [{ choiceRef: 'choice-2', label: 'Segundo', facets: {} }], nextCursor: null });
++    await more;
++    expect(session.choices().map((choice) => choice.choiceRef)).toEqual(['choice-1', 'choice-2']);
++    expect(session.nextChoicesCursor()).toBe(null);
++  });
++
++  it('blocks projections after an uncertain logout until a protected session check settles it', async () => {
++    const checked = session.check(); await finishCheck(); await checked;
++    const pending = session.logout();
++    http.expectOne(url('/auth/logout')).flush(null, { status: 503, statusText: 'Unavailable' });
++    await pending;
++    expect(session.projectionBlocked()).toBe(true);
++    expect(session.displayName()).toBe('Encerramento pendente');
++    await session.login('other', 'not-sent');
++    http.expectNone(url('/auth/login'));
++    const readback = session.check();
++    http.expectOne(url('/auth/session')).flush(null, { status: 401, statusText: 'Unauthorized' });
++    await readback;
++    expect(session.projectionBlocked()).toBe(false);
++    expect(session.active()).toBe(false);
++  });
++});
+diff --git a/src/app/core/navigation.model.ts b/src/app/core/navigation.model.ts
+index e74f70a..d2076bd 100644
+--- a/src/app/core/navigation.model.ts
++++ b/src/app/core/navigation.model.ts
+@@ -38,8 +38,6 @@ export const HERO_NAVIGATION: NavGroup[] = [
+         path: '/rh/folha-pagamento',
+         icon: 'payments',
+         description: 'Processamento de remunerações, eventos e pagamentos.',
+-        badge: 'DEFCON 1',
+-        badgeTone: 'warning',
+       },
+       {
+         label: 'Férias & Afastamentos',
+@@ -71,6 +69,12 @@ export const HERO_NAVIGATION: NavGroup[] = [
+         icon: 'military_tech',
+         description: 'Planejamento e acompanhamento de missões em campo.',
+       },
++      {
++        label: 'Participantes de Missão',
++        path: '/operacoes/participantes',
++        icon: 'groups',
++        description: 'Escalas e alterações em lote avaliadas pela API.',
++      },
+       {
+         label: 'Equipes & Squads',
+         path: '/operacoes/equipes',
+@@ -118,8 +122,6 @@ export const HERO_NAVIGATION: NavGroup[] = [
+         path: '/suprimentos/contratos',
+         icon: 'contract',
+         description: 'Gestão de parceiros, contratos e níveis de serviço.',
+-        badge: 'DEFCON 1',
+-        badgeTone: 'warning',
+       },
+       {
+         label: 'Pedidos de Compra',
+diff --git a/src/app/core/platform.config.ts b/src/app/core/platform.config.ts
+index 596f095..f1fe0c1 100644
+--- a/src/app/core/platform.config.ts
++++ b/src/app/core/platform.config.ts
+@@ -9,6 +9,11 @@ export const PRAXIS_API_ORIGIN = isLocalhost
+   ? ''
+   : 'https://praxis-api-quickstart.onrender.com';
+ export const PRAXIS_API_BASE_URL = `${PRAXIS_API_ORIGIN}/api`;
++// Origins published by the official backend in HATEOAS/schema references. The
++// canonical discovery resolver maps them through the same-origin development proxy.
++export const PRAXIS_API_TRUSTED_REFERENCE_ORIGINS = isLocalhost
++  ? ['https://praxis-api-quickstart.onrender.com', 'http://127.0.0.1:8088']
++  : ['https://praxis-api-quickstart.onrender.com'];
+ 
+ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
+   crud: {
+diff --git a/src/app/core/tactical-clearance.guard.ts b/src/app/core/tactical-clearance.guard.ts
+deleted file mode 100644
+index d00d188..0000000
+--- a/src/app/core/tactical-clearance.guard.ts
++++ /dev/null
+@@ -1,46 +0,0 @@
+-import { inject } from '@angular/core';
+-import { type CanActivateFn, Router } from '@angular/router';
+-import { AuthSimulationService } from './auth-simulation.service';
+-
+-/**
+- * Guard de autorização tática baseado na credencial de segurança (Clearance Level)
+- * da persona ativa no AuthSimulationService.
+- *
+- * Exemplo de uso em rotas:
+- * ```typescript
+- * {
+- *   path: 'rh/folha-pagamento',
+- *   canActivate: [tacticalClearanceGuard],
+- *   data: {
+- *     clearance: 'DEFCON 1',
+- *     title: 'Folha de Pagamento',
+- *   }
+- * }
+- * ```
+- */
+-export const tacticalClearanceGuard: CanActivateFn = (route, state) => {
+-  const authService = inject(AuthSimulationService);
+-  const router = inject(Router);
+-
+-  const requiredClearance = (route.data?.['clearance'] as string | undefined)?.trim();
+-  if (!requiredClearance) {
+-    return true;
+-  }
+-
+-  const currentPersona = authService.currentPersona();
+-  const currentClearance = currentPersona.clearanceLevel || '';
+-
+-  // Hierarquia Tática: DEFCON 1 (Direção Geral) possui autorização irrestrita sobre qualquer nível
+-  const isAuthorized =
+-    currentClearance.includes('DEFCON 1') ||
+-    (requiredClearance === 'DEFCON 2' && currentClearance.includes('DEFCON 2'));
+-
+-  if (!isAuthorized) {
+-    console.warn(
+-      `[TACTICAL-SECURITY] Acesso negado para ${currentPersona.name} (${currentClearance}) à rota '${state.url}'. Nível de credencial requerido: ${requiredClearance}.`,
+-    );
+-    return router.parseUrl(`/?authDenied=true&resource=${encodeURIComponent(route.data?.['title'] || state.url)}`);
+-  }
+-
+-  return true;
+-};
+diff --git a/src/app/pages/dashboard/dashboard-page.component.ts b/src/app/pages/dashboard/dashboard-page.component.ts
+index 005e130..89d1ff4 100644
+--- a/src/app/pages/dashboard/dashboard-page.component.ts
++++ b/src/app/pages/dashboard/dashboard-page.component.ts
+@@ -7,9 +7,8 @@ import {
+   inject,
+   signal,
+ } from '@angular/core';
+-import { ActivatedRoute, Router } from '@angular/router';
++import { Router } from '@angular/router';
+ import { toSignal } from '@angular/core/rxjs-interop';
+-import { map } from 'rxjs/operators';
+ import {
+   type WidgetEventEnvelope,
+   type PageIdentity,
+@@ -18,7 +17,7 @@ import {
+ import { DynamicPageBuilderComponent } from '@praxisui/page-builder';
+ import { DASHBOARD_PAGE_DEFINITION } from './dashboard-page.definition';
+ import { DashboardStatsService } from './dashboard-stats.service';
+-import { AuthSimulationService } from '../../core/auth-simulation.service';
++import { HeroSessionService } from '../../core/hero-session.service';
+ 
+ @Component({
+   selector: 'app-dashboard-page',
+@@ -27,23 +26,6 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
+   changeDetection: ChangeDetectionStrategy.OnPush,
+   template: `
+     <div class="dashboard-page-wrapper">
+-      @if (authDeniedResource(); as deniedRes) {
+-        <div class="tactical-auth-alert glass-panel" role="alert" data-testid="tactical-auth-alert">
+-          <div class="alert-content">
+-            <span class="material-symbols-outlined alert-icon">shield_lock</span>
+-            <div class="alert-text">
+-              <strong class="alert-title">Acesso Tático Restrito (Credencial DEFCON 1 Requerida)</strong>
+-              <p class="alert-desc">
+-                A credencial de segurança de <strong>{{ authService.currentPersona().name }}</strong> ({{ authService.currentPersona().clearanceLevel }})
+-                não possui autorização executiva para acessar <em>{{ deniedRes }}</em>. Alterne para <strong>Nick Fury</strong> no menu superior para autorizar o acesso.
+-              </p>
+-            </div>
+-          </div>
+-          <button type="button" class="alert-dismiss-btn" (click)="dismissAuthDenied()" aria-label="Fechar alerta">
+-            <span class="material-symbols-outlined">close</span>
+-          </button>
+-        </div>
+-      }
+       <!-- Toolbar de Governança do Dashboard -->
+       <header class="dashboard-toolbar" data-testid="dashboard-governance-toolbar">
+         <div class="toolbar-brand">
+@@ -78,7 +60,7 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
+           @if (isCustomizing() && isLayoutCustomized()) {
+             <button type="button" class="reset-layout-btn" data-testid="reset-layout-btn"
+               (click)="builder.resetPersistedPage(pageDefinition)"
+-              title="Reverter para o layout padrão de fábrica e descartar customizações desta persona">
++              title="Reverter para o layout padrão de fábrica e descartar customizações deste contexto">
+               <span class="material-symbols-outlined">restart_alt</span>
+               <span>Restaurar Fábrica</span>
+             </button>
+@@ -90,7 +72,7 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
+             data-testid="toggle-customization-btn"
+             [class.active]="isCustomizing()"
+             (click)="toggleCustomization()"
+-            [disabled]="busy() || persistence().status === 'error'"
++            [disabled]="!pageIdentity() || busy() || persistence().status === 'error'"
+             [attr.aria-pressed]="isCustomizing()"
+             title="Alternar modo de customização de layout e widgets"
+           >
+@@ -108,7 +90,7 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
+           #builder
+           [page]="pageDefinition"
+           [pageIdentity]="pageIdentity()"
+-          [autoPersist]="true"
++          [autoPersist]="!!pageIdentity()"
+           (persistenceChange)="persistence.set($event)"
+           [context]="dashboardContext()"
+           [enableCustomization]="isCustomizing() && persistence().status !== 'error' && persistence().status !== 'loading'"
+@@ -378,29 +360,15 @@ import { AuthSimulationService } from '../../core/auth-simulation.service';
+ })
+ export class DashboardPageComponent {
+   private readonly router = inject(Router);
+-  private readonly route = inject(ActivatedRoute);
+   private readonly statsService = inject(DashboardStatsService);
+-  protected readonly authService = inject(AuthSimulationService);
+-
+-  protected readonly authDeniedResource = toSignal(
+-    this.route.queryParams.pipe(
+-      map((params) => (params['authDenied'] === 'true' ? params['resource'] || 'Recurso Restrito' : null)),
+-    ),
+-    { initialValue: null },
+-  );
+-
+-  protected dismissAuthDenied(): void {
+-    this.router.navigate([], {
+-      relativeTo: this.route,
+-      queryParams: { authDenied: null, resource: null },
+-      queryParamsHandling: 'merge',
+-    });
+-  }
++  protected readonly session = inject(HeroSessionService);
+ 
+   protected readonly pageDefinition = DASHBOARD_PAGE_DEFINITION;
+-  protected readonly pageIdentity = computed<PageIdentity>(() => {
+-    const persona = this.authService.currentPersona();
+-    return { appId: 'praxis-hero-hq', tenantId: persona.tenant, userId: persona.id, routePath: '/' };
++  protected readonly pageIdentity = computed<PageIdentity | undefined>(() => {
++    const context = this.session.context();
++    if (context?.state !== 'ready' || !context.effectiveContext) return undefined;
++    return { appId: 'praxis-hero-hq', tenantId: context.effectiveContext.activeTenant.tenantId,
++      userId: context.user.userId, routePath: '/' };
+   });
+   protected readonly isCustomizing = signal(false);
+   protected readonly persistence = signal<WidgetPagePersistenceState>({ status: 'idle', customized: false });
+diff --git a/src/app/pages/operacoes/incidentes.config.ts b/src/app/pages/operacoes/incidentes.config.ts
+index 6eef6eb..ba8fd96 100644
+--- a/src/app/pages/operacoes/incidentes.config.ts
++++ b/src/app/pages/operacoes/incidentes.config.ts
+@@ -106,19 +106,6 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
+       },
+     },
+     behavior: {
+-      selection: {
+-        enabled: true,
+-        type: 'multiple',
+-        mode: 'checkbox',
+-        allowSelectAll: true,
+-        checkboxPosition: 'start',
+-        persistSelection: true,
+-        persistOnDataUpdate: false,
+-        visual: {
+-          highlightSelected: true,
+-          showSelectionCount: true,
+-        },
+-      },
+       filtering: {
+         columnFilters: {
+           enabled: true,
+@@ -136,252 +123,7 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
+         source: 'schema',
+       },
+     },
+-    actions: {
+-      bulk: {
+-        enabled: true,
+-        position: 'both',
+-        actions: [
+-          {
+-            id: 'bulk-conter',
+-            action: 'bulk-conter',
+-            label: 'Conter Ocorrências',
+-            icon: 'verified_user',
+-            color: 'primary',
+-          },
+-          {
+-            id: 'bulk-edit-severidade',
+-            action: 'bulk-edit-severidade',
+-            label: 'Ajustar Severidade em Lote',
+-            icon: 'tune',
+-          },
+-        ],
+-      },
+-    },
+   },
+-  actions: [
+-    {
+-      id: 'bulk-conter',
+-      action: 'bulk-conter',
+-      label: 'Conter Ocorrências Selecionadas',
+-      icon: 'verified_user',
+-      execution: {
+-        bulk: {
+-          mode: 'DOMAIN_COMMAND',
+-          atomicity: 'PER_ITEM',
+-          selectionModes: ['EXPLICIT'],
+-          executionModes: ['SYNC'],
+-          limits: {
+-            maxTargets: 100,
+-            maxRequestBytes: 1048576,
+-            proposalLifetimeMillis: 300000,
+-            unitDeadlineMillis: 15000,
+-          },
+-          evaluationOperation: {
+-            operation: {
+-              operationId: 'contain-incidentes',
+-              path: '/api/operations/incidentes/bulk/contain/evaluation',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-contain-proposal',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-contain-proposal',
+-            },
+-          },
+-          confirmationOperation: {
+-            operation: {
+-              operationId: 'confirm-contain-incidentes',
+-              path: '/api/operations/incidentes/bulk/contain/confirmation',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-contain-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-contain-execution',
+-            },
+-          },
+-          proposalOperation: {
+-            operation: {
+-              operationId: 'get-proposal-contain-incidentes',
+-              path: '/api/operations/incidentes/bulk/contain/proposal/{proposalId}',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-contain-proposal',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-contain-proposal',
+-            },
+-          },
+-          proposalResultsOperation: {
+-            operation: {
+-              operationId: 'get-proposal-results-contain-incidentes',
+-              path: '/api/operations/incidentes/bulk/contain/proposal/{proposalId}/results',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-contain-proposal-results',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-contain-proposal-results',
+-            },
+-          },
+-          executionOperation: {
+-            operation: {
+-              operationId: 'get-execution-contain-incidentes',
+-              path: '/api/operations/incidentes/bulk/contain/execution/{executionId}',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-contain-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-contain-execution',
+-            },
+-          },
+-          resultsOperation: {
+-            operation: {
+-              operationId: 'get-execution-results-contain-incidentes',
+-              path: '/api/operations/incidentes/bulk/contain/execution/{executionId}/results',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-contain-execution-results',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-contain-execution-results',
+-            },
+-          },
+-          cancelOperation: {
+-            operation: {
+-              operationId: 'cancel-contain-incidentes',
+-              path: '/api/operations/incidentes/bulk/contain/execution/{executionId}/cancel',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-contain-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-contain-execution',
+-            },
+-          },
+-        },
+-      },
+-    },
+-    {
+-      id: 'bulk-edit-severidade',
+-      action: 'bulk-edit-severidade',
+-      label: 'Ajustar Severidade em Lote',
+-      icon: 'tune',
+-      execution: {
+-        bulk: {
+-          mode: 'UNIFORM_UPDATE',
+-          atomicity: 'PER_ITEM',
+-          selectionModes: ['EXPLICIT'],
+-          executionModes: ['SYNC'],
+-          limits: {
+-            maxTargets: 100,
+-            maxRequestBytes: 1048576,
+-            proposalLifetimeMillis: 300000,
+-            unitDeadlineMillis: 15000,
+-          },
+-          editableFields: {
+-            sourceOperation: {
+-              operationId: 'bulk-update-incidentes-fields',
+-              path: '/api/operations/incidentes/bulk/update/evaluation',
+-              method: 'POST',
+-            },
+-            requestSchema: {
+-              schemaId: 'bulk-incidentes-update-schema',
+-              schemaType: 'request',
+-              url: '/schemas/bulk-incidentes-update',
+-            },
+-            writableFields: ['severidade', 'local'],
+-            clearableFields: [],
+-          },
+-          evaluationOperation: {
+-            operation: {
+-              operationId: 'evaluate-update-incidentes',
+-              path: '/api/operations/incidentes/bulk/update/evaluation',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-proposal',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-proposal',
+-            },
+-          },
+-          confirmationOperation: {
+-            operation: {
+-              operationId: 'confirm-update-incidentes',
+-              path: '/api/operations/incidentes/bulk/update/confirmation',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-execution',
+-            },
+-          },
+-          proposalOperation: {
+-            operation: {
+-              operationId: 'get-proposal-update-incidentes',
+-              path: '/api/operations/incidentes/bulk/update/proposal/{proposalId}',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-proposal',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-proposal',
+-            },
+-          },
+-          proposalResultsOperation: {
+-            operation: {
+-              operationId: 'get-proposal-results-update-incidentes',
+-              path: '/api/operations/incidentes/bulk/update/proposal/{proposalId}/results',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-proposal-results',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-proposal-results',
+-            },
+-          },
+-          executionOperation: {
+-            operation: {
+-              operationId: 'get-execution-update-incidentes',
+-              path: '/api/operations/incidentes/bulk/update/execution/{executionId}',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-execution',
+-            },
+-          },
+-          resultsOperation: {
+-            operation: {
+-              operationId: 'get-execution-results-update-incidentes',
+-              path: '/api/operations/incidentes/bulk/update/execution/{executionId}/results',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-execution-results',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-execution-results',
+-            },
+-          },
+-          cancelOperation: {
+-            operation: {
+-              operationId: 'cancel-update-incidentes',
+-              path: '/api/operations/incidentes/bulk/update/execution/{executionId}/cancel',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-execution',
+-            },
+-          },
+-        },
+-      },
+-    },
+-  ],
+   defaults: {
+     openMode: 'drawer',
+   },
+diff --git a/src/app/pages/operacoes/participantes.config.ts b/src/app/pages/operacoes/participantes.config.ts
+new file mode 100644
+index 0000000..f8d1ace
+--- /dev/null
++++ b/src/app/pages/operacoes/participantes.config.ts
+@@ -0,0 +1,30 @@
++import type { CrudMetadata } from '@praxisui/crud';
++
++/** Presentation only. Bulk fields, bindings, modes and availability come from discovery. */
++export const PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
++  component: 'praxis-crud',
++  resource: { path: 'operations/missao-participantes', idField: 'id' },
++  table: {
++    columnProjection: {
++      source: 'schema',
++      include: ['id', 'missaoTitulo', 'funcionarioNome', 'papel', 'ordem', 'principal', 'resultado'],
++      order: ['id', 'missaoTitulo', 'funcionarioNome', 'papel', 'ordem', 'principal', 'resultado'],
++      overrides: {
++        id: { header: 'Cód.', width: '80px', align: 'center' },
++        missaoTitulo: { header: 'Missão', width: '240px' },
++        funcionarioNome: { header: 'Participante', width: '240px' },
++        papel: { header: 'Papel', width: '140px' },
++        ordem: { header: 'Ordem', width: '90px', align: 'center' },
++        principal: { header: 'Liderança', width: '100px' },
++        resultado: { header: 'Resultado', width: '150px' },
++      },
++    },
++    behavior: {
++      selection: { enabled: true, type: 'multiple', mode: 'checkbox', allowSelectAll: true,
++        checkboxPosition: 'start', persistSelection: false, persistOnDataUpdate: false },
++      filtering: { enabled: true, columnFilters: { enabled: true } },
++      expansion: { enabled: true, source: 'schema' },
++    },
++  },
++  defaults: { openMode: 'drawer' },
++};
+diff --git a/src/app/pages/rh/folha-pagamento.config.ts b/src/app/pages/rh/folha-pagamento.config.ts
+index 7db2c37..9712690 100644
+--- a/src/app/pages/rh/folha-pagamento.config.ts
++++ b/src/app/pages/rh/folha-pagamento.config.ts
+@@ -99,40 +99,7 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
+         showAdvancedButton: true,
+       },
+     },
+-    actions: {
+-      bulk: {
+-        enabled: true,
+-        position: 'both',
+-        actions: [
+-          {
+-            id: 'reajustar-salarial',
+-            action: 'reajustar-salarial',
+-            label: 'Reajuste Coletivo de Vencimentos',
+-            icon: 'trending_up',
+-          },
+-          {
+-            id: 'atualizacao-cadastral',
+-            action: 'atualizacao-cadastral',
+-            label: 'Atualização de Registros em Massa',
+-            icon: 'edit_note',
+-          },
+-        ],
+-      },
+-    },
+     behavior: {
+-      selection: {
+-        enabled: true,
+-        type: 'multiple',
+-        mode: 'checkbox',
+-        allowSelectAll: true,
+-        checkboxPosition: 'start',
+-        persistSelection: true,
+-        persistOnDataUpdate: false,
+-        visual: {
+-          highlightSelected: true,
+-          showSelectionCount: true,
+-        },
+-      },
+       filtering: {
+         columnFilters: {
+           enabled: true,
+@@ -151,230 +118,6 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
+       },
+     },
+   },
+-  actions: [
+-    {
+-      id: 'reajustar-salarial',
+-      action: 'reajustar-salarial',
+-      label: 'Reajuste Coletivo de Vencimentos',
+-      icon: 'trending_up',
+-      execution: {
+-        bulk: {
+-          mode: 'DOMAIN_COMMAND',
+-          atomicity: 'PER_ITEM',
+-          selectionModes: ['EXPLICIT'],
+-          executionModes: ['SYNC'],
+-          limits: {
+-            maxTargets: 100,
+-            maxRequestBytes: 1048576,
+-            proposalLifetimeMillis: 300000,
+-            unitDeadlineMillis: 15000,
+-          },
+-          evaluationOperation: {
+-            operation: {
+-              operationId: 'evaluate-reajuste',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/evaluate',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-reajuste-proposal',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-reajuste-proposal',
+-            },
+-          },
+-          confirmationOperation: {
+-            operation: {
+-              operationId: 'confirm-reajuste',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/confirm',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-reajuste-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-reajuste-execution',
+-            },
+-          },
+-          proposalOperation: {
+-            operation: {
+-              operationId: 'get-reajuste-proposal',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/proposal/{proposalId}',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-reajuste-proposal',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-reajuste-proposal',
+-            },
+-          },
+-          proposalResultsOperation: {
+-            operation: {
+-              operationId: 'get-reajuste-proposal-results',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/proposal/{proposalId}/results',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-reajuste-proposal-results',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-reajuste-proposal-results',
+-            },
+-          },
+-          executionOperation: {
+-            operation: {
+-              operationId: 'get-reajuste-execution',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/execution/{executionId}',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-reajuste-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-reajuste-execution',
+-            },
+-          },
+-          resultsOperation: {
+-            operation: {
+-              operationId: 'get-reajuste-execution-results',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/execution/{executionId}/results',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-reajuste-execution-results',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-reajuste-execution-results',
+-            },
+-          },
+-          cancelOperation: {
+-            operation: {
+-              operationId: 'cancel-reajuste-execution',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/reajuste/execution/{executionId}/cancel',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-reajuste-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-reajuste-execution',
+-            },
+-          },
+-        },
+-      },
+-    },
+-    {
+-      id: 'atualizacao-cadastral',
+-      action: 'atualizacao-cadastral',
+-      label: 'Atualização de Registros em Massa',
+-      icon: 'edit_note',
+-      execution: {
+-        bulk: {
+-          mode: 'UNIFORM_UPDATE',
+-          atomicity: 'PER_ITEM',
+-          selectionModes: ['EXPLICIT'],
+-          executionModes: ['SYNC'],
+-          limits: {
+-            maxTargets: 100,
+-            maxRequestBytes: 1048576,
+-            proposalLifetimeMillis: 300000,
+-            unitDeadlineMillis: 15000,
+-          },
+-          editableFields: {
+-            sourceOperation: {
+-              operationId: 'bulk-update-folha-fields',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/evaluate',
+-              method: 'POST',
+-            },
+-            requestSchema: {
+-              schemaId: 'bulk-folha-update-schema',
+-              schemaType: 'request',
+-              url: '/schemas/bulk-folha-update',
+-            },
+-            writableFields: ['salarioBruto', 'totalDescontos', 'dataPagamento'],
+-            clearableFields: ['totalDescontos'],
+-          },
+-          evaluationOperation: {
+-            operation: {
+-              operationId: 'evaluate-uniform-update',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/evaluate',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-proposal',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-proposal',
+-            },
+-          },
+-          confirmationOperation: {
+-            operation: {
+-              operationId: 'confirm-uniform-update',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/confirm',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-execution',
+-            },
+-          },
+-          proposalOperation: {
+-            operation: {
+-              operationId: 'get-update-proposal',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/proposal/{proposalId}',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-proposal',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-proposal',
+-            },
+-          },
+-          proposalResultsOperation: {
+-            operation: {
+-              operationId: 'get-update-proposal-results',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/proposal/{proposalId}/results',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-proposal-results',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-proposal-results',
+-            },
+-          },
+-          executionOperation: {
+-            operation: {
+-              operationId: 'get-update-execution',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/execution/{executionId}',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-execution',
+-            },
+-          },
+-          resultsOperation: {
+-            operation: {
+-              operationId: 'get-update-execution-results',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/execution/{executionId}/results',
+-              method: 'GET',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-execution-results',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-execution-results',
+-            },
+-          },
+-          cancelOperation: {
+-            operation: {
+-              operationId: 'cancel-update-execution',
+-              path: '/api/v1/rh/folhas-pagamento/bulk-operations/uniform-update/execution/{executionId}/cancel',
+-              method: 'POST',
+-            },
+-            responseSchema: {
+-              schemaId: 'bulk-update-execution',
+-              schemaType: 'response',
+-              url: '/schemas/bulk-update-execution',
+-            },
+-          },
+-        },
+-      },
+-    },
+-  ],
+   defaults: {
+     openMode: 'drawer',
+   },
+diff --git a/src/app/shell/hero-app-shell.component.ts b/src/app/shell/hero-app-shell.component.ts
+index 40cc87e..f4e0efb 100644
+--- a/src/app/shell/hero-app-shell.component.ts
++++ b/src/app/shell/hero-app-shell.component.ts
+@@ -8,7 +8,7 @@ import {
+   inject,
+   signal,
+ } from '@angular/core';
+-import { Router, RouterLink, RouterOutlet } from '@angular/router';
++import { RouterLink, RouterOutlet } from '@angular/router';
+ import {
+   PraxisAppShellComponent,
+   type PraxisBrandConfig,
+@@ -17,7 +17,9 @@ import {
+ } from '@praxisui/core';
+ import { ALL_NAV_ITEMS, HERO_NAVIGATION } from '../core/navigation.model';
+ import { ThemeService } from '../core/theme.service';
+-import { AuthSimulationService } from '../core/auth-simulation.service';
++import { MatDialog } from '@angular/material/dialog';
++import { HeroSessionService } from '../core/hero-session.service';
++import { HeroSessionDialogComponent } from '../core/hero-session-dialog.component';
+ 
+ @Component({
+   selector: 'app-hero-shell',
+@@ -68,70 +70,24 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
+           <span class="notification-count">3</span>
+         </button>
+ 
+-        <!-- Tactical Persona / Authentication Simulation Switcher -->
+-        <div class="commander-profile-wrapper">
+-          <button
+-            type="button"
+-            class="commander-profile-btn"
+-            data-testid="persona-switcher"
+-            (click)="personaMenuOpen.set(!personaMenuOpen())"
+-            [attr.aria-expanded]="personaMenuOpen()"
+-            aria-label="Alternar persona tática"
+-          >
+-            <div class="avatar-ring" [style.background]="authService.currentPersona().badgeColor">
+-              <div class="avatar-inner">{{ authService.currentPersona().initials }}</div>
+-            </div>
+-            <div class="commander-details">
+-              <div class="commander-name-row">
+-                <p class="commander-name" data-testid="current-user-display">
+-                  {{ authService.currentPersona().name }}
+-                </p>
+-                <span class="material-symbols-outlined dropdown-icon">
+-                  {{ personaMenuOpen() ? 'expand_less' : 'expand_more' }}
+-                </span>
+-              </div>
+-              <p class="commander-role">{{ authService.currentPersona().role }}</p>
+-            </div>
+-          </button>
+-
+-          @if (personaMenuOpen()) {
+-            <div class="persona-dropdown-backdrop" (click)="personaMenuOpen.set(false)"></div>
+-            <div class="persona-dropdown glass-panel" data-testid="persona-dropdown">
+-              <div class="persona-dropdown-header">
+-                <span class="persona-header-title">Alternar Simulação de Usuário</span>
+-                <span class="persona-header-subtitle">Teste de Persistência & Isolamento Tático</span>
+-              </div>
+-              <div class="persona-options">
+-                @for (persona of authService.personas; track persona.id) {
+-                  <button
+-                    type="button"
+-                    class="persona-option"
+-                    [class.active]="persona.id === authService.currentPersona().id"
+-                    [attr.data-testid]="'persona-option-' + persona.id"
+-                    (click)="selectPersona(persona.id)"
+-                  >
+-                    <div class="avatar-ring small" [style.background]="persona.badgeColor">
+-                      <div class="avatar-inner">{{ persona.initials }}</div>
+-                    </div>
+-                    <div class="persona-option-info">
+-                      <span class="persona-option-name">{{ persona.name }}</span>
+-                      <span class="persona-option-role">{{ persona.clearanceLevel }}</span>
+-                    </div>
+-                    @if (persona.id === authService.currentPersona().id) {
+-                      <span class="material-symbols-outlined check-icon">check_circle</span>
+-                    }
+-                  </button>
+-                }
+-              </div>
+-            </div>
+-          }
+-        </div>
++        <button type="button" class="commander-profile-btn" data-testid="session-switcher"
++          (click)="openSession()" aria-label="Gerenciar sessão da API">
++          <div class="avatar-ring"><div class="avatar-inner"><span class="material-symbols-outlined">account_circle</span></div></div>
++          <div class="commander-details">
++            <p class="commander-name" data-testid="current-user-display">{{ session.displayName() }}</p>
++            <p class="commander-role">{{ session.context()?.state === 'ready' ? 'Contexto confirmado' : 'Sessão da API' }}</p>
++          </div>
++        </button>
+       </div>
+ 
+       <!-- Main Dynamic Content Routed from Modules -->
+-      <!-- Persona simulation belongs to this host; rebuild its routed view on selection. -->
+-      @for (personaId of [authService.currentPersona().id]; track personaId) {
+-        <router-outlet></router-outlet>
++      <!-- Session changes invalidate routed projections; references remain in the canonical bulk custody. -->
++      @if (session.busy() || session.projectionBlocked() || session.corporateProjectionBlocked()) {
++        <p role="status">{{ session.projectionBlocked() ? 'Encerramento pendente. Abra a sessão para verificar ou repetir o encerramento.' : session.corporateProjectionBlocked() ? 'Contexto corporativo indisponível. Abra a sessão para verificar novamente.' : 'Confirmando a sessão e seu contexto…' }}</p>
++      } @else {
++        @for (revision of [session.revision()]; track revision) {
++          <router-outlet></router-outlet>
++        }
+       }
+     </praxis-app-shell>
+ 
+@@ -175,8 +131,8 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
+ })
+ export class HeroAppShellComponent {
+   protected readonly themeService = inject(ThemeService);
+-  protected readonly authService = inject(AuthSimulationService);
+-  private readonly router = inject(Router);
++  protected readonly session = inject(HeroSessionService);
++  private readonly dialog = inject(MatDialog);
+ 
+   protected readonly brand: PraxisBrandConfig = {
+     title: 'Praxis Hero HQ',
+@@ -189,14 +145,13 @@ export class HeroAppShellComponent {
+   protected readonly quickLinks = ALL_NAV_ITEMS.slice(0, 8);
+ 
+   protected readonly footerStatus: PraxisShellFooterStatus = {
+-    title: 'Defcon 5 · Sistema Operacional',
+-    metric: 'Host Render: 32ms',
+-    statusTone: 'success',
+-    pulse: true,
++    title: 'Praxis Hero HQ',
++    metric: 'API Quickstart',
++    statusTone: 'neutral',
++    pulse: false,
+   };
+ 
+   protected readonly searchOpen = signal<boolean>(false);
+-  protected readonly personaMenuOpen = signal<boolean>(false);
+   protected readonly isDark = this.themeService.isDark;
+ 
+   @HostListener('window:keydown', ['$event'])
+@@ -209,9 +164,6 @@ export class HeroAppShellComponent {
+       if (this.searchOpen()) {
+         this.searchOpen.set(false);
+       }
+-      if (this.personaMenuOpen()) {
+-        this.personaMenuOpen.set(false);
+-      }
+     }
+   }
+ 
+@@ -219,14 +171,11 @@ export class HeroAppShellComponent {
+     this.searchOpen.set(true);
+   }
+ 
+-  protected selectPersona(personaId: string): void {
+-    this.authService.switchPersona(personaId);
+-    this.personaMenuOpen.set(false);
+-    const currentUrl = this.router.url;
+-    if (currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/?')) {
+-      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+-        this.router.navigateByUrl(currentUrl);
+-      });
+-    }
++  constructor() {
++    void this.session.check();
++  }
++
++  protected openSession(): void {
++    this.dialog.open(HeroSessionDialogComponent, { width: '440px', maxWidth: '95vw' });
+   }
+ }
+diff --git a/tsconfig.spec.json b/tsconfig.spec.json
+new file mode 100644
+index 0000000..9c7a2ee
+--- /dev/null
++++ b/tsconfig.spec.json
+@@ -0,0 +1,13 @@
++{
++  "extends": "./tsconfig.json",
++  "compilerOptions": {
++    "outDir": "./out-tsc/spec",
++    "types": [
++      "vitest/globals"
++    ]
++  },
++  "include": [
++    "src/**/*.spec.ts",
++    "src/**/*.d.ts"
++  ]
++}

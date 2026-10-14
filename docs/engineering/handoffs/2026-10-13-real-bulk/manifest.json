@@ -1,0 +1,11 @@
+{
+  "repository": "git@github.com:codexrodrigues/praxis-hero-hq-ui.git",
+  "baseline": "2081c87b3b86c35f3b8fbf56ff1c323e08e67573",
+  "mainObserved": "c1612d55921cb33607622f9af3735a2746db8446",
+  "patchSha256": "211349cc6c72f2bc3e07f3d4c485291400f8bb963adee8b09e7565379ddcb737",
+  "patchBytes": 188996,
+  "delivery": "reviewable-patch-not-runtime-applied",
+  "stopRequested": true,
+  "validationOfFinalTree": "PENDING",
+  "release": "NOT_PERFORMED"
+}
