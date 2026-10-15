@@ -25,7 +25,8 @@
           "criticalIncidents": 18,
           "criticalIncidentsBadge": "18",
           "highIncidents": 19,
-          "riscosPercent": 24
+          "riscosPercent": 24,
+          "defconScore": 4.2
         }
       },
       "derived": {
@@ -138,6 +139,44 @@
                   ]
                 },
                 0
+              ]
+            }
+          }
+        },
+        "kpis.defconScore": {
+          "dependsOn": ["kpis.criticalIncidents", "kpis.totalIncidents"],
+          "compute": {
+            "kind": "json-logic",
+            "expression": {
+              "if": [
+                { ">": [{ "var": "state.kpis.totalIncidents" }, 0] },
+                {
+                  "max": [
+                    1,
+                    {
+                      "min": [
+                        5,
+                        {
+                          "round": [
+                            {
+                              "-": [
+                                5,
+                                {
+                                  "*": [
+                                    { "/": [{ "var": "state.kpis.criticalIncidents" }, { "var": "state.kpis.totalIncidents" }] },
+                                    3.3
+                                  ]
+                                }
+                              ]
+                            },
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                5
               ]
             }
           }
@@ -1135,7 +1174,7 @@
         "shell": {
           "kind": "dashboard-card",
           "title": "Nível de Defesa Tática (DEFCON)",
-          "subtitle": "Escala DEFCON: 5 (Estável) a 1 (Alerta Máximo) · Status: 4.2",
+          "subtitle": "Escala DEFCON: 5 (Estável) a 1 (Alerta Máximo) · Status: {{state.kpis.defconScore}}",
           "icon": "speed",
           "showHeader": true
         },
@@ -1180,7 +1219,7 @@
                 "items": [
                   {
                     "estagio": "Prontidão Global",
-                    "defcon": 4.2
+                    "defcon": "${kpis.defconScore}"
                   }
                 ]
               },
@@ -1838,7 +1877,7 @@
       "items": [
         {
           "estagio": "Prontidão Global",
-          "defcon": 4.2
+          "defcon": "${kpis.defconScore}"
         }
       ]
     },
