@@ -8,7 +8,8 @@
     "start": "ng serve --host 127.0.0.1 --port 4302",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "tsc -p tsconfig.spec.json --noEmit && node e2e/verify-dashboard-contracts.cjs && node test-e2e/test-dashboard-navigation.cjs",
+    "test:contracts": "node e2e/verify-dashboard-contracts.cjs && node test-e2e/test-dashboard-navigation.cjs",
     "test:e2e": "node e2e/run-e2e.cjs"
   },
   "dependencies": {

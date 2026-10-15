@@ -1,6 +1,10 @@
 // Deterministic browser contract test: HTTP is mocked, never a remote database proof.
 // Runs the actual HQ, Page Builder, Core runtime and ApiConfigStorage through public UI.
-const { chromium, expect } = require('@playwright/test');
+const path = require('node:path');
+const playwrightPath = require.resolve('@playwright/test', {
+  paths: [__dirname, path.resolve(__dirname, '../../praxis-ui-angular/node_modules')],
+});
+const { chromium, expect } = require(playwrightPath);
 const assert = require('node:assert/strict');
 const appUrl = process.env.TEST_BASE_URL || 'http://127.0.0.1:4302';
 const definition = require('../src/app/pages/dashboard/dashboard-page.definition.json').dashboardPageDefinition;

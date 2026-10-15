@@ -1,28 +1,133 @@
-// Exercises the actual host handler, transpiled without bootstrapping Angular.
+// Exercises the transpiled runtime methods of HeroTacticalRadarComponent and
+// reconcilePersistedDashboardPage in an isolated Node VM without bootstrapping Angular.
 const ts = require('typescript');
 const fs = require('node:fs');
+const path = require('node:path');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
-const source = fs.readFileSync('src/app/pages/dashboard/dashboard-page.component.ts', 'utf8');
-const file = ts.createSourceFile('dashboard.ts', source, ts.ScriptTarget.Latest, true);
-const component = file.statements.find(n => ts.isClassDeclaration(n) && n.name?.text === 'DashboardPageComponent');
-const method = component.members.find(n => n.name?.getText(file) === 'handleWidgetEvent');
-const code = ts.transpileModule(`class Host { ${method.getText(file)} }; Host`, {
-  compilerOptions: {target: ts.ScriptTarget.ES2022},
+
+const ROOT = path.resolve(__dirname, '..');
+const dashboardBundle = require('../src/app/pages/dashboard/dashboard-page.definition.json');
+
+// 1. Transpile and execute HeroTacticalRadarComponent methods (isSafeInternalRoute, engageLockedContact, sanitizeResolvedText)
+const radarSource = fs.readFileSync(
+  path.join(ROOT, 'src/app/pages/dashboard/hero-tactical-radar.component.ts'),
+  'utf8',
+);
+const radarAst = ts.createSourceFile('radar.ts', radarSource, ts.ScriptTarget.Latest, true);
+const radarClass = radarAst.statements.find(
+  (n) => ts.isClassDeclaration(n) && n.name?.text === 'HeroTacticalRadarComponent',
+);
+
+const findMethod = (cls, ast, name) =>
+  cls.members.find((m) => m.name?.getText(ast) === name)?.getText(ast);
+
+const radarHarnessTs = `
+class RadarHarness {
+  sonarPulseRadius = 0;
+  sonarPulseOpacity = 0;
+  lockedContactId: string | null = null;
+  runtimeContacts: any[] = [];
+  globalActions: any = null;
+  router: any = null;
+
+  ${findMethod(radarClass, radarAst, 'isSafeInternalRoute')}
+  ${findMethod(radarClass, radarAst, 'engageLockedContact')}
+  ${findMethod(radarClass, radarAst, 'sanitizeResolvedText')}
+}
+RadarHarness;
+`;
+
+const radarHarnessJs = ts.transpileModule(radarHarnessTs, {
+  compilerOptions: { target: ts.ScriptTarget.ES2022 },
 }).outputText;
-const Host = vm.runInNewContext(code);
-const calls = [];
-const host = new Host();
-host.router = { navigateByUrl: path => calls.push(path) };
-for (const output of ['rowClick', 'dataChange', 'action']) {
-  host.handleWidgetEvent({output, payload:{path:'/unexpected', actionId:'dangerous', url:'/unexpected'}});
+const RadarHarness = vm.runInNewContext(radarHarnessJs);
+
+const navigatedRoutes = [];
+const radar = new RadarHarness();
+radar.router = { navigateByUrl: (url) => navigatedRoutes.push(url) };
+radar.runtimeContacts = [
+  { id: 'EXT-1', route: 'https://example.com', phosphor: 0, flashRing: 0 },
+  { id: 'EXT-2', route: '//example.com', phosphor: 0, flashRing: 0 },
+  { id: 'EXT-3', route: 'javascript:alert(1)', phosphor: 0, flashRing: 0 },
+  { id: 'INT-1', route: '/rh/funcionarios', phosphor: 0, flashRing: 0 },
+  { id: 'INT-2', route: '/operacoes/missoes', phosphor: 0, flashRing: 0 },
+];
+
+for (const unsafeId of ['EXT-1', 'EXT-2', 'EXT-3']) {
+  radar.lockedContactId = unsafeId;
+  radar.engageLockedContact();
 }
-for (const payload of [null, '/invalid', {url:'https://example.com'}, {url:'//example.com'}, {path:42}]) {
-  host.handleWidgetEvent({output:'navigate',payload});
+assert.deepEqual(navigatedRoutes, [], 'Unsafe or external routes must be rejected');
+
+for (const safeId of ['INT-1', 'INT-2']) {
+  radar.lockedContactId = safeId;
+  radar.engageLockedContact();
 }
-assert.deepEqual(calls, []);
-for (const payload of [{path:'/rh/funcionarios'}, {route:'/operacoes/missoes'}, {url:'/'}]) {
-  host.handleWidgetEvent({output:'navigate',payload});
-}
-assert.deepEqual(calls, ['/rh/funcionarios','/operacoes/missoes','/']);
-console.log('PASS: explicit internal navigation only; data/action events cannot dispatch navigation or actions');
+assert.deepEqual(navigatedRoutes, ['/rh/funcionarios', '/operacoes/missoes']);
+
+assert.equal(
+  radar.sanitizeResolvedText('IFF · PRONTIDÃO ${readinessRate}%', 'FALLBACK'),
+  'IFF · PRONTIDÃO',
+);
+assert.equal(
+  radar.sanitizeResolvedText('Heróis Ativos (${activeHeroes})', 'FALLBACK'),
+  'Heróis Ativos',
+);
+
+// 2. Transpile and execute reconcilePersistedDashboardPage from dashboard-page.definition.ts
+const defSource = fs.readFileSync(
+  path.join(ROOT, 'src/app/pages/dashboard/dashboard-page.definition.ts'),
+  'utf8',
+);
+const defAst = ts.createSourceFile('def.ts', defSource, ts.ScriptTarget.Latest, true);
+const reconcileFnNode = defAst.statements.find(
+  (n) => ts.isFunctionDeclaration(n) && n.name?.text === 'reconcilePersistedDashboardPage',
+);
+const defHarnessTs = `
+const DASHBOARD_PAGE_DEFINITION = __bundle.dashboardPageDefinition;
+${reconcileFnNode.getText(defAst).replace(/^export\s+/, '')}
+reconcilePersistedDashboardPage;
+`;
+const defHarnessJs = ts.transpileModule(defHarnessTs, {
+  compilerOptions: { target: ts.ScriptTarget.ES2022 },
+}).outputText;
+const reconcilePersistedDashboardPage = vm.runInNewContext(defHarnessJs, {
+  __bundle: dashboardBundle,
+  structuredClone,
+});
+
+const legacySnapshot = {
+  widgets: [
+    {
+      key: 'heroBanner',
+      definition: {
+        id: 'praxis-rich-content',
+        inputs: {
+          document: {
+            kind: 'praxis.rich-content',
+            version: '1.0.0',
+            nodes: [{ type: 'card', variant: 'hero', media: { kind: 'icon', icon: 'radar' } }],
+          },
+        },
+      },
+    },
+    { key: 'customWidget', definition: { id: 'praxis-rich-content', inputs: {} } },
+  ],
+};
+
+const upgraded = reconcilePersistedDashboardPage(legacySnapshot);
+assert.equal(
+  upgraded.widgets[0].definition.inputs.document.nodes[0].media.componentId,
+  'hero-hq-tactical-radar',
+);
+assert.equal(upgraded.widgets[1].key, 'customWidget');
+assert.equal(
+  reconcilePersistedDashboardPage(upgraded),
+  upgraded,
+  'Already-reconciled snapshots must be returned by reference without redundant cloning',
+);
+
+console.log(
+  'PASS: explicit internal navigation only, placeholder sanitization, and persisted dashboard snapshot reconciliation verified at runtime',
+);

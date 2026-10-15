@@ -1,6 +1,9 @@
-const { chromium } = require('D:/Developer/praxis-plataform/.worktrees/hero-hq-batch8/node_modules/@playwright/test');
 const path = require('path');
 const fs = require('fs');
+const playwrightPath = require.resolve('@playwright/test', {
+  paths: [__dirname, path.resolve(__dirname, '../../praxis-ui-angular/node_modules')],
+});
+const { chromium } = require(playwrightPath);
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://127.0.0.1:4302';
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots');

@@ -9,7 +9,9 @@ import {
 } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import {
+  HttpEvent,
   HttpInterceptorFn,
+  HttpResponse,
   provideHttpClient,
   withInterceptors,
 } from '@angular/common/http';
@@ -24,7 +26,7 @@ import {
   registerLocaleData,
 } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
-import { finalize } from 'rxjs';
+import { Observable, finalize, map, shareReplay, tap } from 'rxjs';
 
 registerLocaleData(localePt, 'pt-BR');
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -36,6 +38,7 @@ import {
   type ApiUrlConfig,
   ASYNC_CONFIG_STORAGE,
   ApiConfigStorage,
+  ComponentMetadataRegistry,
   GenericCrudService,
   GlobalActionService,
   LoadingContext,
@@ -69,11 +72,91 @@ import {
 import { providePraxisTableMetadata, providePraxisAnalyticalDrawerSchemas } from '@praxisui/table';
 import { providePraxisListMetadata } from '@praxisui/list';
 import { HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS } from './core/analytical-drawer-schemas.catalog';
+import { HERO_TACTICAL_RADAR_METADATA } from './pages/dashboard/hero-tactical-radar.component';
+import { reconcilePersistedDashboardPage } from './pages/dashboard/dashboard-page.definition';
 import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
 
 const API_URL_VALUE: ApiUrlConfig = {
   default: { baseUrl: PRAXIS_API_BASE_URL },
+};
+
+interface CachedStatsEntry {
+  expiresAt: number;
+  stream$: Observable<HttpEvent<unknown>>;
+}
+
+const statsRequestCache = new Map<string, CachedStatsEntry>();
+const STATS_DEDUPE_TTL_MS = 2500;
+
+const praxisStatsDedupeInterceptor: HttpInterceptorFn = (req, next) => {
+  if (req.method !== 'POST' || !req.url.endsWith('/stats/group-by')) {
+    return next(req);
+  }
+
+  const tenant = req.headers.get('X-Tenant-ID') || 'shield-hq';
+  const user = req.headers.get('X-User-ID') || 'nick.fury';
+  const bodyKey = typeof req.body === 'string' ? req.body : JSON.stringify(req.body ?? {});
+  const cacheKey = `${tenant}|${user}|${req.url}|${bodyKey}`;
+  const now = Date.now();
+  const cached = statsRequestCache.get(cacheKey);
+  if (cached && cached.expiresAt > now) {
+    return cached.stream$;
+  }
+
+  const stream$ = next(req).pipe(
+    tap({
+      error: () => {
+        statsRequestCache.delete(cacheKey);
+      },
+    }),
+    shareReplay({ bufferSize: 1, refCount: false }),
+  );
+
+  statsRequestCache.set(cacheKey, {
+    expiresAt: now + STATS_DEDUPE_TTL_MS,
+    stream$,
+  });
+
+  return stream$;
+};
+
+const praxisDashboardSnapshotReconcileInterceptor: HttpInterceptorFn = (req, next) => {
+  if (
+    req.method !== 'GET' ||
+    !req.url.includes('/praxis/config/ui') ||
+    !req.urlWithParams.includes('dynamic-page:')
+  ) {
+    return next(req);
+  }
+
+  return next(req).pipe(
+    map((event) => {
+      if (!(event instanceof HttpResponse) || !event.body || typeof event.body !== 'object') {
+        return event;
+      }
+      const body = event.body as Record<string, any>;
+      if (body['payload'] && typeof body['payload'] === 'object') {
+        const reconciledPayload = reconcilePersistedDashboardPage(body['payload']);
+        if (reconciledPayload !== body['payload']) {
+          return event.clone({
+            body: {
+              ...body,
+              payload: reconciledPayload,
+            },
+          });
+        }
+      } else if (Array.isArray(body['widgets'])) {
+        const reconciledBody = reconcilePersistedDashboardPage(body);
+        if (reconciledBody !== body) {
+          return event.clone({
+            body: reconciledBody,
+          });
+        }
+      }
+      return event;
+    }),
+  );
 };
 
 const praxisApiLoadingBridgeInterceptor: HttpInterceptorFn = (req, next) => {
@@ -145,6 +228,8 @@ export const appConfig: ApplicationConfig = {
           });
           return next(cloned);
         },
+        praxisStatsDedupeInterceptor,
+        praxisDashboardSnapshotReconcileInterceptor,
         praxisApiLoadingBridgeInterceptor,
       ]),
     ),
@@ -213,16 +298,23 @@ export const appConfig: ApplicationConfig = {
     LowerCasePipe,
     TitleCasePipe,
     provideEnvironmentInitializer(() => {
+      inject(ComponentMetadataRegistry).register(HERO_TACTICAL_RADAR_METADATA);
+
       (globalThis as any).PAX_FETCH_HEADERS = () => {
         if (typeof window === 'undefined') {
           return {};
         }
 
-        const tenant = localStorage.getItem('pax.api.tenant') || 'demo';
+        const tenant = localStorage.getItem('pax.api.tenant') || 'shield-hq';
+        const user =
+          localStorage.getItem('praxis.demoUserId') ||
+          localStorage.getItem('pax.api.user') ||
+          'nick.fury';
         const token = localStorage.getItem('pax.api.token') || '';
         const headers: Record<string, string> = {
           'X-Tenant-ID': tenant,
           'X-Tenant': tenant,
+          'X-User-ID': user,
           'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
         };
 

@@ -1,4 +1,8 @@
-const { chromium } = require('D:/Developer/praxis-plataform/.worktrees/hero-hq-batch8/node_modules/@playwright/test');
+const path = require('node:path');
+const playwrightPath = require.resolve('@playwright/test', {
+  paths: [__dirname, path.resolve(__dirname, '../../praxis-ui-angular/node_modules')],
+});
+const { chromium } = require(playwrightPath);
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://127.0.0.1:4302';
 
@@ -39,6 +43,68 @@ async function runE2E() {
 
     const radarMedia = page.locator('.hero-executive-banner .prx-rich-card-media, .hero-executive-banner [class*="media"]').first();
     assert(await radarMedia.count() > 0, 'Container de telemetria presente no banner');
+
+    const radarComponent = page.locator('.hero-executive-banner app-hero-tactical-radar').first();
+    assert(await radarComponent.count() > 0, 'Componente host app-hero-tactical-radar instanciado no slot de mídia do banner');
+
+    // Validar acessibilidade por teclado no radar tático (ArrowRight -> lock, Escape -> unlock)
+    const radarScope = radarComponent.locator('.radar-scope').first();
+    if ((await radarScope.count()) > 0) {
+      await radarScope.focus();
+      await page.keyboard.press('ArrowRight');
+      await page.waitForTimeout(150);
+      assert(
+        (await radarComponent.locator('.target-lock-hud').count()) > 0,
+        'Radar tático trava contato via teclado (ArrowRight) e exibe HUD de Target Lock',
+      );
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
+      assert(
+        (await radarComponent.locator('.target-lock-hud').count()) === 0,
+        'Radar tático limpa Target Lock ao pressionar Escape',
+      );
+    }
+
+    const shellReadiness = page.locator('[data-testid="shell-readiness-val"]').first();
+    assert(await shellReadiness.count() > 0, 'Indicador de prontidão dinâmico presente na barra superior da Shell');
+
+    // Validar Command Palette (Ctrl+K) com filtro em tempo real e navegação por teclado
+    await page.keyboard.press('Control+k');
+    await page.waitForTimeout(300);
+    const commandPalette = page.locator('[data-testid="command-palette-modal"]').first();
+    assert(await commandPalette.count() > 0, 'Command Palette (Ctrl+K) aberto com sucesso');
+
+    const commandInput = page.locator('[data-testid="command-palette-input"]').first();
+    await commandInput.fill('missao');
+    await page.waitForTimeout(200);
+    const filteredItemsCount = await page.locator('[data-testid="command-palette-item"]').count();
+    assert(filteredItemsCount >= 2 && filteredItemsCount < 16, `Command Palette filtra módulos em tempo real ("missao" -> ${filteredItemsCount} resultados)`);
+
+    await page.keyboard.press('ArrowDown');
+    await page.waitForTimeout(100);
+    const activeDescendant = await commandInput.getAttribute('aria-activedescendant');
+    assert(
+      activeDescendant === 'command-palette-opt-1',
+      'Command Palette atualiza aria-activedescendant="command-palette-opt-1" ao navegar com ArrowDown',
+    );
+
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    assert(await commandPalette.count() === 0, 'Command Palette fecha ao pressionar Escape');
+
+    // Validar abertura imediata ao digitar no campo de busca da Topbar
+    const topbarSearchInput = page.locator('.praxis-shell__search-input').first();
+    if ((await topbarSearchInput.count()) > 0) {
+      await topbarSearchInput.fill('folha');
+      await page.waitForTimeout(200);
+      assert(
+        (await commandPalette.count()) > 0,
+        'Digitar no campo de busca da Topbar abre imediatamente o Command Palette',
+      );
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(200);
+    }
+
 
     // -------------------------------------------------------------
     // Test 2: Bento KPIs & Governed Data

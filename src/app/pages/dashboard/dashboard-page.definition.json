@@ -25,6 +25,8 @@
           "criticalIncidents": 18,
           "criticalIncidentsBadge": "18",
           "highIncidents": 19,
+          "mediumIncidents": 22,
+          "lowIncidents": 15,
           "riscosPercent": 24,
           "defconScore": 4.2
         }
@@ -307,6 +309,8 @@
         "fallbackValue": {
           "criticalIncidents": 18,
           "highIncidents": 19,
+          "mediumIncidents": 22,
+          "lowIncidents": 15,
           "totalIncidents": 74
         }
       }
@@ -490,6 +494,13 @@
         "definition": {
           "id": "praxis-rich-content",
           "inputs": {
+            "context": {
+              "activeHeroes": "${kpis.activeHeroes}",
+              "inProgressMissions": "${kpis.inProgressMissions}",
+              "criticalIncidents": "${kpis.criticalIncidents}",
+              "highIncidents": "${kpis.highIncidents}",
+              "readinessRate": "${kpis.readinessRate}"
+            },
             "document": {
               "kind": "praxis.rich-content",
               "version": "1.0.0",
@@ -572,10 +583,64 @@
                     }
                   ],
                   "media": {
-                    "kind": "icon",
-                    "icon": "radar",
+                    "kind": "component",
+                    "componentId": "hero-hq-tactical-radar",
                     "placement": "trailing",
-                    "verticalAlign": "center"
+                    "verticalAlign": "center",
+                    "componentInputs": {
+                      "speed": "normal",
+                      "interactive": true,
+                      "palette": "emerald",
+                      "maxRange": 120,
+                      "label": "IFF · PRONTIDÃO ${readinessRate}%",
+                      "contacts": [
+                        {
+                          "id": "TRK-01",
+                          "bearing": 42,
+                          "range": 0.48,
+                          "heading": 135,
+                          "classification": "friendly",
+                          "label": "Heróis Ativos (${activeHeroes})",
+                          "route": "/rh/funcionarios"
+                        },
+                        {
+                          "id": "TRK-02",
+                          "bearing": 118,
+                          "range": 0.72,
+                          "heading": 290,
+                          "classification": "warning",
+                          "label": "Riscos Altos (${highIncidents})",
+                          "route": "/operacoes/incidentes"
+                        },
+                        {
+                          "id": "TRK-03",
+                          "bearing": 215,
+                          "range": 0.34,
+                          "heading": 45,
+                          "classification": "friendly",
+                          "label": "Missões Ativas (${inProgressMissions})",
+                          "route": "/operacoes/missoes"
+                        },
+                        {
+                          "id": "TRK-04",
+                          "bearing": 308,
+                          "range": 0.56,
+                          "heading": 120,
+                          "classification": "critical",
+                          "label": "Ameaças Críticas (${criticalIncidents})",
+                          "route": "/risco/ameacas"
+                        },
+                        {
+                          "id": "TRK-05",
+                          "bearing": 348,
+                          "range": 0.84,
+                          "heading": 195,
+                          "classification": "neutral",
+                          "label": "Satélite Relé",
+                          "route": "/ativos/equipamentos"
+                        }
+                      ]
+                    }
                   }
                 }
               ]
@@ -604,6 +669,15 @@
                   "variant": "unstyled",
                   "tone": "neutral",
                   "className": "glass-panel bento-kpi-card",
+                  "interaction": {
+                    "mode": "action",
+                    "action": {
+                      "actionId": "navigation.openRoute",
+                      "payload": {
+                        "path": "/rh/funcionarios"
+                      }
+                    }
+                  },
                   "header": [
                     {
                       "type": "compose",
@@ -665,6 +739,15 @@
                   "variant": "unstyled",
                   "tone": "neutral",
                   "className": "glass-panel bento-kpi-card",
+                  "interaction": {
+                    "mode": "action",
+                    "action": {
+                      "actionId": "navigation.openRoute",
+                      "payload": {
+                        "path": "/operacoes/missoes"
+                      }
+                    }
+                  },
                   "header": [
                     {
                       "type": "compose",
@@ -726,6 +809,15 @@
                   "variant": "unstyled",
                   "tone": "neutral",
                   "className": "glass-panel bento-kpi-card",
+                  "interaction": {
+                    "mode": "action",
+                    "action": {
+                      "actionId": "navigation.openRoute",
+                      "payload": {
+                        "path": "/rh/folha-pagamento"
+                      }
+                    }
+                  },
                   "header": [
                     {
                       "type": "compose",
@@ -787,6 +879,15 @@
                   "variant": "unstyled",
                   "tone": "neutral",
                   "className": "glass-panel bento-kpi-card",
+                  "interaction": {
+                    "mode": "action",
+                    "action": {
+                      "actionId": "navigation.openRoute",
+                      "payload": {
+                        "path": "/operacoes/incidentes"
+                      }
+                    }
+                  },
                   "header": [
                     {
                       "type": "compose",
@@ -1079,6 +1180,24 @@
         "definition": {
           "id": "praxis-chart",
           "inputs": {
+            "data": [
+              {
+                "severidade": "CRITICA",
+                "total": "${kpis.criticalIncidents}"
+              },
+              {
+                "severidade": "ALTA",
+                "total": "${kpis.highIncidents}"
+              },
+              {
+                "severidade": "MEDIA",
+                "total": "${kpis.mediumIncidents}"
+              },
+              {
+                "severidade": "BAIXA",
+                "total": "${kpis.lowIncidents}"
+              }
+            ],
             "config": {
               "id": "hero-incident-severity-donut-chart",
               "type": "donut",
@@ -1099,31 +1218,25 @@
                 }
               },
               "dataSource": {
-                "kind": "remote",
-                "resourcePath": "risk-intelligence/vw-indicadores-incidentes",
-                "query": {
-                  "sourceKind": "praxis.stats",
-                  "statsOperation": "group-by",
-                  "statsPath": "risk-intelligence/vw-indicadores-incidentes/stats/group-by",
-                  "statsRequest": {
-                    "filter": {},
-                    "field": "severidade",
-                    "metric": {
-                      "operation": "COUNT",
-                      "alias": "total"
-                    }
+                "kind": "local",
+                "items": [
+                  {
+                    "severidade": "CRITICA",
+                    "total": "${kpis.criticalIncidents}"
                   },
-                  "dimensions": [
-                    "severidade"
-                  ],
-                  "metrics": [
-                    {
-                      "field": "total",
-                      "aggregation": "count",
-                      "alias": "total"
-                    }
-                  ]
-                }
+                  {
+                    "severidade": "ALTA",
+                    "total": "${kpis.highIncidents}"
+                  },
+                  {
+                    "severidade": "MEDIA",
+                    "total": "${kpis.mediumIncidents}"
+                  },
+                  {
+                    "severidade": "BAIXA",
+                    "total": "${kpis.lowIncidents}"
+                  }
+                ]
               },
               "axes": {
                 "x": {
@@ -1144,7 +1257,7 @@
                   "categoryField": "severidade",
                   "metric": {
                     "field": "total",
-                    "aggregation": "count"
+                    "aggregation": "sum"
                   },
                   "labels": {
                     "visible": true
@@ -1174,13 +1287,19 @@
         "shell": {
           "kind": "dashboard-card",
           "title": "Nível de Defesa Tática (DEFCON)",
-          "subtitle": "Escala DEFCON: 5 (Estável) a 1 (Alerta Máximo) · Status: {{state.kpis.defconScore}}",
+          "subtitle": "Escala DEFCON: 5 (Estável) a 1 (Alerta Máximo)",
           "icon": "speed",
           "showHeader": true
         },
         "definition": {
           "id": "praxis-chart",
           "inputs": {
+            "data": [
+              {
+                "estagio": "Prontidão Global",
+                "defcon": "${kpis.defconScore}"
+              }
+            ],
             "config": {
               "id": "hero-defcon-gauge-chart",
               "type": "gauge",
@@ -1564,13 +1683,24 @@
         "definition": {
           "id": "praxis-rich-content",
           "inputs": {
+            "context": {
+              "activeHeroes": "${kpis.activeHeroes}",
+              "totalHeroes": "${kpis.totalHeroes}",
+              "readinessRate": "${kpis.readinessRate}",
+              "inProgressMissions": "${kpis.inProgressMissions}",
+              "plannedMissions": "${kpis.plannedMissions}",
+              "totalMissions": "${kpis.totalMissions}",
+              "criticalIncidents": "${kpis.criticalIncidents}",
+              "highIncidents": "${kpis.highIncidents}",
+              "defconScore": "${kpis.defconScore}"
+            },
             "document": {
               "kind": "praxis.rich-content",
               "version": "1.0.0",
               "nodes": [
                 {
                   "type": "timeline",
-                  "title": "Atividades Recentes de Campo",
+                  "title": "Atividades Recentes de Campo (${kpis.totalMissions} Missões)",
                   "position": "right",
                   "orientation": "vertical",
                   "markerVariant": "dot",
@@ -1578,43 +1708,71 @@
                   "items": [
                     {
                       "title": "Interceptação Orbital Completa",
-                      "description": "Esquadrão Vanguarda neutralizou satélite espião em órbita LEO-2.",
+                      "subtitle": "Esquadrão Vanguarda neutralizou satélite espião em órbita LEO-2.",
+                      "meta": "Perímetro orbital assegurado · Telemetria nominal",
                       "opposite": "15:20",
                       "badge": "Concluído",
                       "markerColor": "success",
                       "markerStyle": "filled",
                       "connectorColor": "success",
-                      "connectorVariant": "solid"
+                      "connectorVariant": "solid",
+                      "action": {
+                        "actionId": "navigation.openRoute",
+                        "payload": {
+                          "path": "/operacoes/missoes"
+                        }
+                      }
                     },
                     {
-                      "title": "Contenção no Reator Arc",
-                      "description": "Equipe Stark isolou vazamento térmico e restabeleceu campo magnético.",
+                      "title": "Despacho Tático & Contenção (${kpis.inProgressMissions} em Curso)",
+                      "subtitle": "Forças especiais mobilizadas com ${kpis.plannedMissions} operações adicionais no plano de voo.",
+                      "meta": "Clique para inspecionar teatro de missões ativas",
                       "opposite": "13:45",
-                      "badge": "Em Curso",
+                      "badge": "${kpis.inProgressMissionsBadge} Em Curso",
                       "markerColor": "accent",
                       "markerStyle": "filled",
                       "connectorColor": "accent",
-                      "connectorVariant": "solid"
+                      "connectorVariant": "solid",
+                      "action": {
+                        "actionId": "navigation.openRoute",
+                        "payload": {
+                          "path": "/operacoes/missoes"
+                        }
+                      }
                     },
                     {
-                      "title": "Alerta DEFCON 4 Elevado",
-                      "description": "Detecção de anomalia quântica não catalogada no Ártico.",
+                      "title": "Vigilância DEFCON (${kpis.defconScore}) · ${kpis.criticalIncidents} Ameaças Críticas",
+                      "subtitle": "Monitoramento de ${kpis.highIncidents} incidentes de severidade alta e contenção de perímetro.",
+                      "meta": "Protocolo de resposta imediata acionado pelo QG",
                       "opposite": "11:10",
-                      "badge": "Alerta",
+                      "badge": "${kpis.criticalIncidentsBadge} Críticos",
                       "markerColor": "warn",
                       "markerStyle": "outlined",
                       "connectorColor": "warn",
-                      "connectorVariant": "dashed"
+                      "connectorVariant": "dashed",
+                      "action": {
+                        "actionId": "navigation.openRoute",
+                        "payload": {
+                          "path": "/operacoes/incidentes"
+                        }
+                      }
                     },
                     {
-                      "title": "Início de Turno & Calibração",
-                      "description": "Checklist tático de prontidão executado por 21 heróis da base.",
+                      "title": "Início de Turno & Calibração de Prontidão (${kpis.readinessRate}%)",
+                      "subtitle": "Checklist tático de prontidão confirmado para ${kpis.activeHeroes} de ${kpis.totalHeroes} heróis da base.",
+                      "meta": "Sincronização biométrica e trajes homologados",
                       "opposite": "08:00",
-                      "badge": "Rotina",
+                      "badge": "${kpis.activeHeroes} Ativos",
                       "markerColor": "neutral",
                       "markerStyle": "filled",
                       "connectorColor": "neutral",
-                      "connectorVariant": "solid"
+                      "connectorVariant": "solid",
+                      "action": {
+                        "actionId": "navigation.openRoute",
+                        "payload": {
+                          "path": "/rh/funcionarios"
+                        }
+                      }
                     }
                   ]
                 }
@@ -1635,6 +1793,19 @@
         "definition": {
           "id": "praxis-rich-content",
           "inputs": {
+            "context": {
+              "activeHeroes": "${kpis.activeHeroes}",
+              "totalHeroes": "${kpis.totalHeroes}",
+              "readinessRate": "${kpis.readinessRate}",
+              "inProgressMissions": "${kpis.inProgressMissions}",
+              "plannedMissions": "${kpis.plannedMissions}",
+              "totalMissions": "${kpis.totalMissions}",
+              "latestPayrollNetMillion": "${kpis.latestPayrollNetMillion}",
+              "latestPayrollMonth": "${kpis.latestPayrollMonth}",
+              "criticalIncidents": "${kpis.criticalIncidents}",
+              "highIncidents": "${kpis.highIncidents}",
+              "totalIncidents": "${kpis.totalIncidents}"
+            },
             "document": {
               "kind": "praxis.rich-content",
               "version": "1.0.0",
@@ -1652,6 +1823,7 @@
                       "variant": "unstyled",
                       "title": "Heróis & Colaboradores",
                       "subtitle": "Cadastros completos, identidades civis, remunerações e histórico funcional.",
+                      "meta": "${kpis.activeHeroes}/${kpis.totalHeroes} ativos · ${kpis.readinessRate}% prontidão",
                       "icon": "group",
                       "ctaLabel": "Acessar RH",
                       "ctaIcon": "arrow_forward",
@@ -1668,6 +1840,7 @@
                       "variant": "unstyled",
                       "title": "Centro de Missões",
                       "subtitle": "Despacho tático, formação de squads, diário de bordo e desfechos operacionais.",
+                      "meta": "${kpis.inProgressMissions} em curso · ${kpis.plannedMissions} planejadas",
                       "icon": "military_tech",
                       "ctaLabel": "Operações",
                       "ctaIcon": "arrow_forward",
@@ -1684,6 +1857,7 @@
                       "variant": "unstyled",
                       "title": "Ativos & Armaduras",
                       "subtitle": "Controle de custódia, manutenção preventiva de trajes e frota aérea/terrestre.",
+                      "meta": "Arsenal homologado · Telemetria de campo",
                       "icon": "inventory_2",
                       "ctaLabel": "Ver Ativos",
                       "ctaIcon": "arrow_forward",
@@ -1700,6 +1874,7 @@
                       "variant": "unstyled",
                       "title": "Suprimentos & Contratos",
                       "subtitle": "Fornecedores homologados, requisições de compra e tecnologia bélica avançada.",
+                      "meta": "Folha R$ ${kpis.latestPayrollNetMillion} M · ${kpis.latestPayrollMonth}",
                       "icon": "contract",
                       "ctaLabel": "Contratos",
                       "ctaIcon": "arrow_forward",
@@ -1716,6 +1891,7 @@
                       "variant": "unstyled",
                       "title": "Inteligência & Ameaças",
                       "subtitle": "Monitoramento geoespacial de vilões, acordos regulatórios e indenizações públicas.",
+                      "meta": "${kpis.criticalIncidents} críticos · ${kpis.highIncidents} severidade alta",
                       "icon": "radar",
                       "ctaLabel": "Monitorar",
                       "ctaIcon": "arrow_forward",
@@ -1732,6 +1908,7 @@
                       "variant": "unstyled",
                       "title": "Ranking Reputacional",
                       "subtitle": "Índices consolidados de aprovação popular, respaldo governamental e governança.",
+                      "meta": "${kpis.totalIncidents} ocorrências auditadas no ciclo",
                       "icon": "monitoring",
                       "ctaLabel": "Métricas",
                       "ctaIcon": "arrow_forward",
@@ -1772,31 +1949,25 @@
       }
     },
     "dataSource": {
-      "kind": "remote",
-      "resourcePath": "risk-intelligence/vw-indicadores-incidentes",
-      "query": {
-        "sourceKind": "praxis.stats",
-        "statsOperation": "group-by",
-        "statsPath": "risk-intelligence/vw-indicadores-incidentes/stats/group-by",
-        "statsRequest": {
-          "filter": {},
-          "field": "severidade",
-          "metric": {
-            "operation": "COUNT",
-            "alias": "total"
-          }
+      "kind": "local",
+      "items": [
+        {
+          "severidade": "CRITICA",
+          "total": "${kpis.criticalIncidents}"
         },
-        "dimensions": [
-          "severidade"
-        ],
-        "metrics": [
-          {
-            "field": "total",
-            "aggregation": "count",
-            "alias": "total"
-          }
-        ]
-      }
+        {
+          "severidade": "ALTA",
+          "total": "${kpis.highIncidents}"
+        },
+        {
+          "severidade": "MEDIA",
+          "total": "${kpis.mediumIncidents}"
+        },
+        {
+          "severidade": "BAIXA",
+          "total": "${kpis.lowIncidents}"
+        }
+      ]
     },
     "axes": {
       "x": {
@@ -1817,7 +1988,7 @@
         "categoryField": "severidade",
         "metric": {
           "field": "total",
-          "aggregation": "count"
+          "aggregation": "sum"
         },
         "labels": {
           "visible": true

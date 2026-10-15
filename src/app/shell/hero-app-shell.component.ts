@@ -1,26 +1,52 @@
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   HostListener,
+  ViewChild,
+  computed,
   inject,
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import {
+  EnterpriseRuntimeContextService,
   PraxisAppShellComponent,
   PraxisCustomizationModeService,
   type PraxisBrandConfig,
   type PraxisNavGroup,
   type PraxisShellFooterStatus,
 } from '@praxisui/core';
-import { ALL_NAV_ITEMS, HERO_NAVIGATION } from '../core/navigation.model';
+import { HERO_NAVIGATION, type NavItem } from '../core/navigation.model';
+import { PRAXIS_API_BASE_URL } from '../core/platform.config';
 import { ThemeService } from '../core/theme.service';
 import { AuthSimulationService } from '../core/auth-simulation.service';
+
+export interface CommandPaletteItem extends NavItem {
+  readonly groupLabel: string;
+}
+
+interface ShellStatsBucket {
+  key?: string | number | boolean | null;
+  label?: string | null;
+  value?: number | null;
+  count?: number | null;
+  values?: Record<string, number | null> | null;
+}
+
+interface ShellStatsEnvelope {
+  data?: {
+    buckets?: ShellStatsBucket[];
+  };
+  buckets?: ShellStatsBucket[];
+}
 
 @Component({
   selector: 'app-hero-shell',
@@ -32,13 +58,15 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
       [brand]="brand"
       [navigation]="navigation"
       [user]="null"
-      [footerStatus]="footerStatus"
+      [footerStatus]="footerStatus()"
       [isDarkTheme]="isDark()"
       [showThemeToggle]="false"
       [showCustomizationToggle]="true"
       [showSearch]="true"
+      [clearSearchOnBlur]="true"
       searchPlaceholder="Buscar no comando... (Ctrl+K)"
-      (searchSubmit)="openSearchModal()"
+      (searchChange)="onTopbarSearchInput($event)"
+      (searchSubmit)="openSearchModal($event)"
     >
       <!-- Header Actions projected into PraxisAppShell canonical slot -->
       <div shell-header-actions class="hud-extra-actions">
@@ -56,20 +84,26 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
           }
         </mat-menu>
         <!-- Tactical Readiness Meter -->
-        <div class="readiness-meter">
+        <div class="readiness-meter" [title]="readinessTooltip()">
           <div class="readiness-header">
             <span>Prontidão</span>
-            <span class="readiness-val">98,4%</span>
+            <span class="readiness-val" data-testid="shell-readiness-val">{{ readinessLabel() }}</span>
           </div>
           <div class="readiness-bar">
-            <div class="readiness-progress" style="width: 98.4%"></div>
+            <div class="readiness-progress" [style.width.%]="readinessRate()"></div>
           </div>
         </div>
 
         <!-- Tactical Notifications Trigger -->
-        <button type="button" class="hud-btn notification-btn" aria-label="Notificações">
+        <button
+          type="button"
+          class="hud-btn notification-btn"
+          [attr.aria-label]="'Notificações: ' + criticalIncidents() + ' incidentes críticos'"
+          [title]="criticalIncidents() + ' incidentes críticos em contenção'"
+          (click)="openCriticalIncidents()"
+        >
           <span class="material-symbols-outlined">notifications</span>
-          <span class="notification-count">3</span>
+          <span class="notification-count" data-testid="shell-notification-count">{{ criticalIncidents() }}</span>
         </button>
 
         <!-- Tactical Persona / Authentication Simulation Switcher -->
@@ -159,35 +193,107 @@ import { AuthSimulationService } from '../core/auth-simulation.service';
 
     <!-- Quick Command Modal (Ctrl+K) -->
     @if (searchOpen()) {
-      <div class="modal-overlay" (click)="searchOpen.set(false)">
-        <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-overlay" (click)="closeSearchModal()" data-testid="command-palette-modal">
+        <div
+          class="modal-card"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Busca rápida de módulos e centros de comando"
+          (click)="$event.stopPropagation()"
+        >
           <div class="search-input-header">
-            <span class="material-symbols-outlined">search</span>
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
             <input
               #searchInput
               type="text"
-              placeholder="Buscar heróis, missões, módulos..."
-              (keydown.escape)="searchOpen.set(false)"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="command-palette-listbox"
+              [attr.aria-expanded]="filteredLinks().length > 0"
+              [attr.aria-activedescendant]="
+                filteredLinks().length > 0 ? 'command-palette-opt-' + selectedSearchIndex() : null
+              "
+              data-testid="command-palette-input"
+              placeholder="Buscar heróis, missões, módulos, DEFCON..."
+              aria-label="Filtrar módulos e centros de comando"
+              [value]="searchQuery()"
+              (input)="onSearchQueryChange($any($event.target).value)"
+              (keydown)="onSearchInputKeydown($event)"
             />
+            @if (searchQuery()) {
+              <button
+                type="button"
+                class="modal-close-btn"
+                (click)="onSearchQueryChange('')"
+                aria-label="Limpar filtro"
+                title="Limpar filtro"
+              >
+                <span class="material-symbols-outlined">backspace</span>
+              </button>
+            }
             <button
               type="button"
               class="modal-close-btn"
-              (click)="searchOpen.set(false)"
+              (click)="closeSearchModal()"
               aria-label="Fechar busca"
             >
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
           <div class="quick-links">
-            <p class="quick-title">Acesso Rápido aos Centros de Comando</p>
-            <div class="links-list">
-              @for (item of quickLinks; track item.path) {
-                <a [routerLink]="item.path" (click)="searchOpen.set(false)" class="quick-link-item">
-                  <span class="material-symbols-outlined">{{ item.icon }}</span>
-                  <span>{{ item.label }}</span>
-                </a>
-              }
+            <div class="quick-header-row">
+              <p class="quick-title">
+                Acesso Rápido aos Centros de Comando ({{ filteredLinks().length }})
+              </p>
+              <span class="quick-kbd-hint">↑↓ navegar · Enter abrir · Esc fechar</span>
             </div>
+            @if (filteredLinks().length > 0) {
+              <div #linksList id="command-palette-listbox" class="links-list" role="listbox" aria-label="Resultados da busca">
+                @for (item of filteredLinks(); track item.path; let i = $index) {
+                  <a
+                    [id]="'command-palette-opt-' + i"
+                    [routerLink]="item.path"
+                    role="option"
+                    [attr.aria-selected]="i === selectedSearchIndex()"
+                    [class.active]="i === selectedSearchIndex()"
+                    [class.restricted]="isItemRestricted(item)"
+                    data-testid="command-palette-item"
+                    (mouseenter)="selectedSearchIndex.set(i)"
+                    (click)="navigateToCommandItem(item, $event)"
+                    class="quick-link-item"
+                  >
+                    <span class="material-symbols-outlined quick-link-icon">{{ item.icon }}</span>
+                    <div class="quick-link-copy">
+                      <div class="quick-link-title-row">
+                        <span class="quick-link-label">{{ item.label }}</span>
+                        @if (item.badge) {
+                          <span
+                            class="quick-link-badge"
+                            [class.quick-link-badge--restricted]="isItemRestricted(item)"
+                            [title]="
+                              isItemRestricted(item)
+                                ? 'Requer credencial DEFCON 1 (Direção Executiva)'
+                                : 'Credencial DEFCON 1 autorizada'
+                            "
+                          >
+                            @if (isItemRestricted(item)) {
+                              <span class="material-symbols-outlined badge-lock-icon" aria-hidden="true">lock</span>
+                            }
+                            {{ item.badge }}
+                          </span>
+                        }
+                      </div>
+                      <span class="quick-link-desc">{{ item.groupLabel }} · {{ item.description }}</span>
+                    </div>
+                  </a>
+                }
+              </div>
+            } @else {
+              <div class="quick-empty-state" data-testid="command-palette-empty" role="status">
+                <span class="material-symbols-outlined">travel_explore</span>
+                <p>Nenhum módulo encontrado para "{{ searchQuery() }}".</p>
+              </div>
+            }
           </div>
         </div>
       </div>
@@ -199,8 +305,54 @@ export class HeroAppShellComponent {
   protected readonly themeService = inject(ThemeService);
   protected readonly authService = inject(AuthSimulationService);
   private readonly customizationMode = inject(PraxisCustomizationModeService, { optional: true });
+  private readonly runtimeContext = inject(EnterpriseRuntimeContextService, { optional: true });
+  private readonly http = inject(HttpClient, { optional: true });
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+
+  protected readonly activeHeroes = signal<number>(53);
+  protected readonly totalHeroes = signal<number>(101);
+  protected readonly criticalIncidents = signal<number>(18);
+  protected readonly totalIncidents = signal<number>(74);
+
+  protected readonly readinessRate = computed<number>(() => {
+    const total = this.totalHeroes();
+    return total > 0 ? Math.round((this.activeHeroes() / total) * 1000) / 10 : 0;
+  });
+
+  protected readonly readinessLabel = computed<string>(() =>
+    `${this.readinessRate().toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`,
+  );
+
+  protected readonly readinessTooltip = computed<string>(
+    () => `${this.activeHeroes()} de ${this.totalHeroes()} heróis prontos para ação (${this.readinessLabel()})`,
+  );
+
+  protected readonly defconScore = computed<number>(() => {
+    const total = this.totalIncidents();
+    if (total <= 0) {
+      return 5;
+    }
+    const raw = 5 - (this.criticalIncidents() / total) * 3.3;
+    return Math.max(1, Math.min(5, Math.round(raw * 10) / 10));
+  });
+
+  protected readonly footerStatus = computed<PraxisShellFooterStatus>(() => {
+    const score = this.defconScore();
+    const level = Math.round(score);
+    const statusLabel =
+      level <= 2
+        ? 'Alerta Máximo'
+        : level <= 4
+          ? 'Vigilância Tática'
+          : 'Sistema Operacional';
+    return {
+      title: `Defcon ${level} (${score.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}) · ${statusLabel}`,
+      metric: `${this.activeHeroes()}/${this.totalHeroes()} Ativos · ${this.criticalIncidents()} Críticos`,
+      statusTone: level <= 2 ? 'error' : level <= 4 ? 'warning' : 'success',
+      pulse: true,
+    };
+  });
 
   protected readonly authDeniedResource = toSignal(
     this.route.queryParams.pipe(
@@ -209,12 +361,20 @@ export class HeroAppShellComponent {
     { initialValue: null },
   );
 
+  constructor() {
+    this.refreshTelemetry();
+  }
+
   protected dismissAuthDenied(): void {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { authDenied: null, resource: null },
       queryParamsHandling: 'merge',
     });
+  }
+
+  protected openCriticalIncidents(): void {
+    void this.router.navigateByUrl('/operacoes/incidentes');
   }
 
   protected readonly brand: PraxisBrandConfig = {
@@ -225,28 +385,60 @@ export class HeroAppShellComponent {
   };
 
   protected readonly navigation: PraxisNavGroup[] = HERO_NAVIGATION;
-  protected readonly quickLinks = ALL_NAV_ITEMS.slice(0, 8);
+  protected readonly allCommandItems: readonly CommandPaletteItem[] = HERO_NAVIGATION.flatMap((group) =>
+    group.items.map((item) => ({
+      ...item,
+      groupLabel: group.label,
+    })),
+  );
 
-  protected readonly footerStatus: PraxisShellFooterStatus = {
-    title: 'Defcon 5 · Sistema Operacional',
-    metric: 'Host Render: 32ms',
-    statusTone: 'success',
-    pulse: true,
-  };
+  @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
+  @ViewChild('linksList') private linksListRef?: ElementRef<HTMLElement>;
 
   protected readonly searchOpen = signal<boolean>(false);
+  protected readonly searchQuery = signal<string>('');
+  protected readonly selectedSearchIndex = signal<number>(0);
   protected readonly personaMenuOpen = signal<boolean>(false);
   protected readonly isDark = this.themeService.isDark;
+
+  protected readonly filteredLinks = computed<readonly CommandPaletteItem[]>(() => {
+    const rawQuery = this.searchQuery().trim();
+    if (!rawQuery) {
+      return this.allCommandItems;
+    }
+    const normalizedQuery = HeroAppShellComponent.normalizeSearchText(rawQuery);
+    const terms = normalizedQuery.split(/\s+/).filter(Boolean);
+    return this.allCommandItems.filter((item) => {
+      const haystack = HeroAppShellComponent.normalizeSearchText(
+        `${item.label} ${item.groupLabel} ${item.description} ${item.path} ${item.badge ?? ''}`,
+      );
+      return terms.every((term) => haystack.includes(term));
+    });
+  });
+
+  protected isItemRestricted(item: CommandPaletteItem): boolean {
+    if (item.badge !== 'DEFCON 1') {
+      return false;
+    }
+    return !this.authService.currentPersona().clearanceLevel.includes('DEFCON 1');
+  }
+
+  private static normalizeSearchText(text: string): string {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  }
 
   @HostListener('window:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
-      this.searchOpen.set(true);
+      this.openSearchModal(this.searchQuery());
     }
     if (event.key === 'Escape') {
       if (this.searchOpen()) {
-        this.searchOpen.set(false);
+        this.closeSearchModal();
       }
       if (this.personaMenuOpen()) {
         this.personaMenuOpen.set(false);
@@ -254,19 +446,181 @@ export class HeroAppShellComponent {
     }
   }
 
-  protected openSearchModal(): void {
+  protected onTopbarSearchInput(query: string): void {
+    const trimmed = typeof query === 'string' ? query.trim() : '';
+    if (!trimmed) {
+      return;
+    }
+    this.openSearchModal(trimmed);
+  }
+
+  protected openSearchModal(initialQuery = ''): void {
+    this.searchQuery.set(typeof initialQuery === 'string' ? initialQuery : '');
+    this.selectedSearchIndex.set(0);
     this.searchOpen.set(true);
+    setTimeout(() => {
+      const el = this.searchInputRef?.nativeElement;
+      if (el) {
+        el.focus();
+        if (typeof el.setSelectionRange === 'function') {
+          const len = el.value.length;
+          el.setSelectionRange(len, len);
+        }
+      }
+    }, 0);
+  }
+
+  protected closeSearchModal(): void {
+    this.searchOpen.set(false);
+    this.searchQuery.set('');
+    this.selectedSearchIndex.set(0);
+  }
+
+  protected onSearchQueryChange(value: string): void {
+    this.searchQuery.set(value ?? '');
+    this.selectedSearchIndex.set(0);
+  }
+
+  protected onSearchInputKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.closeSearchModal();
+      return;
+    }
+    const items = this.filteredLinks();
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (items.length > 0) {
+        this.selectedSearchIndex.update((idx) => (idx + 1) % items.length);
+        this.scrollActiveOptionIntoView();
+      }
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (items.length > 0) {
+        this.selectedSearchIndex.update((idx) => (idx - 1 + items.length) % items.length);
+        this.scrollActiveOptionIntoView();
+      }
+      return;
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const idx = Math.max(0, Math.min(this.selectedSearchIndex(), items.length - 1));
+      const target = items[idx];
+      if (target) {
+        this.navigateToCommandItem(target);
+      }
+    }
+  }
+
+  private scrollActiveOptionIntoView(): void {
+    setTimeout(() => {
+      const idx = this.selectedSearchIndex();
+      const activeEl = this.linksListRef?.nativeElement?.querySelector<HTMLElement>(
+        `#command-palette-opt-${idx}`,
+      );
+      if (activeEl && typeof activeEl.scrollIntoView === 'function') {
+        activeEl.scrollIntoView({ block: 'nearest' });
+      }
+    }, 0);
+  }
+
+  protected navigateToCommandItem(item: CommandPaletteItem, event?: Event): void {
+    event?.preventDefault();
+    this.closeSearchModal();
+    void this.router.navigateByUrl(item.path);
   }
 
   protected selectPersona(personaId: string): void {
     this.customizationMode?.setCustomizing(false);
     this.authService.switchPersona(personaId);
+    this.runtimeContext?.invalidate();
     this.personaMenuOpen.set(false);
+    this.refreshTelemetry();
     const currentUrl = this.router.url;
     if (currentUrl && currentUrl !== '/' && !currentUrl.startsWith('/?')) {
       this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
         this.router.navigateByUrl(currentUrl);
       });
+    } else if (this.authDeniedResource()) {
+      this.dismissAuthDenied();
     }
   }
+
+  private refreshTelemetry(): void {
+    if (!this.http) {
+      return;
+    }
+
+    this.http
+      .post<ShellStatsEnvelope>(
+        `${PRAXIS_API_BASE_URL}/human-resources/funcionarios/stats/group-by`,
+        {
+          filter: {},
+          field: 'ativo',
+          metrics: [{ operation: 'COUNT', alias: 'total' }],
+        },
+      )
+      .pipe(catchError(() => of(null)))
+      .subscribe((res) => {
+        const buckets = res?.data?.buckets ?? res?.buckets;
+        if (!Array.isArray(buckets) || !buckets.length) {
+          return;
+        }
+        let active = 0;
+        let total = 0;
+        for (const bucket of buckets) {
+          const count = Number(bucket.values?.['total'] ?? bucket.value ?? bucket.count ?? 0);
+          if (!Number.isFinite(count) || count < 0) {
+            continue;
+          }
+          total += count;
+          const key = String(bucket.key ?? bucket.label ?? '').toLowerCase();
+          if (key === 'true' || key === '1' || key === 'ativo') {
+            active += count;
+          }
+        }
+        if (total > 0) {
+          this.activeHeroes.set(active);
+          this.totalHeroes.set(total);
+        }
+      });
+
+    this.http
+      .post<ShellStatsEnvelope>(
+        `${PRAXIS_API_BASE_URL}/risk-intelligence/vw-indicadores-incidentes/stats/group-by`,
+        {
+          filter: {},
+          field: 'severidade',
+          metrics: [{ operation: 'COUNT', alias: 'total' }],
+        },
+      )
+      .pipe(catchError(() => of(null)))
+      .subscribe((res) => {
+        const buckets = res?.data?.buckets ?? res?.buckets;
+        if (!Array.isArray(buckets) || !buckets.length) {
+          return;
+        }
+        let critical = 0;
+        let total = 0;
+        for (const bucket of buckets) {
+          const count = Number(bucket.values?.['total'] ?? bucket.value ?? bucket.count ?? 0);
+          if (!Number.isFinite(count) || count < 0) {
+            continue;
+          }
+          total += count;
+          const key = String(bucket.key ?? bucket.label ?? '').toUpperCase();
+          if (key === 'CRITICA' || key === 'CRÍTICA') {
+            critical += count;
+          }
+        }
+        if (total > 0) {
+          this.criticalIncidents.set(critical);
+          this.totalIncidents.set(total);
+        }
+      });
+  }
 }
+
