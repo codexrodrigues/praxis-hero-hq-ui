@@ -47,8 +47,14 @@ import {
   provideGlobalConfig,
   provideGlobalConfigReady,
   provideGlobalConfigSeed,
+  providePraxisDynamicPageMetadata,
+  providePraxisFooterLinksMetadata,
+  providePraxisHeroBannerMetadata,
+  providePraxisLegalNoticeMetadata,
   providePraxisLoadingDefaults,
   providePraxisRelatedResourceOutletMetadata,
+  providePraxisRichTextBlockMetadata,
+  providePraxisUserContextSummaryMetadata,
   withPraxisHttpLoading,
 } from '@praxisui/core';
 import { providePraxisDynamicFieldsCore } from '@praxisui/dynamic-fields';
@@ -63,13 +69,20 @@ import {
   providePraxisDialogGlobalActions,
   providePraxisSurfaceGlobalActions,
 } from '@praxisui/dialog';
-import { providePraxisDynamicFormMetadata } from '@praxisui/dynamic-form';
+import {
+  providePraxisDynamicFormMetadata,
+  providePraxisFilterFormMetadata,
+} from '@praxisui/dynamic-form';
+import { providePraxisExpansionMetadata } from '@praxisui/expansion';
+import { providePraxisFilesUploadMetadata } from '@praxisui/files-upload';
+import { providePraxisMetadataEditorMetadata } from '@praxisui/metadata-editor';
 import { providePraxisPageBuilderMetadata } from '@praxisui/page-builder';
 import { providePraxisRichContentMetadata } from '@praxisui/rich-content';
 import {
   providePraxisSettingsPanelBridge,
   providePraxisSurfaceDrawerBridge,
 } from '@praxisui/settings-panel';
+import { providePraxisStepperMetadata } from '@praxisui/stepper';
 import { providePraxisTableMetadata, providePraxisAnalyticalDrawerSchemas } from '@praxisui/table';
 import { providePraxisTabsMetadata } from '@praxisui/tabs';
 import { providePraxisListMetadata } from '@praxisui/list';
@@ -236,17 +249,28 @@ export const appConfig: ApplicationConfig = {
       ]),
     ),
     ...providePraxisDynamicFieldsCore(),
+    providePraxisFooterLinksMetadata(),
+    providePraxisHeroBannerMetadata(),
+    providePraxisLegalNoticeMetadata(),
+    providePraxisDynamicPageMetadata(),
+    providePraxisRelatedResourceOutletMetadata(),
+    providePraxisRichTextBlockMetadata(),
+    providePraxisRichContentMetadata(),
+    providePraxisUserContextSummaryMetadata(),
     providePraxisDynamicFormMetadata(),
+    providePraxisFilterFormMetadata(),
+    providePraxisExpansionMetadata(),
+    providePraxisFilesUploadMetadata(),
+    providePraxisListMetadata(),
+    providePraxisMetadataEditorMetadata(),
     providePraxisTableMetadata(),
     providePraxisAnalyticalDrawerSchemas(HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS),
-    providePraxisListMetadata(),
-    providePraxisCrudMetadata(),
-    providePraxisRelatedResourceOutletMetadata(),
     providePraxisTabsMetadata(),
+    providePraxisStepperMetadata(),
+    providePraxisCrudMetadata(),
     providePraxisDialogMetadata(),
     providePraxisDialogGlobalActions(),
     providePraxisSurfaceGlobalActions(),
-    providePraxisRichContentMetadata(),
     providePraxisChartsMetadata(),
     providePraxisPageBuilderMetadata(),
     ...providePraxisCharts(),

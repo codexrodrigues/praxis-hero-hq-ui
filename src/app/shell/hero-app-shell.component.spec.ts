@@ -144,12 +144,16 @@ describe('HeroAppShellComponent', () => {
     expect((component as any).filteredLinks()[0].path).toBe('/rh/folha-pagamento');
   });
 
-  it('registers praxis-tabs and praxis-related-resource-outlet in ComponentMetadataRegistry for Employee 360 authoring and runtime', () => {
+  it('registers praxis-tabs, praxis-related-resource-outlet and full widget catalog in ComponentMetadataRegistry for Employee 360 authoring and runtime', () => {
     httpMock.match(() => true).forEach((req) => req.flush({ data: { buckets: [] } }));
 
     const registry = TestBed.inject(ComponentMetadataRegistry);
     const tabsMeta = registry.get('praxis-tabs');
     const outletMeta = registry.get('praxis-related-resource-outlet');
+    const expansionMeta = registry.get('praxis-expansion');
+    const stepperMeta = registry.get('praxis-stepper');
+    const filesUploadMeta = registry.get('praxis-files-upload');
+    const filterFormMeta = registry.get('praxis-filter-form');
 
     expect(tabsMeta).toBeDefined();
     expect(tabsMeta?.component).toBeDefined();
@@ -159,6 +163,11 @@ describe('HeroAppShellComponent', () => {
     expect(outletMeta?.component).toBeDefined();
     expect(outletMeta?.configEditor?.component).toBeDefined();
     expect(outletMeta?.ports?.some((p) => p.id === 'applyContext' && p.direction === 'input')).toBeTrue();
+
+    expect(expansionMeta).toBeDefined();
+    expect(stepperMeta).toBeDefined();
+    expect(filesUploadMeta).toBeDefined();
+    expect(filterFormMeta).toBeDefined();
   });
 });
 
