@@ -2,6 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
+import {
+  ComponentMetadataRegistry,
+  providePraxisRelatedResourceOutletMetadata,
+} from '@praxisui/core';
+import { providePraxisTabsMetadata } from '@praxisui/tabs';
 import { of } from 'rxjs';
 import { HeroAppShellComponent } from './hero-app-shell.component';
 
@@ -18,6 +23,8 @@ describe('HeroAppShellComponent', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
+        providePraxisRelatedResourceOutletMetadata(),
+        providePraxisTabsMetadata(),
         {
           provide: ActivatedRoute,
           useValue: {
@@ -136,5 +143,23 @@ describe('HeroAppShellComponent', () => {
     expect((component as any).searchQuery()).toBe('folha');
     expect((component as any).filteredLinks()[0].path).toBe('/rh/folha-pagamento');
   });
+
+  it('registers praxis-tabs and praxis-related-resource-outlet in ComponentMetadataRegistry for Employee 360 authoring and runtime', () => {
+    httpMock.match(() => true).forEach((req) => req.flush({ data: { buckets: [] } }));
+
+    const registry = TestBed.inject(ComponentMetadataRegistry);
+    const tabsMeta = registry.get('praxis-tabs');
+    const outletMeta = registry.get('praxis-related-resource-outlet');
+
+    expect(tabsMeta).toBeDefined();
+    expect(tabsMeta?.component).toBeDefined();
+    expect(tabsMeta?.configEditor?.component).toBeDefined();
+
+    expect(outletMeta).toBeDefined();
+    expect(outletMeta?.component).toBeDefined();
+    expect(outletMeta?.configEditor?.component).toBeDefined();
+    expect(outletMeta?.ports?.some((p) => p.id === 'applyContext' && p.direction === 'input')).toBeTrue();
+  });
 });
+
 

@@ -254,6 +254,49 @@ assert(
   'dashboard-theme.scss estiliza badges de telemetria (.prx-rich-action-card__meta) e itens acionáveis da timeline (.prx-rich-timeline__item-body--actionable)',
 );
 
+// ---------------------------------------------------------------------------
+// 5. Catálogo Funcionário 360 — Tabs & Related Resource Outlet (Issue #6)
+// ---------------------------------------------------------------------------
+console.log('\n[Suite 5] Invariantes do Catálogo Funcionário 360 — Tabs e Related Resource Outlet (Issue #6)');
+assert(
+  appConfigSrc.includes('providePraxisRelatedResourceOutletMetadata') &&
+    appConfigSrc.includes('providePraxisRelatedResourceOutletMetadata()'),
+  'app.config.ts importa e registra providePraxisRelatedResourceOutletMetadata() (@praxisui/core) no bootstrap do Hero HQ',
+);
+assert(
+  appConfigSrc.includes('providePraxisTabsMetadata') &&
+    appConfigSrc.includes('providePraxisTabsMetadata()'),
+  'app.config.ts importa e registra providePraxisTabsMetadata() (@praxisui/tabs) no bootstrap do Hero HQ',
+);
+
+const praxisDeps = Object.entries(pkgJson.dependencies || {}).filter(([name]) =>
+  name.startsWith('@praxisui/'),
+);
+const allAlignedRc27Plus =
+  praxisDeps.length >= 20 &&
+  praxisDeps.every(([, version]) => {
+    const match = /^10\.0\.0-rc\.(\d+)$/.exec(String(version));
+    return Boolean(match && Number(match[1]) >= 27);
+  });
+assert(
+  allAlignedRc27Plus,
+  'Todas as dependências @praxisui/* em package.json estão alinhadas em >= 10.0.0-rc.27 (com suporte a fiação aninhada de abas e isolamento de pilha de drawers)',
+);
+
+const coreDtsPath = path.join(ROOT, 'node_modules/@praxisui/core/types/praxisui-core.d.ts');
+const tabsDtsPath = path.join(ROOT, 'node_modules/@praxisui/tabs/types/praxisui-tabs.d.ts');
+if (fs.existsSync(coreDtsPath) && fs.existsSync(tabsDtsPath)) {
+  const coreDts = fs.readFileSync(coreDtsPath, 'utf8');
+  const tabsDts = fs.readFileSync(tabsDtsPath, 'utf8');
+  assert(
+    coreDts.includes('providePraxisRelatedResourceOutletMetadata') &&
+      coreDts.includes('PRAXIS_RELATED_RESOURCE_OUTLET_COMPONENT_METADATA') &&
+      tabsDts.includes('providePraxisTabsMetadata') &&
+      tabsDts.includes('PRAXIS_TABS_COMPONENT_METADATA'),
+    'Pacotes instalados @praxisui/core e @praxisui/tabs exportam os providers e metadados canônicos para praxis-related-resource-outlet e praxis-tabs',
+  );
+}
+
 console.log('\n================================================================');
 if (failed === 0) {
   console.log(` [SUCESSO] Todas as ${passed} asserções de contrato passaram!`);
@@ -264,3 +307,4 @@ if (failed === 0) {
   console.log('================================================================\n');
   process.exit(1);
 }
+

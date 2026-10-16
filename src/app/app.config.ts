@@ -48,6 +48,7 @@ import {
   provideGlobalConfigReady,
   provideGlobalConfigSeed,
   providePraxisLoadingDefaults,
+  providePraxisRelatedResourceOutletMetadata,
   withPraxisHttpLoading,
 } from '@praxisui/core';
 import { providePraxisDynamicFieldsCore } from '@praxisui/dynamic-fields';
@@ -70,6 +71,7 @@ import {
   providePraxisSurfaceDrawerBridge,
 } from '@praxisui/settings-panel';
 import { providePraxisTableMetadata, providePraxisAnalyticalDrawerSchemas } from '@praxisui/table';
+import { providePraxisTabsMetadata } from '@praxisui/tabs';
 import { providePraxisListMetadata } from '@praxisui/list';
 import { HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS } from './core/analytical-drawer-schemas.catalog';
 import { HERO_TACTICAL_RADAR_METADATA } from './pages/dashboard/hero-tactical-radar.component';
@@ -239,6 +241,8 @@ export const appConfig: ApplicationConfig = {
     providePraxisAnalyticalDrawerSchemas(HERO_HQ_ANALYTICAL_DRAWER_SCHEMAS),
     providePraxisListMetadata(),
     providePraxisCrudMetadata(),
+    providePraxisRelatedResourceOutletMetadata(),
+    providePraxisTabsMetadata(),
     providePraxisDialogMetadata(),
     providePraxisDialogGlobalActions(),
     providePraxisSurfaceGlobalActions(),
