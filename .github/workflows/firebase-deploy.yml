@@ -9,8 +9,6 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    env:
-      FIREBASE_SECRET: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRAXIS_HERO_HQ }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,6 +19,25 @@ jobs:
           node-version: 22
           cache: 'npm'
 
+      - name: Validate Firebase Hosting credential
+        env:
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRAXIS_HERO_HQ }}
+        run: |
+          node <<'NODE'
+          try {
+            const credential = JSON.parse(process.env.FIREBASE_SECRET || 'null');
+            if (credential?.type !== 'service_account' ||
+                credential.project_id !== 'praxis-hero-hq' ||
+                credential.client_email !== 'github-hero-hosting@praxis-hero-hq.iam.gserviceaccount.com') {
+              throw new Error();
+            }
+            require('node:crypto').createPrivateKey(credential.private_key);
+          } catch {
+            console.error('::error::FIREBASE_SERVICE_ACCOUNT_PRAXIS_HERO_HQ is missing or invalid for the dedicated Hero Hosting account.');
+            process.exit(1);
+          }
+          NODE
+
       - name: Install dependencies
         run: npm ci
 
@@ -29,7 +46,6 @@ jobs:
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
-        if: env.FIREBASE_SECRET != ''
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRAXIS_HERO_HQ }}'
