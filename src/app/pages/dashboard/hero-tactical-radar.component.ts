@@ -193,6 +193,10 @@ const STATIC_COMPASS_TICKS: CompassTick[] = (() => {
 const STATIC_COMPASS_LABELS: CompassLabel[] = (() => {
   const labels: CompassLabel[] = [];
   for (let deg = 0; deg < 360; deg += 30) {
+    if (deg === 180) {
+      // 180° cardinal sits directly beneath the bottom HUD telemetry pill
+      continue;
+    }
     const rad = (deg - 90) * (Math.PI / 180);
     const rLabel = 105.8;
     labels.push({
@@ -234,7 +238,7 @@ const STATIC_CONIC_WEDGE_SLICES: ConicWedgeSlice[] = (() => {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
-      class="hero-radar-scope"
+      class="hero-radar-scope radar-scope"
       role="region"
       [attr.aria-label]="resolveScopeAriaLabel()"
       [attr.tabindex]="interactive() ? 0 : null"
@@ -623,6 +627,8 @@ const STATIC_CONIC_WEDGE_SLICES: ConicWedgeSlice[] = (() => {
       <!-- Micro Telemetry Status Bar -->
       <div
         class="hero-radar-scope__hud"
+        [class.hero-radar-scope__hud--active]="pointerInside || !!lockedContactId"
+        [class.target-lock-hud]="!!lockedContactId"
         aria-live="polite"
         aria-atomic="true"
         [style.color]="activePalette().primary"
@@ -631,7 +637,7 @@ const STATIC_CONIC_WEDGE_SLICES: ConicWedgeSlice[] = (() => {
       >
         <span class="hero-radar-scope__hud-bearing">{{ hudBearingText }}</span>
         <span class="hero-radar-scope__hud-sep">·</span>
-        <span class="hero-radar-scope__hud-target">{{ hudTargetText }}</span>
+        <span class="hero-radar-scope__hud-target">{{ hudDisplayTargetText }}</span>
       </div>
     </div>
   `,
@@ -731,21 +737,22 @@ const STATIC_CONIC_WEDGE_SLICES: ConicWedgeSlice[] = (() => {
     .hero-radar-scope__hud {
       position: absolute;
       bottom: 5px;
-      left: 8px;
-      right: 8px;
+      left: 7px;
+      right: 7px;
       z-index: 3;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      padding: 2px 7px;
+      gap: 4px;
+      padding: 2.5px 7px;
       border-radius: 999px;
-      background: rgba(2, 8, 14, 0.78);
-      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(2, 8, 14, 0.9);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(148, 163, 184, 0.2);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       line-height: 1.2;
       white-space: nowrap;
       overflow: hidden;
@@ -753,14 +760,34 @@ const STATIC_CONIC_WEDGE_SLICES: ConicWedgeSlice[] = (() => {
       cursor: pointer;
     }
 
+    .hero-radar-scope__hud--active {
+      flex-direction: column;
+      gap: 1px;
+      padding: 3px 6px;
+      border-radius: 9px;
+      font-size: 8.5px;
+      letter-spacing: 0.015em;
+      line-height: 1.15;
+    }
+
+    .hero-radar-scope__hud-bearing {
+      flex-shrink: 0;
+    }
+
     .hero-radar-scope__hud-sep {
       opacity: 0.55;
+      flex-shrink: 0;
+    }
+
+    .hero-radar-scope__hud--active .hero-radar-scope__hud-sep {
+      display: none;
     }
 
     .hero-radar-scope__hud-target {
+      max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
-      opacity: 0.92;
+      opacity: 0.94;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -970,8 +997,18 @@ export class HeroTacticalRadarComponent
     }
   }
 
+  get hudDisplayTargetText(): string {
+    if (!this.pointerInside && /^IFF\b/i.test(this.hudBearingText)) {
+      const stripped = this.hudTargetText.replace(/^IFF\s*[·\-:]\s*/i, '').trim();
+      if (stripped) {
+        return stripped;
+      }
+    }
+    return this.hudTargetText;
+  }
+
   resolveScopeAriaLabel(): string {
-    return `Radar Tático PPI: ${this.hudBearingText} · ${this.hudTargetText}`;
+    return `Radar Tático PPI: ${this.hudBearingText} · ${this.hudDisplayTargetText}`;
   }
 
   onPaletteCycleClick(event: MouseEvent): void {

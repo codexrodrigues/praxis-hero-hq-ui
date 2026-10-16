@@ -59,6 +59,8 @@ describe('HeroTacticalRadarComponent', () => {
     fixture.detectChanges();
 
     expect((component as any).hudTargetText).toBe('IFF · PRONTIDÃO');
+    expect(component.hudDisplayTargetText).toBe('PRONTIDÃO');
+    expect(component.compassLabels.some((item) => item.text === '180°')).toBe(false);
     const contacts = (component as any).runtimeContacts as Array<{ label: string }>;
     expect(contacts[0].label).toBe('Heróis Ativos');
   });
