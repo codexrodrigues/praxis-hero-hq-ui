@@ -26,7 +26,7 @@ export type HeroRadarContactClassification =
   | 'warning'
   | 'critical';
 
-export type HeroRadarPalette = 'emerald' | 'cyan' | 'amber';
+export type HeroRadarPalette = 'theme' | 'emerald' | 'cyan' | 'amber';
 
 export interface HeroRadarContact {
   id: string;
@@ -93,7 +93,32 @@ interface PhosphorPaletteSpec {
 const SCOPE_CENTER = 120;
 const SCOPE_RADIUS = 94;
 
+/**
+ * Cores do app (tokens de `theme-praxis`/`workspace-themes`) com fallback para o
+ * tema dark-tech. O escopo permanece escuro em qualquer tema; o matiz do fundo e o
+ * fósforo seguem `--primary`, e os contatos seguem `--ready`, `--warning`,
+ * `--destructive` e `--category-sky`, clareados para manter contraste sobre o escopo.
+ */
+const THEME_PRIMARY = 'var(--primary, #67d4f2)';
+const THEME_SCOPE_BASE = '#02060c';
+
+/**
+ * Garante luminância mínima (OKLCH) sobre o escopo escuro: em temas claros os tokens
+ * semânticos são escuros e ficariam ilegíveis; o matiz e o croma do tema são preservados.
+ */
+const liftToken = (token: string, fallback: string, minLightness = 0.76): string =>
+  `oklch(from var(${token}, ${fallback}) clamp(${minLightness}, l, 0.92) c h)`;
+
 const PALETTE_SPECS: Record<HeroRadarPalette, PhosphorPaletteSpec> = {
+  theme: {
+    primary: liftToken('--primary', '#67d4f2', 0.8),
+    friendly: liftToken('--ready', '#34d399', 0.78),
+    bg1: `color-mix(in oklab, ${THEME_PRIMARY} 22%, ${THEME_SCOPE_BASE})`,
+    bg2: `color-mix(in oklab, ${THEME_PRIMARY} 11%, ${THEME_SCOPE_BASE})`,
+    bg3: `color-mix(in oklab, ${THEME_PRIMARY} 4%, ${THEME_SCOPE_BASE})`,
+    containerBg: `color-mix(in oklab, ${THEME_PRIMARY} 8%, ${THEME_SCOPE_BASE})`,
+    borderAlpha: `color-mix(in oklab, ${liftToken('--primary', '#67d4f2', 0.8)} 45%, transparent)`,
+  },
   emerald: {
     primary: '#00ff66',
     friendly: '#00ff66',
@@ -811,7 +836,7 @@ export class HeroTacticalRadarComponent
 
   @ViewChild('radarSvg') radarSvgRef?: ElementRef<SVGSVGElement>;
 
-  readonly palette = input<HeroRadarPalette>('emerald');
+  readonly palette = input<HeroRadarPalette>('theme');
   readonly speed = input<'slow' | 'normal' | 'fast'>('normal');
   readonly interactive = input<boolean>(true);
   readonly maxRange = input<number>(120);
@@ -831,12 +856,12 @@ export class HeroTacticalRadarComponent
   private readonly paletteOverride = signal<HeroRadarPalette | null>(null);
 
   readonly activePaletteKey = computed<HeroRadarPalette>(
-    () => this.paletteOverride() ?? this.palette() ?? 'emerald',
+    () => this.paletteOverride() ?? this.palette() ?? 'theme',
   );
 
   readonly activePalette = computed<PhosphorPaletteSpec>(() => {
     const configuredPalette = this.activePaletteKey();
-    return PALETTE_SPECS[configuredPalette] ?? PALETTE_SPECS.emerald;
+    return PALETTE_SPECS[configuredPalette] ?? PALETTE_SPECS.theme;
   });
 
   readonly maxScaleRange = computed<number>(() => {
@@ -1013,7 +1038,7 @@ export class HeroTacticalRadarComponent
 
   onPaletteCycleClick(event: MouseEvent): void {
     event.stopPropagation();
-    const order: HeroRadarPalette[] = ['emerald', 'cyan', 'amber'];
+    const order: HeroRadarPalette[] = ['theme', 'emerald', 'cyan', 'amber'];
     const current = this.activePaletteKey();
     const next = order[(order.indexOf(current) + 1) % order.length];
     this.paletteOverride.set(next);
@@ -1208,11 +1233,11 @@ export class HeroTacticalRadarComponent
   resolveContactColor(contact: RuntimeRadarContact): string {
     switch (contact.classification) {
       case 'critical':
-        return '#ff3b5c';
+        return liftToken('--destructive', '#f87171', 0.7);
       case 'warning':
-        return '#ffbf00';
+        return liftToken('--warning', '#fbbf24', 0.8);
       case 'neutral':
-        return '#38bdf8';
+        return liftToken('--category-sky', '#38bdf8', 0.78);
       case 'friendly':
       default:
         return this.activePalette().friendly;
@@ -1416,7 +1441,7 @@ export const HERO_TACTICAL_RADAR_METADATA: ComponentDocMeta = {
   component: HeroTacticalRadarComponent,
   lib: 'praxis-hero-hq-ui',
   inputs: [
-    { name: 'palette', type: 'string', description: 'Paleta de fósforo (emerald, cyan, amber).' },
+    { name: 'palette', type: 'string', description: 'Paleta de fósforo (theme, emerald, cyan, amber).' },
     { name: 'speed', type: 'string', description: 'Velocidade de varredura (slow, normal, fast).' },
     { name: 'interactive', type: 'boolean', description: 'Habilita cursor EBL/VRM e target lock.' },
     { name: 'maxRange', type: 'number', description: 'Alcance radial máximo em km.' },

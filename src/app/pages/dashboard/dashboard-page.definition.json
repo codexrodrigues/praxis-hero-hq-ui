@@ -590,7 +590,7 @@
                     "componentInputs": {
                       "speed": "normal",
                       "interactive": true,
-                      "palette": "emerald",
+                      "palette": "theme",
                       "maxRange": 120,
                       "label": "IFF · PRONTIDÃO ${readinessRate}%",
                       "contacts": [

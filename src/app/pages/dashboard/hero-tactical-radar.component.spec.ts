@@ -178,5 +178,23 @@ describe('HeroTacticalRadarComponent', () => {
     expect(upgradedMedia?.kind).toBe('component');
     expect(upgradedMedia?.componentId).toBe('hero-hq-tactical-radar');
   });
+
+  it('defaults to the semantic theme palette and cycles through theme, emerald, cyan, and amber', () => {
+    expect(component.activePaletteKey()).toBe('theme');
+    expect(component.activePalette().primary).toContain('--primary');
+    expect(component.resolveContactColor({ classification: 'critical' } as any)).toContain('--destructive');
+    expect(component.resolveContactColor({ classification: 'warning' } as any)).toContain('--warning');
+    expect(component.resolveContactColor({ classification: 'neutral' } as any)).toContain('--category-sky');
+
+    const clickEvent = new MouseEvent('click');
+    component.onPaletteCycleClick(clickEvent);
+    expect(component.activePaletteKey()).toBe('emerald');
+    component.onPaletteCycleClick(clickEvent);
+    expect(component.activePaletteKey()).toBe('cyan');
+    component.onPaletteCycleClick(clickEvent);
+    expect(component.activePaletteKey()).toBe('amber');
+    component.onPaletteCycleClick(clickEvent);
+    expect(component.activePaletteKey()).toBe('theme');
+  });
 });
 
