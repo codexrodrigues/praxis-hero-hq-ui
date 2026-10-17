@@ -85,32 +85,21 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Toda a Frota', filter: {}, icon: 'rocket_launch' },
           { id: 'operacional', label: 'Em Operação / Prontidão', filter: { status: 'OPERACIONAL' }, icon: 'verified' },
           { id: 'manutencao', label: 'Em Manutenção / Hangar', filter: { status: 'MANUTENCAO' }, icon: 'build' },
           { id: 'aerea', label: 'Aeronaves & Espaciais', filter: { tiposIn: ['AEREO', 'ESPACIAL'] }, icon: 'flight' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['nome', 'tipo', 'status', 'proprietarioId'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -118,4 +107,5 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

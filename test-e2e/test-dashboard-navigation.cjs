@@ -6,6 +6,8 @@ const path = require('node:path');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
 
+require('./test-route-catalog.cjs');
+
 const ROOT = path.resolve(__dirname, '..');
 const dashboardBundle = require('../src/app/pages/dashboard/dashboard-page.definition.json');
 

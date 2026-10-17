@@ -84,32 +84,21 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Bases', filter: {}, icon: 'hub' },
           { id: 'sigilo', label: 'Segurança Máxima', filter: { sigilo: 'ULTRA_SECRETA' }, icon: 'security' },
           { id: 'terra', label: 'Bases Terrestres', filter: { planeta: 'Terra' }, icon: 'public' },
           { id: 'espaco', label: 'Órbita / Espaço', filter: { tipo: 'ORBITAL' }, icon: 'satellite_alt' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['nome', 'tipo', 'sigilo', 'planeta'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -117,4 +106,5 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

@@ -9,7 +9,9 @@ import {
 } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import {
+  HttpErrorResponse,
   HttpEvent,
+  HttpHeaders,
   HttpInterceptorFn,
   HttpResponse,
   provideHttpClient,
@@ -26,7 +28,7 @@ import {
   registerLocaleData,
 } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
-import { Observable, finalize, map, shareReplay, tap } from 'rxjs';
+import { Observable, catchError, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
 
 registerLocaleData(localePt, 'pt-BR');
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -46,7 +48,6 @@ import {
   PRAXIS_LOADING_CTX,
   provideGlobalConfig,
   provideGlobalConfigReady,
-  provideGlobalConfigSeed,
   providePraxisDynamicPageMetadata,
   providePraxisFooterLinksMetadata,
   providePraxisHeroBannerMetadata,
@@ -206,6 +207,124 @@ const praxisApiLoadingBridgeInterceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
+const praxisSimulatedSessionConfigFallbackInterceptor: HttpInterceptorFn = (req, next) => {
+  if (!req.url.includes('/praxis/config/ui') || typeof localStorage === 'undefined') {
+    return next(req);
+  }
+
+  return next(req).pipe(
+    catchError((error: unknown) => {
+      if (!(error instanceof HttpErrorResponse) || error.status !== 401) {
+        return throwError(() => error);
+      }
+
+      const errorCode =
+        typeof error.error === 'object' && error.error !== null
+          ? (error.error as Record<string, unknown>)['code']
+          : undefined;
+      if (errorCode !== 'SESSION_REQUIRED') {
+        return throwError(() => error);
+      }
+
+      const tenant = req.headers.get('X-Tenant-ID') || 'shield-hq';
+      const user = req.headers.get('X-User-ID') || 'nick.fury';
+      let componentId = req.params.get('componentId') || '';
+      if (!componentId) {
+        try {
+          const parsed = new URL(req.urlWithParams, 'http://localhost');
+          componentId = parsed.searchParams.get('componentId') || 'default';
+        } catch {
+          componentId = 'default';
+        }
+      }
+      const storageKey = `praxis:ui-config-sim:${tenant}:${user}:${componentId}`;
+
+      if (req.method === 'GET') {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) {
+          return throwError(
+            () =>
+              new HttpErrorResponse({
+                status: 404,
+                statusText: 'Not Found',
+                url: req.urlWithParams,
+                error: { message: 'Not found in simulated persona config store' },
+              }),
+          );
+        }
+        try {
+          const record = JSON.parse(raw) as {
+            payload: unknown;
+            scope: string;
+            version: number;
+            etag: string;
+          };
+          return of(
+            new HttpResponse({
+              status: 200,
+              url: req.urlWithParams,
+              headers: new HttpHeaders({ ETag: record.etag || `W/"${record.version || 1}"` }),
+              body: record,
+            }),
+          );
+        } catch {
+          return throwError(() => error);
+        }
+      }
+
+      if (req.method === 'PUT' || req.method === 'POST') {
+        let existingVersion = 0;
+        const raw = localStorage.getItem(storageKey);
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw) as { version?: number };
+            existingVersion = Number(parsed?.version ?? 0) || 0;
+          } catch {
+            existingVersion = 0;
+          }
+        }
+        const incomingBody =
+          typeof req.body === 'string'
+            ? (JSON.parse(req.body) as Record<string, unknown>)
+            : ((req.body ?? {}) as Record<string, unknown>);
+        const payload =
+          incomingBody && typeof incomingBody === 'object' && 'payload' in incomingBody
+            ? incomingBody['payload']
+            : incomingBody;
+        const nextVersion = existingVersion + 1;
+        const nextEtag = `W/"${nextVersion}"`;
+        const record = {
+          payload,
+          scope: 'user',
+          version: nextVersion,
+          etag: nextEtag,
+        };
+        localStorage.setItem(storageKey, JSON.stringify(record));
+        return of(
+          new HttpResponse({
+            status: 200,
+            url: req.urlWithParams,
+            headers: new HttpHeaders({ ETag: nextEtag }),
+            body: record,
+          }),
+        );
+      }
+
+      if (req.method === 'DELETE') {
+        localStorage.removeItem(storageKey);
+        return of(
+          new HttpResponse({
+            status: 204,
+            url: req.urlWithParams,
+          }),
+        );
+      }
+
+      return throwError(() => error);
+    }),
+  );
+};
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -244,6 +363,7 @@ export const appConfig: ApplicationConfig = {
           return next(cloned);
         },
         praxisStatsDedupeInterceptor,
+        praxisSimulatedSessionConfigFallbackInterceptor,
         praxisDashboardSnapshotReconcileInterceptor,
         praxisApiLoadingBridgeInterceptor,
       ]),
@@ -284,7 +404,6 @@ export const appConfig: ApplicationConfig = {
     GenericCrudService,
     GlobalActionService,
     provideGlobalConfig(GLOBAL_CONFIG_SEED),
-    provideGlobalConfigSeed(GLOBAL_CONFIG_SEED),
     provideGlobalConfigReady(),
     {
       provide: ASYNC_CONFIG_STORAGE,
@@ -355,3 +474,4 @@ export const appConfig: ApplicationConfig = {
     }),
   ],
 };
+

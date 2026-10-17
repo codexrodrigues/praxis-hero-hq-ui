@@ -85,32 +85,21 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Contratos', filter: {}, icon: 'description' },
           { id: 'active', label: 'Vigentes & Assinados', filter: { status: 'ACTIVE' }, icon: 'verified' },
           { id: 'expired', label: 'Contratos Expirados', filter: { status: 'EXPIRED' }, icon: 'event_busy' },
           { id: 'draft', label: 'Em Minuta / Draft', filter: { status: 'DRAFT' }, icon: 'edit_note' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['companyId', 'supplierId', 'number', 'status'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -118,4 +107,5 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

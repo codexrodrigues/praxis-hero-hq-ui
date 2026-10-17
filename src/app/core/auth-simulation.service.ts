@@ -1,4 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
+import type { TacticalClearance } from './tactical-access';
 
 export interface PersonaProfile {
   readonly id: string;
@@ -8,6 +9,7 @@ export interface PersonaProfile {
   readonly tenant: string;
   readonly token: string;
   readonly clearanceLevel: string;
+  readonly clearance: TacticalClearance;
   readonly badgeColor: string;
 }
 
@@ -20,6 +22,7 @@ export const HERO_PERSONAS: readonly PersonaProfile[] = [
     tenant: 'shield-hq',
     token: 'tactical-token-nick-fury-alpha',
     clearanceLevel: 'DEFCON 1 · Direção Executiva',
+    clearance: 'DEFCON 1',
     badgeColor: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
   },
   {
@@ -30,6 +33,7 @@ export const HERO_PERSONAS: readonly PersonaProfile[] = [
     tenant: 'shield-hq',
     token: 'tactical-token-tony-stark-arc',
     clearanceLevel: 'DEFCON 2 · Engenharia & P&D',
+    clearance: 'DEFCON 2',
     badgeColor: 'linear-gradient(135deg, #b91c1c, #f59e0b)',
   },
 ];
@@ -95,3 +99,4 @@ export class AuthSimulationService {
     }
   }
 }
+

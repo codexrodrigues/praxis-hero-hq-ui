@@ -28,6 +28,7 @@ import { HERO_NAVIGATION, type NavItem } from '../core/navigation.model';
 import { PRAXIS_API_BASE_URL } from '../core/platform.config';
 import { ThemeService } from '../core/theme.service';
 import { AuthSimulationService } from '../core/auth-simulation.service';
+import { canAccessTacticalPage } from '../core/tactical-access';
 
 export interface CommandPaletteItem extends NavItem {
   readonly groupLabel: string;
@@ -172,10 +173,11 @@ interface ShellStatsEnvelope {
           <div class="alert-content">
             <span class="material-symbols-outlined alert-icon">shield_lock</span>
             <div class="alert-text">
-              <strong class="alert-title">Acesso Tático Restrito (Credencial DEFCON 1 Requerida)</strong>
+              <strong class="alert-title">Acesso restrito nesta demonstração</strong>
               <p class="alert-desc">
                 A credencial de segurança de <strong>{{ authService.currentPersona().name }}</strong> ({{ authService.currentPersona().clearanceLevel }})
-                não possui autorização executiva para acessar <em>{{ deniedRes }}</em>. Alterne para <strong>Nick Fury</strong> no menu superior para autorizar o acesso.
+                não atende ao requisito de acesso a <em>{{ deniedRes }}</em>.
+                Selecione uma persona com a credencial necessária no menu superior.
               </p>
             </div>
           </div>
@@ -270,11 +272,11 @@ interface ShellStatsEnvelope {
                           <span
                             class="quick-link-badge"
                             [class.quick-link-badge--restricted]="isItemRestricted(item)"
-                            [title]="
-                              isItemRestricted(item)
-                                ? 'Requer credencial DEFCON 1 (Direção Executiva)'
-                                : 'Credencial DEFCON 1 autorizada'
-                            "
+                            [title]="item.clearance
+                              ? (isItemRestricted(item)
+                                ? 'Requer credencial ' + item.clearance
+                                : 'Credencial ' + item.clearance + ' autorizada')
+                              : item.description"
                           >
                             @if (isItemRestricted(item)) {
                               <span class="material-symbols-outlined badge-lock-icon" aria-hidden="true">lock</span>
@@ -417,10 +419,7 @@ export class HeroAppShellComponent {
   });
 
   protected isItemRestricted(item: CommandPaletteItem): boolean {
-    if (item.badge !== 'DEFCON 1') {
-      return false;
-    }
-    return !this.authService.currentPersona().clearanceLevel.includes('DEFCON 1');
+    return !canAccessTacticalPage(this.authService.currentPersona().clearance, item.clearance);
   }
 
   private static normalizeSearchText(text: string): string {
@@ -623,4 +622,5 @@ export class HeroAppShellComponent {
       });
   }
 }
+
 

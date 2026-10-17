@@ -97,32 +97,21 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Sinistros', filter: {}, icon: 'account_balance' },
           { id: 'critico', label: 'Severidade Crítica', filter: { severidade: 'CRITICA' }, icon: 'warning' },
           { id: 'pendente', label: 'Saldo Pendente', filter: { totalPendenteBetween: [0.01, 999999999] }, icon: 'pending' },
           { id: 'homologado', label: '100% Homologado', filter: { totalPendenteBetween: [0, 0] }, icon: 'verified' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['missao', 'local', 'severidade'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -130,4 +119,5 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

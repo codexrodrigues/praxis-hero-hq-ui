@@ -1,5 +1,4 @@
 import type { CrudMetadata } from '@praxisui/crud';
-import type { PraxisChartConfig } from '@praxisui/charts';
 
 export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
   component: 'praxis-crud',
@@ -79,31 +78,23 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Heróis', filter: {}, icon: 'groups' },
           { id: 'top90', label: 'Score 90%+', filter: { mediaBetween: [90, 100] }, icon: 'military_tech' },
           { id: 'top80', label: 'Score 80%+', filter: { mediaBetween: [80, 100] }, icon: 'trending_up' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['codinome', 'nomeCompleto', 'equipe'],
-            useInlineSearchableSelectVariant: true,
           },
         },
       },
       expansion: {
-        enabled: true,
-        source: 'schema',
+        enabled: false,
       },
     },
   },
@@ -112,43 +103,3 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
   },
 };
 
-export function buildReputacaoChartConfig(
-  items: Array<{ heroi: string; civil: number; governo: number }>,
-): PraxisChartConfig {
-  return {
-    id: 'reputacao-top7-chart',
-    type: 'bar',
-    title: 'Top Heróis - Avaliação Reputacional Comparativa',
-    subtitle: 'Aprovação civil e confiança institucional consolidadas',
-    sizing: { mode: 'fixed', height: 320 },
-    dataSource: {
-      kind: 'local',
-      items,
-    },
-    axes: {
-      x: { field: 'heroi', type: 'category', label: 'Herói' },
-      y: {
-        type: 'value',
-        label: 'Score (%)',
-        min: 60,
-        max: 100,
-      },
-    },
-    series: [
-      {
-        id: 'civil',
-        name: 'Aprovação Civil',
-        type: 'bar',
-        metric: { field: 'civil', aggregation: 'sum' },
-        color: 'var(--primary, #06b6d4)',
-      },
-      {
-        id: 'governo',
-        name: 'Confiança Governo',
-        type: 'bar',
-        metric: { field: 'governo', aggregation: 'sum' },
-        color: 'var(--ready, #10b981)',
-      },
-    ],
-  };
-}

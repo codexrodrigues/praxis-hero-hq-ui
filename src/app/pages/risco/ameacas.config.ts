@@ -85,32 +85,21 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Ameaças', filter: {}, icon: 'radar' },
           { id: 'confronto', label: 'Em Confronto Ativo', filter: { status: 'CONFRONTO' }, icon: 'crisis_alert' },
           { id: 'critico', label: 'Nível Ômega / Crítico', filter: { nivelBetween: [5, 10] }, icon: 'warning' },
           { id: 'contidos', label: 'Neutralizados / Raft', filter: { status: 'CAPTURADO' }, icon: 'lock' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['nome', 'classe', 'status', 'planeta'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -118,4 +107,5 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

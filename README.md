@@ -2,42 +2,41 @@
 
 **Demonstração publicada:** [praxis-hero-hq.web.app](https://praxis-hero-hq.web.app).
 
-**Dependências:** 22 pacotes `@praxisui/*` fixados em `10.0.0-rc.12`, obtidos do
-npm público após o postflight oficial. A versão corrige a inferência de paginação
-remota para metadados parciais, preservando estratégias explicitamente configuradas.
-Em 13/10/2026, o Hero foi publicado no Firebase e validado após reinício oficial do
-Render com SDK `8.0.0-rc.169`: schemas, filtros, capabilities e actions carregaram,
-e a tabela de Heróis & Colaboradores manteve total 101 no percurso
-`1–10 → 11–20 → 1–10`. A nova JVM recuperou `RESTORED`, preservando
-READY13/PUBLISHED21. O [recibo de aceite e seus limites](https://github.com/codexrodrigues/praxis-api-quickstart/blob/fadf0ca4/docs/engineering/evidence/render-startup-recovery-live-rc169-20261013/acceptance.json)
-registra respostas críticas e términos, inclusive a requisição 304 cancelada com
-duplicata 200 concluída. Isso prova esse percurso de leitura, sem alegar SLA ou
-escrita de negócio. O [registro anterior](docs/design/hero-publication-2026-10-12.md)
-permanece como evidência histórica.
+**Dependências:** 22 pacotes `@praxisui/*` com versões exatas declaradas em
+[package.json](package.json); o lockfile registra a resolução reproduzível. Confira os
+arquivos juntos antes de instalar ou atualizar. A versão de um checkout não comprova
+qual versão está atualmente publicada no Firebase.
 
-> **Plataforma Corporativa de Gestão Tática & RH de Super-Heróis** construída sobre a **Plataforma Praxis** (`@praxisui/*`), Angular 21 e arquitetura 100% orientada a metadados (*metadata-driven*).
+O Hero combina schemas remotos, configurações declarativas do produto e componentes
+próprios de apresentação. O backend publica os contratos de recursos; as bibliotecas
+Praxis interpretam esses contratos. Navegação, personas simuladas e identidade visual
+pertencem a este host.
+
+A publicação de 13/10/2026 possui um [recibo histórico de aceite e limites](https://github.com/codexrodrigues/praxis-api-quickstart/blob/fadf0ca4/docs/engineering/evidence/render-startup-recovery-live-rc169-20261013/acceptance.json).
+Consulte também o [registro da publicação anterior](docs/design/hero-publication-2026-10-12.md).
+Esses registros não representam uma verificação atual do serviço.
 
 ---
 
 ## 🎯 Princípios Fundamentais
 
 1. **Zero Formulários Manuais:** Nenhum campo ou validação é codificado em templates HTML. Todos os fluxos de criação e edição são governados por `<praxis-dynamic-form>` e `/schemas/filtered`.
-2. **Zero Tabelas Estáticas:** Todas as listagens analíticas utilizam `<praxis-table>` e `<praxis-crud>` com paginação server-side, ordenação e filtros remotos.
-3. **Superfícies Dinâmicas:** As visões de detalhe (Dossiê 360) projetam contratos `@UiSurface` do backend ([`FuncionarioController`](file:///D:/Developer/praxis-plataform/praxis-api-quickstart/src/main/java/com/example/praxis/apiquickstart/hr/controller/FuncionarioController.java)).
+2. **Listagens orientadas a recursos:** As páginas de recursos usam `PraxisResourcePage` e o runtime de CRUD/tabela. Widgets do dashboard também podem usar dados locais e projeções de agregações.
+3. **Superfícies Dinâmicas:** As visões de detalhe (Dossiê 360) projetam contratos `@UiSurface` do backend ([`FuncionarioController`](https://github.com/codexrodrigues/praxis-api-quickstart/blob/main/src/main/java/com/example/praxis/apiquickstart/hr/controller/FuncionarioController.java)).
 4. **Governança de Workflow:** Ações de ciclo de vida utilizam `@WorkflowAction` com controle de concorrência por ETag (`If-Match`).
-5. **Design System & HUD Tático:** Tokens OKLCH para temas Claro e Escuro, glassmorphism, indicador de prontidão (98,4%) e Defcon 5.
+5. **Design System & HUD Tático:** Tokens OKLCH para temas Claro e Escuro, glassmorphism, indicadores de prontidão e DEFCON calculados pelo shell.
 
 ---
 
 ## 🚀 Como Executar
 
 ### Pré-requisitos
-- Node.js >= 20.x
+- Node.js `^20.19.0`, `^22.12.0` ou `>=24.0.0`, conforme o Angular CLI instalado.
 - npm >= 10.x
 
 ### Instalação
 ```bash
-npm install
+npm ci
 ```
 
 ### Desenvolvimento
@@ -60,15 +59,12 @@ A aplicação implementa um case corporativo de governança com persistência re
 1. **Dashboard Executivo (Page Builder):**
    - Gráficos customizados com dados reais de agregação: **Área Volumétrica** (`type: 'area'`) e **Barras Horizontais** (`type: 'horizontal-bar'`).
    - Novo widget governado com **Formulário Dinâmico Tático** (`praxis-dynamic-form`) integrado ao grid.
-2. **Tabela de Suprimentos / Pedidos (`praxis-table` & `praxis-crud`):**
-   - **Coluna Composta (`compose` renderer):** Unificação de `id` e `currency` na coluna *"Ordem & Moeda"*.
-   - **Ocultação Seletiva de Colunas:** Projeção canônica via `columnProjection.include`.
-   - **Regras Condicionais de Célula e Linha:** Badges temáticos com ícones, realces para lotes volumosos e opacidade em ordens canceladas via JsonLogic.
-   - **Densidade Compacta e Animações:** Layout otimizado para visão executiva.
-3. **Isolamento Estrito entre Personas:**
-   - **Nick Fury (`nick.fury`):** Visualiza e persiste seus layouts customizados (HTTP 200).
-   - **Tony Stark (`tony.stark`):** Recebe o baseline 100% de fábrica / governança limpo (HTTP 404).
-   - **Restauração de Fábrica:** Botão que dispara `HTTP DELETE 204` e retorna aos padrões de governança.
+2. **Páginas de recursos:**
+   - Cada recurso define projeções de colunas, filtros rápidos, KPIs e apresentação específica do domínio.
+   - Os padrões transversais de tabela e formulário (densidade, espaçamento, tipografia, filtros inline e expansão) são herdados de [`GLOBAL_CONFIG_SEED`](src/app/core/platform.config.ts).
+3. **Personas e persistência:**
+   - O host fornece identidade de usuário e tenant ao adapter remoto.
+   - Os ensaios com HTTP interceptado validam o contrato de UI; não comprovam isolamento em banco ou autorização corporativa.
 
 ### 🧪 Executando a Bateria E2E Automatizada (Playwright)
 
@@ -86,8 +82,8 @@ são interceptadas; não acessa o backend remoto nem comprova persistência em b
 Uma prova operacional de banco exige branch Neon isolada, conforme a governança do workspace.
 
 Para mais detalhes sobre as propostas e evoluções canônicas de plataforma, consulte:
-- [`docs/PRAXIS_PLATFORM_EVOLUTIONS.md`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/docs/PRAXIS_PLATFORM_EVOLUTIONS.md)
-- [`../docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md`](file:///d:/Developer/praxis-plataform/docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md)
+- [Histórico de evoluções documentado](docs/PRAXIS_PLATFORM_EVOLUTIONS.md)
+- [Catálogo de acompanhamento de evoluções](praxis-platform-evolutions.md)
 
 
 
@@ -102,8 +98,11 @@ e configura o storage com `errorPolicy: 'fail'` para exibir falhas de carga.
 
 A identidade usa app `praxis-hero-hq`, tenant e usuário da persona ativa, e rota `/`.
 O adapter remoto continua usando a identidade HTTP do host. Não há cache de layout
-paralelo nem hooks globais `PAX_*`. Uma definição salva é reaberta integralmente, inclusive
-quando todos os widgets foram removidos; não há merge implícito com novos widgets de fábrica.
+paralelo nem hooks globais de teste. O bootstrap fornece `PAX_FETCH_HEADERS` como
+bridge de headers para chamadas fetch. O documento salvo é carregado pelo runtime, inclusive quando está vazio. Há uma
+exceção local: o interceptor do host reconcilia o widget `heroBanner` legado com a
+definição atual do radar, em memória. Essa transformação substitui a definição desse
+widget; não constitui gravação automática nem migração geral dos demais widgets.
 
 A chave antiga `dynamic-page:hq-dashboard` e os caches locais antigos não são lidos pelo
 novo fluxo. Nenhum registro antigo é apagado automaticamente. A adoção beta inicia o layout
@@ -112,9 +111,7 @@ verificados, não a cópia de um cache compartilhado. “Restaurar Fábrica” s
 backend confirmar; erros e conflitos permanecem visíveis. “Descartar alterações e recarregar”
 é uma ação explícita para recuperar o documento salvo.
 
-Os 22 pacotes `@praxisui/*` estão fixados em **10.0.0-rc.9**, com lockfile
-resolvido no npm público. Esta versão contém as correções canônicas de shell,
-cores/tooltip dos gráficos e ciclo de contexto do CRUD.
+Para instalar as versões registradas no lockfile e iniciar o host:
 
 ```sh
 npm ci --registry=https://registry.npmjs.org/
@@ -122,11 +119,8 @@ npm run build
 npm start
 ```
 
-A release oficial por tag `praxis-ui-v10.0.0-rc.9` passou por build, publicação OIDC
-e postflight dos 22 pacotes. A adoção deste host passou por instalação limpa e
-build; não depende de tarballs locais, paths para `dist` ou flags de peer legado.
-O canal `latest` permanece na linha estável; o host fixa a versão RC exata para
-reproduzir a apresentação.
+Informações de versões e releases anteriores pertencem aos registros históricos de
+publicação. O README não presume o estado atual de dist-tags ou do serviço remoto.
 
 A troca de persona é uma simulação privada: o host recria sua rota ao escolher
 outra persona, sem emitir evento global para as bibliotecas. Isso não equivale
@@ -157,23 +151,11 @@ para conhecer os tokens investigados, os estados conferidos e os limites de fide
 ## Publicação no Firebase Hosting
 
 O frontend usa o projeto Firebase `praxis-hero-hq`, definido em `.firebaserc`,
-e publica `dist/praxis-hero-hq-ui/browser`, conforme `firebase.json`. A primeira
-publicação de Praxis rc.9 foi feita com a CLI oficial Firebase 15.33.0, após
-instalação limpa e build, usando a sessão já autenticada do operador:
-
-```sh
-npm ci --registry=https://registry.npmjs.org/
-npm run build
-npx --yes --registry=https://registry.npmjs.org/ firebase-tools@15.33.0 deploy --only hosting --project praxis-hero-hq
-```
-
-O workflow GitHub `firebase-deploy.yml` executa instalação/build após push em
-`main`, mas seu deploy depende do secret
-`FIREBASE_SERVICE_ACCOUNT_PRAXIS_HERO_HQ`. No run `38310673919`, instalação e
-build passaram e o deploy foi ignorado pela ausência desse secret. Não considere
-um workflow verde, por si só, prova de publicação: confira a etapa de deploy.
-A automação futura precisa de autenticação própria; nenhuma chave de serviço
-foi criada nesta publicação.
+e publica `dist/praxis-hero-hq-ui/browser`, conforme `firebase.json`. O fluxo atual está descrito em
+[Publicação do Hero no Firebase Hosting](docs/engineering/firebase-hosting-deployment.md).
+O workflow valida a credencial antes de instalar e compilar; ausência ou formato
+inválido falha o job. Confirme a etapa de deploy e a release live para comprovar
+publicação. Incidentes antigos com deploy ignorado são registros históricos.
 
 A API pública usada pelo host é `https://praxis-api-quickstart.onrender.com`.
 Seu proprietário é o Quickstart. A origem exata `https://praxis-hero-hq.web.app`
@@ -181,3 +163,27 @@ deve estar em `CORS_ALLOWED_ORIGINS` e
 `APP_SECURITY_CONFIG_ORIGIN_RESTRICTION_ALLOWED_ORIGINS`. Não use wildcard nem
 desative autenticação, CSRF ou o filtro de origem para contornar bloqueios.
 A persona do host continua uma simulação; ela não concede autoridade corporativa.
+
+## Definição das páginas e navegação
+
+[page-definitions.ts](src/app/core/page-definitions.ts) declara os destinos do produto,
+seus grupos, requisitos de acesso e bindings lazy. [app.routes.ts](src/app/app.routes.ts)
+projeta as rotas Angular; [navigation.model.ts](src/app/core/navigation.model.ts) projeta
+o menu e os badges. Títulos, descrições e ícones do menu são usados como defaults da
+página; diferenças editoriais ficam explícitas na definição da página. O caminho da
+API é declarado separadamente do caminho de navegação.
+
+O requisito `clearance` alimenta o guard da rota e o indicador do shell. O badge é
+apresentação, não fonte de permissão. As personas e seus tokens são simulações
+privadas do host; o guard não substitui autorização no backend. Os loaders de
+componentes e metadados continuam sendo `import()` lazy.
+
+Validação local focal: `npm test` verifica tipagem dos specs, invariantes, contratos
+de navegação e harnesses isolados. Isso não executa os specs em TestBed nem comprova
+integração com o backend. A bateria de browser exige servidor na porta oficial 4302.
+
+A política local de acesso usa `clearance` tipado da persona, separado do texto de
+exibição da credencial, e vale para páginas de recurso e de componente. Badges
+informativos, como STUDIO, não anunciam autorização. O teste de catálogo mantém
+um inventário independente dos destinos e recursos esperados.
+

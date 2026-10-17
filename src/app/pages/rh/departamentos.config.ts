@@ -80,32 +80,21 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Divisões', filter: {}, icon: 'corporate_fare' },
           { id: 'operacoes', label: 'Operações & Defesa', filter: { codigo: 'OPS' }, icon: 'shield' },
           { id: 'pesquisa', label: 'P&D e Tecnologia', filter: { codigo: 'RND' }, icon: 'science' },
           { id: 'engenharia', label: 'Engenharia & Sistemas', filter: { codigo: 'ENG' }, icon: 'engineering' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['nome', 'codigo', 'responsavelId'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -113,4 +102,5 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

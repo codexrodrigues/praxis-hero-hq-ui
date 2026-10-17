@@ -87,32 +87,21 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Ordens', filter: {}, icon: 'local_shipping' },
           { id: 'aprovadas', label: 'Aprovadas / Entregues', filter: { status: 'APPROVED' }, icon: 'inventory' },
           { id: 'analise', label: 'Aguardando Aprovação', filter: { status: 'DRAFT' }, icon: 'pending_actions' },
           { id: 'canceladas', label: 'Canceladas / Revogadas', filter: { status: 'CANCELLED' }, icon: 'cancel' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['companyId', 'supplierId', 'status'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -120,4 +109,5 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

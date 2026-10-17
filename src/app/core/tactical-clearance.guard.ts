@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { type CanActivateFn, Router } from '@angular/router';
 import { AuthSimulationService } from './auth-simulation.service';
+import { canAccessTacticalPage } from './tactical-access';
 
 /**
  * Guard de autorização tática baseado na credencial de segurança (Clearance Level)
@@ -28,19 +29,15 @@ export const tacticalClearanceGuard: CanActivateFn = (route, state) => {
   }
 
   const currentPersona = authService.currentPersona();
-  const currentClearance = currentPersona.clearanceLevel || '';
-
-  // Hierarquia Tática: DEFCON 1 (Direção Geral) possui autorização irrestrita sobre qualquer nível
-  const isAuthorized =
-    currentClearance.includes('DEFCON 1') ||
-    (requiredClearance === 'DEFCON 2' && currentClearance.includes('DEFCON 2'));
+  const isAuthorized = canAccessTacticalPage(currentPersona.clearance, requiredClearance);
 
   if (!isAuthorized) {
     console.warn(
-      `[TACTICAL-SECURITY] Acesso negado para ${currentPersona.name} (${currentClearance}) à rota '${state.url}'. Nível de credencial requerido: ${requiredClearance}.`,
+      `[TACTICAL-SECURITY] Acesso negado para ${currentPersona.name} (${currentPersona.clearanceLevel}) à rota '${state.url}'. Nível de credencial requerido: ${requiredClearance}.`,
     );
     return router.parseUrl(`/?authDenied=true&resource=${encodeURIComponent(route.data?.['title'] || state.url)}`);
   }
 
   return true;
 };
+

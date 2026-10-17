@@ -83,32 +83,21 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Esquadrões', filter: {}, icon: 'diversity_3' },
           { id: 'ativa', label: 'Prontidão Ativa', filter: { status: 'ATIVA' }, icon: 'verified_user' },
           { id: 'reserva', label: 'Reserva Tática', filter: { status: 'RESERVA' }, icon: 'shield' },
           { id: 'missoes', label: 'Em Missão', filter: { status: 'EM_MISSAO' }, icon: 'flight_takeoff' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['nome', 'status', 'sigla'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -116,4 +105,5 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 
