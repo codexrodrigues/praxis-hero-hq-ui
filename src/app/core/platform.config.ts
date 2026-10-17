@@ -23,6 +23,15 @@ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
   table: {
     appearance: {
       density: 'comfortable',
+      borders: {
+        showRowBorders: true,
+        showColumnBorders: false,
+        showOuterBorder: true,
+      },
+      elevation: {
+        level: 0,
+        shadowColor: 'transparent',
+      },
       spacing: {
         cellPadding: '10px 16px',
         headerPadding: '12px 16px',
@@ -32,6 +41,75 @@ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
         headerFontSize: '12px',
       },
     },
+    toolbar: {
+      visible: true,
+      position: 'top',
+      filters: {
+        enabled: true,
+        showAdvancedButton: true,
+      },
+    },
+    actions: {
+      row: {
+        enabled: true,
+        position: 'end',
+        display: 'icons',
+        trigger: 'always',
+      },
+      bulk: {
+        enabled: true,
+        position: 'both',
+      },
+    },
+    behavior: {
+      pagination: {
+        enabled: true,
+        pageSize: 10,
+        pageSizeOptions: [5, 10, 25, 50, 100],
+        showFirstLastButtons: true,
+        strategy: 'server',
+      },
+      sorting: {
+        enabled: true,
+        strategy: 'server',
+        multiSort: false,
+        showSortIndicators: true,
+        allowClearSort: true,
+      },
+      resizing: {
+        enabled: true,
+      },
+      selection: {
+        type: 'multiple',
+        mode: 'checkbox',
+        allowSelectAll: true,
+        checkboxPosition: 'start',
+        persistSelection: true,
+        persistOnDataUpdate: false,
+        visual: {
+          highlightSelected: true,
+          showSelectionCount: true,
+        },
+      },
+      filtering: {
+        enabled: true,
+        strategy: 'server',
+        debounceTime: 300,
+        columnFilters: {
+          enabled: true,
+        },
+        advancedFilters: {
+          settings: {
+            inline: true,
+            useInlineSearchableSelectVariant: true,
+          },
+        },
+      },
+      expansion: {
+        enabled: true,
+        source: 'schema',
+      },
+    },
     filteringUi: {
       advancedOpenMode: 'drawer',
       overlayVariant: 'card',
@@ -39,3 +117,5 @@ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
     },
   },
 };
+
+

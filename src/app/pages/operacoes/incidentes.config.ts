@@ -91,45 +91,24 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Ocorrências', filter: {}, icon: 'report' },
           { id: 'critico', label: 'Severidade Crítica', filter: { severidade: 'CRITICA' }, icon: 'warning' },
           { id: 'alta', label: 'Alta Severidade', filter: { severidade: 'ALTA' }, icon: 'crisis_alert' },
           { id: 'media', label: 'Severidade Moderada', filter: { severidade: 'MEDIA' }, icon: 'info' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       selection: {
         enabled: true,
-        type: 'multiple',
-        mode: 'checkbox',
-        allowSelectAll: true,
-        checkboxPosition: 'start',
-        persistSelection: true,
-        persistOnDataUpdate: false,
-        visual: {
-          highlightSelected: true,
-          showSelectionCount: true,
-        },
       },
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['local', 'severidade', 'descricao'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -137,4 +116,5 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

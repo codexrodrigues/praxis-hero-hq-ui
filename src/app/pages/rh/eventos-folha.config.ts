@@ -64,45 +64,27 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Eventos', filter: {}, icon: 'receipt_long' },
           { id: 'pendentes', label: 'Pendentes de Aprovação', filter: { status: 'PENDENTE' }, icon: 'pending_actions' },
           { id: 'aprovados', label: 'Aprovados', filter: { status: 'APROVADO' }, icon: 'task_alt' },
           { id: 'rejeitados', label: 'Rejeitados', filter: { status: 'REJEITADO' }, icon: 'cancel' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       selection: {
         enabled: true,
-        type: 'multiple',
-        mode: 'checkbox',
-        allowSelectAll: true,
-        checkboxPosition: 'start',
-        persistSelection: true,
-        persistOnDataUpdate: false,
-        visual: {
-          highlightSelected: true,
-          showSelectionCount: true,
-        },
       },
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['descricao', 'tipo', 'status'],
-            useInlineSearchableSelectVariant: true,
           },
         },
       },
       expansion: {
-        enabled: true,
-        source: 'schema',
+        enabled: false,
       },
     },
   },
@@ -110,3 +92,4 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+

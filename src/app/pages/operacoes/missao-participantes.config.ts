@@ -65,45 +65,24 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Escalas', filter: {}, icon: 'groups' },
           { id: 'lideres', label: 'Líderes de Missão', filter: { papel: 'LIDER' }, icon: 'military_tech' },
           { id: 'principais', label: 'Referência Principal', filter: { principal: true }, icon: 'star' },
           { id: 'sucesso', label: 'Resultado: Sucesso', filter: { resultado: 'OK' }, icon: 'verified' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       selection: {
         enabled: true,
-        type: 'multiple',
-        mode: 'checkbox',
-        allowSelectAll: true,
-        checkboxPosition: 'start',
-        persistSelection: true,
-        persistOnDataUpdate: false,
-        visual: {
-          highlightSelected: true,
-          showSelectionCount: true,
-        },
       },
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['papel', 'principal', 'resultado'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -111,3 +90,4 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+

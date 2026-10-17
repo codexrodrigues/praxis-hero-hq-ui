@@ -17,7 +17,7 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         caption: 'Competência ativa 03/2026',
         icon: 'account_balance_wallet',
         tone: 'info',
-        filter: { mes: 3, ano: 2026 },
+        filter: { mesBetween: [3, 3], anoBetween: [2026, 2026] },
       },
       {
         id: 'consolidados',
@@ -45,6 +45,9 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
         tone: 'neutral',
       },
     ],
+  },
+  filterBar: {
+    placement: 'scope-bar',
   },
   table: {
     columnProjection: {
@@ -85,45 +88,27 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Ciclos', filter: {}, icon: 'receipt_long' },
-          { id: 'mesAtual', label: 'Competência Vigente (03/2026)', filter: { mes: 3, ano: 2026 }, icon: 'today' },
-          { id: 'anoAtual', label: 'Exercício 2026', filter: { ano: 2026 }, icon: 'calendar_month' },
-          { id: 'anoAnterior', label: 'Exercício 2025', filter: { ano: 2025 }, icon: 'history' },
+          { id: 'mesAtual', label: 'Competência Vigente (03/2026)', filter: { mesBetween: [3, 3], anoBetween: [2026, 2026] }, icon: 'today' },
+          { id: 'anoAtual', label: 'Exercício 2026', filter: { anoBetween: [2026, 2026] }, icon: 'calendar_month' },
+          { id: 'anoAnterior', label: 'Exercício 2025', filter: { anoBetween: [2025, 2025] }, icon: 'history' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       selection: {
         enabled: true,
-        type: 'multiple',
-        mode: 'checkbox',
-        allowSelectAll: true,
-        checkboxPosition: 'start',
-        persistSelection: true,
-        persistOnDataUpdate: false,
-        visual: {
-          highlightSelected: true,
-          showSelectionCount: true,
-        },
       },
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
-            alwaysVisibleFields: ['mes', 'ano', 'funcionarioId'],
-            useInlineSearchableSelectVariant: true,
+            alwaysVisibleFields: ['mesBetween', 'anoBetween', 'funcionarioId'],
           },
         },
       },
       expansion: {
-        enabled: true,
-        source: 'schema',
+        enabled: false,
       },
     },
   },
@@ -131,4 +116,5 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

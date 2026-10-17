@@ -98,40 +98,26 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Heróis', icon: 'group', filter: {} },
           { id: 'ativos', label: 'Em Prontidão', icon: 'verified_user', filter: { ativo: true } },
           { id: 'inativos', label: 'Reserva / Licença', icon: 'person_off', filter: { ativo: false } },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       selection: {
         enabled: true,
-        type: 'multiple',
-        mode: 'checkbox',
-        allowSelectAll: true,
-        checkboxPosition: 'start',
-        persistSelection: true,
-        persistOnDataUpdate: false,
-        visual: {
-          highlightSelected: true,
-          showSelectionCount: true,
-        },
       },
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['nomeCompleto', 'departamentoNome', 'ativo'],
-            useInlineSearchableSelectVariant: true,
           },
         },
+      },
+      expansion: {
+        enabled: false,
       },
     },
   },
@@ -157,4 +143,5 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
     modal: { width: '920px', maxWidth: '95vw' },
   },
 };
+
 

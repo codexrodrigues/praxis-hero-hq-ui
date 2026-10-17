@@ -85,10 +85,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      visible: true,
       filters: {
-        enabled: true,
-        showAdvancedButton: true,
         quickFilters: [
           { id: 'all', label: 'Todas as Missões', icon: 'military_tech', filter: {} },
           { id: 'ativas', label: 'Em Andamento', icon: 'flight_takeoff', filter: { status: 'EM_ANDAMENTO' } },
@@ -100,32 +97,13 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
     behavior: {
       selection: {
         enabled: true,
-        type: 'multiple',
-        mode: 'checkbox',
-        allowSelectAll: true,
-        checkboxPosition: 'start',
-        persistSelection: true,
-        persistOnDataUpdate: false,
-        visual: {
-          highlightSelected: true,
-          showSelectionCount: true,
-        },
       },
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            showAdvanced: true,
             alwaysVisibleFields: ['titulo', 'status', 'prioridade', 'ameacaId', 'local'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -151,4 +129,5 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
     modal: { width: '920px', maxWidth: '95vw' },
   },
 };
+
 

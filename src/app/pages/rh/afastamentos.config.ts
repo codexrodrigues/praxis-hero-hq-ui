@@ -85,45 +85,27 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
     },
     toolbar: {
       filters: {
-        enabled: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Registros', filter: {}, icon: 'history' },
           { id: 'ferias', label: 'Férias Regulamentares', filter: { tipo: 'FERIAS' }, icon: 'beach_access' },
           { id: 'medica', label: 'Licença Médica / Recuperação', filter: { tipo: 'AFASTAMENTO' }, icon: 'health_and_safety' },
           { id: 'ciclo2026', label: 'Vigência 2026', filter: { dataInicioBetween: ['2026-01-01', '2026-12-31'] }, icon: 'date_range' },
         ],
-        showAdvancedButton: true,
       },
     },
     behavior: {
       selection: {
         enabled: true,
-        type: 'multiple',
-        mode: 'checkbox',
-        allowSelectAll: true,
-        checkboxPosition: 'start',
-        persistSelection: true,
-        persistOnDataUpdate: false,
-        visual: {
-          highlightSelected: true,
-          showSelectionCount: true,
-        },
       },
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            inline: true,
             alwaysVisibleFields: ['tipo', 'funcionarioId', 'dataInicioBetween'],
-            useInlineSearchableSelectVariant: true,
           },
         },
       },
       expansion: {
-        enabled: true,
-        source: 'schema',
+        enabled: false,
       },
     },
   },
@@ -131,4 +113,5 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 

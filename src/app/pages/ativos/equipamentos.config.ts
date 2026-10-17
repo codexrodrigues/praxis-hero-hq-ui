@@ -80,10 +80,7 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
       },
     },
     toolbar: {
-      visible: true,
       filters: {
-        enabled: true,
-        showAdvancedButton: true,
         quickFilters: [
           { id: 'all', label: 'Todos os Itens', icon: 'inventory_2', filter: {} },
           { id: 'custodia', label: 'Em Uso / Custódia', icon: 'verified_user', filter: { status: 'EM_USO' } },
@@ -94,20 +91,11 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
     },
     behavior: {
       filtering: {
-        columnFilters: {
-          enabled: true,
-        },
         advancedFilters: {
           settings: {
-            showAdvanced: true,
             alwaysVisibleFields: ['nome', 'tipo', 'status'],
-            useInlineSearchableSelectVariant: true,
           },
         },
-      },
-      expansion: {
-        enabled: true,
-        source: 'schema',
       },
     },
   },
@@ -115,4 +103,5 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
     openMode: 'drawer',
   },
 };
+
 
