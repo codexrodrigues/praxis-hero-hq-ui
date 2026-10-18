@@ -17,30 +17,75 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
     return persisted;
   }
 
-  const canonicalHeroBanner = DASHBOARD_PAGE_DEFINITION.widgets?.find(
-    (w) => w.key === 'heroBanner',
+  const canonicalByKey = new Map(
+    (DASHBOARD_PAGE_DEFINITION.widgets ?? []).map((w) => [w.key, w]),
   );
-  if (!canonicalHeroBanner) {
-    return persisted;
-  }
 
   let upgraded = false;
   const nextWidgets = persisted['widgets'].map((widget: any) => {
-    if (!widget || widget.key !== 'heroBanner') {
+    if (!widget || typeof widget.key !== 'string') {
       return widget;
     }
-    const nodes = widget.definition?.inputs?.document?.nodes;
-    const firstNode = Array.isArray(nodes) ? nodes[0] : null;
-    const media = firstNode?.media;
-    if (media?.kind === 'component' && media?.componentId === 'hero-hq-tactical-radar') {
+
+    if (widget.key === 'heroBanner') {
+      const canonical = canonicalByKey.get('heroBanner');
+      const nodes = widget.definition?.inputs?.document?.nodes;
+      const firstNode = Array.isArray(nodes) ? nodes[0] : null;
+      const media = firstNode?.media;
+      const trk05 = Array.isArray(media?.componentInputs?.contacts)
+        ? media.componentInputs.contacts.find((c: any) => c?.id === 'TRK-05')
+        : null;
+      const hasRadarMedia =
+        media?.kind === 'component' && media?.componentId === 'hero-hq-tactical-radar';
+      const hasLiveTrk05 = !trk05 || String(trk05.label ?? '').includes('${inUseAssets}');
+      if (canonical && (!hasRadarMedia || !hasLiveTrk05)) {
+        upgraded = true;
+        return {
+          ...widget,
+          definition: structuredClone(canonical.definition),
+        };
+      }
       return widget;
     }
-    upgraded = true;
-    return {
-      ...widget,
-      definition: structuredClone(canonicalHeroBanner.definition),
-    };
+
+    if (widget.key === 'missionsTimeline' || widget.key === 'domainHub') {
+      const canonical = canonicalByKey.get(widget.key);
+      const serialized = JSON.stringify(widget.definition ?? {});
+      if (
+        canonical &&
+        (serialized.includes('Interceptação Orbital Completa') ||
+          serialized.includes('Arsenal homologado · Telemetria de campo'))
+      ) {
+        upgraded = true;
+        return {
+          ...widget,
+          definition: structuredClone(canonical.definition),
+        };
+      }
+    }
+
+    return widget;
   });
+
+  let nextState = persisted['state'];
+  if (
+    nextState &&
+    typeof nextState === 'object' &&
+    !nextState.derived?.['kpis.folhaPercent'] &&
+    DASHBOARD_PAGE_DEFINITION.state
+  ) {
+    upgraded = true;
+    nextState = structuredClone(DASHBOARD_PAGE_DEFINITION.state);
+  }
+
+  let nextDataSources = persisted['dataSources'];
+  if (Array.isArray(nextDataSources) && Array.isArray(DASHBOARD_PAGE_DEFINITION.dataSources)) {
+    const ids = new Set(nextDataSources.map((ds: any) => ds?.id));
+    if (!ids.has('assetsStats') || !ids.has('threatsStats')) {
+      upgraded = true;
+      nextDataSources = structuredClone(DASHBOARD_PAGE_DEFINITION.dataSources);
+    }
+  }
 
   if (!upgraded) {
     return persisted;
@@ -48,7 +93,10 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
 
   return {
     ...persisted,
+    ...(nextState !== undefined ? { state: nextState } : {}),
+    ...(nextDataSources !== undefined ? { dataSources: nextDataSources } : {}),
     widgets: nextWidgets,
   };
 }
+
 

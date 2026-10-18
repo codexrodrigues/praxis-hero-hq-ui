@@ -40,6 +40,25 @@ const rawBundle = JSON.parse(fs.readFileSync(defPath, 'utf8'));
 const pageDef = rawBundle.dashboardPageDefinition || rawBundle;
 
 const widgetsByKey = new Map((pageDef.widgets || []).map((w) => [w.key || w.id, w]));
+const dataSourcesById = new Map((pageDef.dataSources || []).map((ds) => [ds.id, ds]));
+
+// 1.0 Page-level DataSources & Derived KPIs (zero static KPI percentages)
+assert(
+  dataSourcesById.has('heroesStats') &&
+    dataSourcesById.has('missionsStats') &&
+    dataSourcesById.has('payrollStats') &&
+    dataSourcesById.has('incidentsStats') &&
+    dataSourcesById.has('assetsStats') &&
+    dataSourcesById.has('threatsStats'),
+  'pageDef.dataSources declara os 6 DataSources canônicos (heroesStats, missionsStats, payrollStats, incidentsStats, assetsStats, threatsStats)',
+);
+assert(
+  Boolean(pageDef.state?.derived?.['kpis.folhaPercent']) &&
+    dataSourcesById.get('payrollStats')?.transform?.mappings?.['values.salarioBruto'] ===
+      'latestPayrollGross' &&
+    dataSourcesById.get('missionsStats')?.transform?.mappings?.['PAUSADA'] === 'pausedMissions',
+  'kpis.folhaPercent é derivado dinamicamente (salarioLiquido / salarioBruto) e missionsStats mapeia o bucket PAUSADA',
+);
 
 // 1.1 Hero Banner + Tactical Radar Media Slot
 const heroBanner = widgetsByKey.get('heroBanner');
@@ -54,8 +73,9 @@ assert(
   bannerInputs?.context?.readinessRate === '${kpis.readinessRate}' &&
     bannerCard?.media?.componentInputs?.label === 'IFF · PRONTIDÃO ${readinessRate}%' &&
     Array.isArray(bannerCard?.media?.componentInputs?.contacts) &&
-    bannerCard.media.componentInputs.contacts.length === 5,
-  'heroBanner injeta telemetria viva (readinessRate, contacts) em componentInputs do radar',
+    bannerCard.media.componentInputs.contacts.length === 5 &&
+    bannerCard.media.componentInputs.contacts.every((c) => /\$\{[^}]+\}/.test(String(c.label || ''))),
+  'heroBanner injeta telemetria viva (readinessRate e todos os 5 contacts TRK-01..TRK-05) em componentInputs do radar',
 );
 
 // 1.2 Interactive Bento KPI Cards
@@ -98,6 +118,7 @@ const timelineWidget = widgetsByKey.get('missionsTimeline');
 const timelineInputs = timelineWidget?.definition?.inputs || {};
 assert(
   timelineInputs?.context?.inProgressMissions === '${kpis.inProgressMissions}' &&
+    timelineInputs?.context?.completedMissions === '${kpis.completedMissions}' &&
     timelineInputs?.context?.readinessRate === '${kpis.readinessRate}',
   'missionsTimeline injeta kpis vivos no context de interpolação',
 );
@@ -108,11 +129,14 @@ assert(
     timelineItems.every(
       (item) =>
         typeof item.subtitle === 'string' &&
+        /\$\{kpis\.[^}]+\}/.test(item.title) &&
+        /\$\{kpis\.[^}]+\}/.test(item.subtitle) &&
+        /\$\{kpis\.[^}]+\}/.test(item.badge) &&
         !('description' in item) &&
         item.action?.actionId === 'navigation.openRoute' &&
         typeof item.action?.payload?.path === 'string',
     ),
-  'missionsTimeline utiliza propriedade canônica "subtitle" (sem "description") e possui ação navigation.openRoute em todos os 4 itens',
+  'missionsTimeline utiliza propriedade canônica "subtitle", interpola ${kpis.*} em todos os 4 itens e possui ação navigation.openRoute',
 );
 
 // 1.5 Domain Hub Live Telemetry & Bindings
@@ -120,8 +144,10 @@ const hubWidget = widgetsByKey.get('domainHub');
 const hubInputs = hubWidget?.definition?.inputs || {};
 assert(
   hubInputs?.context?.activeHeroes === '${kpis.activeHeroes}' &&
+    hubInputs?.context?.inUseAssets === '${kpis.inUseAssets}' &&
+    hubInputs?.context?.confrontationThreats === '${kpis.confrontationThreats}' &&
     hubInputs?.context?.criticalIncidents === '${kpis.criticalIncidents}',
-  'domainHub injeta kpis vivos no context de interpolação',
+  'domainHub injeta kpis vivos (RH, missões, ativos, ameaças e incidentes) no context de interpolação',
 );
 const hubCards = hubInputs?.document?.nodes?.[0]?.items || [];
 assert(
@@ -130,10 +156,10 @@ assert(
       (card) =>
         card.type === 'actionCard' &&
         typeof card.meta === 'string' &&
-        card.meta.length > 0 &&
+        /\$\{kpis\.[^}]+\}/.test(card.meta) &&
         card.action?.actionId === 'navigation.openRoute',
     ),
-  'Todos os 6 cartões de domínio em domainHub possuem meta tático e ação navigation.openRoute',
+  'Todos os 6 cartões de domínio em domainHub interpolam telemetria viva ${kpis.*} em meta e possuem ação navigation.openRoute',
 );
 
 // ---------------------------------------------------------------------------

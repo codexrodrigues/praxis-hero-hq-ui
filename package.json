@@ -10,7 +10,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "tsc -p tsconfig.spec.json --noEmit && node e2e/verify-dashboard-contracts.cjs && node test-e2e/test-dashboard-navigation.cjs",
     "test:contracts": "node e2e/verify-dashboard-contracts.cjs && node test-e2e/test-dashboard-navigation.cjs",
-    "test:e2e": "node e2e/run-e2e.cjs"
+    "test:e2e": "node e2e/run-e2e.cjs",
+    "demo:studio": "node e2e/record-studio-demo.mjs"
   },
   "dependencies": {
     "@angular/animations": "21.2.14",

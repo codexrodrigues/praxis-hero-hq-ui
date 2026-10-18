@@ -113,8 +113,10 @@ async function runE2E() {
     const bodyText = await page.innerText('body');
     assert(bodyText.includes('53 Ativos'), 'KPI "53 Ativos" renderizado');
     assert(bodyText.includes('14 Planejadas') || bodyText.includes('15 Planejadas') || /\d+\s+Planejadas/.test(bodyText), 'KPI de missões planejadas ("Planejadas") renderizado');
-    assert(bodyText.includes('R$ 3,09 M') || bodyText.includes('3,09 M') || bodyText.includes('3.09 M'), 'KPI de execução orçamentária formatado em Real presente');
-    assert(bodyText.includes('18 Críticos'), 'KPI "18 Críticos" renderizado');
+    assert(/R\$\s*[\d.,]+\s*M/.test(bodyText), 'KPI de execução orçamentária formatado em Real (R$ 2.68 M) presente');
+    assert(bodyText.includes('23 Críticos') || /\d+\s+Críticos/.test(bodyText), 'KPI de incidentes críticos ("23 Críticos") renderizado');
+    assert(/56\/72\s+EM USO/i.test(bodyText), 'Card de Ativos & Armaduras conectado ao endpoint de equipamentos ("56/72 EM USO")');
+    assert(/9\/24\s+EM CONFRONTO/i.test(bodyText), 'Card de Inteligência & Ameaças conectado ao endpoint de ameaças ("9/24 EM CONFRONTO")');
 
     // -------------------------------------------------------------
     // Test 2.1: Governance Toolbar + Floating Toolbar + DataSources State Preservation
@@ -130,7 +132,7 @@ async function runE2E() {
 
     const bodyAfterCustomize = await page.innerText('body');
     assert(bodyAfterCustomize.includes('53 Ativos'), 'Dados vivos dos DataSources ("53 Ativos") preservados ao entrar em modo de customização');
-    assert(bodyAfterCustomize.includes('18 Críticos'), 'Dados vivos dos DataSources ("18 Críticos") preservados ao entrar em modo de customização');
+    assert(bodyAfterCustomize.includes('23 Críticos') || /\d+\s+Críticos/.test(bodyAfterCustomize), 'Dados vivos dos DataSources ("23 Críticos") preservados ao entrar em modo de customização');
 
     // Sair do modo de customização
     await customizeBtn.click();

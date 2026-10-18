@@ -10,25 +10,41 @@
         "kpis": {
           "readinessRate": 52.5,
           "activeHeroes": 53,
+          "inactiveHeroes": 48,
           "totalHeroes": 101,
           "inProgressMissions": 9,
           "inProgressMissionsBadge": "09",
           "plannedMissions": 15,
-          "totalMissions": 39,
-          "missoesPercent": 23,
-          "latestPayrollNet": 3090000,
-          "latestPayrollMonth": "Março / 2026",
-          "latestPayrollNetMillion": "3,09",
-          "latestPayrollEmployees": 98,
-          "folhaPercent": 78.5,
-          "totalIncidents": 74,
-          "criticalIncidents": 18,
-          "criticalIncidentsBadge": "18",
-          "highIncidents": 19,
-          "mediumIncidents": 22,
-          "lowIncidents": 15,
-          "riscosPercent": 24,
-          "defconScore": 4.2
+          "completedMissions": 22,
+          "pausedMissions": 4,
+          "cancelledMissions": 0,
+          "totalMissions": 50,
+          "missoesPercent": 30,
+          "latestPayrollNet": 2684945.08,
+          "latestPayrollGross": 3041500,
+          "latestPayrollMonth": "2026-10-01",
+          "latestPayrollNetMillion": 2.68,
+          "latestPayrollEmployees": 101,
+          "folhaPercent": 88.3,
+          "totalIncidents": 108,
+          "criticalIncidents": 23,
+          "criticalIncidentsBadge": "23",
+          "highIncidents": 30,
+          "mediumIncidents": 29,
+          "lowIncidents": 26,
+          "riscosPercent": 21,
+          "defconScore": 4.3,
+          "inUseAssets": 56,
+          "brokenAssets": 11,
+          "maintenanceAssets": 2,
+          "stockAssets": 2,
+          "lostAssets": 1,
+          "totalAssets": 72,
+          "confrontationThreats": 9,
+          "atLargeThreats": 6,
+          "observedThreats": 6,
+          "capturedThreats": 3,
+          "totalThreats": 24
         }
       },
       "derived": {
@@ -71,6 +87,29 @@
                       ]
                     },
                     0
+                  ]
+                },
+                0
+              ]
+            }
+          }
+        },
+        "kpis.folhaPercent": {
+          "dependsOn": ["kpis.latestPayrollNet", "kpis.latestPayrollGross"],
+          "compute": {
+            "kind": "json-logic",
+            "expression": {
+              "if": [
+                { ">": [{ "var": "state.kpis.latestPayrollGross" }, 0] },
+                {
+                  "round": [
+                    {
+                      "*": [
+                        { "/": [{ "var": "state.kpis.latestPayrollNet" }, { "var": "state.kpis.latestPayrollGross" }] },
+                        100
+                      ]
+                    },
+                    1
                   ]
                 },
                 0
@@ -212,6 +251,7 @@
         },
         "fallbackValue": {
           "activeHeroes": 53,
+          "inactiveHeroes": 48,
           "totalHeroes": 101
         }
       },
@@ -237,6 +277,7 @@
             "PLANEJADA": "plannedMissions",
             "EM_ANDAMENTO": "inProgressMissions",
             "CONCLUIDA": "completedMissions",
+            "PAUSADA": "pausedMissions",
             "CANCELADA": "cancelledMissions"
           },
           "totalField": "totalMissions"
@@ -244,7 +285,10 @@
         "fallbackValue": {
           "plannedMissions": 15,
           "inProgressMissions": 9,
-          "totalMissions": 39
+          "completedMissions": 22,
+          "pausedMissions": 4,
+          "cancelledMissions": 0,
+          "totalMissions": 50
         }
       },
       {
@@ -261,6 +305,11 @@
               "operation": "SUM",
               "field": "salarioLiquido",
               "alias": "salarioLiquido"
+            },
+            {
+              "operation": "SUM",
+              "field": "salarioBruto",
+              "alias": "salarioBruto"
             }
           ]
         },
@@ -269,15 +318,16 @@
           "kind": "timeseries-last",
           "mappings": {
             "values.salarioLiquido": "latestPayrollNet",
+            "values.salarioBruto": "latestPayrollGross",
             "count": "latestPayrollEmployees",
             "label": "latestPayrollMonth"
           }
         },
         "fallbackValue": {
-          "latestPayrollNet": 3090000,
-          "latestPayrollMonth": "Março / 2026",
-          "latestPayrollEmployees": 98,
-          "folhaPercent": 78.5
+          "latestPayrollNet": 2684945.08,
+          "latestPayrollGross": 3041500,
+          "latestPayrollMonth": "2026-10-01",
+          "latestPayrollEmployees": 101
         }
       },
       {
@@ -307,11 +357,81 @@
           "totalField": "totalIncidents"
         },
         "fallbackValue": {
-          "criticalIncidents": 18,
-          "highIncidents": 19,
-          "mediumIncidents": 22,
-          "lowIncidents": 15,
-          "totalIncidents": 74
+          "criticalIncidents": 23,
+          "highIncidents": 30,
+          "mediumIncidents": 29,
+          "lowIncidents": 26,
+          "totalIncidents": 108
+        }
+      },
+      {
+        "id": "assetsStats",
+        "kind": "stats-query",
+        "resourcePath": "assets/equipamentos/stats/group-by",
+        "method": "POST",
+        "query": {
+          "filter": {},
+          "field": "status",
+          "metrics": [
+            {
+              "operation": "COUNT",
+              "alias": "total"
+            }
+          ]
+        },
+        "targetStatePath": "kpis",
+        "transform": {
+          "kind": "group-by-map",
+          "mappings": {
+            "EM_USO": "inUseAssets",
+            "QUEBRADO": "brokenAssets",
+            "MANUTENCAO": "maintenanceAssets",
+            "ESTOQUE": "stockAssets",
+            "PERDIDO": "lostAssets"
+          },
+          "totalField": "totalAssets"
+        },
+        "fallbackValue": {
+          "inUseAssets": 56,
+          "brokenAssets": 11,
+          "maintenanceAssets": 2,
+          "stockAssets": 2,
+          "lostAssets": 1,
+          "totalAssets": 72
+        }
+      },
+      {
+        "id": "threatsStats",
+        "kind": "stats-query",
+        "resourcePath": "risk-intelligence/ameacas/stats/group-by",
+        "method": "POST",
+        "query": {
+          "filter": {},
+          "field": "status",
+          "metrics": [
+            {
+              "operation": "COUNT",
+              "alias": "total"
+            }
+          ]
+        },
+        "targetStatePath": "kpis",
+        "transform": {
+          "kind": "group-by-map",
+          "mappings": {
+            "CONFRONTO": "confrontationThreats",
+            "LIVRE": "atLargeThreats",
+            "EM_OBSERVACAO": "observedThreats",
+            "CAPTURADO": "capturedThreats"
+          },
+          "totalField": "totalThreats"
+        },
+        "fallbackValue": {
+          "confrontationThreats": 9,
+          "atLargeThreats": 6,
+          "observedThreats": 6,
+          "capturedThreats": 3,
+          "totalThreats": 24
         }
       }
     ],
@@ -499,7 +619,9 @@
               "inProgressMissions": "${kpis.inProgressMissions}",
               "criticalIncidents": "${kpis.criticalIncidents}",
               "highIncidents": "${kpis.highIncidents}",
-              "readinessRate": "${kpis.readinessRate}"
+              "readinessRate": "${kpis.readinessRate}",
+              "inUseAssets": "${kpis.inUseAssets}",
+              "totalAssets": "${kpis.totalAssets}"
             },
             "document": {
               "kind": "praxis.rich-content",
@@ -636,7 +758,7 @@
                           "range": 0.84,
                           "heading": 195,
                           "classification": "neutral",
-                          "label": "Satélite Relé",
+                          "label": "Satélite Relé (${inUseAssets}/${totalAssets})",
                           "route": "/ativos/equipamentos"
                         }
                       ]
@@ -1689,10 +1811,14 @@
               "readinessRate": "${kpis.readinessRate}",
               "inProgressMissions": "${kpis.inProgressMissions}",
               "plannedMissions": "${kpis.plannedMissions}",
+              "completedMissions": "${kpis.completedMissions}",
+              "pausedMissions": "${kpis.pausedMissions}",
               "totalMissions": "${kpis.totalMissions}",
               "criticalIncidents": "${kpis.criticalIncidents}",
               "highIncidents": "${kpis.highIncidents}",
-              "defconScore": "${kpis.defconScore}"
+              "defconScore": "${kpis.defconScore}",
+              "inUseAssets": "${kpis.inUseAssets}",
+              "totalAssets": "${kpis.totalAssets}"
             },
             "document": {
               "kind": "praxis.rich-content",
@@ -1707,11 +1833,11 @@
                   "markerStyle": "filled",
                   "items": [
                     {
-                      "title": "Interceptação Orbital Completa",
-                      "subtitle": "Esquadrão Vanguarda neutralizou satélite espião em órbita LEO-2.",
-                      "meta": "Perímetro orbital assegurado · Telemetria nominal",
+                      "title": "Operações Finalizadas (${kpis.completedMissions} Concluídas)",
+                      "subtitle": "Esquadrões encerraram ${kpis.completedMissions} de ${kpis.totalMissions} missões com ${kpis.pausedMissions} em espera tática.",
+                      "meta": "${kpis.inUseAssets}/${kpis.totalAssets} equipamentos ativos em suporte orbital",
                       "opposite": "15:20",
-                      "badge": "Concluído",
+                      "badge": "${kpis.completedMissions} Concluídas",
                       "markerColor": "success",
                       "markerStyle": "filled",
                       "connectorColor": "success",
@@ -1804,7 +1930,12 @@
               "latestPayrollMonth": "${kpis.latestPayrollMonth}",
               "criticalIncidents": "${kpis.criticalIncidents}",
               "highIncidents": "${kpis.highIncidents}",
-              "totalIncidents": "${kpis.totalIncidents}"
+              "totalIncidents": "${kpis.totalIncidents}",
+              "inUseAssets": "${kpis.inUseAssets}",
+              "maintenanceAssets": "${kpis.maintenanceAssets}",
+              "totalAssets": "${kpis.totalAssets}",
+              "confrontationThreats": "${kpis.confrontationThreats}",
+              "totalThreats": "${kpis.totalThreats}"
             },
             "document": {
               "kind": "praxis.rich-content",
@@ -1857,7 +1988,7 @@
                       "variant": "unstyled",
                       "title": "Ativos & Armaduras",
                       "subtitle": "Controle de custódia, manutenção preventiva de trajes e frota aérea/terrestre.",
-                      "meta": "Arsenal homologado · Telemetria de campo",
+                      "meta": "${kpis.inUseAssets}/${kpis.totalAssets} em uso · ${kpis.maintenanceAssets} manutenção",
                       "icon": "inventory_2",
                       "ctaLabel": "Ver Ativos",
                       "ctaIcon": "arrow_forward",
@@ -1891,7 +2022,7 @@
                       "variant": "unstyled",
                       "title": "Inteligência & Ameaças",
                       "subtitle": "Monitoramento geoespacial de vilões, acordos regulatórios e indenizações públicas.",
-                      "meta": "${kpis.criticalIncidents} críticos · ${kpis.highIncidents} severidade alta",
+                      "meta": "${kpis.confrontationThreats}/${kpis.totalThreats} em confronto · ${kpis.criticalIncidents} críticos",
                       "icon": "radar",
                       "ctaLabel": "Monitorar",
                       "ctaIcon": "arrow_forward",
