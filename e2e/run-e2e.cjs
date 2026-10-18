@@ -25,6 +25,14 @@ async function runE2E() {
     }
   }
 
+  const dashboardApiRequests = [];
+  page.on('request', (req) => {
+    const url = req.url();
+    if (url.includes('/api/')) {
+      dashboardApiRequests.push({ method: req.method(), url });
+    }
+  });
+
   try {
     // -------------------------------------------------------------
     // Test 1: Dashboard Navigation & Hero Executive Banner
@@ -107,16 +115,33 @@ async function runE2E() {
 
 
     // -------------------------------------------------------------
-    // Test 2: Bento KPIs & Governed Data
+    // Test 2: Bento KPIs, Aligned Footnotes & Live Missions Timeline
     // -------------------------------------------------------------
-    console.log('\n[Test 2] Validando Bento KPIs no Dashboard...');
+    console.log('\n[Test 2] Validando Bento KPIs, Footnotes Alinhados e Linha do Tempo de Missões Viva no Dashboard...');
     const bodyText = await page.innerText('body');
     assert(bodyText.includes('53 Ativos'), 'KPI "53 Ativos" renderizado');
     assert(bodyText.includes('14 Planejadas') || bodyText.includes('15 Planejadas') || /\d+\s+Planejadas/.test(bodyText), 'KPI de missões planejadas ("Planejadas") renderizado');
+    assert(
+      bodyText.includes('9 em curso · 22 concluídas de 52 missões') ||
+        /\d+\s+em curso\s+·\s+\d+\s+concluídas de\s+\d+\s+missões/i.test(bodyText),
+      'Footnote de kpiMissoes alinhado com o percentual de missões concluídas ("9 em curso · 22 concluídas de 52 missões")',
+    );
     assert(/R\$\s*[\d.,]+\s*M/.test(bodyText), 'KPI de execução orçamentária formatado em Real (R$ 2.68 M) presente');
     assert(bodyText.includes('23 Críticos') || /\d+\s+Críticos/.test(bodyText), 'KPI de incidentes críticos ("23 Críticos") renderizado');
+    assert(
+      bodyText.includes('21% críticos · 30 de severidade alta em 108 ocorrências') ||
+        /\d+%\s+críticos\s+·\s+\d+\s+de severidade alta em\s+\d+\s+ocorrências/i.test(bodyText),
+      'Footnote de kpiRiscos alinhado com o percentual de incidentes críticos ("21% críticos · 30 de severidade alta em 108 ocorrências")',
+    );
     assert(/56\/72\s+EM USO/i.test(bodyText), 'Card de Ativos & Armaduras conectado ao endpoint de equipamentos ("56/72 EM USO")');
     assert(/9\/24\s+EM CONFRONTO/i.test(bodyText), 'Card de Inteligência & Ameaças conectado ao endpoint de ameaças ("9/24 EM CONFRONTO")');
+    assert(
+      bodyText.includes('Batalha de Nova York') &&
+        bodyText.includes('Operação Firewall Global II') &&
+        bodyText.includes('Patrulha em Tóquio') &&
+        bodyText.includes('Bloqueio Coluano'),
+      'Widget missionsTimeline renderiza os 4 registros reais de missões em andamento vindos de operations/vw-resumo-missoes/filter',
+    );
 
     // -------------------------------------------------------------
     // Test 2.1: Governance Toolbar + Floating Toolbar + DataSources State Preservation
@@ -133,6 +158,44 @@ async function runE2E() {
     const bodyAfterCustomize = await page.innerText('body');
     assert(bodyAfterCustomize.includes('53 Ativos'), 'Dados vivos dos DataSources ("53 Ativos") preservados ao entrar em modo de customização');
     assert(bodyAfterCustomize.includes('23 Críticos') || /\d+\s+Críticos/.test(bodyAfterCustomize), 'Dados vivos dos DataSources ("23 Críticos") preservados ao entrar em modo de customização');
+
+    const liveDashboardAudit = await page.evaluate(() => {
+      const builderEl = document.querySelector('praxis-dynamic-page-builder, praxis-dynamic-page');
+      const comp = builderEl && window.ng && typeof window.ng.getComponent === 'function'
+        ? window.ng.getComponent(builderEl)
+        : null;
+      const def =
+        (typeof comp?.effectiveConfig === 'function' ? comp.effectiveConfig() : comp?.effectiveConfig) ||
+        (typeof comp?.config === 'function' ? comp.config() : comp?.config);
+      if (!def || !Array.isArray(def.widgets)) {
+        const renderedCharts = document.querySelectorAll('praxis-chart').length;
+        return { mode: 'dom', ok: renderedCharts === 4, chartCount: renderedCharts, violations: [] };
+      }
+      const violations = [];
+      let chartCount = 0;
+      for (const w of def.widgets) {
+        if (w.definition?.id === 'praxis-chart') {
+          chartCount++;
+          const inputs = w.definition?.inputs || {};
+          const dsKind = inputs.config?.dataSource?.kind;
+          const srcKind = inputs.config?.dataSource?.query?.sourceKind || inputs.chartDocument?.source?.kind;
+          if (dsKind === 'local' || srcKind === 'derived' || Array.isArray(inputs.data)) {
+            violations.push(`${w.key}: dsKind=${dsKind}, srcKind=${srcKind}, hasData=${Array.isArray(inputs.data)}`);
+          }
+        }
+      }
+      return { mode: 'ng', ok: chartCount === 4 && violations.length === 0, chartCount, violations };
+    });
+    const incidentStatsCallCount = dashboardApiRequests.filter((r) =>
+      r.url.includes('/risk-intelligence/vw-indicadores-incidentes/stats/group-by'),
+    ).length;
+    const reputationStatsCallCount = dashboardApiRequests.filter((r) =>
+      r.url.includes('/human-resources/vw-ranking-reputacao/stats/group-by'),
+    ).length;
+    assert(
+      liveDashboardAudit.ok && incidentStatsCallCount === 1 && reputationStatsCallCount >= 2,
+      `Dashboard API Integration Audit em runtime (/comando): ${liveDashboardAudit.chartCount}/4 gráficos via praxis.stats (incidentes deduplicados=${incidentStatsCallCount} req, reputação/defcon=${reputationStatsCallCount} reqs)`,
+    );
 
     // Sair do modo de customização
     await customizeBtn.click();
@@ -169,6 +232,62 @@ async function runE2E() {
     }
 
     // -------------------------------------------------------------
+    // Test 3.5: Responsive Layout Geometry (Tablet 820x1180 & Mobile 412x915)
+    // -------------------------------------------------------------
+    console.log('\n[Test 3.5] Validando Geometria Responsiva (Tablet 6 colunas e Mobile 1 coluna sem corte)...');
+    await page.setViewportSize({ width: 820, height: 1180 });
+    await page.waitForTimeout(800);
+    const tabletGeom = await page.evaluate(() => {
+      const overflowX = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+      const kpis = Array.from(document.querySelectorAll('.bento-kpi-card')).map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) };
+      });
+      return { overflowX, kpis };
+    });
+    assert(tabletGeom.overflowX <= 0, `Zero overflow horizontal em Tablet 820x1180 (overflowX=${tabletGeom.overflowX})`);
+    assert(
+      tabletGeom.kpis.length === 4 &&
+        Math.abs(tabletGeom.kpis[0].y - tabletGeom.kpis[1].y) <= 4 &&
+        tabletGeom.kpis[2].y > tabletGeom.kpis[0].y + 80,
+      'Tablet (820x1180) organiza os 4 cartões KPI em grade 2x2 (deviceLayouts.tablet)',
+    );
+
+    await page.setViewportSize({ width: 412, height: 915 });
+    await page.waitForTimeout(800);
+    const mobileGeom = await page.evaluate(() => {
+      const overflowX = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+      const kpis = Array.from(document.querySelectorAll('.bento-kpi-card')).map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) };
+      });
+      const bannerEl = document.querySelector('.hero-executive-banner');
+      const radarEl = document.querySelector('.hero-executive-banner app-hero-tactical-radar');
+      const bannerRect = bannerEl ? bannerEl.getBoundingClientRect() : null;
+      const radarRect = radarEl ? radarEl.getBoundingClientRect() : null;
+      const radarClippedBottom =
+        bannerRect && radarRect ? Math.round(radarRect.bottom - bannerRect.bottom) : 0;
+      return { overflowX, kpis, radarClippedBottom };
+    });
+    assert(mobileGeom.overflowX <= 0, `Zero overflow horizontal em Mobile 412x915 (overflowX=${mobileGeom.overflowX})`);
+    assert(
+      mobileGeom.kpis.length === 4 &&
+        mobileGeom.kpis.every((k) => k.w >= 300) &&
+        mobileGeom.kpis[1].y > mobileGeom.kpis[0].y + 80 &&
+        mobileGeom.kpis[2].y > mobileGeom.kpis[1].y + 80 &&
+        mobileGeom.kpis[3].y > mobileGeom.kpis[2].y + 80,
+      'Mobile (412x915) empilha todos os 4 cartões KPI em 1 coluna com largura integral (deviceLayouts.mobile)',
+    );
+    assert(
+      mobileGeom.radarClippedBottom <= 2,
+      `Radar tático não sofre corte vertical no banner em Mobile (radarClippedBottom=${mobileGeom.radarClippedBottom}px)`,
+    );
+
+    // Restaurar viewport Desktop
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.waitForTimeout(600);
+
+    // -------------------------------------------------------------
     // Test 4: Resource Page - Incidentes Táticos (HTML5 PushState)
     // -------------------------------------------------------------
     console.log('\n[Test 4] Validando Página de Recurso: Incidentes Táticos...');
@@ -179,7 +298,12 @@ async function runE2E() {
 
     await page.waitForTimeout(3000);
     const incidentsBody = await page.innerText('body');
-    assert(incidentsBody.includes('TOTAL DE OCORRÊNCIAS') || incidentsBody.includes('74 Registros'), 'KPI de Total de Ocorrências presente');
+    assert(
+      incidentsBody.includes('TOTAL DE OCORRÊNCIAS') ||
+        incidentsBody.includes('108 Registros') ||
+        incidentsBody.includes('74 Registros'),
+      'KPI de Total de Ocorrências ("108 Registros") presente',
+    );
     assert(incidentsBody.includes('R$ 154,4 M') || incidentsBody.includes('154,4 M'), 'KPI de Danos Materiais formatado em Real presente');
 
     // -------------------------------------------------------------
@@ -213,7 +337,7 @@ async function runE2E() {
     await page.waitForTimeout(3000);
     const heroesBody = await page.innerText('body');
     assert(heroesBody.includes('EFETIVO TOTAL') || heroesBody.includes('101 Cadastrados'), 'KPI de Efetivo Total ("101 Cadastrados") presente');
-    assert(heroesBody.includes('101 Ativos'), 'KPI de Prontidão Ativa ("101 Ativos") presente');
+    assert(heroesBody.includes('53 Ativos') || heroesBody.includes('101 Ativos'), 'KPI de Prontidão Ativa ("53 Ativos") alinhado com a API presente');
 
     // Validar que os 3 filtros inline declarados pelo host continuam presentes mesmo após snapshot legado no localStorage
     const inlineFilterFields = page.locator('praxis-filter .compact-fields .pfx-field-shell');

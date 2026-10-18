@@ -9,11 +9,15 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'human-resources/departamentos/filter?page=0&size=1',
+    method: 'POST',
+    payload: {},
     cards: [
       {
         id: 'divisoes',
         label: 'Divisões Ativas',
         value: '28 Departamentos',
+        valueExpr: '${totalElements | number | default:28} Departamentos',
         caption: 'Estrutura operacional e estratégica',
         icon: 'corporate_fare',
         tone: 'info',
@@ -62,9 +66,9 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: '85',
+                valueExpr: '= 85',
                 total: 100,
-                toneExpr: "'info'",
+                toneExpr: "= 'info'",
                 fallbackText: 'Ocupação',
               },
             },

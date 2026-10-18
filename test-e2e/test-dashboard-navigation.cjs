@@ -100,6 +100,18 @@ const reconcilePersistedDashboardPage = vm.runInNewContext(defHarnessJs, {
 });
 
 const legacySnapshot = {
+  state: {
+    values: {
+      customEnterpriseFilter: 'SOKOVIA_AUDIT',
+    },
+  },
+  dataSources: [
+    {
+      id: 'customEnterpriseFeed',
+      kind: 'http',
+      request: { method: 'GET', path: '/api/custom' },
+    },
+  ],
   widgets: [
     {
       key: 'heroBanner',
@@ -124,6 +136,32 @@ assert.equal(
   'hero-hq-tactical-radar',
 );
 assert.equal(upgraded.widgets[1].key, 'customWidget');
+assert.ok(
+  Array.isArray(upgraded.dataSources) &&
+    upgraded.dataSources.some((ds) => ds.id === 'recentMissionsFeed') &&
+    upgraded.dataSources.some((ds) => ds.id === 'customEnterpriseFeed'),
+  'Legacy snapshots must be upgraded to include recentMissionsFeed while preserving custom enterprise DataSources',
+);
+assert.equal(
+  upgraded.state?.values?.customEnterpriseFilter,
+  'SOKOVIA_AUDIT',
+  'Reconciliation must preserve custom enterprise state variables',
+);
+assert.ok(
+  Array.isArray(upgraded.state?.values?.activeMissions) &&
+    upgraded.state.values.activeMissions.length === 4,
+  'Legacy snapshots must be upgraded with activeMissions initial state',
+);
+assert.equal(
+  upgraded.deviceLayouts?.tablet?.canvas?.columns,
+  6,
+  'Legacy snapshots must receive responsive 6-column tablet deviceLayout',
+);
+assert.equal(
+  upgraded.deviceLayouts?.mobile?.canvas?.columns,
+  1,
+  'Legacy snapshots must receive responsive 1-column mobile deviceLayout',
+);
 assert.equal(
   reconcilePersistedDashboardPage(upgraded),
   upgraded,
@@ -131,5 +169,5 @@ assert.equal(
 );
 
 console.log(
-  'PASS: explicit internal navigation only, placeholder sanitization, and persisted dashboard snapshot reconciliation verified at runtime',
+  'PASS: explicit internal navigation only, placeholder sanitization, and non-destructive persisted dashboard snapshot reconciliation verified at runtime',
 );

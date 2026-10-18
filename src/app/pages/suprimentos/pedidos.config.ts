@@ -9,11 +9,19 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'procurement/purchase-orders/stats/group-by',
+    method: 'POST',
+    payload: {
+      filter: {},
+      field: 'status',
+      metrics: [{ operation: 'COUNT', alias: 'total' }],
+    },
     cards: [
       {
         id: 'ordens',
         label: 'Ordens de Compra',
-        value: '19 Pedidos',
+        value: '10 Pedidos',
+        valueExpr: '${totalCount | number | default:10} Pedidos',
         caption: 'Ciclo de suprimento em andamento',
         icon: 'local_shipping',
         tone: 'info',
@@ -22,8 +30,10 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'aprovadas',
         label: 'Aprovadas / Em Expedição',
-        value: '12 Ordens',
-        caption: 'Pedidos aprovados pelo comando',
+        value: '3 Ordens',
+        valueExpr: '${byKey.APPROVED | number | default:3} Ordens',
+        caption: '3 aprovadas + 2 recebidas no arsenal',
+        captionExpr: '${byKey.APPROVED | number | default:3} aprovadas + ${byKey.RECEIVED | number | default:2} recebidas no arsenal',
         icon: 'inventory',
         tone: 'success',
         filter: { status: 'APPROVED' },
@@ -31,7 +41,8 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'analise',
         label: 'Aguardando Aprovação',
-        value: '4 em Análise',
+        value: '3 em Análise',
+        valueExpr: '${byKey.DRAFT | number | default:3} em Análise',
         caption: 'Compliance de compras e finanças',
         icon: 'pending_actions',
         tone: 'warning',
@@ -40,7 +51,8 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'canceladas',
         label: 'Canceladas / Revogadas',
-        value: '1 Pedido',
+        value: '2 Pedidos',
+        valueExpr: '${byKey.CANCELLED | number | default:2} Pedidos',
         caption: 'Ordens reavaliadas pelo comando',
         icon: 'cancel',
         tone: 'neutral',
@@ -65,9 +77,9 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: "row.status === 'RECEIVED' ? 100 : row.status === 'APPROVED' ? 75 : row.status === 'PENDING' ? 35 : 10",
+                valueExpr: "= row.status === 'RECEIVED' ? 100 : row.status === 'APPROVED' ? 75 : row.status === 'PENDING' ? 35 : 10",
                 total: 100,
-                toneExpr: "row.status === 'RECEIVED' ? 'success' : row.status === 'APPROVED' ? 'info' : 'warning'",
+                toneExpr: "= row.status === 'RECEIVED' ? 'success' : row.status === 'APPROVED' ? 'info' : 'warning'",
                 fallbackText: 'Progresso',
               },
             },

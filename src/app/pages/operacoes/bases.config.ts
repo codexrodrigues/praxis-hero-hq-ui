@@ -9,11 +9,15 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'operations/bases/filter?page=0&size=1',
+    method: 'POST',
+    payload: {},
     cards: [
       {
         id: 'all',
         label: 'Complexos Operacionais',
-        value: '16 Instalações',
+        value: '15 Instalações',
+        valueExpr: '${totalElements | number | default:15} Instalações',
         caption: 'Quartéis-generais, torres e hangares',
         icon: 'hub',
         tone: 'info',
@@ -22,7 +26,7 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'sigilo',
         label: 'Segurança Máxima',
-        value: '4 Bases Sigilosas',
+        value: '3 Bases Sigilosas',
         caption: 'Classificação Ultra-Secreta',
         icon: 'security',
         tone: 'danger',
@@ -31,7 +35,7 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'mundos',
         label: 'Bases Terrestres',
-        value: '11 na Terra',
+        value: '14 na Terra',
         caption: 'Instalações no teatro terrestre',
         icon: 'public',
         tone: 'neutral',
@@ -65,9 +69,9 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: "row.sigilo === 'ULTRA_SECRETA' ? 98 : row.sigilo === 'SECRETA' ? 85 : row.sigilo === 'CONFIDENCIAL' ? 72 : 55",
+                valueExpr: "= row.sigilo === 'ULTRA_SECRETA' ? 98 : row.sigilo === 'SECRETA' ? 85 : row.sigilo === 'CONFIDENCIAL' ? 72 : 55",
                 total: 100,
-                toneExpr: "row.sigilo === 'ULTRA_SECRETA' ? 'success' : row.sigilo === 'SECRETA' ? 'info' : 'warning'",
+                toneExpr: "= row.sigilo === 'ULTRA_SECRETA' ? 'success' : row.sigilo === 'SECRETA' ? 'info' : 'warning'",
                 fallbackText: 'Prontidão',
               },
             },

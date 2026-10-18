@@ -22,6 +22,36 @@ export const BLANK_STUDIO_PAGE_DEFINITION: WidgetPageDefinition = {
     collisionPolicy: 'swap',
     items: {},
   },
+  deviceLayouts: {
+    tablet: {
+      layout: {
+        orientation: 'columns',
+        columns: 6,
+        gap: '16px',
+      },
+      canvas: {
+        columns: 6,
+        gap: '16px',
+        autoRows: 'content',
+        collisionPolicy: 'swap',
+        items: {},
+      },
+    },
+    mobile: {
+      layout: {
+        orientation: 'vertical',
+        columns: 1,
+        gap: '14px',
+      },
+      canvas: {
+        columns: 1,
+        gap: '14px',
+        autoRows: 'content',
+        collisionPolicy: 'push-down',
+        items: {},
+      },
+    },
+  },
   widgets: [],
 };
 

@@ -9,11 +9,15 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'human-resources/eventos-folha/filter?page=0&size=1',
+    method: 'POST',
+    payload: {},
     cards: [
       {
         id: 'total',
         label: 'Eventos Lançados',
-        value: 'Conferência Ativa',
+        value: '25.590 Rubricas',
+        valueExpr: "${totalElements | number | default:'25.590'} Rubricas",
         caption: 'Rubricas vinculadas às folhas de pagamento',
         icon: 'receipt_long',
         tone: 'neutral',
@@ -22,7 +26,7 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
       {
         id: 'pendentes',
         label: 'Aguardando Aprovação',
-        value: 'Fila de Conferência',
+        value: '18.802 Pendentes',
         caption: 'Elegíveis para aprovação ou revisão em lote',
         icon: 'pending_actions',
         tone: 'warning',
@@ -31,7 +35,7 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
       {
         id: 'aprovados',
         label: 'Eventos Homologados',
-        value: 'Prontos para Fechamento',
+        value: '6.758 Aprovados',
         caption: 'Aprovados pelo fluxo governado de folha',
         icon: 'task_alt',
         tone: 'success',
@@ -40,7 +44,7 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
       {
         id: 'rejeitados',
         label: 'Eventos Glosados',
-        value: 'Revisão Necessária',
+        value: '30 Rejeitados',
         caption: 'Bloqueados na auditoria de folha',
         icon: 'cancel',
         tone: 'danger',

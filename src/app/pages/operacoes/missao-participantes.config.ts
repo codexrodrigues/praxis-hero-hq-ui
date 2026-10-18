@@ -9,11 +9,19 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'operations/missao-participantes/stats/group-by',
+    method: 'POST',
+    payload: {
+      filter: {},
+      field: 'papel',
+      metrics: [{ operation: 'COUNT', alias: 'total' }],
+    },
     cards: [
       {
         id: 'total',
         label: 'Escalas Operacionais',
-        value: 'Efetivo Escalado',
+        value: '315 Escalas',
+        valueExpr: '${totalCount | number | default:315} Escalas',
         caption: 'Participantes vinculados a missões em campo',
         icon: 'groups',
         tone: 'info',
@@ -22,8 +30,10 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'lideres',
         label: 'Liderança Tática',
-        value: 'Comandantes de Campo',
+        value: '54 Comandantes',
+        valueExpr: '${byKey.LIDER | number | default:54} Comandantes',
         caption: 'Referências principais de esquadrão',
+        captionExpr: "Referências principais de esquadrão (${((byKey.LIDER / totalCount) * 100) | round:1 | default:'17,1'}%)",
         icon: 'military_tech',
         tone: 'primary',
         filter: { papel: 'LIDER' },
@@ -31,8 +41,10 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'suporte',
         label: 'Suporte & Especialistas',
-        value: 'Apoio Operacional',
+        value: '152 Operadores',
+        valueExpr: '${byKey.SUPORTE | number | default:152} Operadores',
         caption: 'Retaguarda, inteligência e contenção',
+        captionExpr: "Retaguarda, inteligência e contenção (${((byKey.SUPORTE / totalCount) * 100) | round:1 | default:'48,3'}%)",
         icon: 'shield',
         tone: 'neutral',
         filter: { papel: 'SUPORTE' },
@@ -40,8 +52,8 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'sucesso',
         label: 'Missões Bem-Sucedidas',
-        value: 'Debriefing Positivo',
-        caption: 'Participações concluídas com sucesso',
+        value: '282 Concluídas',
+        caption: 'Participações concluídas com sucesso (89,5%)',
         icon: 'verified',
         tone: 'success',
         filter: { resultado: 'OK' },

@@ -17,15 +17,16 @@
           "plannedMissions": 15,
           "completedMissions": 22,
           "pausedMissions": 4,
+          "failedMissions": 2,
           "cancelledMissions": 0,
-          "totalMissions": 50,
-          "missoesPercent": 30,
+          "totalMissions": 52,
+          "missoesPercent": 42.3,
           "latestPayrollNet": 2684945.08,
-          "latestPayrollGross": 3041500,
-          "latestPayrollMonth": "2026-10-01",
+          "latestPayrollGross": 3237079.58,
+          "latestPayrollMonth": "2026-04-01",
           "latestPayrollNetMillion": 2.68,
           "latestPayrollEmployees": 101,
-          "folhaPercent": 88.3,
+          "folhaPercent": 82.9,
           "totalIncidents": 108,
           "criticalIncidents": 23,
           "criticalIncidentsBadge": "23",
@@ -45,7 +46,57 @@
           "observedThreats": 6,
           "capturedThreats": 3,
           "totalThreats": 24
-        }
+        },
+        "activeMissions": [
+          {
+            "missaoId": 1,
+            "titulo": "Batalha de Nova York",
+            "status": "EM_ANDAMENTO",
+            "statusLabel": "Em andamento",
+            "prioridade": "CRITICA",
+            "prioridadeLabel": "Crítica",
+            "local": "Nova York",
+            "ameaca": "Thanos",
+            "qtdHerois": 10,
+            "qtdEventos": 6
+          },
+          {
+            "missaoId": 14,
+            "titulo": "Operação Firewall Global II",
+            "status": "EM_ANDAMENTO",
+            "statusLabel": "Em andamento",
+            "prioridade": "CRITICA",
+            "prioridadeLabel": "Crítica",
+            "local": "Global",
+            "ameaca": "Skynet",
+            "qtdHerois": 7,
+            "qtdEventos": 3
+          },
+          {
+            "missaoId": 21,
+            "titulo": "Patrulha em Tóquio",
+            "status": "EM_ANDAMENTO",
+            "statusLabel": "Em andamento",
+            "prioridade": "MEDIA",
+            "prioridadeLabel": "Média",
+            "local": "Tóquio",
+            "ameaca": "Duende Verde",
+            "qtdHerois": 5,
+            "qtdEventos": 3
+          },
+          {
+            "missaoId": 26,
+            "titulo": "Bloqueio Coluano",
+            "status": "EM_ANDAMENTO",
+            "statusLabel": "Em andamento",
+            "prioridade": "CRITICA",
+            "prioridadeLabel": "Crítica",
+            "local": "Metrópolis",
+            "ameaca": "Brainiac",
+            "qtdHerois": 9,
+            "qtdEventos": 7
+          }
+        ]
       },
       "derived": {
         "kpis.readinessRate": {
@@ -278,6 +329,7 @@
             "EM_ANDAMENTO": "inProgressMissions",
             "CONCLUIDA": "completedMissions",
             "PAUSADA": "pausedMissions",
+            "FALHOU": "failedMissions",
             "CANCELADA": "cancelledMissions"
           },
           "totalField": "totalMissions"
@@ -287,8 +339,9 @@
           "inProgressMissions": 9,
           "completedMissions": 22,
           "pausedMissions": 4,
+          "failedMissions": 2,
           "cancelledMissions": 0,
-          "totalMissions": 50
+          "totalMissions": 52
         }
       },
       {
@@ -325,8 +378,8 @@
         },
         "fallbackValue": {
           "latestPayrollNet": 2684945.08,
-          "latestPayrollGross": 3041500,
-          "latestPayrollMonth": "2026-10-01",
+          "latestPayrollGross": 3237079.58,
+          "latestPayrollMonth": "2026-04-01",
           "latestPayrollEmployees": 101
         }
       },
@@ -433,6 +486,70 @@
           "capturedThreats": 3,
           "totalThreats": 24
         }
+      },
+      {
+        "id": "recentMissionsFeed",
+        "kind": "remote-resource",
+        "resourcePath": "operations/vw-resumo-missoes/filter?page=0&size=4",
+        "method": "POST",
+        "query": {
+          "status": "EM_ANDAMENTO"
+        },
+        "targetStatePath": "activeMissions",
+        "transform": {
+          "kind": "path",
+          "path": "content"
+        },
+        "fallbackValue": [
+          {
+            "missaoId": 1,
+            "titulo": "Batalha de Nova York",
+            "status": "EM_ANDAMENTO",
+            "statusLabel": "Em andamento",
+            "prioridade": "CRITICA",
+            "prioridadeLabel": "Crítica",
+            "local": "Nova York",
+            "ameaca": "Thanos",
+            "qtdHerois": 10,
+            "qtdEventos": 6
+          },
+          {
+            "missaoId": 14,
+            "titulo": "Operação Firewall Global II",
+            "status": "EM_ANDAMENTO",
+            "statusLabel": "Em andamento",
+            "prioridade": "CRITICA",
+            "prioridadeLabel": "Crítica",
+            "local": "Global",
+            "ameaca": "Skynet",
+            "qtdHerois": 7,
+            "qtdEventos": 3
+          },
+          {
+            "missaoId": 21,
+            "titulo": "Patrulha em Tóquio",
+            "status": "EM_ANDAMENTO",
+            "statusLabel": "Em andamento",
+            "prioridade": "MEDIA",
+            "prioridadeLabel": "Média",
+            "local": "Tóquio",
+            "ameaca": "Duende Verde",
+            "qtdHerois": 5,
+            "qtdEventos": 3
+          },
+          {
+            "missaoId": 26,
+            "titulo": "Bloqueio Coluano",
+            "status": "EM_ANDAMENTO",
+            "statusLabel": "Em andamento",
+            "prioridade": "CRITICA",
+            "prioridadeLabel": "Crítica",
+            "local": "Metrópolis",
+            "ameaca": "Brainiac",
+            "qtdHerois": 9,
+            "qtdEventos": 7
+          }
+        ]
       }
     ],
     "layout": {
@@ -575,6 +692,311 @@
           "constraints": {
             "minColSpan": 4,
             "maxColSpan": 12
+          }
+        }
+      }
+    },
+    "deviceLayouts": {
+      "tablet": {
+        "layout": {
+          "orientation": "columns",
+          "columns": 6,
+          "gap": "16px"
+        },
+        "canvas": {
+          "columns": 6,
+          "gap": "16px",
+          "autoRows": "content",
+          "collisionPolicy": "swap",
+          "items": {
+            "heroBanner": {
+              "col": 1,
+              "row": 1,
+              "colSpan": 6,
+              "rowSpan": 4,
+              "constraints": {
+                "minColSpan": 6,
+                "maxColSpan": 6
+              }
+            },
+            "kpiProntidao": {
+              "col": 1,
+              "row": 5,
+              "colSpan": 3,
+              "rowSpan": 3,
+              "constraints": {
+                "minColSpan": 2,
+                "maxColSpan": 6
+              }
+            },
+            "kpiMissoes": {
+              "col": 4,
+              "row": 5,
+              "colSpan": 3,
+              "rowSpan": 3,
+              "constraints": {
+                "minColSpan": 2,
+                "maxColSpan": 6
+              }
+            },
+            "kpiFolha": {
+              "col": 1,
+              "row": 8,
+              "colSpan": 3,
+              "rowSpan": 3,
+              "constraints": {
+                "minColSpan": 2,
+                "maxColSpan": 6
+              }
+            },
+            "kpiRiscos": {
+              "col": 4,
+              "row": 8,
+              "colSpan": 3,
+              "rowSpan": 3,
+              "constraints": {
+                "minColSpan": 2,
+                "maxColSpan": 6
+              }
+            },
+            "payrollChart": {
+              "col": 1,
+              "row": 11,
+              "colSpan": 6,
+              "rowSpan": 6,
+              "constraints": {
+                "minColSpan": 3,
+                "maxColSpan": 6
+              }
+            },
+            "reputationChart": {
+              "col": 1,
+              "row": 17,
+              "colSpan": 6,
+              "rowSpan": 6,
+              "constraints": {
+                "minColSpan": 3,
+                "maxColSpan": 6
+              }
+            },
+            "incidentsSeverityDonut": {
+              "col": 1,
+              "row": 23,
+              "colSpan": 3,
+              "rowSpan": 6,
+              "constraints": {
+                "minColSpan": 3,
+                "maxColSpan": 6
+              }
+            },
+            "defconGaugeChart": {
+              "col": 4,
+              "row": 23,
+              "colSpan": 3,
+              "rowSpan": 6,
+              "constraints": {
+                "minColSpan": 3,
+                "maxColSpan": 6
+              }
+            },
+            "distressSignalsList": {
+              "col": 1,
+              "row": 29,
+              "colSpan": 6,
+              "rowSpan": 6,
+              "constraints": {
+                "minColSpan": 3,
+                "maxColSpan": 6
+              }
+            },
+            "recentIncidents": {
+              "col": 1,
+              "row": 35,
+              "colSpan": 6,
+              "rowSpan": 7,
+              "constraints": {
+                "minColSpan": 6,
+                "maxColSpan": 6
+              }
+            },
+            "missionsTimeline": {
+              "col": 1,
+              "row": 42,
+              "colSpan": 6,
+              "rowSpan": 7,
+              "constraints": {
+                "minColSpan": 3,
+                "maxColSpan": 6
+              }
+            },
+            "domainHub": {
+              "col": 1,
+              "row": 49,
+              "colSpan": 6,
+              "rowSpan": 7,
+              "constraints": {
+                "minColSpan": 3,
+                "maxColSpan": 6
+              }
+            }
+          }
+        }
+      },
+      "mobile": {
+        "layout": {
+          "orientation": "vertical",
+          "columns": 1,
+          "gap": "14px"
+        },
+        "canvas": {
+          "columns": 1,
+          "gap": "14px",
+          "autoRows": "content",
+          "collisionPolicy": "push-down",
+          "items": {
+            "heroBanner": {
+              "col": 1,
+              "row": 1,
+              "colSpan": 1,
+              "rowSpan": 4,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "kpiProntidao": {
+              "col": 1,
+              "row": 5,
+              "colSpan": 1,
+              "rowSpan": 3,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "kpiMissoes": {
+              "col": 1,
+              "row": 8,
+              "colSpan": 1,
+              "rowSpan": 3,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "kpiFolha": {
+              "col": 1,
+              "row": 11,
+              "colSpan": 1,
+              "rowSpan": 3,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "kpiRiscos": {
+              "col": 1,
+              "row": 14,
+              "colSpan": 1,
+              "rowSpan": 3,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "payrollChart": {
+              "col": 1,
+              "row": 17,
+              "colSpan": 1,
+              "rowSpan": 6,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "reputationChart": {
+              "col": 1,
+              "row": 23,
+              "colSpan": 1,
+              "rowSpan": 6,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "incidentsSeverityDonut": {
+              "col": 1,
+              "row": 29,
+              "colSpan": 1,
+              "rowSpan": 6,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "defconGaugeChart": {
+              "col": 1,
+              "row": 35,
+              "colSpan": 1,
+              "rowSpan": 6,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "distressSignalsList": {
+              "col": 1,
+              "row": 41,
+              "colSpan": 1,
+              "rowSpan": 6,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "recentIncidents": {
+              "col": 1,
+              "row": 47,
+              "colSpan": 1,
+              "rowSpan": 7,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "missionsTimeline": {
+              "col": 1,
+              "row": 54,
+              "colSpan": 1,
+              "rowSpan": 7,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            },
+            "domainHub": {
+              "col": 1,
+              "row": 61,
+              "colSpan": 1,
+              "rowSpan": 7,
+              "contentSize": "auto",
+              "constraints": {
+                "minColSpan": 1,
+                "maxColSpan": 1
+              }
+            }
           }
         }
       }
@@ -824,7 +1246,7 @@
                   "content": [
                     {
                       "type": "progress",
-                      "valueExpr": "progressValue",
+                      "valueExpr": "progressValue | round:1 | default:0",
                       "showPercent": false,
                       "className": "fill-ready"
                     },
@@ -894,13 +1316,13 @@
                   "content": [
                     {
                       "type": "progress",
-                      "valueExpr": "progressValue",
+                      "valueExpr": "progressValue | round:0 | default:0",
                       "showPercent": false,
                       "className": "fill-operations"
                     },
                     {
                       "type": "text",
-                      "text": "${kpis.totalMissions} missões catalogadas no radar tático",
+                      "text": "${kpis.inProgressMissions} em curso · ${kpis.completedMissions} concluídas de ${kpis.totalMissions} missões",
                       "className": "card-footnote"
                     }
                   ]
@@ -964,7 +1386,7 @@
                   "content": [
                     {
                       "type": "progress",
-                      "valueExpr": "progressValue",
+                      "valueExpr": "progressValue | round:1 | default:0",
                       "showPercent": false,
                       "className": "fill-rh"
                     },
@@ -1034,13 +1456,13 @@
                   "content": [
                     {
                       "type": "progress",
-                      "valueExpr": "progressValue",
+                      "valueExpr": "progressValue | round:0 | default:0",
                       "showPercent": false,
                       "className": "fill-risk"
                     },
                     {
                       "type": "text",
-                      "text": "${kpis.highIncidents} ocorrências de severidade alta em contenção",
+                      "text": "${kpis.riscosPercent}% críticos · ${kpis.highIncidents} de severidade alta em ${kpis.totalIncidents} ocorrências",
                       "className": "card-footnote"
                     }
                   ]
@@ -1120,7 +1542,7 @@
               "axes": {
                 "x": {
                   "field": "competencia",
-                  "type": "category",
+                  "type": "time",
                   "labels": {
                     "format": "MMM/yy"
                   }
@@ -1302,24 +1724,6 @@
         "definition": {
           "id": "praxis-chart",
           "inputs": {
-            "data": [
-              {
-                "severidade": "CRITICA",
-                "total": "${kpis.criticalIncidents}"
-              },
-              {
-                "severidade": "ALTA",
-                "total": "${kpis.highIncidents}"
-              },
-              {
-                "severidade": "MEDIA",
-                "total": "${kpis.mediumIncidents}"
-              },
-              {
-                "severidade": "BAIXA",
-                "total": "${kpis.lowIncidents}"
-              }
-            ],
             "config": {
               "id": "hero-incident-severity-donut-chart",
               "type": "donut",
@@ -1340,25 +1744,37 @@
                 }
               },
               "dataSource": {
-                "kind": "local",
-                "items": [
-                  {
-                    "severidade": "CRITICA",
-                    "total": "${kpis.criticalIncidents}"
+                "kind": "remote",
+                "resourcePath": "risk-intelligence/vw-indicadores-incidentes",
+                "query": {
+                  "sourceKind": "praxis.stats",
+                  "statsOperation": "group-by",
+                  "statsPath": "risk-intelligence/vw-indicadores-incidentes/stats/group-by",
+                  "statsRequest": {
+                    "filter": {},
+                    "field": "severidade",
+                    "metric": {
+                      "operation": "COUNT",
+                      "alias": "total"
+                    },
+                    "metrics": [
+                      {
+                        "operation": "COUNT",
+                        "alias": "total"
+                      }
+                    ]
                   },
-                  {
-                    "severidade": "ALTA",
-                    "total": "${kpis.highIncidents}"
-                  },
-                  {
-                    "severidade": "MEDIA",
-                    "total": "${kpis.mediumIncidents}"
-                  },
-                  {
-                    "severidade": "BAIXA",
-                    "total": "${kpis.lowIncidents}"
-                  }
-                ]
+                  "dimensions": [
+                    "severidade"
+                  ],
+                  "metrics": [
+                    {
+                      "field": "total",
+                      "aggregation": "count",
+                      "alias": "total"
+                    }
+                  ]
+                }
               },
               "axes": {
                 "x": {
@@ -1379,7 +1795,7 @@
                   "categoryField": "severidade",
                   "metric": {
                     "field": "total",
-                    "aggregation": "sum"
+                    "aggregation": "count"
                   },
                   "labels": {
                     "visible": true
@@ -1409,19 +1825,13 @@
         "shell": {
           "kind": "dashboard-card",
           "title": "Nível de Defesa Tática (DEFCON)",
-          "subtitle": "Escala DEFCON: 5 (Estável) a 1 (Alerta Máximo)",
+          "subtitle": "Índice de aprovação e prontidão tática por equipe (0 a 100)",
           "icon": "speed",
           "showHeader": true
         },
         "definition": {
           "id": "praxis-chart",
           "inputs": {
-            "data": [
-              {
-                "estagio": "Prontidão Global",
-                "defcon": "${kpis.defconScore}"
-              }
-            ],
             "config": {
               "id": "hero-defcon-gauge-chart",
               "type": "gauge",
@@ -1431,23 +1841,23 @@
               },
               "gauge": {
                 "scale": {
-                  "min": 1,
-                  "max": 5
+                  "min": 0,
+                  "max": 100
                 }
               },
               "axes": {
                 "x": {
-                  "field": "estagio",
+                  "field": "equipe",
                   "type": "category"
                 }
               },
               "series": [
                 {
                   "id": "nivelDefcon",
-                  "name": "DEFCON",
-                  "categoryField": "estagio",
+                  "name": "Prontidão Tática",
+                  "categoryField": "equipe",
                   "metric": {
-                    "field": "defcon",
+                    "field": "scorePublico",
                     "aggregation": "avg"
                   },
                   "labels": {
@@ -1456,13 +1866,40 @@
                 }
               ],
               "dataSource": {
-                "kind": "local",
-                "items": [
-                  {
-                    "estagio": "Prontidão Global",
-                    "defcon": "${kpis.defconScore}"
-                  }
-                ]
+                "kind": "remote",
+                "resourcePath": "human-resources/vw-ranking-reputacao",
+                "query": {
+                  "sourceKind": "praxis.stats",
+                  "statsOperation": "group-by",
+                  "statsPath": "human-resources/vw-ranking-reputacao/stats/group-by",
+                  "statsRequest": {
+                    "filter": {},
+                    "field": "equipe",
+                    "limit": 1,
+                    "metric": {
+                      "operation": "AVG",
+                      "field": "scorePublico",
+                      "alias": "scorePublico"
+                    },
+                    "metrics": [
+                      {
+                        "operation": "AVG",
+                        "field": "scorePublico",
+                        "alias": "scorePublico"
+                      }
+                    ]
+                  },
+                  "dimensions": [
+                    "equipe"
+                  ],
+                  "metrics": [
+                    {
+                      "field": "scorePublico",
+                      "aggregation": "avg",
+                      "alias": "scorePublico"
+                    }
+                  ]
+                }
               },
               "theme": {
                 "palette": [
@@ -1806,15 +2243,18 @@
           "id": "praxis-rich-content",
           "inputs": {
             "context": {
+              "activeMissions": "${activeMissions}",
               "activeHeroes": "${kpis.activeHeroes}",
               "totalHeroes": "${kpis.totalHeroes}",
               "readinessRate": "${kpis.readinessRate}",
               "inProgressMissions": "${kpis.inProgressMissions}",
+              "inProgressMissionsBadge": "${kpis.inProgressMissionsBadge}",
               "plannedMissions": "${kpis.plannedMissions}",
               "completedMissions": "${kpis.completedMissions}",
               "pausedMissions": "${kpis.pausedMissions}",
               "totalMissions": "${kpis.totalMissions}",
               "criticalIncidents": "${kpis.criticalIncidents}",
+              "criticalIncidentsBadge": "${kpis.criticalIncidentsBadge}",
               "highIncidents": "${kpis.highIncidents}",
               "defconScore": "${kpis.defconScore}",
               "inUseAssets": "${kpis.inUseAssets}",
@@ -1826,21 +2266,21 @@
               "nodes": [
                 {
                   "type": "timeline",
-                  "title": "Atividades Recentes de Campo (${kpis.totalMissions} Missões)",
+                  "title": "Missões em Curso no Teatro Operacional (${kpis.inProgressMissions} de ${kpis.totalMissions})",
                   "position": "right",
                   "orientation": "vertical",
                   "markerVariant": "dot",
                   "markerStyle": "filled",
                   "items": [
                     {
-                      "title": "Operações Finalizadas (${kpis.completedMissions} Concluídas)",
-                      "subtitle": "Esquadrões encerraram ${kpis.completedMissions} de ${kpis.totalMissions} missões com ${kpis.pausedMissions} em espera tática.",
-                      "meta": "${kpis.inUseAssets}/${kpis.totalAssets} equipamentos ativos em suporte orbital",
-                      "opposite": "15:20",
-                      "badge": "${kpis.completedMissions} Concluídas",
-                      "markerColor": "success",
+                      "title": "${activeMissions.0.titulo} · ${activeMissions.0.local} (${kpis.inProgressMissions} em Curso)",
+                      "subtitle": "Alvo tático: ${activeMissions.0.ameaca} · ${activeMissions.0.qtdHerois} heróis mobilizados em ${activeMissions.0.qtdEventos} eventos (${kpis.completedMissions}/${kpis.totalMissions} concluídas).",
+                      "meta": "Missão #${activeMissions.0.missaoId} · Status: ${activeMissions.0.statusLabel} · ${kpis.inUseAssets}/${kpis.totalAssets} ativos em suporte",
+                      "opposite": "#${activeMissions.0.missaoId}",
+                      "badge": "${activeMissions.0.prioridadeLabel} · ${kpis.inProgressMissionsBadge} Ativas",
+                      "markerColor": "error",
                       "markerStyle": "filled",
-                      "connectorColor": "success",
+                      "connectorColor": "error",
                       "connectorVariant": "solid",
                       "action": {
                         "actionId": "navigation.openRoute",
@@ -1850,11 +2290,11 @@
                       }
                     },
                     {
-                      "title": "Despacho Tático & Contenção (${kpis.inProgressMissions} em Curso)",
-                      "subtitle": "Forças especiais mobilizadas com ${kpis.plannedMissions} operações adicionais no plano de voo.",
-                      "meta": "Clique para inspecionar teatro de missões ativas",
-                      "opposite": "13:45",
-                      "badge": "${kpis.inProgressMissionsBadge} Em Curso",
+                      "title": "${activeMissions.1.titulo} · ${activeMissions.1.local} (${kpis.plannedMissions} Planejadas)",
+                      "subtitle": "Alvo tático: ${activeMissions.1.ameaca} · ${activeMissions.1.qtdHerois} heróis mobilizados em ${activeMissions.1.qtdEventos} eventos (${kpis.pausedMissions} em espera tática).",
+                      "meta": "Missão #${activeMissions.1.missaoId} · Status: ${activeMissions.1.statusLabel}",
+                      "opposite": "#${activeMissions.1.missaoId}",
+                      "badge": "${activeMissions.1.prioridadeLabel} · #${activeMissions.1.missaoId}",
                       "markerColor": "accent",
                       "markerStyle": "filled",
                       "connectorColor": "accent",
@@ -1867,36 +2307,36 @@
                       }
                     },
                     {
-                      "title": "Vigilância DEFCON (${kpis.defconScore}) · ${kpis.criticalIncidents} Ameaças Críticas",
-                      "subtitle": "Monitoramento de ${kpis.highIncidents} incidentes de severidade alta e contenção de perímetro.",
-                      "meta": "Protocolo de resposta imediata acionado pelo QG",
-                      "opposite": "11:10",
-                      "badge": "${kpis.criticalIncidentsBadge} Críticos",
-                      "markerColor": "warn",
+                      "title": "${activeMissions.2.titulo} · ${activeMissions.2.local} (Prontidão ${kpis.readinessRate}%)",
+                      "subtitle": "Alvo tático: ${activeMissions.2.ameaca} · ${activeMissions.2.qtdHerois} heróis mobilizados em ${activeMissions.2.qtdEventos} eventos (${kpis.activeHeroes}/${kpis.totalHeroes} heróis prontos).",
+                      "meta": "Missão #${activeMissions.2.missaoId} · Status: ${activeMissions.2.statusLabel}",
+                      "opposite": "#${activeMissions.2.missaoId}",
+                      "badge": "${activeMissions.2.prioridadeLabel} · #${activeMissions.2.missaoId}",
+                      "markerColor": "warning",
                       "markerStyle": "outlined",
-                      "connectorColor": "warn",
+                      "connectorColor": "warning",
                       "connectorVariant": "dashed",
                       "action": {
                         "actionId": "navigation.openRoute",
                         "payload": {
-                          "path": "/operacoes/incidentes"
+                          "path": "/operacoes/missoes"
                         }
                       }
                     },
                     {
-                      "title": "Início de Turno & Calibração de Prontidão (${kpis.readinessRate}%)",
-                      "subtitle": "Checklist tático de prontidão confirmado para ${kpis.activeHeroes} de ${kpis.totalHeroes} heróis da base.",
-                      "meta": "Sincronização biométrica e trajes homologados",
-                      "opposite": "08:00",
-                      "badge": "${kpis.activeHeroes} Ativos",
-                      "markerColor": "neutral",
+                      "title": "${activeMissions.3.titulo} · ${activeMissions.3.local} (DEFCON ${kpis.defconScore})",
+                      "subtitle": "Alvo tático: ${activeMissions.3.ameaca} · ${activeMissions.3.qtdHerois} heróis mobilizados em ${activeMissions.3.qtdEventos} eventos (${kpis.criticalIncidents} incidentes críticos).",
+                      "meta": "Missão #${activeMissions.3.missaoId} · Status: ${activeMissions.3.statusLabel}",
+                      "opposite": "#${activeMissions.3.missaoId}",
+                      "badge": "${activeMissions.3.prioridadeLabel} · ${kpis.criticalIncidentsBadge} Críticos",
+                      "markerColor": "success",
                       "markerStyle": "filled",
-                      "connectorColor": "neutral",
+                      "connectorColor": "success",
                       "connectorVariant": "solid",
                       "action": {
                         "actionId": "navigation.openRoute",
                         "payload": {
-                          "path": "/rh/funcionarios"
+                          "path": "/operacoes/missoes"
                         }
                       }
                     }
@@ -2080,25 +2520,37 @@
       }
     },
     "dataSource": {
-      "kind": "local",
-      "items": [
-        {
-          "severidade": "CRITICA",
-          "total": "${kpis.criticalIncidents}"
+      "kind": "remote",
+      "resourcePath": "risk-intelligence/vw-indicadores-incidentes",
+      "query": {
+        "sourceKind": "praxis.stats",
+        "statsOperation": "group-by",
+        "statsPath": "risk-intelligence/vw-indicadores-incidentes/stats/group-by",
+        "statsRequest": {
+          "filter": {},
+          "field": "severidade",
+          "metric": {
+            "operation": "COUNT",
+            "alias": "total"
+          },
+          "metrics": [
+            {
+              "operation": "COUNT",
+              "alias": "total"
+            }
+          ]
         },
-        {
-          "severidade": "ALTA",
-          "total": "${kpis.highIncidents}"
-        },
-        {
-          "severidade": "MEDIA",
-          "total": "${kpis.mediumIncidents}"
-        },
-        {
-          "severidade": "BAIXA",
-          "total": "${kpis.lowIncidents}"
-        }
-      ]
+        "dimensions": [
+          "severidade"
+        ],
+        "metrics": [
+          {
+            "field": "total",
+            "aggregation": "count",
+            "alias": "total"
+          }
+        ]
+      }
     },
     "axes": {
       "x": {
@@ -2119,7 +2571,7 @@
         "categoryField": "severidade",
         "metric": {
           "field": "total",
-          "aggregation": "sum"
+          "aggregation": "count"
         },
         "labels": {
           "visible": true
@@ -2150,23 +2602,23 @@
     },
     "gauge": {
       "scale": {
-        "min": 1,
-        "max": 5
+        "min": 0,
+        "max": 100
       }
     },
     "axes": {
       "x": {
-        "field": "estagio",
+        "field": "equipe",
         "type": "category"
       }
     },
     "series": [
       {
         "id": "nivelDefcon",
-        "name": "DEFCON",
-        "categoryField": "estagio",
+        "name": "Prontidão Tática",
+        "categoryField": "equipe",
         "metric": {
-          "field": "defcon",
+          "field": "scorePublico",
           "aggregation": "avg"
         },
         "labels": {
@@ -2175,13 +2627,40 @@
       }
     ],
     "dataSource": {
-      "kind": "local",
-      "items": [
-        {
-          "estagio": "Prontidão Global",
-          "defcon": "${kpis.defconScore}"
-        }
-      ]
+      "kind": "remote",
+      "resourcePath": "human-resources/vw-ranking-reputacao",
+      "query": {
+        "sourceKind": "praxis.stats",
+        "statsOperation": "group-by",
+        "statsPath": "human-resources/vw-ranking-reputacao/stats/group-by",
+        "statsRequest": {
+          "filter": {},
+          "field": "equipe",
+          "limit": 1,
+          "metric": {
+            "operation": "AVG",
+            "field": "scorePublico",
+            "alias": "scorePublico"
+          },
+          "metrics": [
+            {
+              "operation": "AVG",
+              "field": "scorePublico",
+              "alias": "scorePublico"
+            }
+          ]
+        },
+        "dimensions": [
+          "equipe"
+        ],
+        "metrics": [
+          {
+            "field": "scorePublico",
+            "aggregation": "avg",
+            "alias": "scorePublico"
+          }
+        ]
+      }
     },
     "theme": {
       "palette": [
@@ -2334,7 +2813,7 @@
     "axes": {
       "x": {
         "field": "competencia",
-        "type": "category",
+        "type": "time",
         "labels": {
           "format": "MMM/yy"
         }

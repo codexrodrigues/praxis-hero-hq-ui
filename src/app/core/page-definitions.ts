@@ -11,6 +11,7 @@ export interface HeroNavItem extends PraxisNavItem {
 interface ResourcePage {
   readonly kind: 'resource';
   readonly resource: string;
+  readonly crudId?: string;
   readonly domain: { readonly label: string; readonly tone: string };
   readonly title?: string;
   readonly subtitle?: string;
@@ -67,6 +68,23 @@ export const HERO_PAGE_GROUPS: HeroPageGroup[] = [
             import('../pages/dashboard-studio/dashboard-studio-page.component').then(
               (m) => m.DashboardStudioPageComponent,
             ),
+        },
+      },
+      {
+        label: 'Estúdio CRUD (Studio)',
+        path: '/crud-studio',
+        icon: 'table_chart',
+        description: 'Página CRUD corporativa construída e customizada do zero, sem código e sem deploy.',
+        badge: 'STUDIO',
+        badgeTone: 'info',
+        page: {
+          kind: 'resource',
+          resource: '',
+          crudId: 'studio-funcionarios',
+          title: 'Estúdio CRUD Corporativo',
+          subtitle: 'Conexão de recurso, KPIs táticos, filtros rápidos, colunas ricas e formulário customizado em tempo real.',
+          domain: { label: 'Engenharia Zero-Code & Runtime Studio', tone: 'info' },
+          loadMetadata: () => Promise.resolve({ component: 'praxis-crud', table: { columns: [] } }),
         },
       },
     ],

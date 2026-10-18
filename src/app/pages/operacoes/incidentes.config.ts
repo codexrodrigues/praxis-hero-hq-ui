@@ -9,11 +9,19 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'operations/incidentes/stats/group-by',
+    method: 'POST',
+    payload: {
+      filter: {},
+      field: 'severidade',
+      metrics: [{ operation: 'COUNT', alias: 'total' }],
+    },
     cards: [
       {
         id: 'all',
         label: 'Total de Ocorrências',
-        value: '74 Registros',
+        value: '108 Registros',
+        valueExpr: '${totalCount | number | default:108} Registros',
         caption: 'Sinistros pós-combate catalogados',
         icon: 'report',
         tone: 'neutral',
@@ -22,8 +30,10 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'criticos',
         label: 'Severidade Crítica',
-        value: '18 Casos Críticos',
-        caption: 'Alto impacto civil e estrutural',
+        value: '23 Casos Críticos',
+        valueExpr: '${byKey.CRITICA | number | default:23} Casos Críticos',
+        caption: 'Alto impacto civil e estrutural (21,3%)',
+        captionExpr: "Alto impacto civil e estrutural (${((byKey.CRITICA / totalCount) * 100) | round:1 | default:'21,3'}%)",
         icon: 'warning',
         tone: 'danger',
         filter: { severidade: 'CRITICA' },

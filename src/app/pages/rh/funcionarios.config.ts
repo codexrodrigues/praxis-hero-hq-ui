@@ -9,12 +9,20 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'human-resources/funcionarios/stats/group-by',
+    method: 'POST',
+    payload: {
+      filter: {},
+      field: 'ativo',
+      metrics: [{ operation: 'COUNT', alias: 'total' }],
+    },
     cards: [
       {
         id: 'total',
         label: 'Efetivo Total',
         value: '101 Cadastrados',
-        caption: 'Quadro ativo e reserva',
+        valueExpr: '${totalCount | number | default:101} Cadastrados',
+        caption: 'Quadro ativo e reserva tática',
         icon: 'group',
         tone: 'info',
         filter: {},
@@ -22,8 +30,10 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'ativos',
         label: 'Em Prontidão Ativa',
-        value: '101 Ativos',
-        caption: '100% da força operacional',
+        value: '53 Ativos',
+        valueExpr: '${byKey.true | number | default:53} Ativos',
+        caption: '52,5% da força operacional mobilizável',
+        captionExpr: "${((byKey.true / totalCount) * 100) | round:1 | default:'52,5'}% da força operacional mobilizável",
         icon: 'verified_user',
         tone: 'success',
         filter: { ativo: true },
@@ -31,7 +41,8 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'inativos',
         label: 'Em Reserva / Licença',
-        value: '0 Inativos',
+        value: '48 Inativos',
+        valueExpr: '${byKey.false | number | default:48} Inativos',
         caption: 'Reserva tática ou licença civil',
         icon: 'person_off',
         tone: 'warning',
@@ -64,9 +75,9 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: 'row.ativo ? 90 : 40',
+                valueExpr: '= row.ativo ? 90 : 40',
                 total: 100,
-                toneExpr: "row.ativo ? 'success' : 'warning'",
+                toneExpr: "= row.ativo ? 'success' : 'warning'",
                 fallbackText: 'Prontidão',
               },
             },

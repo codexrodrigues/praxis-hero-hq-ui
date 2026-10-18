@@ -9,11 +9,19 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'assets/veiculos/stats/group-by',
+    method: 'POST',
+    payload: {
+      filter: {},
+      field: 'status',
+      metrics: [{ operation: 'COUNT', alias: 'total' }],
+    },
     cards: [
       {
         id: 'all',
         label: 'Unidades na Frota',
-        value: '22 Veículos',
+        value: '24 Veículos',
+        valueExpr: '${totalCount | number | default:24} Veículos',
         caption: 'Aeronaves, hovercrafts e terrestres',
         icon: 'rocket_launch',
         tone: 'info',
@@ -23,7 +31,9 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
         id: 'operacional',
         label: 'Prontidão de Voo',
         value: '17 Disponíveis',
+        valueExpr: '${byKey.OPERACIONAL | number | default:17} Disponíveis',
         caption: 'Abastecidos e prontos para decolagem',
+        captionExpr: "Abastecidos e prontos para decolagem (${((byKey.OPERACIONAL / totalCount) * 100) | round:1 | default:'70,8'}%)",
         icon: 'verified',
         tone: 'success',
         filter: { status: 'OPERACIONAL' },
@@ -31,7 +41,8 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
       {
         id: 'manutencao',
         label: 'Em Revisão / Hangar',
-        value: '3 em Manutenção',
+        value: '5 em Manutenção',
+        valueExpr: '${byKey.MANUTENCAO | number | default:5} em Manutenção',
         caption: 'Calibragem de propulsores iônicos',
         icon: 'build',
         tone: 'warning',
@@ -65,9 +76,9 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: "row.status === 'OPERACIONAL' ? 95 : row.status === 'MANUTENCAO' ? 45 : 15",
+                valueExpr: "= row.status === 'OPERACIONAL' ? 95 : row.status === 'MANUTENCAO' ? 45 : 15",
                 total: 100,
-                toneExpr: "row.status === 'OPERACIONAL' ? 'success' : row.status === 'MANUTENCAO' ? 'warning' : 'danger'",
+                toneExpr: "= row.status === 'OPERACIONAL' ? 'success' : row.status === 'MANUTENCAO' ? 'warning' : 'danger'",
                 fallbackText: 'Prontidão',
               },
             },

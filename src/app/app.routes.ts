@@ -27,6 +27,7 @@ export const routes: Routes = [
       resolve: { metadata: () => page.loadMetadata() },
       data: {
         resource: page.resource,
+        ...(page.crudId ? { crudId: page.crudId } : {}),
         title,
         subtitle: page.subtitle ?? item.description,
         domain: { ...page.domain, icon: page.icon ?? item.icon },

@@ -9,11 +9,15 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'operations/equipes/filter?page=0&size=1',
+    method: 'POST',
+    payload: {},
     cards: [
       {
         id: 'all',
         label: 'Esquadrões Registrados',
-        value: '18 Equipes',
+        value: '5 Equipes',
+        valueExpr: '${totalElements | number | default:5} Equipes',
         caption: 'Compostas por heróis de ponta',
         icon: 'diversity_3',
         tone: 'info',
@@ -22,7 +26,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'ativas',
         label: 'Prontidão Máxima',
-        value: '12 Ativas',
+        value: '4 Ativas',
         caption: 'Mobilizáveis para resposta imediata',
         icon: 'verified_user',
         tone: 'success',
@@ -31,7 +35,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'reserva',
         label: 'Reserva & Suporte',
-        value: '3 em Reserva',
+        value: '1 em Reserva',
         caption: 'Squads em prontidão secundária',
         icon: 'shield',
         tone: 'neutral',
@@ -40,7 +44,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'bases',
         label: 'Bases Interligadas',
-        value: '16 Complexos',
+        value: '15 Complexos',
         caption: 'Presença e ancoragem tática',
         icon: 'hub',
         tone: 'info',
@@ -64,9 +68,9 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: "row.status === 'ATIVA' ? 95 : row.status === 'RESERVA' ? 70 : 40",
+                valueExpr: "= row.status === 'ATIVA' ? 95 : row.status === 'RESERVA' ? 70 : 40",
                 total: 100,
-                toneExpr: "row.status === 'ATIVA' ? 'success' : row.status === 'RESERVA' ? 'info' : 'warning'",
+                toneExpr: "= row.status === 'ATIVA' ? 'success' : row.status === 'RESERVA' ? 'info' : 'warning'",
                 fallbackText: 'Prontidão',
               },
             },

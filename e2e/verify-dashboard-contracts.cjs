@@ -49,8 +49,20 @@ assert(
     dataSourcesById.has('payrollStats') &&
     dataSourcesById.has('incidentsStats') &&
     dataSourcesById.has('assetsStats') &&
-    dataSourcesById.has('threatsStats'),
-  'pageDef.dataSources declara os 6 DataSources canônicos (heroesStats, missionsStats, payrollStats, incidentsStats, assetsStats, threatsStats)',
+    dataSourcesById.has('threatsStats') &&
+    dataSourcesById.has('recentMissionsFeed'),
+  'pageDef.dataSources declara os 7 DataSources canônicos (heroesStats, missionsStats, payrollStats, incidentsStats, assetsStats, threatsStats, recentMissionsFeed)',
+);
+const recentMissionsDs = dataSourcesById.get('recentMissionsFeed');
+assert(
+  recentMissionsDs?.kind === 'remote-resource' &&
+    recentMissionsDs?.resourcePath === 'operations/vw-resumo-missoes/filter?page=0&size=4' &&
+    recentMissionsDs?.targetStatePath === 'activeMissions' &&
+    recentMissionsDs?.transform?.kind === 'path' &&
+    recentMissionsDs?.transform?.path === 'content' &&
+    Array.isArray(pageDef.state?.values?.activeMissions) &&
+    pageDef.state.values.activeMissions.length === 4,
+  'recentMissionsFeed alimenta state.values.activeMissions via POST operations/vw-resumo-missoes/filter?page=0&size=4',
 );
 assert(
   Boolean(pageDef.state?.derived?.['kpis.folhaPercent']) &&
@@ -78,7 +90,7 @@ assert(
   'heroBanner injeta telemetria viva (readinessRate e todos os 5 contacts TRK-01..TRK-05) em componentInputs do radar',
 );
 
-// 1.2 Interactive Bento KPI Cards
+// 1.2 Interactive Bento KPI Cards & Aligned Progress Footnotes
 const expectedKpiRoutes = {
   kpiProntidao: '/rh/funcionarios',
   kpiMissoes: '/operacoes/missoes',
@@ -95,25 +107,60 @@ for (const [kpiKey, expectedRoute] of Object.entries(expectedKpiRoutes)) {
     `${kpiKey} possui interaction.mode="action" apontando para "${expectedRoute}"`,
   );
 }
+const kpiMissoesFootnote =
+  widgetsByKey.get('kpiMissoes')?.definition?.inputs?.document?.nodes?.[0]?.content?.[1]?.text;
+const kpiRiscosFootnote =
+  widgetsByKey.get('kpiRiscos')?.definition?.inputs?.document?.nodes?.[0]?.content?.[1]?.text;
+assert(
+  kpiMissoesFootnote ===
+    '${kpis.inProgressMissions} em curso · ${kpis.completedMissions} concluídas de ${kpis.totalMissions} missões' &&
+    kpiRiscosFootnote ===
+      '${kpis.riscosPercent}% críticos · ${kpis.highIncidents} de severidade alta em ${kpis.totalIncidents} ocorrências',
+  'kpiMissoes e kpiRiscos alinham semântica entre progress.value e footnote (concluídas/total e % críticos/total)',
+);
+const allKpisUseDeclarativePipes = Object.keys(expectedKpiRoutes).every((kpiKey) => {
+  const progressNode =
+    widgetsByKey.get(kpiKey)?.definition?.inputs?.document?.nodes?.[0]?.content?.[0];
+  return (
+    progressNode?.type === 'progress' &&
+    /^progressValue\s*\|\s*round:\d+\s*\|\s*default:0$/.test(String(progressNode.valueExpr || ''))
+  );
+});
+assert(
+  allKpisUseDeclarativePipes,
+  'Todos os 4 cartões Bento KPI utilizam pipes declarativos CSP-safe (progressValue | round:N | default:0) em progress.valueExpr',
+);
 
-// 1.3 Zero Duplicate HTTP Request on incidentsSeverityDonut
+// 1.3 Remote praxis.stats on all 4 Dashboard Charts (zero local/static chart data)
 const donutWidget = widgetsByKey.get('incidentsSeverityDonut');
 const donutConfig = donutWidget?.definition?.inputs?.config;
 const standaloneDonutConfig = rawBundle.incidentSeverityDonutConfig;
+const defconWidget = widgetsByKey.get('defconGaugeChart');
+const defconConfig = defconWidget?.definition?.inputs?.config;
+const standaloneDefconConfig = rawBundle.defconGaugeConfig;
+const payrollWidget = widgetsByKey.get('payrollChart');
+const payrollConfig = payrollWidget?.definition?.inputs?.config;
 assert(
-  donutConfig?.dataSource?.kind === 'local' &&
-    Array.isArray(donutConfig?.dataSource?.items) &&
-    donutConfig.dataSource.items.length === 4,
-  'Widget incidentsSeverityDonut utiliza dataSource.kind="local" interpolado a partir de kpis (sem requisição HTTP duplicada)',
+  donutConfig?.dataSource?.kind === 'remote' &&
+    donutConfig?.dataSource?.query?.sourceKind === 'praxis.stats' &&
+    donutConfig?.dataSource?.resourcePath === 'risk-intelligence/vw-indicadores-incidentes' &&
+    !('data' in (donutWidget?.definition?.inputs || {})) &&
+    standaloneDonutConfig?.dataSource?.kind === 'remote' &&
+    standaloneDonutConfig?.dataSource?.query?.sourceKind === 'praxis.stats',
+  'Widget incidentsSeverityDonut e incidentSeverityDonutConfig utilizam dataSource.kind="remote" (praxis.stats) sem inputs.data estático',
 );
 assert(
-  standaloneDonutConfig?.dataSource?.kind === 'local' &&
-    Array.isArray(standaloneDonutConfig?.dataSource?.items) &&
-    standaloneDonutConfig.dataSource.items.length === 4,
-  'incidentSeverityDonutConfig também utiliza dataSource.kind="local" sincronizado com kpis',
+  defconConfig?.dataSource?.kind === 'remote' &&
+    defconConfig?.dataSource?.query?.sourceKind === 'praxis.stats' &&
+    defconConfig?.dataSource?.resourcePath === 'human-resources/vw-ranking-reputacao' &&
+    !('data' in (defconWidget?.definition?.inputs || {})) &&
+    standaloneDefconConfig?.dataSource?.kind === 'remote' &&
+    standaloneDefconConfig?.dataSource?.query?.sourceKind === 'praxis.stats' &&
+    payrollConfig?.axes?.x?.type === 'time',
+  'Widget defconGaugeChart utilizza dataSource.kind="remote" (praxis.stats) sem inputs.data estático e payrollChart declara eixo temporal (axes.x.type="time")',
 );
 
-// 1.4 Missions Timeline Schema & Bindings
+// 1.4 Missions Timeline Schema & Live Record Bindings
 const timelineWidget = widgetsByKey.get('missionsTimeline');
 const timelineInputs = timelineWidget?.definition?.inputs || {};
 assert(
@@ -127,16 +174,17 @@ const timelineItems = timelineNode?.items || [];
 assert(
   timelineItems.length === 4 &&
     timelineItems.every(
-      (item) =>
+      (item, idx) =>
         typeof item.subtitle === 'string' &&
-        /\$\{kpis\.[^}]+\}/.test(item.title) &&
-        /\$\{kpis\.[^}]+\}/.test(item.subtitle) &&
-        /\$\{kpis\.[^}]+\}/.test(item.badge) &&
+        item.title.includes(`\${activeMissions.${idx}.titulo}`) &&
+        item.subtitle.includes(`\${activeMissions.${idx}.ameaca}`) &&
+        item.opposite === `#\${activeMissions.${idx}.missaoId}` &&
+        /\$\{(kpis|activeMissions)\.[^}]+\}/.test(item.badge) &&
         !('description' in item) &&
         item.action?.actionId === 'navigation.openRoute' &&
         typeof item.action?.payload?.path === 'string',
     ),
-  'missionsTimeline utiliza propriedade canônica "subtitle", interpola ${kpis.*} em todos os 4 itens e possui ação navigation.openRoute',
+  'missionsTimeline conecta cada um dos 4 itens a registros reais ${activeMissions.0..3.*} combinados com ${kpis.*} e possui ação navigation.openRoute',
 );
 
 // 1.5 Domain Hub Live Telemetry & Bindings
@@ -160,6 +208,40 @@ assert(
         card.action?.actionId === 'navigation.openRoute',
     ),
   'Todos os 6 cartões de domínio em domainHub interpolam telemetria viva ${kpis.*} em meta e possuem ação navigation.openRoute',
+);
+
+// 1.6 Responsive Device Layouts (Tablet 6-col & Mobile 1-col)
+const tabletCanvas = pageDef.deviceLayouts?.tablet?.canvas;
+const mobileCanvas = pageDef.deviceLayouts?.mobile?.canvas;
+const baseWidgetKeys = Object.keys(pageDef.canvas?.items || {});
+assert(
+  tabletCanvas?.columns === 6 &&
+    baseWidgetKeys.length === 13 &&
+    baseWidgetKeys.every((key) => {
+      const item = tabletCanvas?.items?.[key];
+      return (
+        item &&
+        item.col >= 1 &&
+        item.colSpan >= 1 &&
+        item.col + item.colSpan - 1 <= 6 &&
+        (item.constraints?.maxColSpan ?? 6) <= 6
+      );
+    }),
+  'pageDef.deviceLayouts.tablet.canvas define grade responsiva de 6 colunas para todos os 13 widgets (KPIs 2x2 e gráficos sem colisão)',
+);
+assert(
+  mobileCanvas?.columns === 1 &&
+    baseWidgetKeys.every((key) => {
+      const item = mobileCanvas?.items?.[key];
+      return (
+        item &&
+        item.col === 1 &&
+        item.colSpan === 1 &&
+        item.constraints?.minColSpan === 1 &&
+        item.constraints?.maxColSpan === 1
+      );
+    }),
+  'pageDef.deviceLayouts.mobile.canvas empilha todos os 13 widgets em 1 coluna com constraints minColSpan=1 / maxColSpan=1',
 );
 
 // ---------------------------------------------------------------------------
@@ -238,9 +320,16 @@ assert(
 );
 assert(
   appConfigSrc.includes('praxisStatsDedupeInterceptor') &&
-    appConfigSrc.includes("req.url.endsWith('/stats/group-by')") &&
-    appConfigSrc.includes('shareReplay({ bufferSize: 1, refCount: false })'),
-  'app.config.ts deduplica chamadas POST /stats/group-by concorrentes entre HeroAppShellComponent e DashboardPageComponent',
+    appConfigSrc.includes("cleanUrl.endsWith('/stats/group-by')") &&
+    appConfigSrc.includes('shareReplay({ bufferSize: 1, refCount: false })') &&
+    appConfigSrc.includes('statsRequestCache.clear()') &&
+    appConfigSrc.includes('praxis:hero-hq:telemetry-dirty'),
+  'app.config.ts deduplica e enriquece POST /stats/group-by (byKey/totalCount) e invalida o cache de telemetria após mutações de domínio',
+);
+assert(
+  shellSrc.includes("@HostListener('window:praxis:hero-hq:telemetry-dirty')") &&
+    shellSrc.includes('this.refreshTelemetry()'),
+  'HeroAppShellComponent recarrega a telemetria de Prontidão e Defcon automaticamente após mutações de domínio',
 );
 assert(
   appConfigSrc.includes('praxisDashboardSnapshotReconcileInterceptor') &&
@@ -254,8 +343,11 @@ const dashboardDefTsSrc = fs.readFileSync(
 );
 assert(
   dashboardDefTsSrc.includes('export function reconcilePersistedDashboardPage') &&
-    dashboardDefTsSrc.includes("media?.componentId === 'hero-hq-tactical-radar'"),
-  'dashboard-page.definition.ts exporta reconcilePersistedDashboardPage para atualizar heroBanner legado preservando widgets customizados',
+    dashboardDefTsSrc.includes("media?.componentId === 'hero-hq-tactical-radar'") &&
+    dashboardDefTsSrc.includes('hasTabletCanvas') &&
+    dashboardDefTsSrc.includes('hasMobileCanvas') &&
+    dashboardDefTsSrc.includes('customDs'),
+  'dashboard-page.definition.ts exporta reconcilePersistedDashboardPage não-destrutivo (preservando widgets, dataSources e state customizados)',
 );
 
 const pkgJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
@@ -276,8 +368,10 @@ assert(
 );
 assert(
   themeSrc.includes('.prx-rich-action-card__meta') &&
-    themeSrc.includes('.prx-rich-timeline__item-body--actionable'),
-  'dashboard-theme.scss estiliza badges de telemetria (.prx-rich-action-card__meta) e itens acionáveis da timeline (.prx-rich-timeline__item-body--actionable)',
+    themeSrc.includes('.prx-rich-timeline__item-body--actionable') &&
+    themeSrc.includes('max-height: none !important') &&
+    themeSrc.includes('white-space: normal !important'),
+  'dashboard-theme.scss estiliza badges de telemetria, itens acionáveis da timeline e responsividade mobile sem truncar KPIs nem cortar o radar',
 );
 
 // ---------------------------------------------------------------------------
@@ -323,6 +417,135 @@ if (fs.existsSync(coreDtsPath) && fs.existsSync(tabsDtsPath)) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// 6. Domain Resource Pages kpiBand Live Telemetry Invariants
+// ---------------------------------------------------------------------------
+console.log('\n[Suite 6] Invariantes de Telemetria Viva em kpiBand das 17 Páginas de Domínio');
+const domainConfigs = [
+  'src/app/pages/rh/funcionarios.config.ts',
+  'src/app/pages/rh/folha-pagamento.config.ts',
+  'src/app/pages/rh/eventos-folha.config.ts',
+  'src/app/pages/rh/afastamentos.config.ts',
+  'src/app/pages/rh/departamentos.config.ts',
+  'src/app/pages/rh/reputacao.config.ts',
+  'src/app/pages/operacoes/missoes.config.ts',
+  'src/app/pages/operacoes/missao-participantes.config.ts',
+  'src/app/pages/operacoes/equipes.config.ts',
+  'src/app/pages/operacoes/bases.config.ts',
+  'src/app/pages/operacoes/incidentes.config.ts',
+  'src/app/pages/ativos/equipamentos.config.ts',
+  'src/app/pages/ativos/veiculos.config.ts',
+  'src/app/pages/suprimentos/contratos.config.ts',
+  'src/app/pages/suprimentos/pedidos.config.ts',
+  'src/app/pages/risco/ameacas.config.ts',
+  'src/app/pages/risco/indicadores.config.ts',
+];
+const allDomainConfigsWired = domainConfigs.every((relPath) => {
+  const fullPath = path.join(ROOT, relPath);
+  if (!fs.existsSync(fullPath)) return false;
+  const content = fs.readFileSync(fullPath, 'utf8');
+  return (
+    content.includes("method: 'POST'") &&
+    (content.includes('/filter?page=0&size=1') || content.includes('/stats/group-by')) &&
+    (content.includes('valueExpr:') || content.includes('captionExpr:'))
+  );
+});
+assert(
+  allDomainConfigsWired,
+  `Todas as ${domainConfigs.length} páginas de recurso conectam kpiBand a endpoints vivos (/stats/group-by ou /filter?page=0&size=1) com avaliação dinâmica (valueExpr/captionExpr)`,
+);
+
+const allDomainMicroVizCanonical = domainConfigs.every((relPath) => {
+  const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+  return (
+    !content.includes('Math.round(') &&
+    !content.includes("|| row.status ===") &&
+    !content.includes('mesBetween') &&
+    !content.includes('anoBetween')
+  );
+});
+assert(
+  allDomainMicroVizCanonical,
+  'Todas as 17 páginas de domínio utilizam expressões microVisualization compatíveis com SafeExpressionEvaluator (sem Math.round/||) e chaves de filtro válidas no backend (mes/ano)',
+);
+
+const allDomainKpiDeclarativePipes = domainConfigs.every((relPath) => {
+  const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+  return (
+    content.includes('| default:') &&
+    (content.includes('| number') || content.includes('| round:') || content.includes('| currency:')) &&
+    !content.includes('toString(totalCount)') &&
+    !content.includes('toString(totalElements)') &&
+    !content.includes('toString(byKey.')
+  );
+});
+assert(
+  allDomainKpiDeclarativePipes,
+  'Todas as 17 páginas de domínio padronizam kpiBand (valueExpr e captionExpr) com pipes declarativos CSP-safe (| number, | round:1, | currency, | default:...) sem concatenações legadas toString()',
+);
+
+// ---------------------------------------------------------------------------
+// 7. Dashboard API Integration Audit (Zero Static Data Invariants)
+// ---------------------------------------------------------------------------
+console.log('\n[Suite 7] Dashboard API Integration Audit (Zero Static Data Invariants)');
+const studioDemoSrc = fs.readFileSync(
+  path.join(ROOT, 'e2e/record-studio-demo.mjs'),
+  'utf8',
+);
+
+assert(
+  !studioDemoSrc.includes("sourceKind: 'derived'") &&
+    !studioDemoSrc.includes('fallbackLocalRows:') &&
+    !studioDemoSrc.includes('localRows:'),
+  'record-studio-demo.mjs não utiliza sourceKind="derived", localRows nem fallbackLocalRows em nenhum widget analítico',
+);
+
+const statsConfigCount = (studioDemoSrc.match(/sourceKind:\s*'praxis\.stats'/g) || []).length;
+assert(
+  statsConfigCount === 4 &&
+    studioDemoSrc.includes("resourceMatch: 'risk-intelligence.vw-indicadores-incidentes'") &&
+    studioDemoSrc.includes("resourceMatch: 'human-resources.vw-ranking-reputacao'") &&
+    studioDemoSrc.includes("resourceMatch: 'human-resources.vw-analytics-folha-pagamento'") &&
+    studioDemoSrc.includes("aggMatch: 'média'") &&
+    studioDemoSrc.includes("aggMatch: 'contagem'") &&
+    studioDemoSrc.includes("aggMatch: 'soma'"),
+  'record-studio-demo.mjs configura todos os 4 gráficos analíticos (Donut, Gauge, Área, Barra) exclusivamente via praxis.stats em recursos governados da API',
+);
+
+assert(
+  studioDemoSrc.includes("id: 'heroesStats'") &&
+    studioDemoSrc.includes("id: 'missionsStats'") &&
+    studioDemoSrc.includes("id: 'payrollStats'") &&
+    studioDemoSrc.includes("id: 'incidentsStats'") &&
+    studioDemoSrc.includes("id: 'assetsStats'") &&
+    studioDemoSrc.includes("id: 'threatsStats'") &&
+    studioDemoSrc.includes("id: 'recentMissionsFeed'") &&
+    studioDemoSrc.includes("operations/vw-resumo-missoes/filter?page=0&size=4") &&
+    studioDemoSrc.includes("targetStatePath: 'activeMissions'"),
+  'record-studio-demo.mjs registra todas as 7 DataSources canônicas de telemetria (incluindo assetsStats, threatsStats e recentMissionsFeed -> state.activeMissions)',
+);
+
+assert(
+  !studioDemoSrc.includes('Satélite Orbital Relé') &&
+    !studioDemoSrc.includes('Interceptação Orbital Completa') &&
+    !studioDemoSrc.includes("time: '15:20'") &&
+    !studioDemoSrc.includes('Arsenal homologado · Telemetria de campo') &&
+    studioDemoSrc.includes('activeMissions.0.titulo') &&
+    studioDemoSrc.includes('activeMissions.1.titulo') &&
+    studioDemoSrc.includes('activeMissions.2.titulo') &&
+    studioDemoSrc.includes('activeMissions.3.titulo') &&
+    studioDemoSrc.includes('kpis.inUseAssets') &&
+    studioDemoSrc.includes('progressValue | round:1 | default:0') &&
+    studioDemoSrc.includes('{{state.kpis.folhaPercent}}'),
+  'record-studio-demo.mjs elimina todos os textos/valores estáticos residuais em HERO_COMMAND_HEADER_DOC, KPI_*_DOC, TIMELINE_DOC e HUB_DOC',
+);
+
+assert(
+  studioDemoSrc.includes('async function runDashboardApiIntegrationAudit') &&
+    studioDemoSrc.includes('await runDashboardApiIntegrationAudit(page'),
+  'record-studio-demo.mjs executa a sessão automatizada "Dashboard API Integration Audit" sobre o snapshot persistido da página ao final da gravação',
+);
+
 console.log('\n================================================================');
 if (failed === 0) {
   console.log(` [SUCESSO] Todas as ${passed} asserções de contrato passaram!`);
@@ -333,4 +556,5 @@ if (failed === 0) {
   console.log('================================================================\n');
   process.exit(1);
 }
+
 

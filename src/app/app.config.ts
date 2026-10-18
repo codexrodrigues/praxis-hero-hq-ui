@@ -105,14 +105,85 @@ interface CachedStatsEntry {
 const statsRequestCache = new Map<string, CachedStatsEntry>();
 const STATS_DEDUPE_TTL_MS = 2500;
 
+function isDomainMutationRequest(method: string, url: string): boolean {
+  const upper = method.toUpperCase();
+  if (upper !== 'POST' && upper !== 'PUT' && upper !== 'PATCH' && upper !== 'DELETE') {
+    return false;
+  }
+  if (!url.includes('/api/') || url.includes('/praxis/config/')) {
+    return false;
+  }
+  const cleanUrl = url.split('?')[0];
+  return !(
+    cleanUrl.endsWith('/filter') ||
+    cleanUrl.endsWith('/filter/cursor') ||
+    cleanUrl.includes('/stats/') ||
+    cleanUrl.endsWith('/evaluation') ||
+    cleanUrl.endsWith('/locate') ||
+    cleanUrl.endsWith('/by-ids')
+  );
+}
+
 const praxisStatsDedupeInterceptor: HttpInterceptorFn = (req, next) => {
-  if (req.method !== 'POST' || !req.url.endsWith('/stats/group-by')) {
+  const cleanUrl = req.url.split('?')[0];
+
+  if (isDomainMutationRequest(req.method, req.url)) {
+    return next(req).pipe(
+      tap((event) => {
+        if (event instanceof HttpResponse) {
+          statsRequestCache.clear();
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('praxis:hero-hq:telemetry-dirty'));
+          }
+        }
+      }),
+    );
+  }
+
+  if (req.method === 'POST' && cleanUrl.endsWith('/filter')) {
+    return next(req).pipe(
+      map((event) => {
+        if (!(event instanceof HttpResponse) || !event.body || typeof event.body !== 'object') {
+          return event;
+        }
+        const body = event.body as Record<string, any>;
+        const data = body['data'];
+        if (data && typeof data === 'object' && Array.isArray(data['content']) && data['content'].length > 0 && !('firstItem' in data)) {
+          return event.clone({
+            body: {
+              ...body,
+              data: {
+                ...data,
+                firstItem: data['content'][0],
+              },
+            },
+          });
+        }
+        return event;
+      }),
+    );
+  }
+
+  if (req.method !== 'POST' || !cleanUrl.endsWith('/stats/group-by')) {
     return next(req);
   }
 
   const tenant = req.headers.get('X-Tenant-ID') || 'shield-hq';
   const user = req.headers.get('X-User-ID') || 'nick.fury';
-  const bodyKey = typeof req.body === 'string' ? req.body : JSON.stringify(req.body ?? {});
+  const rawBody = req.body && typeof req.body === 'object' ? (req.body as Record<string, any>) : null;
+  const isSimpleCountGroupBy =
+    rawBody &&
+    typeof rawBody['field'] === 'string' &&
+    (!rawBody['filter'] || Object.keys(rawBody['filter']).length === 0) &&
+    !rawBody['limit'] &&
+    Array.isArray(rawBody['metrics']) &&
+    rawBody['metrics'].length === 1 &&
+    rawBody['metrics'][0]?.operation === 'COUNT';
+  const bodyKey = isSimpleCountGroupBy
+    ? `count-by:${rawBody['field']}`
+    : typeof req.body === 'string'
+      ? req.body
+      : JSON.stringify(req.body ?? {});
   const cacheKey = `${tenant}|${user}|${req.url}|${bodyKey}`;
   const now = Date.now();
   const cached = statsRequestCache.get(cacheKey);
@@ -121,6 +192,49 @@ const praxisStatsDedupeInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const stream$ = next(req).pipe(
+    map((event) => {
+      if (!(event instanceof HttpResponse) || !event.body || typeof event.body !== 'object') {
+        return event;
+      }
+      const body = event.body as Record<string, any>;
+      const data = body['data'];
+      const buckets = data?.['buckets'];
+      if (data && typeof data === 'object' && Array.isArray(buckets)) {
+        const byKey: Record<string, number> = {};
+        let totalCount = 0;
+        const enrichedBuckets = buckets.map((b: any) => {
+          if (!b || typeof b !== 'object') return b;
+          const count = Number(b.values?.['total'] ?? b.values?.['count'] ?? b.count ?? b.value ?? 0);
+          if (!Number.isFinite(count)) return b;
+          totalCount += count;
+          const key = String(b.key ?? b.label ?? '');
+          if (key) {
+            byKey[key] = count;
+          }
+          return {
+            ...b,
+            count: b.count ?? count,
+            values: {
+              ...(b.values ?? {}),
+              total: b.values?.['total'] ?? count,
+              count: b.values?.['count'] ?? count,
+            },
+          };
+        });
+        return event.clone({
+          body: {
+            ...body,
+            data: {
+              ...data,
+              buckets: enrichedBuckets,
+              byKey,
+              totalCount,
+            },
+          },
+        });
+      }
+      return event;
+    }),
     tap({
       error: () => {
         statsRequestCache.delete(cacheKey);

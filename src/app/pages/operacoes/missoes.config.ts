@@ -9,12 +9,21 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'operations/vw-resumo-missoes/stats/group-by',
+    method: 'POST',
+    payload: {
+      filter: {},
+      field: 'status',
+      metrics: [{ operation: 'COUNT', alias: 'total' }],
+    },
     cards: [
       {
         id: 'ativas',
         label: 'Missões Ativas em Campo',
-        value: '09 Incursões',
-        caption: 'Em andamento no radar operacional',
+        value: '9 Incursões',
+        valueExpr: '${byKey.EM_ANDAMENTO | number | default:9} Incursões',
+        caption: 'Em andamento no teatro operacional',
+        captionExpr: 'De ${totalCount | number | default:46} missões catalogadas no comando',
         icon: 'flight_takeoff',
         tone: 'info',
         filter: { status: 'EM_ANDAMENTO' },
@@ -22,8 +31,10 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'concluidas',
         label: 'Missões Concluídas',
-        value: '07 Concluídas',
+        value: '22 Concluídas',
+        valueExpr: '${byKey.CONCLUIDA | number | default:22} Concluídas',
         caption: 'Operações finalizadas com êxito',
+        captionExpr: "Operações finalizadas com êxito (${((byKey.CONCLUIDA / totalCount) * 100) | round:1 | default:'47,8'}%)",
         icon: 'task_alt',
         tone: 'success',
         filter: { status: 'CONCLUIDA' },
@@ -31,8 +42,10 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'planejamento',
         label: 'Em Planejamento / Briefing',
-        value: '10 Missões',
+        value: '15 Missões',
+        valueExpr: '${byKey.PLANEJADA | number | default:15} Missões',
         caption: 'Em preparação e briefing tático',
+        captionExpr: "Em preparação e briefing tático (${((byKey.PLANEJADA / totalCount) * 100) | round:1 | default:'32,6'}%)",
         icon: 'schedule',
         tone: 'warning',
         filter: { status: 'PLANEJADA' },
@@ -40,7 +53,7 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'omega',
         label: 'Prioridade Ômega / Crítica',
-        value: '10 Alertas',
+        value: '15 Alertas',
         caption: 'Engajamento de prioridade crítica',
         icon: 'crisis_alert',
         tone: 'danger',
@@ -64,9 +77,9 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: "row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 68 : row.status === 'PAUSADA' ? 40 : 15",
+                valueExpr: "= row.status === 'CONCLUIDA' ? 100 : row.status === 'EM_ANDAMENTO' ? 68 : row.status === 'PAUSADA' ? 40 : 15",
                 total: 100,
-                toneExpr: "row.status === 'CONCLUIDA' ? 'success' : row.prioridade === 'CRITICA' ? 'danger' : 'info'",
+                toneExpr: "= row.status === 'CONCLUIDA' ? 'success' : row.prioridade === 'CRITICA' ? 'danger' : 'info'",
                 fallbackText: 'Prontidão',
               },
             },

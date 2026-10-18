@@ -48,14 +48,51 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       return widget;
     }
 
-    if (widget.key === 'missionsTimeline' || widget.key === 'domainHub') {
+    if (
+      widget.key === 'missionsTimeline' ||
+      widget.key === 'domainHub' ||
+      widget.key === 'kpiProntidao' ||
+      widget.key === 'kpiMissoes' ||
+      widget.key === 'kpiFolha' ||
+      widget.key === 'kpiRiscos'
+    ) {
       const canonical = canonicalByKey.get(widget.key);
       const serialized = JSON.stringify(widget.definition ?? {});
+      const isStaleTimeline =
+        widget.key === 'missionsTimeline' && !serialized.includes('activeMissions.0.titulo');
       if (
         canonical &&
-        (serialized.includes('Interceptação Orbital Completa') ||
-          serialized.includes('Arsenal homologado · Telemetria de campo'))
+        (isStaleTimeline ||
+          serialized.includes('Interceptação Orbital Completa') ||
+          serialized.includes('Arsenal homologado · Telemetria de campo') ||
+          serialized.includes('Atividades Recentes de Campo') ||
+          serialized.includes('missões catalogadas no radar tático') ||
+          serialized.includes('ocorrências de severidade alta em contenção') ||
+          serialized.includes('"valueExpr":"progressValue"'))
       ) {
+        upgraded = true;
+        return {
+          ...widget,
+          definition: structuredClone(canonical.definition),
+        };
+      }
+    }
+
+    if (
+      widget.key === 'incidentsSeverityDonut' ||
+      widget.key === 'defconGaugeChart' ||
+      widget.key === 'payrollChart' ||
+      widget.key === 'reputationChart'
+    ) {
+      const canonical = canonicalByKey.get(widget.key);
+      const inputs = widget.definition?.inputs;
+      const cfg = inputs?.config;
+      const hasLegacyLocalChart =
+        Array.isArray(inputs?.data) ||
+        cfg?.dataSource?.kind === 'local' ||
+        inputs?.chartDocument?.source?.kind === 'derived' ||
+        (widget.key === 'payrollChart' && cfg?.axes?.x?.type !== 'time');
+      if (canonical && hasLegacyLocalChart) {
         upgraded = true;
         return {
           ...widget,
@@ -69,21 +106,75 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
 
   let nextState = persisted['state'];
   if (
-    nextState &&
-    typeof nextState === 'object' &&
-    !nextState.derived?.['kpis.folhaPercent'] &&
-    DASHBOARD_PAGE_DEFINITION.state
+    DASHBOARD_PAGE_DEFINITION.state &&
+    (!nextState ||
+      typeof nextState !== 'object' ||
+      !nextState.derived?.['kpis.folhaPercent'] ||
+      !Array.isArray(nextState.values?.['activeMissions']))
   ) {
     upgraded = true;
-    nextState = structuredClone(DASHBOARD_PAGE_DEFINITION.state);
+    const canonicalState = structuredClone(DASHBOARD_PAGE_DEFINITION.state);
+    const existingValues =
+      nextState && typeof nextState.values === 'object' && nextState.values !== null
+        ? nextState.values
+        : {};
+    const existingDerived =
+      nextState && typeof nextState.derived === 'object' && nextState.derived !== null
+        ? nextState.derived
+        : {};
+    nextState = {
+      ...canonicalState,
+      ...(nextState && typeof nextState === 'object' ? nextState : {}),
+      values: {
+        ...canonicalState.values,
+        ...existingValues,
+        kpis: {
+          ...(canonicalState.values?.['kpis'] ?? {}),
+          ...(existingValues['kpis'] && typeof existingValues['kpis'] === 'object'
+            ? existingValues['kpis']
+            : {}),
+        },
+        activeMissions: Array.isArray(existingValues['activeMissions'])
+          ? existingValues['activeMissions']
+          : canonicalState.values?.['activeMissions'],
+      },
+      derived: {
+        ...canonicalState.derived,
+        ...existingDerived,
+      },
+    };
   }
 
   let nextDataSources = persisted['dataSources'];
-  if (Array.isArray(nextDataSources) && Array.isArray(DASHBOARD_PAGE_DEFINITION.dataSources)) {
-    const ids = new Set(nextDataSources.map((ds: any) => ds?.id));
-    if (!ids.has('assetsStats') || !ids.has('threatsStats')) {
+  if (Array.isArray(DASHBOARD_PAGE_DEFINITION.dataSources)) {
+    const existingList = Array.isArray(nextDataSources) ? nextDataSources : [];
+    const ids = new Set(existingList.map((ds: any) => ds?.id));
+    if (!ids.has('assetsStats') || !ids.has('threatsStats') || !ids.has('recentMissionsFeed')) {
       upgraded = true;
-      nextDataSources = structuredClone(DASHBOARD_PAGE_DEFINITION.dataSources);
+      const canonicalDs = structuredClone(DASHBOARD_PAGE_DEFINITION.dataSources);
+      const canonicalIds = new Set(canonicalDs.map((ds: any) => ds?.id));
+      const customDs = existingList.filter((ds: any) => ds?.id && !canonicalIds.has(ds.id));
+      nextDataSources = [...canonicalDs, ...customDs];
+    }
+  }
+
+  let nextDeviceLayouts = persisted['deviceLayouts'];
+  if (DASHBOARD_PAGE_DEFINITION.deviceLayouts) {
+    const hasTabletCanvas = Boolean(nextDeviceLayouts?.tablet?.canvas?.columns);
+    const hasMobileCanvas = Boolean(nextDeviceLayouts?.mobile?.canvas?.columns);
+    if (!hasTabletCanvas || !hasMobileCanvas) {
+      upgraded = true;
+      const canonicalDeviceLayouts = structuredClone(DASHBOARD_PAGE_DEFINITION.deviceLayouts);
+      nextDeviceLayouts = {
+        ...canonicalDeviceLayouts,
+        ...(nextDeviceLayouts && typeof nextDeviceLayouts === 'object' ? nextDeviceLayouts : {}),
+        tablet: hasTabletCanvas
+          ? nextDeviceLayouts.tablet
+          : canonicalDeviceLayouts.tablet,
+        mobile: hasMobileCanvas
+          ? nextDeviceLayouts.mobile
+          : canonicalDeviceLayouts.mobile,
+      };
     }
   }
 
@@ -95,8 +186,10 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
     ...persisted,
     ...(nextState !== undefined ? { state: nextState } : {}),
     ...(nextDataSources !== undefined ? { dataSources: nextDataSources } : {}),
+    ...(nextDeviceLayouts !== undefined ? { deviceLayouts: nextDeviceLayouts } : {}),
     widgets: nextWidgets,
   };
 }
+
 
 

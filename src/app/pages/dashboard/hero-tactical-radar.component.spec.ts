@@ -177,6 +177,8 @@ describe('HeroTacticalRadarComponent', () => {
     const upgradedMedia = (reconciled.widgets[0].definition as any)?.inputs?.document?.nodes?.[0]?.media;
     expect(upgradedMedia?.kind).toBe('component');
     expect(upgradedMedia?.componentId).toBe('hero-hq-tactical-radar');
+    expect((reconciled as any).deviceLayouts?.tablet?.canvas?.columns).toBe(6);
+    expect((reconciled as any).deviceLayouts?.mobile?.canvas?.columns).toBe(1);
   });
 
   it('defaults to the semantic theme palette and cycles through theme, emerald, cyan, and amber', () => {

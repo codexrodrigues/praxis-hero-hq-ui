@@ -9,11 +9,19 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
   kpiBand: {
     enabled: true,
     columns: 4,
+    source: 'risk-intelligence/vw-indicadores-incidentes/stats/group-by',
+    method: 'POST',
+    payload: {
+      filter: {},
+      field: 'severidade',
+      metrics: [{ operation: 'COUNT', alias: 'total' }],
+    },
     cards: [
       {
         id: 'passivo',
         label: 'Sinistros com Passivo',
-        value: '74 Casos',
+        value: '108 Casos',
+        valueExpr: '${totalCount | number | default:108} Casos',
         caption: 'Histórico de acordos regulados pelo HQ',
         icon: 'gavel',
         tone: 'danger',
@@ -22,7 +30,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'total',
         label: 'Acordos Quitados',
-        value: '12 Quitados',
+        value: '41 Quitados',
         caption: 'R$ 99,5 M em indenizações homologadas',
         icon: 'payments',
         tone: 'success',
@@ -31,8 +39,10 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
       {
         id: 'danos',
         label: 'Sinistros Críticos',
-        value: '18 Críticos',
+        value: '23 Críticos',
+        valueExpr: '${byKey.CRITICA | number | default:23} Críticos',
         caption: 'R$ 154,4 M em danos civis auditados',
+        captionExpr: "R$ 154,4 M em danos civis auditados (${((byKey.CRITICA / totalCount) * 100) | round:1 | default:'21,3'}%)",
         icon: 'broken_image',
         tone: 'info',
         filter: { severidade: 'CRITICA' },
@@ -41,7 +51,7 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         id: 'saldo',
         label: 'Saldo em Conciliação',
         value: 'R$ 72,8 M',
-        caption: '62 casos com saldo pendente em perícia',
+        caption: '67 casos com saldo pendente em perícia',
         icon: 'hourglass_top',
         tone: 'warning',
         filter: { totalPendenteBetween: [0.01, 999999999] },

@@ -314,8 +314,8 @@ export class HeroAppShellComponent {
 
   protected readonly activeHeroes = signal<number>(53);
   protected readonly totalHeroes = signal<number>(101);
-  protected readonly criticalIncidents = signal<number>(18);
-  protected readonly totalIncidents = signal<number>(74);
+  protected readonly criticalIncidents = signal<number>(23);
+  protected readonly totalIncidents = signal<number>(108);
 
   protected readonly readinessRate = computed<number>(() => {
     const total = this.totalHeroes();
@@ -426,7 +426,8 @@ export class HeroAppShellComponent {
     return text
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase();
+      .toLowerCase()
+      .replace(/(?:oes|aes)\b/g, 'ao');
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -443,6 +444,11 @@ export class HeroAppShellComponent {
         this.personaMenuOpen.set(false);
       }
     }
+  }
+
+  @HostListener('window:praxis:hero-hq:telemetry-dirty')
+  onTelemetryDirty(): void {
+    this.refreshTelemetry();
   }
 
   protected onTopbarSearchInput(query: string): void {
