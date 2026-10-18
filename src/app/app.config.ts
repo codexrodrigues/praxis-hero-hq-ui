@@ -94,7 +94,15 @@ import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
 
 const API_URL_VALUE: ApiUrlConfig = {
-  default: { baseUrl: PRAXIS_API_BASE_URL },
+  default: {
+    baseUrl: PRAXIS_API_BASE_URL,
+    trustedOrigins: [
+      'http://localhost:8088',
+      'http://127.0.0.1:8088',
+      'http://praxis-api-quickstart.onrender.com',
+      'https://praxis-api-quickstart.onrender.com',
+    ],
+  },
 };
 
 interface CachedStatsEntry {

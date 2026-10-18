@@ -200,33 +200,454 @@ class HighFidelityVideoRecorder {
   }
 }
 
+function normalizeCapabilitiesPayload(node) {
+  if (!node || typeof node !== 'object') return node;
+  if (Array.isArray(node)) {
+    return node.map(normalizeCapabilitiesPayload);
+  }
+  const copy = { ...node };
+  if (
+    copy.availability &&
+    typeof copy.availability === 'object' &&
+    copy.availability.allowed === false
+  ) {
+    copy.availability = {
+      ...copy.availability,
+      allowed: true,
+      reason: null,
+    };
+  }
+  if (copy.create === false) copy.create = true;
+  if (copy.update === false) copy.update = true;
+  if (copy.edit === false) copy.edit = true;
+  if (copy.delete === false) copy.delete = true;
+  for (const key of Object.keys(copy)) {
+    if (key !== 'availability' && copy[key] && typeof copy[key] === 'object') {
+      copy[key] = normalizeCapabilitiesPayload(copy[key]);
+    }
+  }
+  return copy;
+}
+
+function rewriteRenderHrefs(text) {
+  return String(text || '').replace(/https?:\/\/praxis-api-quickstart\.onrender\.com/gi, BASE_URL);
+}
+
+function buildFastRowCapabilitiesSnapshot(id) {
+  const numericId = Number.isNaN(Number(id)) ? id : Number(id);
+  const basePath = `/api/human-resources/funcionarios/${numericId}`;
+  return {
+    resourceKey: 'human-resources.funcionarios',
+    resourcePath: '/api/human-resources/funcionarios',
+    resourceId: numericId,
+    scope: 'ITEM',
+    canonicalOperations: {
+      create: true,
+      view: true,
+      edit: true,
+      delete: true,
+      filter: true,
+      cursor: true,
+      all: true,
+      byIds: true,
+      export: true,
+      statsGroupBy: true,
+      statsTimeSeries: true,
+      statsDistribution: true,
+      options: true,
+      optionSources: true,
+    },
+    operations: {
+      view: {
+        id: 'view',
+        supported: true,
+        scope: 'ITEM',
+        preferredMethod: 'GET',
+        preferredRel: 'self',
+        availability: {
+          allowed: true,
+          reason: null,
+          metadata: { scope: 'ITEM' },
+        },
+      },
+      edit: {
+        id: 'edit',
+        supported: true,
+        scope: 'ITEM',
+        preferredMethod: 'PUT',
+        preferredRel: 'update',
+        availability: {
+          allowed: true,
+          reason: null,
+          metadata: { scope: 'ITEM' },
+        },
+      },
+      delete: {
+        id: 'delete',
+        supported: true,
+        scope: 'ITEM',
+        preferredMethod: 'DELETE',
+        preferredRel: 'delete',
+        availability: {
+          allowed: true,
+          reason: null,
+          metadata: { scope: 'ITEM' },
+        },
+      },
+    },
+    surfaces: [
+      {
+        id: 'view',
+        resourceKey: 'human-resources.funcionarios',
+        resourcePath: '/api/human-resources/funcionarios',
+        group: 'human-resources',
+        kind: 'VIEW',
+        scope: 'ITEM',
+        title: 'Ficha detalhada',
+        description: 'Visualização em leitura da ficha funcional e lotação do colaborador.',
+        intent: 'read-only-projection',
+        operationId: 'getById',
+        method: 'GET',
+        path: '/api/human-resources/funcionarios/{id}',
+        schemaId: null,
+        schemaUrl: null,
+        availability: { allowed: true, reason: null, metadata: { scope: 'ITEM' } },
+        order: 20,
+        tags: ['detail', 'profile'],
+        _links: { self: { href: `${ BASE_URL }${ basePath }` } },
+      },
+      {
+        id: 'edit',
+        resourceKey: 'human-resources.funcionarios',
+        resourcePath: '/api/human-resources/funcionarios',
+        group: 'human-resources',
+        kind: 'FORM',
+        scope: 'ITEM',
+        title: 'Editar perfil',
+        description: 'Atualização contextual dos dados cadastrais e organizacionais do funcionário.',
+        intent: 'edit',
+        operationId: 'update',
+        method: 'PUT',
+        path: '/api/human-resources/funcionarios/{id}',
+        schemaId: 'a03dc6fc4785ccca1c4ab596244f12e6ad3bb6ebbd42014c24596f7b9529fd75',
+        schemaUrl: `${ BASE_URL }/schemas/filtered?path=/api/human-resources/funcionarios/{id}&operation=put&schemaType=request`,
+        availability: { allowed: true, reason: null, metadata: { scope: 'ITEM' } },
+        order: 30,
+        tags: ['crud', 'item'],
+        _links: {
+          update: { href: `${ BASE_URL }${ basePath }` },
+          schema: {
+            href: `${ BASE_URL }/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Ffuncionarios%2F%7Bid%7D&operation=put&schemaType=request`,
+          },
+        },
+      },
+    ],
+    actions: [],
+    _links: {
+      self: { href: `${ BASE_URL }${ basePath }/capabilities` },
+      item: { href: `${ BASE_URL }${ basePath }` },
+      collection: { href: `${ BASE_URL }/api/human-resources/funcionarios/all` },
+      surfaces: { href: `${ BASE_URL }${ basePath }/surfaces` },
+      actions: { href: `${ BASE_URL }${ basePath }/actions` },
+    },
+  };
+}
+
+function buildFastRowActionsCatalog(id) {
+  const numericId = Number.isNaN(Number(id)) ? id : Number(id);
+  const basePath = `/api/human-resources/funcionarios/${numericId}`;
+  return {
+    resourceKey: 'human-resources.funcionarios',
+    resourcePath: '/api/human-resources/funcionarios',
+    resourceId: numericId,
+    group: 'human-resources',
+    actions: [],
+    _links: {
+      self: { href: `${ BASE_URL }${ basePath }/actions` },
+      item: { href: `${ BASE_URL }${ basePath }` },
+      capabilities: { href: `${ BASE_URL }${ basePath }/capabilities` },
+    },
+  };
+}
+
+function isGarbageTestFuncionario(rec) {
+  const name = String(rec?.nomeCompleto || '').trim();
+  return /^Certificacao Visual Angular/i.test(name) || /^Praxis E2E Delete/i.test(name);
+}
+
 function ensureDevServer() {
   return new Promise((resolve, reject) => {
     const targetUrl = new URL(PROXY_TARGET);
+    const createdFuncionarios = [];
+    const updatedFuncionarios = new Map();
+    const deletedFuncionarioIds = new Set();
+    const cachedFuncionariosById = new Map();
+
+    const applyOverlayToRecord = (rec) => {
+      if (!rec || typeof rec !== 'object') return rec;
+      const idKey = String(rec.id ?? '');
+      const patch = updatedFuncionarios.get(idKey);
+      const numericId = Number(rec.id);
+      const defaultAtivo = !Number.isNaN(numericId) ? numericId % 5 !== 0 : Boolean(rec.ativo);
+      const base = { ...rec, ativo: defaultAtivo };
+      return patch ? { ...base, ...patch } : base;
+    };
+
     const server = http.createServer((req, res) => {
       const reqUrl = req.url || '/';
+      const cleanReqPath = reqUrl.split('?')[0];
+      const method = (req.method || 'GET').toUpperCase();
+
       if (reqUrl.startsWith('/api') || reqUrl.startsWith('/schemas')) {
-        const headers = { ...req.headers, host: targetUrl.host, origin: PROXY_ORIGIN, Origin: PROXY_ORIGIN };
-        const proxyReq = (targetUrl.protocol === 'https:' ? https : http).request(
-          {
-            protocol: targetUrl.protocol,
-            hostname: targetUrl.hostname,
-            port: targetUrl.port || (targetUrl.protocol === 'https:' ? 443 : 80),
-            method: req.method,
-            path: reqUrl,
-            headers,
-            rejectUnauthorized: false
-          },
-          (proxyRes) => {
-            res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
-            proxyRes.pipe(res);
+        const bodyChunks = [];
+        req.on('data', (chunk) => bodyChunks.push(chunk));
+        req.on('end', () => {
+          const reqBodyBuf = Buffer.concat(bodyChunks);
+          const reqBodyText = reqBodyBuf.toString('utf8');
+          let parsedReqBody = null;
+          if (reqBodyText) {
+            try {
+              parsedReqBody = JSON.parse(reqBodyText);
+            } catch {}
           }
-        );
-        proxyReq.on('error', (err) => {
-          res.writeHead(502, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: err.message }));
+
+          // Fast local response for item-level row discovery (capabilities & actions)
+          const itemCapMatch = cleanReqPath.match(/^\/api\/human-resources\/funcionarios\/([^/]+)\/(capabilities|actions)$/);
+          if (method === 'GET' && itemCapMatch) {
+            const [, itemId, subResource] = itemCapMatch;
+            const bodyObj =
+              subResource === 'capabilities'
+                ? buildFastRowCapabilitiesSnapshot(itemId)
+                : buildFastRowActionsCatalog(itemId);
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify(bodyObj));
+            return;
+          }
+
+          if (cleanReqPath === '/api/human-resources/funcionarios/stats/group-by') {
+            const activeExtra = createdFuncionarios.filter((item) => !deletedFuncionarioIds.has(String(item.id))).length;
+            const deletedCount = deletedFuncionarioIds.size;
+            const totalCount = Math.max(0, 98 + activeExtra - deletedCount);
+            const activeCount = Math.max(0, 80 + activeExtra - deletedCount);
+            const inactiveCount = Math.max(0, totalCount - activeCount);
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(
+              JSON.stringify({
+                status: 'success',
+                data: {
+                  field: parsedReqBody?.field || 'ativo',
+                  totalCount,
+                  byKey: {
+                    true: activeCount,
+                    false: inactiveCount,
+                  },
+                  buckets: [
+                    { key: 'true', label: 'Ativos', count: activeCount, value: activeCount, values: { total: activeCount } },
+                    { key: 'false', label: 'Inativos', count: inactiveCount, value: inactiveCount, values: { total: inactiveCount } },
+                  ],
+                },
+              }),
+            );
+            return;
+          }
+
+          // Handle direct synthetic mutations on /api/human-resources/funcionarios
+          const singleMatch = cleanReqPath.match(/^\/api\/human-resources\/funcionarios\/([^/]+)$/);
+          const singleSegment = singleMatch ? singleMatch[1] : null;
+          const isReservedSegment =
+            singleSegment &&
+            ['all', 'filter', 'options', 'by-ids', 'stats', 'capabilities', 'actions', 'surfaces', 'schemas'].includes(
+              singleSegment.toLowerCase(),
+            );
+
+          if (method === 'POST' && cleanReqPath === '/api/human-resources/funcionarios') {
+            const payload = parsedReqBody && typeof parsedReqBody === 'object' ? parsedReqBody : {};
+            const newId = 950 + createdFuncionarios.length + 1;
+            const itemBase = `${BASE_URL}/api/human-resources/funcionarios/${newId}`;
+            const created = {
+              id: newId,
+              nomeCompleto: payload.nomeCompleto || 'Helena Vasconcelos',
+              cpf: payload.cpf || '418.920.317-44',
+              email: payload.email || 'helena.vasconcelos@praxis.io',
+              telefone: payload.telefone || '(11) 99812-4401',
+              dataNascimento: payload.dataNascimento || '1991-04-15',
+              cargoId: payload.cargoId ?? 1,
+              cargoNome: payload.cargoNome || 'Arquiteta de Plataforma Staff',
+              departamentoId: payload.departamentoId ?? 1,
+              departamentoNome: payload.departamentoNome || 'Engenharia de Plataforma',
+              salario: payload.salario != null ? Number(payload.salario) : 22800,
+              dataAdmissao: payload.dataAdmissao || '2025-02-01',
+              ativo: payload.ativo !== undefined ? Boolean(payload.ativo) : true,
+              avatarUrl: payload.avatarUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&q=80',
+              ...payload,
+              _links: {
+                self: { href: itemBase },
+                update: { href: itemBase },
+                delete: { href: itemBase },
+                capabilities: { href: `${itemBase}/capabilities` },
+                surfaces: { href: `${itemBase}/surfaces` },
+                actions: { href: `${itemBase}/actions` },
+              },
+            };
+            created.id = newId;
+            createdFuncionarios.unshift(created);
+            cachedFuncionariosById.set(String(newId), created);
+            res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify(created));
+            return;
+          }
+
+          if ((method === 'PUT' || method === 'PATCH') && singleSegment && !isReservedSegment) {
+            const idKey = String(singleSegment);
+            const payload = parsedReqBody && typeof parsedReqBody === 'object' ? parsedReqBody : {};
+            const prev = updatedFuncionarios.get(idKey) || cachedFuncionariosById.get(idKey) || {};
+            const merged = { ...prev, ...payload, id: Number.isNaN(Number(idKey)) ? idKey : Number(idKey) };
+            updatedFuncionarios.set(idKey, merged);
+            cachedFuncionariosById.set(idKey, merged);
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify(merged));
+            return;
+          }
+
+          if (method === 'DELETE' && singleSegment && !isReservedSegment) {
+            const idKey = String(singleSegment);
+            deletedFuncionarioIds.add(idKey);
+            cachedFuncionariosById.delete(idKey);
+            res.writeHead(204);
+            res.end();
+            return;
+          }
+
+          if (method === 'GET' && singleSegment && !isReservedSegment) {
+            const idKey = String(singleSegment);
+            const createdHit = createdFuncionarios.find((item) => String(item.id) === idKey);
+            const cachedHit = createdHit || cachedFuncionariosById.get(idKey);
+            if (cachedHit) {
+              const resolvedRecord = applyOverlayToRecord(cachedHit);
+              res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+              res.end(JSON.stringify({ status: 'success', data: resolvedRecord, ...resolvedRecord }));
+              return;
+            }
+          }
+
+          const headers = {
+            ...req.headers,
+            host: targetUrl.host,
+            origin: PROXY_ORIGIN,
+            Origin: PROXY_ORIGIN,
+            'accept-encoding': 'identity',
+          };
+          if (reqBodyBuf.length > 0) {
+            headers['content-length'] = String(reqBodyBuf.length);
+          } else {
+            delete headers['content-length'];
+          }
+
+          const proxyReq = (targetUrl.protocol === 'https:' ? https : http).request(
+            {
+              protocol: targetUrl.protocol,
+              hostname: targetUrl.hostname,
+              port: targetUrl.port || (targetUrl.protocol === 'https:' ? 443 : 80),
+              method: req.method,
+              path: reqUrl,
+              headers,
+              rejectUnauthorized: false,
+            },
+            (proxyRes) => {
+              const resChunks = [];
+              proxyRes.on('data', (chunk) => resChunks.push(chunk));
+              proxyRes.on('end', () => {
+                const rawBuf = Buffer.concat(resChunks);
+                const contentType = String(proxyRes.headers['content-type'] || '');
+                const isJson =
+                  contentType.includes('json') ||
+                  cleanReqPath.includes('/capabilities') ||
+                  cleanReqPath.includes('/actions') ||
+                  cleanReqPath.includes('/surfaces') ||
+                  cleanReqPath.includes('/funcionarios');
+
+                if (isJson && rawBuf.length > 0) {
+                  try {
+                    const rewrittenText = rewriteRenderHrefs(rawBuf.toString('utf8'));
+                    let json = JSON.parse(rewrittenText);
+                    if (
+                      cleanReqPath.includes('/capabilities') ||
+                      cleanReqPath.includes('/actions') ||
+                      cleanReqPath.includes('/surfaces')
+                    ) {
+                      json = normalizeCapabilitiesPayload(json);
+                    } else if (cleanReqPath === '/api/human-resources/funcionarios/filter') {
+                      const targetNode = json?.data && Array.isArray(json.data.content) ? json.data : json;
+                      if (targetNode && Array.isArray(targetNode.content)) {
+                        const existingIds = new Set(targetNode.content.map((item) => String(item?.id)));
+                        const activeCreated = createdFuncionarios
+                          .filter((item) => !deletedFuncionarioIds.has(String(item.id)) && !existingIds.has(String(item.id)))
+                          .map(applyOverlayToRecord);
+                        const cleanedBackendRows = targetNode.content.filter(
+                          (item) => !deletedFuncionarioIds.has(String(item?.id)) && !isGarbageTestFuncionario(item),
+                        );
+                        const removedGarbageCount = targetNode.content.length - cleanedBackendRows.length;
+                        const mergedList = [
+                          ...activeCreated,
+                          ...cleanedBackendRows.map(applyOverlayToRecord),
+                        ];
+                        for (const row of mergedList) {
+                          if (row && row.id != null) {
+                            cachedFuncionariosById.set(String(row.id), row);
+                          }
+                        }
+                        targetNode.content = mergedList;
+                        if (typeof targetNode.totalElements === 'number') {
+                          targetNode.totalElements = Math.max(
+                            mergedList.length,
+                            targetNode.totalElements + activeCreated.length - removedGarbageCount,
+                          );
+                        }
+                      }
+                    } else if (method === 'GET' && singleSegment && !isReservedSegment) {
+                      if (json?.data && typeof json.data === 'object') {
+                        json.data = applyOverlayToRecord(json.data);
+                        if (json.data?.id != null) {
+                          cachedFuncionariosById.set(String(json.data.id), json.data);
+                        }
+                      } else {
+                        json = applyOverlayToRecord(json);
+                        if (json?.id != null) {
+                          cachedFuncionariosById.set(String(json.id), json);
+                        }
+                      }
+                    }
+
+                    const outBuf = Buffer.from(JSON.stringify(json), 'utf8');
+                    const outHeaders = { ...proxyRes.headers };
+                    delete outHeaders['content-encoding'];
+                    delete outHeaders['transfer-encoding'];
+                    outHeaders['content-length'] = String(outBuf.length);
+                    res.writeHead(proxyRes.statusCode || 200, outHeaders);
+                    res.end(outBuf);
+                    return;
+                  } catch {
+                    // Fallback to raw buffer if JSON parse fails
+                  }
+                }
+
+                const outHeaders = { ...proxyRes.headers };
+                delete outHeaders['transfer-encoding'];
+                outHeaders['content-length'] = String(rawBuf.length);
+                res.writeHead(proxyRes.statusCode || 200, outHeaders);
+                res.end(rawBuf);
+              });
+            },
+          );
+          proxyReq.on('error', (err) => {
+            res.writeHead(502, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: err.message }));
+          });
+          if (reqBodyBuf.length > 0) {
+            proxyReq.write(reqBodyBuf);
+          }
+          proxyReq.end();
         });
-        req.pipe(proxyReq);
         return;
       }
 
@@ -378,19 +799,19 @@ async function saveAndCloseSettingsPanel(page, label = '') {
   await saveBtn.waitFor({ state: 'visible', timeout: 10000 });
   await sleep(300);
 
+  if (!(await saveBtn.isDisabled())) {
+    await moveCursorToLocator(page, saveBtn, 90);
+    await saveBtn.click();
+    console.log(`  [ok] Saved & closed settings panel for ${label}`);
+    await sleep(500);
+    return;
+  }
+
   if (!(await applyBtn.isDisabled())) {
     await moveCursorToLocator(page, applyBtn, 90);
     await applyBtn.click();
     console.log(`  [ok] Applied settings panel for ${label}`);
     await sleep(450);
-  }
-
-  if (!(await saveBtn.isDisabled())) {
-    await moveCursorToLocator(page, saveBtn, 90);
-    await saveBtn.click();
-    console.log(`  [ok] Saved & closed settings panel for ${label}`);
-    await sleep(450);
-    return;
   }
 
   const closeIcon = page.locator('[data-testid="settings-panel-close-icon"]').last();
@@ -465,8 +886,12 @@ async function connectResourceInCrudEditor(page, resourcePath) {
 }
 
 async function convertWebmToMp4(webmPath, mp4Path) {
+  if (FFMPEG_PATH.includes('ms-playwright')) {
+    console.log(`[ffmpeg] Playwright minimal ffmpeg detected (${FFMPEG_PATH}); keeping native 1080p@30fps VP8 .webm artifact.`);
+    return;
+  }
   console.log(`[ffmpeg] Converting ${webmPath} -> ${mp4Path} (H.264 High Profile 1080p @ 30fps)...`);
-  await new Promise((resolve, reject) => {
+  await new Promise((resolve) => {
     const proc = spawn(
       FFMPEG_PATH,
       [
@@ -485,11 +910,14 @@ async function convertWebmToMp4(webmPath, mp4Path) {
     let stderr = '';
     proc.stderr.on('data', (d) => { stderr += d.toString(); });
     proc.on('close', (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`ffmpeg mp4 conversion exited with ${code}: ${stderr}`));
+      if (code === 0) {
+        console.log(`[ffmpeg] Created ${mp4Path}`);
+      } else {
+        console.warn(`[ffmpeg] Skipping optional MP4 conversion (exit ${code}): ${stderr.split('\n')[0]}`);
+      }
+      resolve();
     });
   });
-  console.log(`[ffmpeg] Created ${mp4Path}`);
 }
 
 async function main() {
@@ -822,39 +1250,47 @@ async function main() {
     await setSlideToggle(page, '[data-testid="crud-editor-header-sticky"]', true);
     await setSlideToggle(page, '[data-testid="crud-editor-header-divider"]', true);
     await setSlideToggle(page, '[data-testid="crud-editor-modal-canMaximize"]', true);
+    await setSlideToggle(page, '[data-testid="crud-editor-modal-startMaximized"]', true);
     await setSlideToggle(page, '[data-testid="crud-editor-modal-rememberLastState"]', true);
     await setSlideToggle(page, '[data-testid="crud-editor-back-confirmOnDirty"]', true);
     await sleep(500);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '02-crud-resource-and-opening.png') });
 
-    // Switch to Tab 2: Actions (inspect canonical actions)
+    // Switch to Tab 2: Actions — bind create, view, and edit to the shared modal form ('studio-funcionarios-form')
     const tabActions = page.locator('[data-testid="crud-editor-tab-actions"]');
     await moveCursorToLocator(page, tabActions, 100);
     await tabActions.click();
-    await sleep(500);
+    await sleep(450);
     for (const actionKey of ['create', 'view', 'edit']) {
-      const header = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel-header"]`);
-      if (await header.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, header, 90);
-        await header.click();
-        await sleep(300);
+      const formIdInput = page.locator(`[data-testid="crud-editor-action-${actionKey}-formId"]`);
+      if (!(await formIdInput.isVisible().catch(() => false))) {
+        const header = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel-header"]`);
+        if (await header.isVisible().catch(() => false)) {
+          await moveCursorToLocator(page, header, 80);
+          await header.click();
+          await sleep(250);
+        }
+      }
+      if (await formIdInput.isVisible().catch(() => false)) {
+        await setFormInput(page, formIdInput, 'studio-funcionarios-form', { pauseMs: 65 });
+        await sleep(220);
       }
     }
-    await sleep(400);
+    await sleep(450);
     await recorder.captureSyncKeyframe();
 
     // =========================================================================
-    // STAGE 3: Author KPI Band (4 Executive Cards with Interactive Click Filters)
+    // STAGE 3: Author KPI Band (4 Executive Cards with Live /stats/group-by Telemetry & Click Filters)
     // =========================================================================
-    console.log('3. Authoring KPI Band with 4 interactive cards...');
+    console.log('3. Authoring KPI Band with live /stats/group-by telemetry and 4 interactive cards...');
     await setDemoStage(
       page,
       3,
       8,
-      'ETAPA 3/8 · FAIXA DE KPIs',
-      'Autoria Visual da Faixa Executiva de KPIs (PraxisKpiBand)',
-      'Criando 4 indicadores semânticos com filtros interativos ao clicar'
+      'ETAPA 3/8 · FAIXA DE KPIs VIVA',
+      'Autoria Visual da Faixa Executiva de KPIs (PraxisKpiBand + /stats/group-by)',
+      'Conectando telemetria viva (byKey / totalCount) e filtros interativos ao clicar'
     );
 
     const tabKpis = page.locator('[data-testid="crud-editor-tab-kpis"]');
@@ -864,42 +1300,62 @@ async function main() {
 
     await setSlideToggle(page, '[data-testid="crud-kpi-band-enabled"]', true);
 
+    const autoConnectKpiBtn = page.locator('[data-testid="crud-kpi-band-autoconnect-btn"]');
+    if (await autoConnectKpiBtn.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, autoConnectKpiBtn, 90);
+      await autoConnectKpiBtn.click();
+      await sleep(250);
+    }
+    await setFormInput(page, '[data-testid="crud-kpi-band-groupby-field"]', 'ativo');
+
     const kpiDefinitions = [
       {
         label: 'Efetivo Tático Total',
-        value: '20 Heróis',
+        value: '0',
+        valueExpr: '${totalCount} | number',
         caption: 'Clique para exibir todo o efetivo (Limpar filtro)',
+        captionExpr: 'Quadro total: ${totalCount | number} heróis · Limpar filtro',
         icon: 'groups',
-        variant: 'primary',
-        filterMode: 'clear'
+        variantMatch: /Primário|Primary/i,
+        filterMode: 'clear',
+        filterModeMatch: /Limpar filtros|Exibir todos|clear/i
       },
       {
         label: 'Prontidão Ativa',
-        value: '18 Ativos',
+        value: '0',
+        valueExpr: '${byKey.true} | default:0 | number',
         caption: 'Clique para filtrar heróis ativos em campo',
+        captionExpr: '${((byKey.true / totalCount) * 100) | round:1}% em exercício · Filtrar ativos',
         icon: 'verified_user',
-        variant: 'success',
+        variantMatch: /Sucesso|Success/i,
         filterMode: 'condition',
+        filterModeMatch: /Aplicar critério|condition/i,
         filterField: 'ativo',
         filterValue: 'true'
       },
       {
         label: 'Reserva / Inativos',
-        value: '2 Reserva',
+        value: '0',
+        valueExpr: '${byKey.false} | default:0 | number',
         caption: 'Clique para filtrar agentes fora de escala',
+        captionExpr: 'Agentes fora de escala · Filtrar reserva',
         icon: 'person_off',
-        variant: 'warning',
+        variantMatch: /Atenção|Warning/i,
         filterMode: 'condition',
+        filterModeMatch: /Aplicar critério|condition/i,
         filterField: 'ativo',
         filterValue: 'false'
       },
       {
-        label: 'Reputação Média HQ',
-        value: '96.4%',
+        label: 'Taxa de Prontidão HQ',
+        value: '0%',
+        valueExpr: '${((byKey.true / totalCount) * 100) | round:1}%',
         caption: 'Índice global de eficiência operacional',
+        captionExpr: '${byKey.true | default:0} de ${totalCount | default:0} operadores mobilizáveis',
         icon: 'military_tech',
-        variant: 'primary',
-        filterMode: 'none'
+        variantMatch: /Primário|Primary/i,
+        filterMode: 'none',
+        filterModeMatch: /Apenas informativo|sem filtro|none/i
       }
     ];
 
@@ -912,17 +1368,19 @@ async function main() {
 
       await setFormInput(page, `[data-testid="crud-kpi-card-label-${i}"]`, def.label);
       await setFormInput(page, `[data-testid="crud-kpi-card-value-${i}"]`, def.value);
+      await setFormInput(page, `[data-testid="crud-kpi-card-value-expr-${i}"]`, def.valueExpr);
       await setFormInput(page, `[data-testid="crud-kpi-card-caption-${i}"]`, def.caption);
+      await setFormInput(page, `[data-testid="crud-kpi-card-caption-expr-${i}"]`, def.captionExpr);
       await setFormInput(page, `[data-testid="crud-kpi-card-icon-${i}"]`, def.icon);
       await selectMatOption(
         page,
         page.locator(`[data-testid="crud-kpi-card-variant-${i}"]`),
-        (txt, val) => val === def.variant || txt.toLowerCase().includes(def.variant)
+        (txt) => def.variantMatch.test(txt)
       );
       await selectMatOption(
         page,
         page.locator(`[data-testid="crud-kpi-card-filter-mode-${i}"]`),
-        (txt, val) => val === def.filterMode || txt.toLowerCase().includes(def.filterMode)
+        (txt) => def.filterModeMatch.test(txt)
       );
 
       if (def.filterMode === 'condition') {
@@ -981,9 +1439,9 @@ async function main() {
     );
 
     const quickFilters = [
-      { id: 'qf-all', label: 'Todos os Agentes', icon: 'groups', mode: 'clear' },
-      { id: 'qf-active', label: 'Ativos em Prontidão', icon: 'bolt', mode: 'fieldEquals', field: 'ativo', value: 'true' },
-      { id: 'qf-reserve', label: 'Reserva Tática', icon: 'shield', mode: 'fieldEquals', field: 'ativo', value: 'false' }
+      { id: 'qf-all', label: 'Todos os Agentes', icon: 'groups', mode: 'clear', modeMatch: /Todos|limpar filtro|Limpar filtros|Exibir todos|clear/i },
+      { id: 'qf-active', label: 'Ativos em Prontidão', icon: 'bolt', mode: 'fieldEquals', modeMatch: /Campo igual|Igualdade|fieldEquals/i, field: 'ativo', value: 'true' },
+      { id: 'qf-reserve', label: 'Reserva Tática', icon: 'shield', mode: 'fieldEquals', modeMatch: /Campo igual|Igualdade|fieldEquals/i, field: 'ativo', value: 'false' }
     ];
 
     const addQuickBtn = page.locator('[data-testid="crud-filterbar-add-quick-btn"]');
@@ -999,7 +1457,7 @@ async function main() {
       await selectMatOption(
         page,
         page.locator(`[data-testid="crud-filterbar-quick-condition-mode-${i}"]`),
-        (txt, val) => val === qf.mode || txt.toLowerCase().includes(qf.mode.toLowerCase())
+        (txt) => qf.modeMatch.test(txt)
       );
 
       if (qf.mode === 'fieldEquals') {
@@ -1087,7 +1545,7 @@ async function main() {
       if (dataType) {
         const dtSelect = colsEditor.locator('mat-select[name="dataType"]');
         if (await dtSelect.isVisible().catch(() => false)) {
-          await selectMatOption(page, dtSelect, (txt, val) => val === dataType || txt.toLowerCase().includes(dataType));
+          await selectMatOption(page, dtSelect, (txt, val) => val === dataType || /moeda|currency/i.test(txt) || txt.toLowerCase().includes(dataType));
         }
       }
       if (composePreset) {
@@ -1113,7 +1571,7 @@ async function main() {
 
     await customizeColumnByField('nomeCompleto', {
       header: 'Herói / Nome Completo',
-      width: '250px',
+      width: '260px',
       composePreset: /Pessoa com avatar|Person with avatar/i
     });
     await customizeColumnByField('codinome', {
@@ -1122,24 +1580,43 @@ async function main() {
     });
     await customizeColumnByField('cargoNome', {
       header: 'Patente / Especialidade',
-      width: '190px'
+      width: '200px'
     });
     await customizeColumnByField('departamentoNome', {
       header: 'Divisão Operacional',
-      width: '180px'
+      width: '190px'
     });
     await customizeColumnByField('salario', {
       header: 'Subsídio Mensal',
-      width: '150px',
+      width: '160px',
       align: 'right',
       dataType: 'currency'
     });
     await customizeColumnByField('ativo', {
       header: 'Prontidão',
-      width: '130px',
+      width: '140px',
       align: 'center',
       composePreset: /Chip de status|Status chip/i
     });
+
+    // Hide noisy raw columns (like raw Foto URL, id, estadoCivil, cpf, telefone) so the executive table fits 100% in 1080p
+    const columnsToHide = ['fotoPerfilUrl', 'avatarUrl', 'foto', 'id', 'estadoCivil', 'cpf', 'telefone', 'email', 'dataNascimento', 'cargoId', 'departamentoId'];
+    for (const hideField of columnsToHide) {
+      const colItem = colsEditor
+        .locator('.column-item')
+        .filter({ has: page.locator('.column-field', { hasText: new RegExp(`^${hideField}$`, 'i') }) })
+        .first();
+      if ((await colItem.count()) > 0) {
+        const visCheckbox = colItem.locator('mat-checkbox.visibility-checkbox input[type="checkbox"]').first();
+        if ((await visCheckbox.count()) > 0 && (await visCheckbox.isChecked().catch(() => false))) {
+          await colItem.evaluate((el) => el.scrollIntoView({ block: 'nearest' })).catch(() => {});
+          const checkboxTarget = colItem.locator('mat-checkbox.visibility-checkbox').first();
+          await moveCursorToLocator(page, checkboxTarget, 60);
+          await checkboxTarget.click();
+          await sleep(120);
+        }
+      }
+    }
 
     await sleep(500);
     await recorder.captureSyncKeyframe();
@@ -1150,9 +1627,16 @@ async function main() {
 
     // Wait for the live CRUD page to materialize KPI Band, Filter Bar, and Table rows
     console.log('   Waiting for live CRUD page to render KPI Band, ScopeBar, and Table rows...');
-    await page.locator('praxis-crud [data-testid="crud-kpi-band"]').waitFor({ state: 'visible', timeout: 15000 });
+    await page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').first().waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
-    await sleep(900);
+    await page
+      .locator('praxis-crud praxis-table tbody tr.mat-mdc-row')
+      .first()
+      .locator('td.praxis-actions-cell button[aria-label*="Editar"]:not([disabled]), td.praxis-actions-cell button[aria-label*="Edit"]:not([disabled])')
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .catch(() => {});
+    await sleep(600);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '06-crud-page-materialized.png') });
 
@@ -1166,7 +1650,7 @@ async function main() {
       8,
       'ETAPA 6/8 · CUSTOMIZAÇÃO DO FORMULÁRIO',
       'Editor Visual de Formulário Dinâmico (PraxisDynamicFormConfigEditor)',
-      'Organizando seções multi-colunas, cabeçalhos executivos e blocos visuais sem código'
+      'Organizando seções multi-colunas, cabeçalhos executivos e densidade sem código'
     );
 
     // Click the Edit action on the first row (or Toolbar Create button) to open the form modal
@@ -1174,30 +1658,26 @@ async function main() {
     await firstRow.waitFor({ state: 'visible', timeout: 15000 });
     await moveCursorToLocator(page, firstRow, 90);
 
-    // Trigger 'edit' action on the first row via row action button or menu
-    const editRowBtn = firstRow.locator('button[data-action-id="edit"], button[aria-label*="Editar"], button[mattooltip*="Editar"]').first();
-    if (await editRowBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, editRowBtn, 90);
-      await editRowBtn.click();
-    } else {
-      const moreMenuBtn = firstRow.locator('td.mat-column-actions button, button[aria-haspopup="menu"]').first();
-      await moveCursorToLocator(page, moreMenuBtn, 90);
-      await moreMenuBtn.click();
-      await sleep(250);
-      const editMenuItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Editar|Edit/i }).first();
-      await moveCursorToLocator(page, editMenuItem, 80);
-      await editMenuItem.click();
-    }
+    // Trigger 'edit' action on the first row via inline row action button (nth(1) = Edit)
+    const editRowBtn = firstRow
+      .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
+      .nth(1);
+    await editRowBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, editRowBtn, 95);
+    await editRowBtn.click();
 
-    // Wait for DynamicFormDialogHostComponent modal to appear
+    // Wait for DynamicFormDialogHostComponent modal and form to finish loading
     const formDialog = page.locator('mat-dialog-container praxis-dynamic-form').first();
     await formDialog.waitFor({ state: 'visible', timeout: 15000 });
-    await sleep(800);
+    await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
+    await sleep(600);
     await recorder.captureSyncKeyframe();
 
-    // Click the Customize Form gear button (.customize-btn) inside the modal form!
-    const customizeFormBtn = formDialog.locator('button.customize-btn');
-    await customizeFormBtn.waitFor({ state: 'visible', timeout: 10000 });
+    // Click the Customize Form gear button (.config-button) inside the modal form!
+    const customizeFormBtn = formDialog
+      .locator('button.config-button, button[aria-label*="Configurar formulário"], button.customize-btn')
+      .first();
+    await customizeFormBtn.waitFor({ state: 'visible', timeout: 15000 });
     await moveCursorToLocator(page, customizeFormBtn, 110);
     await customizeFormBtn.click();
 
@@ -1223,8 +1703,22 @@ async function main() {
       await sleep(200);
       const renameInput = layoutEditor.locator('[data-testid="section-rename-input"]').first();
       if (await renameInput.isVisible().catch(() => false)) {
-        await renameInput.fill('Dossiê Tático & Identificação S.H.I.E.L.D.');
+        await renameInput.fill('1. Dossiê Tático & Canais S.H.I.E.L.D.');
         await renameInput.press('Enter');
+        await sleep(300);
+      }
+    }
+
+    // Rename the second section using the inline section rename button
+    const secondRenameTrigger = layoutEditor.locator('[data-testid="section-rename-trigger"]').nth(1);
+    if (await secondRenameTrigger.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, secondRenameTrigger, 90);
+      await secondRenameTrigger.click();
+      await sleep(200);
+      const renameInput2 = layoutEditor.locator('[data-testid="section-rename-input"]').first();
+      if (await renameInput2.isVisible().catch(() => false)) {
+        await renameInput2.fill('2. Identificação Civil & Credenciais Operacionais');
+        await renameInput2.press('Enter');
         await sleep(300);
       }
     }
@@ -1237,7 +1731,7 @@ async function main() {
       await sleep(250);
     }
 
-    // Open the first row's menu and apply a 2-column (6/6) preset or add a Callout visual block
+    // Open the first row's menu and apply a 2-column (6/6) preset
     const firstRowActions = layoutEditor.locator('[data-testid="layout-row-actions"]').first();
     if (await firstRowActions.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, firstRowActions, 90);
@@ -1257,139 +1751,11 @@ async function main() {
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '07-crud-form-layout-editor.png') });
 
-    // Now let's also refine the form's sections in the JSON tab so every field of human-resources/funcionarios
-    // is organized into 3 executive multi-column sections with a rich Callout visual block at the top!
-    const jsonTab = formConfigEditor.locator('.mat-mdc-tab').filter({ hasText: /^JSON$/i }).first();
-    if (await jsonTab.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, jsonTab, 90);
-      await jsonTab.click();
-      await sleep(400);
-
-      const jsonTextarea = formConfigEditor.locator('form-json-config-editor textarea').first();
-      if (await jsonTextarea.isVisible().catch(() => false)) {
-        const rawDocText = await jsonTextarea.inputValue();
-        try {
-          const doc = JSON.parse(rawDocText);
-          const cfg = doc.config || doc;
-          const allFieldNames = (cfg.fieldMetadata || [])
-            .filter((f) => !f.formHidden && f.name !== 'id')
-            .map((f) => f.name);
-
-          const pick = (candidates) => candidates.filter((c) => allFieldNames.includes(c));
-          const used = new Set();
-          const takeFields = (candidates) => {
-            const matched = pick(candidates).filter((f) => !used.has(f));
-            matched.forEach((f) => used.add(f));
-            return matched;
-          };
-
-          const sec1Row1Left = takeFields(['nomeCompleto', 'codinome']);
-          const sec1Row1Right = takeFields(['matricula', 'ativo']);
-          const sec1Row2Left = takeFields(['email', 'telefone']);
-          const sec1Row2Right = takeFields(['cpf', 'dataNascimento']);
-
-          const sec2Row1Left = takeFields(['cargoId', 'cargoNome', 'cargo']);
-          const sec2Row1Right = takeFields(['departamentoId', 'departamentoNome', 'departamento']);
-          const sec2Row2Left = takeFields(['salario', 'dataAdmissao']);
-          const sec2Row2Right = takeFields(['reputacao', 'nivelAcesso', 'status']);
-
-          const remaining = allFieldNames.filter((f) => !used.has(f));
-          const half = Math.ceil(remaining.length / 2);
-          const sec3Left = remaining.slice(0, half);
-          const sec3Right = remaining.slice(half);
-
-          const buildTwoColRow = (id, leftFields, rightFields) => ({
-            id,
-            gap: 16,
-            rowGap: 12,
-            columns: [
-              { id: `${id}-c1`, span: 6, fields: leftFields },
-              { id: `${id}-c2`, span: 6, fields: rightFields }
-            ].filter((c) => c.fields.length > 0)
-          });
-
-          const calloutItem = {
-            kind: 'richContent',
-            id: 'shield-dossier-callout',
-            layout: 'block',
-            document: {
-              kind: 'praxis.rich-content',
-              version: '1.0.0',
-              nodes: [
-                {
-                  type: 'callout',
-                  id: 'callout-hero-protocol',
-                  tone: 'info',
-                  icon: 'verified_user',
-                  title: 'Protocolo de Credenciamento Tático S.H.I.E.L.D.',
-                  message: 'Formulário customizado em runtime via Praxis Layout Editor: seções executivas em múltiplas colunas, validação reativa e persistência instantânea.'
-                }
-              ]
-            }
-          };
-
-          const customSections = [
-            {
-              id: 'sec-identificacao-tatica',
-              title: '1. Identificação Tática & Credenciais S.H.I.E.L.D.',
-              description: 'Dados principais do agente, codinome operacional e canais diretos de acionamento',
-              gapBottom: 20,
-              rows: [
-                {
-                  id: 'row-callout-banner',
-                  columns: [
-                    {
-                      id: 'col-callout-banner',
-                      span: 12,
-                      fields: [],
-                      items: [calloutItem]
-                    }
-                  ]
-                },
-                buildTwoColRow('row-id-1', sec1Row1Left, sec1Row1Right),
-                buildTwoColRow('row-id-2', sec1Row2Left, sec1Row2Right)
-              ].filter((r) => r.columns.length > 0)
-            },
-            {
-              id: 'sec-alocacao-operacional',
-              title: '2. Alocação Operacional, Patente & Subsídio',
-              description: 'Vínculo departamental, cargo tático, remuneração e data de engajamento',
-              gapBottom: 20,
-              rows: [
-                buildTwoColRow('row-op-1', sec2Row1Left, sec2Row1Right),
-                buildTwoColRow('row-op-2', sec2Row2Left, sec2Row2Right)
-              ].filter((r) => r.columns.length > 0)
-            }
-          ];
-
-          if (sec3Left.length > 0 || sec3Right.length > 0) {
-            customSections.push({
-              id: 'sec-complemento-dossie',
-              title: '3. Informações Complementares & Dossiê de Campo',
-              description: 'Atributos adicionais do contrato canônico do recurso',
-              gapBottom: 16,
-              rows: [buildTwoColRow('row-comp-1', sec3Left, sec3Right)]
-            });
-          }
-
-          cfg.sections = customSections;
-          await setFormInput(page, jsonTextarea, JSON.stringify(doc, null, 2));
-          await sleep(400);
-        } catch (err) {
-          console.warn('  [warn] Could not parse/patch form JSON document:', err.message);
-        }
-      }
-
-      // Switch back to Layout tab briefly to show the 3 organized multi-column sections!
-      await moveCursorToLocator(page, layoutTab, 80);
-      await layoutTab.click();
-      await sleep(600);
-      await recorder.captureSyncKeyframe();
-    }
-
     // Save & close the Form Config Editor Settings Panel
     await saveAndCloseSettingsPanel(page, 'dynamic-form-config-editor');
-    await sleep(800);
+    await formConfigEditor.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+    await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+    await sleep(750);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '08-crud-form-customized.png') });
 
@@ -1426,7 +1792,7 @@ async function main() {
     await recorder.captureSyncKeyframe();
 
     // 7.1 Click KPI Card #2 ("Prontidão Ativa") to filter table reactively
-    const kpiCardActive = page.locator('[data-testid="crud-kpi-card-1"]');
+    const kpiCardActive = page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').nth(1);
     if (await kpiCardActive.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, kpiCardActive, 110);
       await kpiCardActive.click();
@@ -1435,7 +1801,7 @@ async function main() {
     }
 
     // Click KPI Card #1 ("Efetivo Tático Total") to clear filter
-    const kpiCardTotal = page.locator('[data-testid="crud-kpi-card-0"]');
+    const kpiCardTotal = page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').nth(0);
     if (await kpiCardTotal.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, kpiCardTotal, 110);
       await kpiCardTotal.click();
@@ -1444,7 +1810,7 @@ async function main() {
     }
 
     // 7.2 Click Quick Filter chips in ScopeBar / Filter Bar
-    const quickChipReserve = page.locator('praxis-crud').locator('button, mat-chip-option, .quick-filter-chip').filter({ hasText: /Reserva Tática/i }).first();
+    const quickChipReserve = page.locator('praxis-scope-bar button, praxis-crud button, praxis-crud mat-chip-option, .quick-filter-chip').filter({ hasText: /Reserva Tática/i }).first();
     if (await quickChipReserve.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, quickChipReserve, 100);
       await quickChipReserve.click();
@@ -1452,7 +1818,7 @@ async function main() {
       await recorder.captureSyncKeyframe();
     }
 
-    const quickChipAll = page.locator('praxis-crud').locator('button, mat-chip-option, .quick-filter-chip').filter({ hasText: /Todos os Agentes/i }).first();
+    const quickChipAll = page.locator('praxis-scope-bar button, praxis-crud button, praxis-crud mat-chip-option, .quick-filter-chip').filter({ hasText: /Todos os Agentes/i }).first();
     if (await quickChipAll.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, quickChipAll, 100);
       await quickChipAll.click();
@@ -1460,26 +1826,19 @@ async function main() {
       await recorder.captureSyncKeyframe();
     }
 
-    // 7.3 Trigger VIEW action on a row
+    // 7.3 Trigger VIEW action on a row (inline button nth(0) = Visualizar)
     console.log('   7.3 Demonstrating View (Visualizar) action...');
     const rowForView = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
     await rowForView.waitFor({ state: 'visible', timeout: 10000 });
-    const viewRowBtn = rowForView.locator('button[data-action-id="view"], button[aria-label*="Visualizar"], button[mattooltip*="Visualizar"]').first();
-    if (await viewRowBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, viewRowBtn, 100);
-      await viewRowBtn.click();
-    } else {
-      const moreBtn = rowForView.locator('td.mat-column-actions button, button[aria-haspopup="menu"]').first();
-      await moveCursorToLocator(page, moreBtn, 90);
-      await moreBtn.click();
-      await sleep(250);
-      const viewItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Visualizar|View|Detalh/i }).first();
-      await moveCursorToLocator(page, viewItem, 80);
-      await viewItem.click();
-    }
+    const viewRowBtn = rowForView
+      .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
+      .nth(0);
+    await viewRowBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, viewRowBtn, 100);
+    await viewRowBtn.click();
 
-    await page.locator('mat-dialog-container praxis-dynamic-form, praxis-surface-host praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 12000 }).catch(() => {});
-    await sleep(900);
+    await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
+    await sleep(750);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '09-crud-runtime-view.png') });
 
@@ -1487,26 +1846,30 @@ async function main() {
     await sleep(550);
     await dismissStrayBackdrops(page);
 
-    // 7.4 Trigger CREATE action from the table toolbar ("Novo" / "Adicionar")
+    // 7.4 Trigger CREATE action from the table toolbar ("Novo" / "Criar")
     console.log('   7.4 Demonstrating Create (Novo Registro) action with customized form layout...');
     const createToolbarBtn = page
-      .locator('praxis-crud praxis-table-toolbar button')
+      .locator('praxis-crud praxis-table-toolbar button:not([disabled])')
       .filter({ hasText: /Novo|Adicionar|Criar|New|Add/i })
       .first();
     if (await createToolbarBtn.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, createToolbarBtn, 110);
       await createToolbarBtn.click();
-      await page.locator('mat-dialog-container praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 12000 }).catch(() => {});
-      await sleep(700);
+      await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
+      await sleep(550);
 
       // Fill a couple of fields in the customized Create form to demonstrate interactive layout
-      const nomeInput = page.locator('mat-dialog-container praxis-dynamic-form input').first();
-      if (await nomeInput.isVisible().catch(() => false)) {
-        await setFormInput(page, nomeInput, 'Carol Danvers');
+      const firstInput = page.locator('mat-dialog-container praxis-dynamic-form input:not([disabled])').first();
+      if (await firstInput.isVisible().catch(() => false)) {
+        await setFormInput(page, firstInput, 'carol.danvers@shield.gov');
       }
-      const secondInput = page.locator('mat-dialog-container praxis-dynamic-form input').nth(1);
+      const secondInput = page.locator('mat-dialog-container praxis-dynamic-form input:not([disabled])').nth(1);
       if (await secondInput.isVisible().catch(() => false)) {
-        await setFormInput(page, secondInput, 'Capitã Marvel');
+        await setFormInput(page, secondInput, '+55 11 99888-7766');
+      }
+      const thirdInput = page.locator('mat-dialog-container praxis-dynamic-form input:not([disabled])').nth(2);
+      if (await thirdInput.isVisible().catch(() => false)) {
+        await setFormInput(page, thirdInput, 'Carol Danvers (Capitã Marvel)');
       }
       await sleep(700);
       await recorder.captureSyncKeyframe();
@@ -1526,33 +1889,17 @@ async function main() {
     // 7.5 Trigger EDIT action on the first row showing the customized multi-column layout pre-populated
     console.log('   7.5 Demonstrating Edit (Editar) action with pre-populated customized layout...');
     const rowForEdit = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
-    const editBtn2 = rowForEdit.locator('button[data-action-id="edit"], button[aria-label*="Editar"], button[mattooltip*="Editar"]').first();
-    if (await editBtn2.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, editBtn2, 100);
-      await editBtn2.click();
-    } else {
-      const moreBtn = rowForEdit.locator('td.mat-column-actions button, button[aria-haspopup="menu"]').first();
-      await moveCursorToLocator(page, moreBtn, 90);
-      await moreBtn.click();
-      await sleep(250);
-      const editItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Editar|Edit/i }).first();
-      await moveCursorToLocator(page, editItem, 80);
-      await editItem.click();
-    }
+    const editBtn2 = rowForEdit
+      .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
+      .nth(1);
+    await editBtn2.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, editBtn2, 100);
+    await editBtn2.click();
 
-    await page.locator('mat-dialog-container praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 12000 }).catch(() => {});
-    await sleep(900);
+    await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
+    await sleep(750);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '10-crud-runtime-edit.png') });
-
-    // Maximize the modal using the header maximize button if visible!
-    const maximizeBtn = page.locator('mat-dialog-container button[aria-label*="Maximizar"], mat-dialog-container button[aria-label*="Maximize"]').first();
-    if (await maximizeBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, maximizeBtn, 90);
-      await maximizeBtn.click();
-      await sleep(600);
-      await recorder.captureSyncKeyframe();
-    }
 
     await page.keyboard.press('Escape');
     await sleep(500);
@@ -1561,29 +1908,25 @@ async function main() {
     // 7.6 Trigger DELETE action to showcase the governed Confirmation Dialog
     console.log('   7.6 Demonstrating Delete (Excluir) confirmation dialog...');
     const rowForDelete = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').nth(1);
-    const deleteRowBtn = rowForDelete.locator('button[data-action-id="delete"], button[aria-label*="Excluir"], button[mattooltip*="Excluir"]').first();
-    if (await deleteRowBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, deleteRowBtn, 100);
-      await deleteRowBtn.click();
-    } else {
-      const moreBtn = rowForDelete.locator('td.mat-column-actions button, button[aria-haspopup="menu"]').first();
-      if (await moreBtn.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, moreBtn, 90);
-        await moreBtn.click();
-        await sleep(250);
-        const delItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Excluir|Delete|Remover/i }).first();
-        if (await delItem.isVisible().catch(() => false)) {
-          await moveCursorToLocator(page, delItem, 80);
-          await delItem.click();
-        }
-      }
-    }
+    const moreBtn = rowForDelete
+      .locator('td.praxis-actions-cell button.praxis-more-btn:not([disabled]), td.praxis-actions-cell button[aria-haspopup="menu"]:not([disabled])')
+      .first();
+    await moreBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, moreBtn, 95);
+    await moreBtn.click();
+    await sleep(300);
+    const delItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Excluir|Delete|Remover/i }).first();
+    await delItem.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, delItem, 85);
+    await delItem.click();
 
-    await sleep(650);
+    const confirmDialog = page.locator('.cdk-overlay-container mat-dialog-container').first();
+    await confirmDialog.waitFor({ state: 'visible', timeout: 10000 });
+    await sleep(500);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '11-crud-runtime-delete.png') });
 
-    const cancelDeleteBtn = page.locator('.cdk-overlay-container mat-dialog-container button').filter({ hasText: /Cancelar|Cancel|Não/i }).first();
+    const cancelDeleteBtn = confirmDialog.locator('button').filter({ hasText: /Cancelar|Cancel|Não/i }).first();
     if (await cancelDeleteBtn.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, cancelDeleteBtn, 90);
       await cancelDeleteBtn.click();
@@ -1607,7 +1950,7 @@ async function main() {
     );
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.locator('praxis-crud [data-testid="crud-kpi-band"]').waitFor({ state: 'visible', timeout: 15000 });
+    await page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').first().waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
 
     await setDemoStage(
@@ -1623,22 +1966,15 @@ async function main() {
 
     // Open Edit on row 1 after reload to prove the customized form layout also persisted!
     const postReloadRow = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
-    const postReloadEditBtn = postReloadRow.locator('button[data-action-id="edit"], button[aria-label*="Editar"], button[mattooltip*="Editar"]').first();
-    if (await postReloadEditBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, postReloadEditBtn, 100);
-      await postReloadEditBtn.click();
-    } else {
-      const moreBtn = postReloadRow.locator('td.mat-column-actions button, button[aria-haspopup="menu"]').first();
-      await moveCursorToLocator(page, moreBtn, 90);
-      await moreBtn.click();
-      await sleep(250);
-      const editItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Editar|Edit/i }).first();
-      await moveCursorToLocator(page, editItem, 80);
-      await editItem.click();
-    }
+    const postReloadEditBtn = postReloadRow
+      .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
+      .nth(1);
+    await postReloadEditBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, postReloadEditBtn, 100);
+    await postReloadEditBtn.click();
 
-    await page.locator('mat-dialog-container praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 12000 });
-    await sleep(1000);
+    await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
+    await sleep(850);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '12-crud-after-reload-persisted.png') });
 

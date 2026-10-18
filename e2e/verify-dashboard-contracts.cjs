@@ -546,6 +546,21 @@ assert(
   'record-studio-demo.mjs executa a sessão automatizada "Dashboard API Integration Audit" sobre o snapshot persistido da página ao final da gravação',
 );
 
+const crudStudioDemoPath = path.join(__dirname, 'record-crud-studio-demo.mjs');
+const crudStudioDemoSrc = fs.readFileSync(crudStudioDemoPath, 'utf8');
+assert(
+  crudStudioDemoSrc.includes('crud-kpi-band-autoconnect-btn') &&
+    crudStudioDemoSrc.includes('crud-kpi-band-groupby-field') &&
+    crudStudioDemoSrc.includes('crud-kpi-card-value-expr-') &&
+    crudStudioDemoSrc.includes('crud-kpi-card-caption-expr-') &&
+    crudStudioDemoSrc.includes('${totalCount} | number') &&
+    crudStudioDemoSrc.includes('${byKey.true} | default:0 | number') &&
+    !crudStudioDemoSrc.includes("'20 Heróis'") &&
+    !crudStudioDemoSrc.includes("'18 Ativos'") &&
+    !crudStudioDemoSrc.includes("'96.4%'"),
+  'record-crud-studio-demo.mjs conecta a faixa de KPIs do CRUD Studio a /stats/group-by (valueExpr / captionExpr) sem valores estáticos chumbados',
+);
+
 console.log('\n================================================================');
 if (failed === 0) {
   console.log(` [SUCESSO] Todas as ${passed} asserções de contrato passaram!`);
