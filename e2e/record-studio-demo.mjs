@@ -1245,20 +1245,25 @@ async function setFormInput(page, selector, value) {
   await loc.blur();
 }
 
-async function selectMatOption(page, selectLocator, optionTextOrPredicate) {
+async function selectMatOption(page, selectLocator, optionTextOrPredicate, { pauseBeforeClickMs = 0 } = {}) {
   await selectLocator.waitFor({ state: 'visible', timeout: 10000 });
   await moveCursorToLocator(page, selectLocator, 70);
   await selectLocator.click({ force: true });
   await sleep(250);
   const options = page.locator('.cdk-overlay-container mat-option');
   await options.first().waitFor({ state: 'visible', timeout: 10000 });
+  if (pauseBeforeClickMs > 0) {
+    await sleep(pauseBeforeClickMs);
+  }
   const count = await options.count();
   for (let i = 0; i < count; i++) {
     const opt = options.nth(i);
     const text = (await opt.innerText()).trim();
+    const widgetKey = (await opt.getAttribute('data-widget-key')) || '';
     const matches = typeof optionTextOrPredicate === 'function'
-      ? optionTextOrPredicate(text)
-      : text.toLowerCase().includes(String(optionTextOrPredicate).toLowerCase());
+      ? optionTextOrPredicate(text, widgetKey)
+      : text.toLowerCase().includes(String(optionTextOrPredicate).toLowerCase()) ||
+        widgetKey.toLowerCase() === String(optionTextOrPredicate).toLowerCase();
     if (matches) {
       await moveCursorToLocator(page, opt, 60);
       await opt.click();
@@ -2258,15 +2263,33 @@ async function main() {
     console.log(`  [binder:G1] Auto-Bind result message: "${binderMsg.trim()}" (active bindings in list: ${activeBindings.length})`);
 
     const progressValueBindings = [
-      { widget: kKpiHeroes, path: 'context.progressValue', token: '{{state.kpis.readinessRate}}' },
-      { widget: kKpiMissions, path: 'context.progressValue', token: '{{state.kpis.missoesPercent}}' },
-      { widget: kKpiPayroll, path: 'context.progressValue', token: '{{state.kpis.folhaPercent}}' },
-      { widget: kKpiIncidents, path: 'context.progressValue', token: '{{state.kpis.riscosPercent}}' }
+      { widget: kKpiHeroes, title: 'Efetivo em Prontidão', path: 'context.progressValue', token: '{{state.kpis.readinessRate}}' },
+      { widget: kKpiMissions, title: 'Teatro de Operações Ativas', path: 'context.progressValue', token: '{{state.kpis.missoesPercent}}' },
+      { widget: kKpiPayroll, title: 'Execução da Folha Líquida', path: 'context.progressValue', token: '{{state.kpis.folhaPercent}}' },
+      { widget: kKpiIncidents, title: 'Pressão de Ameaças & Risco', path: 'context.progressValue', token: '{{state.kpis.riscosPercent}}' }
     ];
-    for (const b of progressValueBindings) {
-      await setFormInput(page, '[data-testid="binder-token"]', b.token);
-      await selectMatOption(page, page.locator('[data-testid="binder-widget"]'), (txt) => txt.includes(b.widget));
-      await setFormInput(page, '[data-testid="binder-input-path"]', b.path);
+    for (let bIdx = 0; bIdx < progressValueBindings.length; bIdx++) {
+      const b = progressValueBindings[bIdx];
+      const tokenChip = page.locator(`[data-testid="binder-token-suggestion-${b.token}"]`);
+      if (await tokenChip.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, tokenChip, 55);
+        await tokenChip.click();
+      } else {
+        await setFormInput(page, '[data-testid="binder-token"]', b.token);
+      }
+      await selectMatOption(
+        page,
+        page.locator('[data-testid="binder-widget"]'),
+        (txt, wKey) => wKey === b.widget || txt.includes(b.title) || txt.includes(b.widget),
+        { pauseBeforeClickMs: bIdx === 0 ? 550 : 120 }
+      );
+      const pathChip = page.locator(`[data-testid="binder-input-suggestion-${b.path}"]`);
+      if (await pathChip.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, pathChip, 55);
+        await pathChip.click();
+      } else {
+        await setFormInput(page, '[data-testid="binder-input-path"]', b.path);
+      }
       const bindBtn = page.locator('[data-testid="binder-bind-btn"]');
       await moveCursorToLocator(page, bindBtn, 60);
       await bindBtn.click();
