@@ -392,15 +392,15 @@ assert(
 const praxisDeps = Object.entries(pkgJson.dependencies || {}).filter(([name]) =>
   name.startsWith('@praxisui/'),
 );
-const allAlignedRc27Plus =
+const allAlignedRc33Plus =
   praxisDeps.length >= 20 &&
   praxisDeps.every(([, version]) => {
     const match = /^10\.0\.0-rc\.(\d+)$/.exec(String(version));
-    return Boolean(match && Number(match[1]) >= 27);
+    return Boolean(match && Number(match[1]) >= 33);
   });
 assert(
-  allAlignedRc27Plus,
-  'Todas as dependências @praxisui/* em package.json estão alinhadas em >= 10.0.0-rc.27 (com suporte a fiação aninhada de abas e isolamento de pilha de drawers)',
+  allAlignedRc33Plus,
+  'Todas as dependências @praxisui/* em package.json estão alinhadas em >= 10.0.0-rc.33 (com suporte nativo a normalizeSourcePayload em PraxisKpiBandComponent e operadores &&/|| em SafeExpressionEvaluator)',
 );
 
 const coreDtsPath = path.join(ROOT, 'node_modules/@praxisui/core/types/praxisui-core.d.ts');

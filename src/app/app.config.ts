@@ -140,30 +140,6 @@ const praxisStatsDedupeInterceptor: HttpInterceptorFn = (req, next) => {
     );
   }
 
-  if (req.method === 'POST' && cleanUrl.endsWith('/filter')) {
-    return next(req).pipe(
-      map((event) => {
-        if (!(event instanceof HttpResponse) || !event.body || typeof event.body !== 'object') {
-          return event;
-        }
-        const body = event.body as Record<string, any>;
-        const data = body['data'];
-        if (data && typeof data === 'object' && Array.isArray(data['content']) && data['content'].length > 0 && !('firstItem' in data)) {
-          return event.clone({
-            body: {
-              ...body,
-              data: {
-                ...data,
-                firstItem: data['content'][0],
-              },
-            },
-          });
-        }
-        return event;
-      }),
-    );
-  }
-
   if (req.method !== 'POST' || !cleanUrl.endsWith('/stats/group-by')) {
     return next(req);
   }
@@ -192,49 +168,6 @@ const praxisStatsDedupeInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const stream$ = next(req).pipe(
-    map((event) => {
-      if (!(event instanceof HttpResponse) || !event.body || typeof event.body !== 'object') {
-        return event;
-      }
-      const body = event.body as Record<string, any>;
-      const data = body['data'];
-      const buckets = data?.['buckets'];
-      if (data && typeof data === 'object' && Array.isArray(buckets)) {
-        const byKey: Record<string, number> = {};
-        let totalCount = 0;
-        const enrichedBuckets = buckets.map((b: any) => {
-          if (!b || typeof b !== 'object') return b;
-          const count = Number(b.values?.['total'] ?? b.values?.['count'] ?? b.count ?? b.value ?? 0);
-          if (!Number.isFinite(count)) return b;
-          totalCount += count;
-          const key = String(b.key ?? b.label ?? '');
-          if (key) {
-            byKey[key] = count;
-          }
-          return {
-            ...b,
-            count: b.count ?? count,
-            values: {
-              ...(b.values ?? {}),
-              total: b.values?.['total'] ?? count,
-              count: b.values?.['count'] ?? count,
-            },
-          };
-        });
-        return event.clone({
-          body: {
-            ...body,
-            data: {
-              ...data,
-              buckets: enrichedBuckets,
-              byKey,
-              totalCount,
-            },
-          },
-        });
-      }
-      return event;
-    }),
     tap({
       error: () => {
         statsRequestCache.delete(cacheKey);
