@@ -1380,8 +1380,8 @@ const INCIDENTS_TABLE_EDITOR_JSON = {
         }
       },
       { field: 'local', header: 'Teatro Operacional', width: '180px', sortable: true },
-      { field: 'ocorridoEm', header: 'Data / Hora', width: '140px', sortable: true },
-      { field: 'danosCivis', header: 'Danos Civis (R$)', width: '150px', align: 'right', sortable: true },
+      { field: 'ocorridoEm', header: 'Data / Hora', type: 'date', format: 'dd/MM/yyyy HH:mm', width: '155px', sortable: true },
+      { field: 'danosCivis', header: 'Danos Civis (R$)', type: 'currency', width: '150px', align: 'right', sortable: true },
       { field: 'feridos', header: 'Feridos', width: '90px', align: 'center', sortable: true },
       { field: 'mortos', header: 'Baixas', width: '90px', align: 'center', sortable: true }
     ],
@@ -1391,6 +1391,16 @@ const INCIDENTS_TABLE_EDITOR_JSON = {
     },
     appearance: {
       density: 'compact'
+    },
+    localization: {
+      locale: 'pt-BR',
+      currency: {
+        code: 'BRL',
+        symbol: 'R$',
+        position: 'before',
+        spacing: true,
+        precision: 0
+      }
     },
     behavior: {
       expansion: {
@@ -1417,7 +1427,7 @@ const INCIDENTS_TABLE_EDITOR_JSON = {
           version: '1.0.0',
           compat: 'semver',
           allowedNodes: [
-            'card', 'value', 'stack', 'text', 'icon', 'badge', 'timeline', 'list', 'tabs', 'tab', 'mediaBlock', 'cardGrid'
+            'card', 'value', 'stack', 'text', 'icon', 'badge', 'compose', 'metric', 'progress', 'richContent', 'timeline', 'list', 'tabs', 'tab', 'mediaBlock', 'cardGrid'
           ],
           sanitization: 'strict'
         },
@@ -1433,27 +1443,154 @@ const INCIDENTS_TABLE_EDITOR_JSON = {
             layout: 'stack',
             items: [
               {
-                type: 'card',
-                title: 'Relatório Tático de Campo & Análise Forense',
+                type: 'cardGrid',
+                title: 'DOSSIÊ TÁTICO DE CAMPO & ANÁLISE FORENSE',
                 subtitle: 'Protocolo de resposta rápida sob governança do Centro de Comando Tático',
-                content: [
+                columns: 3,
+                minCardWidth: 250,
+                cards: [
                   {
-                    type: 'stack',
-                    items: [
-                      { type: 'value', label: 'Teatro Operacional', valueField: 'local' },
-                      { type: 'value', label: 'Severidade Tática', valueField: 'severidade' },
-                      { type: 'value', label: 'Danos Civis Estimados (R$)', valueField: 'danosCivis' },
-                      { type: 'value', label: 'Vítimas & Feridos', valueField: 'feridos' },
-                      { type: 'value', label: 'Baixas Fatais', valueField: 'mortos' },
-                      { type: 'value', label: 'Missão de Origem (ID)', valueField: 'missaoId' },
+                    title: 'Contexto & Teatro Operacional',
+                    subtitle: 'Geolocalização e vínculo de missão',
+                    variant: 'outlined',
+                    tone: 'primary',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
                       {
-                        type: 'value',
-                        label: 'Diretiva de Operação',
-                        value: 'Perímetro isolado com sucesso pela força tática. Esquadrões de perícia coordenando blindagem quântica e monitoramento contínuo.'
+                        type: 'metric',
+                        label: 'Teatro Operacional',
+                        valueExpr: '${row.local | default:Setor em varredura}',
+                        captionExpr: 'Ocorrência #${row.id} · Missão #${row.missaoId | default:N/A}',
+                        icon: 'location_on',
+                        tone: 'primary'
+                      },
+                      {
+                        type: 'compose',
+                        direction: 'row',
+                        gap: 'xs',
+                        items: [
+                          {
+                            type: 'badge',
+                            labelExpr: 'SEVERIDADE ${row.severidade}',
+                            icon: 'gpp_bad',
+                            tone: 'danger',
+                            visibleWhen: {
+                              in: [{ var: 'row.severidade' }, ['CRITICA', 'CRÍTICA']]
+                            }
+                          },
+                          {
+                            type: 'badge',
+                            labelExpr: 'SEVERIDADE ${row.severidade}',
+                            icon: 'warning',
+                            tone: 'warning',
+                            visibleWhen: {
+                              '===': [{ var: 'row.severidade' }, 'ALTA']
+                            }
+                          },
+                          {
+                            type: 'badge',
+                            labelExpr: 'SEVERIDADE ${row.severidade}',
+                            icon: 'shield',
+                            tone: 'info',
+                            visibleWhen: {
+                              in: [{ var: 'row.severidade' }, ['MEDIA', 'MÉDIA', 'BAIXA']]
+                            }
+                          },
+                          {
+                            type: 'badge',
+                            labelExpr: 'MISSÃO #${row.missaoId | default:N/A}',
+                            icon: 'radar',
+                            tone: 'neutral'
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    title: 'Impacto Humano & Contenção',
+                    subtitle: 'Triagem médica e cordão de isolamento',
+                    variant: 'outlined',
+                    tone: 'warning',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
+                      {
+                        type: 'metric',
+                        label: 'Vítimas & Feridos em Atendimento',
+                        valueExpr: '${row.feridos | default:0 | number} feridos',
+                        captionExpr: '${row.mortos | default:0 | number} baixas fatais confirmadas',
+                        icon: 'medical_services',
+                        tone: 'warning'
+                      },
+                      {
+                        type: 'compose',
+                        direction: 'row',
+                        gap: 'xs',
+                        items: [
+                          {
+                            type: 'badge',
+                            label: 'ALERTA DE BAIXAS',
+                            icon: 'emergency',
+                            tone: 'danger',
+                            visibleWhen: {
+                              '>': [{ var: 'row.mortos' }, 0]
+                            }
+                          },
+                          {
+                            type: 'badge',
+                            label: 'ZERO BAIXAS FATAIS',
+                            icon: 'verified_user',
+                            tone: 'success',
+                            visibleWhen: {
+                              '===': [{ var: 'row.mortos' }, 0]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    title: 'Auditoria & Impacto Patrimonial',
+                    subtitle: 'Estimativa pericial e registro cronológico',
+                    variant: 'outlined',
+                    tone: 'info',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
+                      {
+                        type: 'metric',
+                        label: 'Danos Civis Estimados',
+                        valueExpr: '${row.danosCivis | default:0 | currency}',
+                        captionExpr: 'Registro: ${row.ocorridoEm | dateTime}',
+                        icon: 'account_balance_wallet',
+                        tone: 'info'
+                      },
+                      {
+                        type: 'badge',
+                        label: 'PERÍMETRO ISOLADO · AUDITORIA ATIVA',
+                        icon: 'policy',
+                        tone: 'primary'
                       }
                     ]
                   }
                 ]
+              },
+              {
+                type: 'richContent',
+                document: {
+                  kind: 'praxis.rich-content',
+                  version: '1.0.0',
+                  nodes: [
+                    {
+                      type: 'callout',
+                      tone: 'info',
+                      icon: 'security',
+                      title: 'Síntese Forense & Diretiva de Contenção',
+                      messageExpr: '${row.descricao} — Perímetro isolado pela força tática no setor ${row.local} (Missão #${row.missaoId | default:N/A}). Esquadrões de perícia coordenando blindagem e monitoramento contínuo.'
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -1494,10 +1631,22 @@ async function setFormInput(page, selector, value) {
 
 async function selectMatOption(page, selectLocator, optionTextOrPredicate, { pauseBeforeClickMs = 0 } = {}) {
   await selectLocator.waitFor({ state: 'visible', timeout: 10000 });
+  for (let w = 0; w < 100; w++) {
+    if ((await selectLocator.getAttribute('aria-disabled')) !== 'true') break;
+    await sleep(150);
+  }
+  await selectLocator.scrollIntoViewIfNeeded().catch(() => {});
   await moveCursorToLocator(page, selectLocator, 70);
-  await selectLocator.click({ force: true });
-  await sleep(250);
   const options = page.locator('.cdk-overlay-container mat-option');
+  for (let openAttempt = 0; openAttempt < 3; openAttempt++) {
+    await selectLocator.click({ force: true });
+    try {
+      await options.first().waitFor({ state: 'visible', timeout: 3500 });
+      break;
+    } catch {
+      await sleep(200);
+    }
+  }
   await options.first().waitFor({ state: 'visible', timeout: 10000 });
   if (pauseBeforeClickMs > 0) {
     await sleep(pauseBeforeClickMs);
@@ -1512,6 +1661,8 @@ async function selectMatOption(page, selectLocator, optionTextOrPredicate, { pau
       : text.toLowerCase().includes(String(optionTextOrPredicate).toLowerCase()) ||
         widgetKey.toLowerCase() === String(optionTextOrPredicate).toLowerCase();
     if (matches) {
+      await opt.scrollIntoViewIfNeeded().catch(() => {});
+      await sleep(80);
       await moveCursorToLocator(page, opt, 60);
       await opt.click();
       await sleep(200);
@@ -1523,6 +1674,69 @@ async function selectMatOption(page, selectLocator, optionTextOrPredicate, { pau
     allTexts.push((await options.nth(i).innerText()).trim());
   }
   throw new Error(`Could not find mat-option matching ${optionTextOrPredicate}. Available: ${JSON.stringify(allTexts)}`);
+}
+
+async function selectRichFieldOption(page, selectLocator, targetCodeOrLabel) {
+  await selectLocator.waitFor({ state: 'visible', timeout: 10000 });
+  for (let w = 0; w < 100; w++) {
+    if ((await selectLocator.getAttribute('aria-disabled')) !== 'true') break;
+    await sleep(150);
+  }
+  if ((await selectLocator.getAttribute('aria-disabled')) === 'true') {
+    throw new Error(`mat-select remained aria-disabled=true when trying to select "${targetCodeOrLabel}"`);
+  }
+  await selectLocator.scrollIntoViewIfNeeded().catch(() => {});
+  await moveCursorToLocator(page, selectLocator, 70);
+  const options = page.locator('.cdk-overlay-container mat-option');
+  for (let openAttempt = 0; openAttempt < 3; openAttempt++) {
+    await selectLocator.click({ force: true });
+    try {
+      await options.first().waitFor({ state: 'visible', timeout: 3500 });
+      break;
+    } catch {
+      await sleep(200);
+    }
+  }
+  await options.first().waitFor({ state: 'visible', timeout: 10000 });
+  const needle = String(targetCodeOrLabel).trim().toLowerCase();
+
+  const items = await options.evaluateAll((els) =>
+    els.map((el, idx) => {
+      const code = el.querySelector('.editor-rich-option__code')?.textContent?.trim() || '';
+      const label = el.querySelector('.editor-rich-option__label')?.textContent?.trim() || '';
+      const codeParts = code.split('·').map((s) => s.trim().toLowerCase()).filter(Boolean);
+      return { idx, code, label, codeLower: code.toLowerCase(), labelLower: label.toLowerCase(), codeParts };
+    })
+  );
+
+  let match = items.find(
+    (it) => it.codeLower === needle || it.labelLower === needle || it.codeParts.includes(needle)
+  );
+  if (!match) {
+    match = items.find(
+      (it) => (it.codeLower && it.codeLower.includes(needle)) || (it.labelLower && it.labelLower.includes(needle))
+    );
+  }
+
+  if (!match) {
+    throw new Error(
+      `Could not find rich field mat-option matching "${targetCodeOrLabel}". Available: ${JSON.stringify(
+        items.map((it) => ({ code: it.code, label: it.label }))
+      )}`
+    );
+  }
+
+  const opt = options.nth(match.idx);
+  await opt.scrollIntoViewIfNeeded().catch(() => {});
+  await sleep(100);
+  await moveCursorToLocator(page, opt, 60);
+  await opt.click();
+  await sleep(250);
+  if ((await options.count()) > 0) {
+    await opt.click({ force: true }).catch(() => {});
+    await sleep(150);
+  }
+  return match.label || match.code;
 }
 
 async function saveAndCloseSettingsPanel(page, label = '') {
@@ -1544,15 +1758,19 @@ async function saveAndCloseSettingsPanel(page, label = '') {
     return;
   }
 
+  const issues = await page.locator('praxis-settings-panel').evaluate((el) =>
+    Array.from(el.querySelectorAll('[role="alert"], [role="status"], .validation-issue')).map((n) => n.textContent.trim())
+  );
+  if (label.startsWith('chart:')) {
+    throw new Error(`[Dashboard API Integration Audit] Save button disabled for ${label}! Validation issues: ${JSON.stringify(issues)}`);
+  }
+
   if (!(await applyBtn.isDisabled())) {
     await moveCursorToLocator(page, applyBtn, 80);
     await applyBtn.click();
     console.log(`  [ok] Applied settings panel for ${label}`);
     await sleep(350);
   } else {
-    const issues = await page.locator('praxis-settings-panel').evaluate((el) =>
-      Array.from(el.querySelectorAll('[role="alert"], [role="status"], .validation-issue')).map((n) => n.textContent.trim())
-    );
     console.log(`  [warn] Save & Apply disabled for ${label} (issues: ${JSON.stringify(issues)}), closing...`);
   }
 
@@ -1811,11 +2029,9 @@ async function configureChartWidget(page, widgetKey, cfg) {
   await sleep(300);
 
   const tResStart = Date.now();
-  await selectMatOption(page, page.locator('[data-testid="chart-editor-resource"]'), (txt) =>
-    txt.trim().toLowerCase() === cfg.resourceMatch.toLowerCase() ||
-    txt.toLowerCase().includes(cfg.resourceMatch.toLowerCase())
-  );
-  for (let attempt = 0; attempt < 100; attempt++) {
+  await selectRichFieldOption(page, page.locator('[data-testid="chart-editor-resource"]'), cfg.resourceMatch);
+  await sleep(250);
+  for (let attempt = 0; attempt < 120; attempt++) {
     const resolving = await page.locator('[data-testid="chart-editor-resolving-resource"]').count();
     const opDisabled = await page.locator('[data-testid="chart-editor-operation"]').getAttribute('aria-disabled');
     if (resolving === 0 && opDisabled !== 'true') break;
@@ -1827,11 +2043,21 @@ async function configureChartWidget(page, widgetKey, cfg) {
   );
   await sleep(350);
 
+  if (cfg.granularityMatch) {
+    const dataSelects = editor.locator('praxis-chart-config-editor mat-select');
+    if ((await dataSelects.count()) >= 4) {
+      await selectMatOption(page, dataSelects.nth(3), (txt) =>
+        txt.toLowerCase().includes(cfg.granularityMatch.toLowerCase())
+      );
+      await sleep(200);
+    }
+  }
+
   // 3. Analytics section
   const secAnalytics = page.locator('[data-testid="chart-editor-section-analytics"]');
   await moveCursorToLocator(page, secAnalytics, 60);
   await secAnalytics.click();
-  await sleep(300);
+  await sleep(350);
 
   if (cfg.gaugeMax !== undefined) {
     const gaugeMin = page.locator('[data-testid="chart-editor-gauge-min"]');
@@ -1842,35 +2068,28 @@ async function configureChartWidget(page, widgetKey, cfg) {
   }
 
   const dimSelect = page.locator('[data-testid="chart-editor-dimension-field-0"] mat-select');
-  if (await dimSelect.isVisible() && (await dimSelect.getAttribute('aria-disabled')) !== 'true') {
-    await selectMatOption(page, dimSelect, (txt) => txt.toLowerCase().includes(cfg.dimensionMatch.toLowerCase()));
-    await sleep(250);
-  }
+  await selectRichFieldOption(page, dimSelect, cfg.dimensionMatch);
+  await sleep(250);
 
   const metricField0 = page.locator('[data-testid="chart-editor-metric-field-0"] mat-select');
-  if (await metricField0.isVisible() && (await metricField0.getAttribute('aria-disabled')) !== 'true') {
-    await selectMatOption(page, metricField0, (txt) => txt.toLowerCase().includes(cfg.metric0.fieldMatch.toLowerCase()));
-    await sleep(200);
-    await setFormInput(page, '[data-testid="chart-editor-metric-label-0"] input', cfg.metric0.label);
-    await selectMatOption(page, page.locator('[data-testid="chart-editor-metric-aggregation-0"] mat-select'), (txt) =>
-      txt.toLowerCase().includes(cfg.metric0.aggMatch.toLowerCase())
-    );
-  }
+  await selectRichFieldOption(page, metricField0, cfg.metric0.fieldMatch);
+  await sleep(200);
+  await setFormInput(page, '[data-testid="chart-editor-metric-label-0"] input', cfg.metric0.label);
+  await selectMatOption(page, page.locator('[data-testid="chart-editor-metric-aggregation-0"] mat-select'), (txt) =>
+    txt.toLowerCase().includes(cfg.metric0.aggMatch.toLowerCase())
+  );
 
   if (cfg.metric1) {
     const addMetricBtn = page.locator('[data-testid="chart-editor-add-metric"]');
-    if (await addMetricBtn.isVisible() && !(await addMetricBtn.isDisabled())) {
-      await moveCursorToLocator(page, addMetricBtn, 60);
-      await addMetricBtn.click();
-      await sleep(300);
-      await selectMatOption(page, page.locator('[data-testid="chart-editor-metric-field-1"] mat-select'), (txt) =>
-        txt.toLowerCase().includes(cfg.metric1.fieldMatch.toLowerCase())
-      );
-      await setFormInput(page, '[data-testid="chart-editor-metric-label-1"] input', cfg.metric1.label);
-      await selectMatOption(page, page.locator('[data-testid="chart-editor-metric-aggregation-1"] mat-select'), (txt) =>
-        txt.toLowerCase().includes(cfg.metric1.aggMatch.toLowerCase())
-      );
-    }
+    await addMetricBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, addMetricBtn, 60);
+    await addMetricBtn.click();
+    await sleep(300);
+    await selectRichFieldOption(page, page.locator('[data-testid="chart-editor-metric-field-1"] mat-select'), cfg.metric1.fieldMatch);
+    await setFormInput(page, '[data-testid="chart-editor-metric-label-1"] input', cfg.metric1.label);
+    await selectMatOption(page, page.locator('[data-testid="chart-editor-metric-aggregation-1"] mat-select'), (txt) =>
+      txt.toLowerCase().includes(cfg.metric1.aggMatch.toLowerCase())
+    );
   }
 
   // 4. Appearance section (set custom palette)
@@ -2054,6 +2273,14 @@ async function runDashboardApiIntegrationAudit(page, expectedWidgets) {
     'Zero source.kind="derived" · Zero inputs.data estáticos · 7 DataSources ativos'
   );
 
+  // Wait up to 12s for all 4 praxis-chart widgets to finish loading remote stats
+  for (let w = 0; w < 60; w++) {
+    const loadingCount = await page.locator('praxis-chart .praxis-chart-state-loading').count();
+    if (loadingCount === 0) break;
+    await sleep(200);
+  }
+  await sleep(400);
+
   const auditResult = await page.evaluate(() => {
     const violations = [];
     const verified = [];
@@ -2117,6 +2344,7 @@ async function runDashboardApiIntegrationAudit(page, expectedWidgets) {
         const cfgSourceKind = inputs.config?.dataSource?.query?.sourceKind;
         const cfgDataSourceKind = inputs.config?.dataSource?.kind;
         const resourcePath = inputs.config?.dataSource?.resourcePath || inputs.chartDocument?.source?.resource;
+        const dimField = inputs.chartDocument?.dimensions?.[0]?.field;
 
         if (docSourceKind === 'derived' || cfgDataSourceKind === 'local') {
           violations.push(`Gráfico ${wKey} usa fonte estática/derivada (docSourceKind=${docSourceKind}, dataSource.kind=${cfgDataSourceKind})`);
@@ -2124,10 +2352,32 @@ async function runDashboardApiIntegrationAudit(page, expectedWidgets) {
         if (Array.isArray(inputs.data) && inputs.data.length > 0) {
           violations.push(`Gráfico ${wKey} possui inputs.data estático (${inputs.data.length} registros)`);
         }
+        if (!dimField || dimField === 'category') {
+          violations.push(`Gráfico ${wKey} permaneceu com dimensão padrão inválida (${dimField})`);
+        }
         if (docSourceKind !== 'praxis.stats' && cfgSourceKind !== 'praxis.stats') {
           violations.push(`Gráfico ${wKey} não está vinculado a praxis.stats`);
         } else {
-          verified.push(`Gráfico ${wKey} -> praxis.stats (${resourcePath})`);
+          verified.push(`Gráfico ${wKey} -> praxis.stats (${resourcePath}, dim=${dimField})`);
+        }
+
+        // Also inspect live rendered DOM of this chart widget!
+        const domEl = document.querySelector(`[data-widget-key="${wKey}"] praxis-chart`);
+        if (!domEl) {
+          violations.push(`Gráfico ${wKey} não encontrado no DOM`);
+        } else {
+          const errEl = domEl.querySelector('.praxis-chart-state-error');
+          const emptyEl = domEl.querySelector('.praxis-chart-state-empty');
+          const canvasEl = domEl.querySelector('canvas');
+          if (errEl) {
+            violations.push(`Gráfico ${wKey} renderizou estado de erro no DOM: ${errEl.textContent.trim()}`);
+          } else if (emptyEl) {
+            violations.push(`Gráfico ${wKey} renderizou estado vazio no DOM: ${emptyEl.textContent.trim()}`);
+          } else if (!canvasEl) {
+            violations.push(`Gráfico ${wKey} não possui <canvas> ECharts renderizado no DOM`);
+          } else {
+            verified.push(`Gráfico ${wKey} DOM -> <canvas> ECharts renderizado ao vivo sem erros/vazio`);
+          }
         }
       } else if (compId === 'praxis-list') {
         const listRes = inputs.config?.dataSource?.resourcePath || inputs.resourcePath;
@@ -2170,7 +2420,7 @@ async function runDashboardApiIntegrationAudit(page, expectedWidgets) {
     }
     throw new Error(`[Dashboard API Integration Audit] Falhou com ${auditResult.violations.length} violação(ões)!`);
   }
-  console.log(` [SUCESSO] Dashboard API Integration Audit aprovado (${auditResult.widgetCount} widgets, 0 dados estáticos)!`);
+  console.log(` [SUCESSO] Dashboard API Integration Audit aprovado (${auditResult.widgetCount} widgets, 0 dados estáticos, 4/4 gráficos renderizados)!`);
   console.log('================================================================\n');
 }
 
@@ -2681,7 +2931,7 @@ async function main() {
       sourceKind: 'praxis.stats',
       resourceMatch: 'risk-intelligence.vw-indicadores-incidentes',
       operationMatch: 'agrupar por',
-      dimensionMatch: 'Severidade',
+      dimensionMatch: 'severidade',
       metric0: { fieldMatch: 'count', label: 'Ocorrências', aggMatch: 'contagem' },
       colors: ['#ef4444', '#f97316', '#eab308', '#38bdf8'],
       crossFilterMapping: { severidade: 'severidade' }
@@ -2703,10 +2953,10 @@ async function main() {
       sourceKind: 'praxis.stats',
       resourceMatch: 'human-resources.vw-ranking-reputacao',
       operationMatch: 'agrupar por',
-      dimensionMatch: 'Equipe',
+      dimensionMatch: 'equipe',
       gaugeMin: 0,
       gaugeMax: 100,
-      metric0: { fieldMatch: 'Score Publico', label: 'Índice de Defesa (%)', aggMatch: 'média' },
+      metric0: { fieldMatch: 'scorePublico', label: 'Índice de Defesa (%)', aggMatch: 'média' },
       colors: ['#06b6d4', '#10b981', '#f59e0b']
     });
     await configureWidgetShell(page, kChartDefcon, {
@@ -2726,9 +2976,10 @@ async function main() {
       sourceKind: 'praxis.stats',
       resourceMatch: 'human-resources.vw-analytics-folha-pagamento',
       operationMatch: 'série temporal',
-      dimensionMatch: 'Competencia',
-      metric0: { fieldMatch: 'Salario Liquido', label: 'Salário Líquido (R$)', aggMatch: 'soma' },
-      metric1: { fieldMatch: 'Total Descontos', label: 'Descontos & Encargos', aggMatch: 'soma' },
+      granularityMatch: 'mês',
+      dimensionMatch: 'competencia',
+      metric0: { fieldMatch: 'salarioLiquido', label: 'Salário Líquido (R$)', aggMatch: 'soma' },
+      metric1: { fieldMatch: 'totalDescontos', label: 'Descontos & Encargos', aggMatch: 'soma' },
       colors: ['#38bdf8', '#a855f7', '#22c55e']
     });
     await configureWidgetShell(page, kChartPayroll, {
@@ -2748,9 +2999,9 @@ async function main() {
       sourceKind: 'praxis.stats',
       resourceMatch: 'human-resources.vw-ranking-reputacao',
       operationMatch: 'agrupar por',
-      dimensionMatch: 'Equipe',
-      metric0: { fieldMatch: 'Score Publico', label: 'Score de Aprovação (%)', aggMatch: 'média' },
-      metric1: { fieldMatch: 'Score Governamental', label: 'Confiança Governamental', aggMatch: 'média' },
+      dimensionMatch: 'equipe',
+      metric0: { fieldMatch: 'scorePublico', label: 'Score de Aprovação (%)', aggMatch: 'média' },
+      metric1: { fieldMatch: 'scoreGovernamental', label: 'Confiança Governamental', aggMatch: 'média' },
       colors: ['#06b6d4', '#10b981', '#6366f1']
     });
     await configureWidgetShell(page, kChartReputation, {
@@ -2926,6 +3177,10 @@ async function main() {
       path: path.join(ARTIFACT_DIR, 'studio-03-authored-in-editor.png'),
       scale: 'css'
     });
+    await page.screenshot({
+      path: path.join(ARTIFACT_DIR, 'frame-1080p30-editing-sharp.png'),
+      scale: 'css'
+    });
 
     // Exit customization mode
     await moveCursorToLocator(page, toggleBtn, 110);
@@ -2965,8 +3220,13 @@ async function main() {
       'Séries históricas multi-métrica via /stats/timeseries e /stats/group-by + missões ativas'
     );
     await smoothScrollDashboard(page, 620, 1100);
+    await sleep(500);
     await recorder.captureSyncKeyframe();
-    await sleep(2000);
+    await page.screenshot({
+      path: path.join(ARTIFACT_DIR, 'frame-1080p30-tour-row2.png'),
+      scale: 'css'
+    });
+    await sleep(1500);
 
     await setDemoStage(
       page,
