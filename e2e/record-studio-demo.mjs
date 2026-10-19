@@ -1864,7 +1864,7 @@ async function openWidgetEditor(page, widgetKey, mode = 'content') {
   await dismissStrayBackdrops(page);
 }
 
-async function insertWidgetFromPalette(page, componentId, options = {}) {
+async function insertWidgetsBatchFromPalette(page, batchSpecs, recorder = null) {
   const beforeKeys = await page.locator('[data-widget-key]').evaluateAll((els) =>
     els.map((el) => el.getAttribute('data-widget-key'))
   );
@@ -1879,52 +1879,109 @@ async function insertWidgetFromPalette(page, componentId, options = {}) {
   const searchInput = page.locator('[data-testid="component-palette-search"]');
   await searchInput.waitFor({ state: 'visible', timeout: 10000 });
 
-  if (options.keepOpen !== undefined) {
-    const keepOpenCheckbox = page.locator('[data-testid="palette-keep-open"] input[type="checkbox"]');
-    if (await keepOpenCheckbox.count() > 0) {
-      const checked = await keepOpenCheckbox.isChecked();
-      if (checked !== options.keepOpen) {
-        const keepOpenWrap = page.locator('[data-testid="palette-keep-open"]');
-        await moveCursorToLocator(page, keepOpenWrap, 70);
-        await keepOpenWrap.click();
-        await sleep(100);
+  const batchToggle = page.locator('[data-testid="palette-batch-mode-toggle"]');
+  await batchToggle.waitFor({ state: 'visible', timeout: 10000 });
+  if ((await batchToggle.getAttribute('aria-pressed')) !== 'true') {
+    await moveCursorToLocator(page, batchToggle, 80);
+    await batchToggle.click();
+    await sleep(180);
+  }
+
+  let currentColSpan = null;
+  let currentComponentId = null;
+
+  for (let i = 0; i < batchSpecs.length; i++) {
+    const spec = batchSpecs[i];
+    if (spec.colSpan !== undefined && spec.colSpan !== currentColSpan) {
+      const widthChip = page.locator(`[data-testid="palette-colspan-${spec.colSpan}"]`);
+      if (await widthChip.isVisible()) {
+        await moveCursorToLocator(page, widthChip, 55);
+        await widthChip.click();
+        await sleep(80);
+        currentColSpan = spec.colSpan;
       }
     }
-  }
 
-  if (options.colSpan !== undefined) {
-    const widthChip = page.locator(`[data-testid="palette-colspan-${options.colSpan}"]`);
-    if (await widthChip.isVisible()) {
-      await moveCursorToLocator(page, widthChip, 70);
-      await widthChip.click();
-      await sleep(100);
+    if (spec.id !== currentComponentId) {
+      await moveCursorToLocator(page, searchInput, 45);
+      await searchInput.fill(spec.id);
+      await sleep(140);
+      currentComponentId = spec.id;
     }
+
+    const cardBtn = page.locator('praxis-component-palette-dialog button.pdx-card').first();
+    await cardBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, cardBtn, 55);
+    await cardBtn.click();
+    await sleep(110);
   }
 
-  await moveCursorToLocator(page, searchInput, 60);
-  await searchInput.fill(componentId);
-  await sleep(200);
+  const stagingTray = page.locator('[data-testid="palette-staging-tray"]');
+  await stagingTray.waitFor({ state: 'visible', timeout: 10000 });
+  const queuedCoords = await page.locator('[data-testid="palette-queued-coords"]').evaluateAll((els) =>
+    els.map((el) => el.textContent.trim())
+  );
+  console.log(`  [palette:batch] Staging tray queued ${queuedCoords.length} items: ${queuedCoords.join(' | ')}`);
 
-  const cardBtn = page.locator('praxis-component-palette-dialog button.pdx-card').first();
-  await cardBtn.waitFor({ state: 'visible', timeout: 10000 });
-  await moveCursorToLocator(page, cardBtn, 80);
-  await cardBtn.click();
-  await sleep(300);
+  await sleep(350);
+  if (recorder) {
+    await recorder.captureSyncKeyframe();
+  }
+  await page.screenshot({
+    path: path.join(ARTIFACT_DIR, 'frame-1080p30-batch-staging-tray.png'),
+    scale: 'css'
+  });
+  await sleep(450);
+
+  const commitBatchBtn = page.locator('[data-testid="component-palette-commit-batch"]');
+  await commitBatchBtn.waitFor({ state: 'visible', timeout: 10000 });
+  await moveCursorToLocator(page, commitBatchBtn, 110);
+  await commitBatchBtn.click();
+  await dialog.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+  await sleep(400);
 
   const afterKeys = await page.locator('[data-widget-key]').evaluateAll((els) =>
     els.map((el) => el.getAttribute('data-widget-key'))
   );
-  const newKey = afterKeys.find((k) => !beforeKeys.includes(k));
-  if (!newKey) {
-    throw new Error(`Failed to detect newly inserted widget key for ${componentId}`);
+  const newKeys = afterKeys.filter((k) => !beforeKeys.includes(k));
+  if (newKeys.length !== batchSpecs.length) {
+    throw new Error(`Expected ${batchSpecs.length} newly inserted widgets from batch commit, got ${newKeys.length}`);
   }
-  console.log(`[insert] Inserted ${componentId} (colSpan=${options.colSpan ?? 'auto'}, keepOpen=${!!options.keepOpen}) -> ${newKey}`);
-  return newKey;
+  return newKeys;
 }
 
-async function configureWidgetShell(page, widgetKey, { title, subtitle, kind, icon, showHeader }) {
+async function applyContentAndSwitchToShellInDrawer(page, widgetKey, label = '') {
+  const applyBtn = page.locator('[data-testid="settings-panel-apply"]');
+  await applyBtn.waitFor({ state: 'visible', timeout: 10000 });
+  for (let w = 0; w < 45; w++) {
+    if (!(await applyBtn.isDisabled())) break;
+    await sleep(150);
+  }
+  if (!(await applyBtn.isDisabled())) {
+    await moveCursorToLocator(page, applyBtn, 70);
+    await applyBtn.click();
+    console.log(`  [ok] Applied content in-place for ${label} (keeping drawer open for Card/Shell tab)`);
+    await sleep(240);
+  }
+  const widgetModeTab = page.locator('[data-testid="settings-panel-mode-widget"]');
+  if (await widgetModeTab.isVisible().catch(() => false)) {
+    await moveCursorToLocator(page, widgetModeTab, 75);
+    await widgetModeTab.click();
+    for (let w = 0; w < 20; w++) {
+      await sleep(120);
+      if (await page.locator('[data-testid="widget-shell-identity"]').isVisible().catch(() => false)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+async function configureWidgetShell(page, widgetKey, { title, subtitle, kind, icon, showHeader }, { alreadyInShellTab = false } = {}) {
   console.log(`[shell] Configuring shell for ${widgetKey} (${title || 'borderless'})...`);
-  await openWidgetEditor(page, widgetKey, 'shell');
+  if (!alreadyInShellTab || !(await page.locator('[data-testid="widget-shell-identity"]').isVisible().catch(() => false))) {
+    await openWidgetEditor(page, widgetKey, 'shell');
+  }
 
   const identity = page.locator('[data-testid="widget-shell-identity"]');
   await identity.waitFor({ state: 'visible', timeout: 10000 });
@@ -1965,7 +2022,7 @@ async function configureWidgetShell(page, widgetKey, { title, subtitle, kind, ic
   await saveAndCloseSettingsPanel(page, `shell:${widgetKey}`);
 }
 
-async function configureRichContentWidget(page, widgetKey, docObj) {
+async function configureRichContentWidget(page, widgetKey, docObj, shellConfig = null) {
   console.log(`[rich-content] Configuring RichContent for ${widgetKey}...`);
   await openWidgetEditor(page, widgetKey, 'content');
 
@@ -1983,10 +2040,15 @@ async function configureRichContentWidget(page, widgetKey, docObj) {
   await textarea.dispatchEvent('change');
   await sleep(300);
 
-  await saveAndCloseSettingsPanel(page, `rich-content:${widgetKey}`);
+  if (shellConfig) {
+    const switched = await applyContentAndSwitchToShellInDrawer(page, widgetKey, `rich-content:${widgetKey}`);
+    await configureWidgetShell(page, widgetKey, shellConfig, { alreadyInShellTab: switched });
+  } else {
+    await saveAndCloseSettingsPanel(page, `rich-content:${widgetKey}`);
+  }
 }
 
-async function configureChartWidget(page, widgetKey, cfg) {
+async function configureChartWidget(page, widgetKey, cfg, shellConfig = null) {
   console.log(`[chart] Configuring Chart for ${widgetKey} (${cfg.title || cfg.shellTitle})...`);
   const tStart = Date.now();
   await openWidgetEditor(page, widgetKey, 'content');
@@ -2132,10 +2194,15 @@ async function configureChartWidget(page, widgetKey, cfg) {
   }
 
   console.log(`  [chart] Configured ${widgetKey} in ${Date.now() - tStart}ms`);
-  await saveAndCloseSettingsPanel(page, `chart:${widgetKey}`);
+  if (shellConfig) {
+    const switched = await applyContentAndSwitchToShellInDrawer(page, widgetKey, `chart:${widgetKey}`);
+    await configureWidgetShell(page, widgetKey, shellConfig, { alreadyInShellTab: switched });
+  } else {
+    await saveAndCloseSettingsPanel(page, `chart:${widgetKey}`);
+  }
 }
 
-async function configureListWidget(page, widgetKey, resourceMatch, listConfig) {
+async function configureListWidget(page, widgetKey, resourceMatch, listConfig, shellConfig = null) {
   console.log(`[list] Configuring List for ${widgetKey}...`);
   await openWidgetEditor(page, widgetKey, 'content');
 
@@ -2166,10 +2233,15 @@ async function configureListWidget(page, widgetKey, resourceMatch, listConfig) {
     await sleep(250);
   }
 
-  await saveAndCloseSettingsPanel(page, `list:${widgetKey}`);
+  if (shellConfig) {
+    const switched = await applyContentAndSwitchToShellInDrawer(page, widgetKey, `list:${widgetKey}`);
+    await configureWidgetShell(page, widgetKey, shellConfig, { alreadyInShellTab: switched });
+  } else {
+    await saveAndCloseSettingsPanel(page, `list:${widgetKey}`);
+  }
 }
 
-async function configureTableWidget(page, widgetKey, tableEditorDoc) {
+async function configureTableWidget(page, widgetKey, tableEditorDoc, shellConfig = null) {
   console.log(`[table] Configuring Table for ${widgetKey}...`);
   await openWidgetEditor(page, widgetKey, 'content');
 
@@ -2209,7 +2281,12 @@ async function configureTableWidget(page, widgetKey, tableEditorDoc) {
     await sleep(300);
   }
 
-  await saveAndCloseSettingsPanel(page, `table:${widgetKey}`);
+  if (shellConfig) {
+    const switched = await applyContentAndSwitchToShellInDrawer(page, widgetKey, `table:${widgetKey}`);
+    await configureWidgetShell(page, widgetKey, shellConfig, { alreadyInShellTab: switched });
+  } else {
+    await saveAndCloseSettingsPanel(page, `table:${widgetKey}`);
+  }
 }
 
 async function setDemoStage(page, stepNum, totalSteps, stepBadge, title, detail) {
@@ -2704,59 +2781,98 @@ async function main() {
     await toggleBtn.click();
     await sleep(600);
 
-    // 2. Insert 13 widgets via Component Palette Dialog using G4 (keepOpen + initial colSpan chips + smart row packing!)
-    console.log('\n2. Inserting 13 widgets from Component Palette (G4 keepOpen + initial colSpan)...');
+    // 2. Insert all 13 widgets in a single atomic batch via Component Palette Staging Tray!
+    console.log('\n2. Queuing and inserting all 13 widgets via Component Palette Batch Staging Tray...');
     await setDemoStage(
       page,
       2,
       9,
-      'ETAPA 2/9 · MELHORIA G4 (PALETA EM LOTE)',
-      'Inserindo 13 Widgets com Largura Inicial no Bento Grid (12 Colunas)',
-      'Modo "Manter paleta aberta" + chips rápidos (3, 4, 6, 8, 12 cols) + empacotamento automático'
+      'ETAPA 2/9 · MONTAGEM EM LOTE (STAGING TRAY 12 COLUNAS)',
+      'Selecionando os 13 Widgets na Bandeja de Montagem com Coordenadas Pré-Calculadas (L·C)',
+      'Zero "vai e volta": empacotamento automático em 12 colunas e inserção atômica em 1 clique'
     );
     const tPaletteStart = Date.now();
-    const kHeader = await insertWidgetFromPalette(page, 'praxis-rich-content', { colSpan: 12, keepOpen: true });
-    const kKpiHeroes = await insertWidgetFromPalette(page, 'praxis-rich-content', { colSpan: 3, keepOpen: true });
-    const kKpiMissions = await insertWidgetFromPalette(page, 'praxis-rich-content', { colSpan: 3, keepOpen: true });
-    const kKpiPayroll = await insertWidgetFromPalette(page, 'praxis-rich-content', { colSpan: 3, keepOpen: true });
-    const kKpiIncidents = await insertWidgetFromPalette(page, 'praxis-rich-content', { colSpan: 3, keepOpen: true });
-    const kChartSeverity = await insertWidgetFromPalette(page, 'praxis-chart', { colSpan: 4, keepOpen: true });
-    const kChartDefcon = await insertWidgetFromPalette(page, 'praxis-chart', { colSpan: 4, keepOpen: true });
-    const kListSos = await insertWidgetFromPalette(page, 'praxis-list', { colSpan: 4, keepOpen: true });
-    const kChartPayroll = await insertWidgetFromPalette(page, 'praxis-chart', { colSpan: 6, keepOpen: true });
-    const kChartReputation = await insertWidgetFromPalette(page, 'praxis-chart', { colSpan: 6, keepOpen: true });
-    const kTimeline = await insertWidgetFromPalette(page, 'praxis-rich-content', { colSpan: 12, keepOpen: true });
-    const kTableIncidents = await insertWidgetFromPalette(page, 'praxis-table', { colSpan: 12, keepOpen: true });
-    const kHub = await insertWidgetFromPalette(page, 'praxis-rich-content', { colSpan: 12, keepOpen: false });
-    console.log(`  [palette:G4] Inserted all 13 widgets with exact Bento Grid widths in ${Date.now() - tPaletteStart}ms!`);
+    const [
+      kHeader,
+      kKpiHeroes,
+      kKpiMissions,
+      kKpiPayroll,
+      kKpiIncidents,
+      kChartSeverity,
+      kChartDefcon,
+      kListSos,
+      kChartPayroll,
+      kChartReputation,
+      kTimeline,
+      kTableIncidents,
+      kHub
+    ] = await insertWidgetsBatchFromPalette(
+      page,
+      [
+        { id: 'praxis-rich-content', colSpan: 12 },
+        { id: 'praxis-rich-content', colSpan: 3 },
+        { id: 'praxis-rich-content', colSpan: 3 },
+        { id: 'praxis-rich-content', colSpan: 3 },
+        { id: 'praxis-rich-content', colSpan: 3 },
+        { id: 'praxis-chart', colSpan: 4 },
+        { id: 'praxis-chart', colSpan: 4 },
+        { id: 'praxis-list', colSpan: 4 },
+        { id: 'praxis-chart', colSpan: 6 },
+        { id: 'praxis-chart', colSpan: 6 },
+        { id: 'praxis-rich-content', colSpan: 12 },
+        { id: 'praxis-table', colSpan: 12 },
+        { id: 'praxis-rich-content', colSpan: 12 }
+      ],
+      recorder
+    );
+    console.log(`  [palette:batch] Atomically inserted all 13 widgets into Bento Grid in ${Date.now() - tPaletteStart}ms!`);
 
-    // 3. Configure Row 1 & Rich Content Widgets & Their Shells
-    console.log('\n3. Configuring Rich Content Widgets...');
+    // 3. Configure Row 1 & Rich Content Widgets & Their Shells (In-Drawer Conteúdo -> Aplicar -> Card!)
+    console.log('\n3. Configuring Rich Content Widgets & Shells in single continuous drawer sessions...');
     await setDemoStage(
       page,
       3,
       9,
-      'ETAPA 3/9 · SUPERFÍCIES RICH CONTENT & SHELLS',
-      'Configurando Hero Radar, 4 KPI Cards, Timeline Tática e Hub de Comando',
-      'Molduras sem borda (kind: none) com extração semântica automática de títulos (Melhoria G5)'
+      'ETAPA 3/9 · EDIÇÃO CONTÍNUA NO DRAWER (CONTEÚDO → CARD)',
+      'Configurando Hero Radar, 4 KPI Cards, Timeline Tática e Hub sem Fechar/Reabrir o Drawer',
+      'Transição direta Conteúdo → Aplicar → Card + navegação visual ordenada (L·C) no cabeçalho'
     );
-    await configureRichContentWidget(page, kHeader, HERO_COMMAND_HEADER_DOC);
-    await configureWidgetShell(page, kHeader, { title: '', subtitle: '', kind: 'none', showHeader: 'false' });
+    await configureRichContentWidget(page, kHeader, HERO_COMMAND_HEADER_DOC, {
+      title: '',
+      subtitle: '',
+      kind: 'none',
+      showHeader: 'false'
+    });
 
-    await configureRichContentWidget(page, kKpiHeroes, KPI_HEROES_DOC);
-    await configureWidgetShell(page, kKpiHeroes, { title: '', subtitle: '', kind: 'none', showHeader: 'false' });
+    await configureRichContentWidget(page, kKpiHeroes, KPI_HEROES_DOC, {
+      title: '',
+      subtitle: '',
+      kind: 'none',
+      showHeader: 'false'
+    });
 
-    await configureRichContentWidget(page, kKpiMissions, KPI_MISSIONS_DOC);
-    await configureWidgetShell(page, kKpiMissions, { title: '', subtitle: '', kind: 'none', showHeader: 'false' });
+    await configureRichContentWidget(page, kKpiMissions, KPI_MISSIONS_DOC, {
+      title: '',
+      subtitle: '',
+      kind: 'none',
+      showHeader: 'false'
+    });
 
-    await configureRichContentWidget(page, kKpiPayroll, KPI_PAYROLL_DOC);
-    await configureWidgetShell(page, kKpiPayroll, { title: '', subtitle: '', kind: 'none', showHeader: 'false' });
+    await configureRichContentWidget(page, kKpiPayroll, KPI_PAYROLL_DOC, {
+      title: '',
+      subtitle: '',
+      kind: 'none',
+      showHeader: 'false'
+    });
 
-    await configureRichContentWidget(page, kKpiIncidents, KPI_INCIDENTS_DOC);
-    await configureWidgetShell(page, kKpiIncidents, { title: '', subtitle: '', kind: 'none', showHeader: 'false' });
+    await configureRichContentWidget(page, kKpiIncidents, KPI_INCIDENTS_DOC, {
+      title: '',
+      subtitle: '',
+      kind: 'none',
+      showHeader: 'false'
+    });
 
-    await configureRichContentWidget(page, kTimeline, TIMELINE_DOC);
-    await configureWidgetShell(page, kTimeline, {
+    await configureRichContentWidget(page, kTimeline, TIMELINE_DOC, {
       title: 'Diário Operacional de Missões',
       subtitle: 'Cronologia tática e despacho de forças especiais em tempo real',
       kind: 'dashboard-card',
@@ -2764,8 +2880,7 @@ async function main() {
       showHeader: 'true'
     });
 
-    await configureRichContentWidget(page, kHub, HUB_DOC);
-    await configureWidgetShell(page, kHub, {
+    await configureRichContentWidget(page, kHub, HUB_DOC, {
       title: 'Centros de Comando & Especialidades',
       subtitle: 'Atalhos táticos de governança departamental e inteligência operacional',
       kind: 'dashboard-card',
@@ -2773,15 +2888,15 @@ async function main() {
       showHeader: 'true'
     });
 
-    // 4. Configure Page Settings (Guided Composer, Theme, Canvas autoRows, DataSources, Derived State, G1 Auto-Bind & CSP-Safe Declarative Pipes!)
-    console.log('\n4. Opening Page Settings Editor (Guided Composer, DataSources, Page State, G1 Auto-Bind & CSP-Safe Pipes)...');
+    // 4. Configure Page Settings (Guided Composer, Theme, Canvas autoRows, DataSources -> Auto-Sync State Keys, Derived State, Auto-Bind & CSP-Safe Pipes!)
+    console.log('\n4. Opening Page Settings Editor (Guided Composer, DataSources -> State Sync, Derived State, Auto-Bind & CSP-Safe Pipes)...');
     await setDemoStage(
       page,
       4,
       9,
-      'ETAPA 4/9 · STATE BINDER + PIPES CSP-SAFE & AUTO-BIND 1-CLICK',
-      'Compositor Guiado, DataSources, Medidas Derivadas, Chips de Pipes CSP-safe e Auto-Bind',
-      'Vinculando 38 placeholders em 1 clique + pipes declarativos (| default:0 | round:1) com prévia simulada ao vivo'
+      'ETAPA 4/9 · DATASOURCES → PAGE STATE SYNC + PIPES CSP-SAFE & AUTO-BIND',
+      'Sincronizando Chaves de Estado dos DataSources, Medidas Derivadas, Pipes CSP-safe e Auto-Bind',
+      'Vinculando 38 placeholders em 1 clique + pipes declarativos (| default:0 | round:1) com prévia ao vivo'
     );
     await dismissStrayBackdrops(page);
     const pageSettingsBtn = page.locator('praxis-floating-toolbar button[aria-label="Configurações da página"]');
@@ -2801,7 +2916,7 @@ async function main() {
     await studioTabs.nth(1).click();
     await sleep(450);
 
-    // Highlight the new Guided Collection Screen Composer card in Layout templates tab
+    // Highlight the Guided Collection Screen Composer card in Layout templates tab
     const guidedComposerCard = page.locator('[data-testid="collection-screen-composer"]');
     if (await guidedComposerCard.isVisible().catch(() => false)) {
       const summary = guidedComposerCard.locator('summary').first();
@@ -2831,7 +2946,17 @@ async function main() {
 
     await setFormInput(page, '[data-testid="page-datasources-json"]', PAGE_DATASOURCES_JSON);
     await page.locator('[data-testid="page-datasources-json"]').dispatchEvent('blur');
-    await sleep(300);
+    await sleep(250);
+
+    const syncFromDsBtn = page.locator('[data-testid="page-state-sync-from-datasources"]');
+    if (await syncFromDsBtn.isVisible().catch(() => false)) {
+      await syncFromDsBtn.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+      await moveCursorToLocator(page, syncFromDsBtn, 95);
+      await syncFromDsBtn.click();
+      await sleep(250);
+      console.log('  [state:sync] Triggered page-state-sync-from-datasources to initialize targetStatePath keys!');
+    }
+
     await setFormInput(page, '[data-testid="page-state-json"]', PAGE_STATE_JSON);
     await page.locator('[data-testid="page-state-json"]').dispatchEvent('blur');
     await sleep(300);
@@ -2881,7 +3006,7 @@ async function main() {
         await setFormInput(page, '[data-testid="binder-token"]', b.token);
       }
 
-      // Showcase the new CSP-safe declarative pipe chips & live simulated preview!
+      // Showcase the CSP-safe declarative pipe chips & live simulated preview!
       const defaultPipeChip = page.locator('[data-testid="binder-pipe-chip-| default:0"]');
       if (await defaultPipeChip.isVisible().catch(() => false)) {
         await defaultPipeChip.evaluate((el) => el.scrollIntoView({ block: 'center' }));
@@ -2912,107 +3037,123 @@ async function main() {
 
     await saveAndCloseSettingsPanel(page, 'PageSettings');
 
-    // 5. Configure Chart Widgets & Their Shells — 100% Governed praxis.stats APIs (Zero Static Data!)
-    console.log('\n5. Configuring Chart Widgets (100% praxis.stats APIs — zero static localRows)...');
+    // 5. Configure Chart Widgets & Their Shells — 100% Governed praxis.stats APIs (Zero Static Data & In-Drawer Shell Switching!)
+    console.log('\n5. Configuring Chart Widgets & Shells in continuous drawer sessions (100% praxis.stats APIs)...');
     await setDemoStage(
       page,
       5,
       9,
-      'ETAPA 5/9 · MELHORIA G2 (4 GRÁFICOS 100% PRAXIS.STATS)',
-      'Configurando Rosca (Severidade), Velocímetro (Prontidão), Área (Folha) e Barra (Reputação)',
-      '100% conectados a endpoints /stats governados · Zero dados locais estáticos (inputs.data)'
+      'ETAPA 5/9 · 4 GRÁFICOS 100% PRAXIS.STATS (CONTEÚDO → CARD)',
+      'Configurando Rosca (Severidade), Velocímetro (Prontidão), Área (Folha) e Barra (Missões)',
+      '100% conectados a endpoints /stats governados · Zero dados locais estáticos e zero buckets nulos'
     );
-    await configureChartWidget(page, kChartSeverity, {
-      title: 'Distribuição de Severidade',
-      subtitle: '',
-      shellTitle: 'Distribuição de Severidade',
-      kindLabel: 'Rosca',
-      height: 290,
-      sourceKind: 'praxis.stats',
-      resourceMatch: 'risk-intelligence.vw-indicadores-incidentes',
-      operationMatch: 'agrupar por',
-      dimensionMatch: 'severidade',
-      metric0: { fieldMatch: 'count', label: 'Ocorrências', aggMatch: 'contagem' },
-      colors: ['#ef4444', '#f97316', '#eab308', '#38bdf8'],
-      crossFilterMapping: { severidade: 'severidade' }
-    });
-    await configureWidgetShell(page, kChartSeverity, {
-      title: 'Distribuição de Severidade (Clique para Filtrar)',
-      subtitle: 'Classificação de risco conectada via barramento à tabela de incidentes',
-      kind: 'dashboard-card',
-      icon: 'pie_chart',
-      showHeader: 'true'
-    });
+    await configureChartWidget(
+      page,
+      kChartSeverity,
+      {
+        title: 'Distribuição de Severidade',
+        subtitle: '',
+        shellTitle: 'Distribuição de Severidade',
+        kindLabel: 'Rosca',
+        height: 290,
+        sourceKind: 'praxis.stats',
+        resourceMatch: 'risk-intelligence.vw-indicadores-incidentes',
+        operationMatch: 'agrupar por',
+        dimensionMatch: 'severidade',
+        metric0: { fieldMatch: 'count', label: 'Ocorrências', aggMatch: 'contagem' },
+        colors: ['#ef4444', '#f97316', '#eab308', '#38bdf8'],
+        crossFilterMapping: { severidade: 'severidade' }
+      },
+      {
+        title: 'Distribuição de Severidade (Clique para Filtrar)',
+        subtitle: 'Classificação de risco conectada via barramento à tabela de incidentes',
+        kind: 'dashboard-card',
+        icon: 'pie_chart',
+        showHeader: 'true'
+      }
+    );
 
-    await configureChartWidget(page, kChartDefcon, {
-      title: 'Nível de Defesa Tática (DEFCON)',
-      subtitle: '',
-      shellTitle: 'Nível de Defesa Tática (DEFCON)',
-      kindLabel: 'Velocímetro',
-      height: 290,
-      sourceKind: 'praxis.stats',
-      resourceMatch: 'human-resources.vw-ranking-reputacao',
-      operationMatch: 'agrupar por',
-      dimensionMatch: 'equipe',
-      gaugeMin: 0,
-      gaugeMax: 100,
-      metric0: { fieldMatch: 'scorePublico', label: 'Índice de Defesa (%)', aggMatch: 'média' },
-      colors: ['#06b6d4', '#10b981', '#f59e0b']
-    });
-    await configureWidgetShell(page, kChartDefcon, {
-      title: 'Nível de Defesa Tática (DEFCON)',
-      subtitle: 'Índice consolidado de prontidão e respaldo operacional em tempo real (0 a 100%)',
-      kind: 'dashboard-card',
-      icon: 'speed',
-      showHeader: 'true'
-    });
+    await configureChartWidget(
+      page,
+      kChartDefcon,
+      {
+        title: 'Nível de Defesa Tática (DEFCON)',
+        subtitle: '',
+        shellTitle: 'Nível de Defesa Tática (DEFCON)',
+        kindLabel: 'Velocímetro',
+        height: 290,
+        sourceKind: 'praxis.stats',
+        resourceMatch: 'human-resources.vw-ranking-reputacao',
+        operationMatch: 'agrupar por',
+        dimensionMatch: 'equipe',
+        gaugeMin: 0,
+        gaugeMax: 100,
+        metric0: { fieldMatch: 'scorePublico', label: 'Índice de Defesa (%)', aggMatch: 'média' },
+        colors: ['#06b6d4', '#10b981', '#f59e0b']
+      },
+      {
+        title: 'Nível de Defesa Tática (DEFCON)',
+        subtitle: 'Índice consolidado de prontidão e respaldo operacional em tempo real (0 a 100%)',
+        kind: 'dashboard-card',
+        icon: 'speed',
+        showHeader: 'true'
+      }
+    );
 
-    await configureChartWidget(page, kChartPayroll, {
-      title: 'Evolução da Folha Salarial & Benefícios',
-      subtitle: '',
-      shellTitle: 'Evolução da Folha Salarial & Benefícios',
-      kindLabel: 'Área',
-      height: 300,
-      sourceKind: 'praxis.stats',
-      resourceMatch: 'human-resources.vw-analytics-folha-pagamento',
-      operationMatch: 'série temporal',
-      granularityMatch: 'mês',
-      dimensionMatch: 'competencia',
-      metric0: { fieldMatch: 'salarioLiquido', label: 'Salário Líquido (R$)', aggMatch: 'soma' },
-      metric1: { fieldMatch: 'totalDescontos', label: 'Descontos & Encargos', aggMatch: 'soma' },
-      colors: ['#38bdf8', '#a855f7', '#22c55e']
-    });
-    await configureWidgetShell(page, kChartPayroll, {
-      title: 'Evolução da Folha Salarial & Benefícios',
-      subtitle: 'Execução orçamentária dos últimos ciclos de pagamento tático via /stats/timeseries',
-      kind: 'dashboard-card',
-      icon: 'payments',
-      showHeader: 'true'
-    });
+    await configureChartWidget(
+      page,
+      kChartPayroll,
+      {
+        title: 'Evolução da Folha Salarial & Benefícios',
+        subtitle: '',
+        shellTitle: 'Evolução da Folha Salarial & Benefícios',
+        kindLabel: 'Área',
+        height: 300,
+        sourceKind: 'praxis.stats',
+        resourceMatch: 'human-resources.vw-analytics-folha-pagamento',
+        operationMatch: 'série temporal',
+        granularityMatch: 'mês',
+        dimensionMatch: 'competencia',
+        metric0: { fieldMatch: 'salarioLiquido', label: 'Salário Líquido (R$)', aggMatch: 'soma' },
+        metric1: { fieldMatch: 'totalDescontos', label: 'Descontos & Encargos', aggMatch: 'soma' },
+        colors: ['#38bdf8', '#a855f7', '#22c55e']
+      },
+      {
+        title: 'Evolução da Folha Salarial & Benefícios',
+        subtitle: 'Execução orçamentária dos últimos ciclos de pagamento tático via /stats/timeseries',
+        kind: 'dashboard-card',
+        icon: 'payments',
+        showHeader: 'true'
+      }
+    );
 
-    await configureChartWidget(page, kChartReputation, {
-      title: 'Ranking Reputacional da Força',
-      subtitle: '',
-      shellTitle: 'Ranking Reputacional da Força',
-      kindLabel: 'Barra',
-      height: 300,
-      sourceKind: 'praxis.stats',
-      resourceMatch: 'human-resources.vw-ranking-reputacao',
-      operationMatch: 'agrupar por',
-      dimensionMatch: 'equipe',
-      metric0: { fieldMatch: 'scorePublico', label: 'Score de Aprovação (%)', aggMatch: 'média' },
-      metric1: { fieldMatch: 'scoreGovernamental', label: 'Confiança Governamental', aggMatch: 'média' },
-      colors: ['#06b6d4', '#10b981', '#6366f1']
-    });
-    await configureWidgetShell(page, kChartReputation, {
-      title: 'Ranking Reputacional da Força',
-      subtitle: 'Índice consolidado de aprovação pública e governamental via /stats/group-by',
-      kind: 'dashboard-card',
-      icon: 'military_tech',
-      showHeader: 'true'
-    });
+    await configureChartWidget(
+      page,
+      kChartReputation,
+      {
+        title: 'Mobilização Tática & Eventos por Missão',
+        subtitle: '',
+        shellTitle: 'Mobilização Tática & Eventos por Missão',
+        kindLabel: 'Barra',
+        height: 300,
+        sourceKind: 'praxis.stats',
+        resourceMatch: 'operations.vw-resumo-missoes',
+        operationMatch: 'agrupar por',
+        dimensionMatch: 'status',
+        metric0: { fieldMatch: 'qtdHerois', label: 'Efetivo Mobilizado', aggMatch: 'soma' },
+        metric1: { fieldMatch: 'qtdEventos', label: 'Eventos Táticos', aggMatch: 'soma' },
+        colors: ['#06b6d4', '#10b981', '#6366f1']
+      },
+      {
+        title: 'Mobilização Tática & Eventos por Missão',
+        subtitle: 'Efetivo alocado e telemetria de eventos por status operacional via /stats/group-by',
+        kind: 'dashboard-card',
+        icon: 'military_tech',
+        showHeader: 'true'
+      }
+    );
 
-    // 6. Configure SOS List Widget
+    // 6. Configure SOS List Widget (In-Drawer Conteúdo -> Card!)
     console.log('\n6. Configuring SOS List Widget...');
     await setDemoStage(
       page,
@@ -3020,10 +3161,9 @@ async function main() {
       9,
       'ETAPA 6/9 · FEED DE SINAIS DE SOCORRO (PRAXIS-LIST)',
       'Configurando Lista Operacional Conectada a operations/sinais-socorro',
-      'Template de cards compactos com severidade e ações táticas'
+      'Template de cards compactos com severidade e transição direta Conteúdo → Card'
     );
-    await configureListWidget(page, kListSos, 'sinais-socorro', SOS_LIST_CONFIG);
-    await configureWidgetShell(page, kListSos, {
+    await configureListWidget(page, kListSos, 'sinais-socorro', SOS_LIST_CONFIG, {
       title: 'Sinais de Socorro Ativos',
       subtitle: 'Chamados de emergência tática recebidos pelo QG',
       kind: 'dashboard-card',
@@ -3031,18 +3171,17 @@ async function main() {
       showHeader: 'true'
     });
 
-    // 7. Configure Incidents Table Widget
+    // 7. Configure Incidents Table Widget (In-Drawer Conteúdo -> Card!)
     console.log('\n7. Configuring Incidents Table Widget...');
     await setDemoStage(
       page,
       7,
       9,
-      'ETAPA 7/9 · MELHORIA G6 (TABELA + DOSSIÊ FORENSE INLINE)',
+      'ETAPA 7/9 · TABELA + DOSSIÊ FORENSE INLINE',
       'Configurando Tabela de Incidentes com Contenção Radial e Expansão Inline',
-      'Seletor de seções visível no Settings Panel + schema de detalhe forense embutido'
+      'Seletor de seções visível no Settings Panel + transição direta Conteúdo → Card'
     );
-    await configureTableWidget(page, kTableIncidents, INCIDENTS_TABLE_EDITOR_JSON);
-    await configureWidgetShell(page, kTableIncidents, {
+    await configureTableWidget(page, kTableIncidents, INCIDENTS_TABLE_EDITOR_JSON, {
       title: 'Monitoramento de Incidentes & Ameaças Recentes',
       subtitle: 'Feed operacional com telemetria tática, contenção radial e dossiê forense inline',
       kind: 'dashboard-card',
