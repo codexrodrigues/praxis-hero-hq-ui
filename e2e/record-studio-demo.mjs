@@ -203,10 +203,23 @@ class HighFidelityVideoRecorder {
 function ensureDevServer() {
   return new Promise((resolve, reject) => {
     const targetUrl = new URL(PROXY_TARGET);
+    const getCache = new Map();
     const server = http.createServer((req, res) => {
       const reqUrl = req.url || '/';
       if (reqUrl.startsWith('/api') || reqUrl.startsWith('/schemas')) {
+        const isCacheableGet =
+          req.method === 'GET' &&
+          !reqUrl.startsWith('/api/praxis/config');
+        if (isCacheableGet && getCache.has(reqUrl)) {
+          const cached = getCache.get(reqUrl);
+          res.writeHead(cached.statusCode, cached.headers);
+          res.end(cached.body);
+          return;
+        }
         const headers = { ...req.headers, host: targetUrl.host, origin: PROXY_ORIGIN, Origin: PROXY_ORIGIN };
+        if (isCacheableGet) {
+          delete headers['accept-encoding'];
+        }
         const proxyReq = (targetUrl.protocol === 'https:' ? https : http).request(
           {
             protocol: targetUrl.protocol,
@@ -218,6 +231,24 @@ function ensureDevServer() {
             rejectUnauthorized: false
           },
           (proxyRes) => {
+            if (isCacheableGet && (proxyRes.statusCode || 200) >= 200 && (proxyRes.statusCode || 200) < 300) {
+              const chunks = [];
+              proxyRes.on('data', (c) => chunks.push(c));
+              proxyRes.on('end', () => {
+                const body = Buffer.concat(chunks);
+                const cleanHeaders = { ...proxyRes.headers };
+                delete cleanHeaders['transfer-encoding'];
+                cleanHeaders['content-length'] = String(body.length);
+                getCache.set(reqUrl, {
+                  statusCode: proxyRes.statusCode || 200,
+                  headers: cleanHeaders,
+                  body
+                });
+                res.writeHead(proxyRes.statusCode || 200, cleanHeaders);
+                res.end(body);
+              });
+              return;
+            }
             res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
             proxyRes.pipe(res);
           }
@@ -1498,7 +1529,11 @@ async function saveAndCloseSettingsPanel(page, label = '') {
   const saveBtn = page.locator('[data-testid="settings-panel-save"]');
   const applyBtn = page.locator('[data-testid="settings-panel-apply"]');
   await saveBtn.waitFor({ state: 'visible', timeout: 10000 });
-  await sleep(300);
+  for (let w = 0; w < 50; w++) {
+    if (!(await saveBtn.isDisabled())) break;
+    await sleep(200);
+  }
+  await sleep(200);
 
   if (!(await saveBtn.isDisabled())) {
     await moveCursorToLocator(page, saveBtn, 80);
@@ -2488,15 +2523,15 @@ async function main() {
       showHeader: 'true'
     });
 
-    // 4. Configure Page Settings (Theme, Canvas autoRows, DataSources, Derived State, and G1 1-Click Auto-Bind!) right after RichContent so KPIs resolve immediately on canvas!
-    console.log('\n4. Opening Page Settings Editor (DataSources, Page State & G1 1-Click Auto-Bind)...');
+    // 4. Configure Page Settings (Guided Composer, Theme, Canvas autoRows, DataSources, Derived State, G1 Auto-Bind & CSP-Safe Declarative Pipes!)
+    console.log('\n4. Opening Page Settings Editor (Guided Composer, DataSources, Page State, G1 Auto-Bind & CSP-Safe Pipes)...');
     await setDemoStage(
       page,
       4,
       9,
-      'ETAPA 4/9 · MELHORIA G1 (AUTO-VINCULAR ESTADO EM 1 CLIQUE)',
-      'Configurando DataSources Declarativos, Medidas Derivadas (JsonLogic) e State Binder',
-      'Vinculando automaticamente todos os placeholders ${kpis.*} e ${activeMissions.*} em 1 clique'
+      'ETAPA 4/9 · STATE BINDER + PIPES CSP-SAFE & AUTO-BIND 1-CLICK',
+      'Compositor Guiado, DataSources, Medidas Derivadas, Chips de Pipes CSP-safe e Auto-Bind',
+      'Vinculando 38 placeholders em 1 clique + pipes declarativos (| default:0 | round:1) com prévia simulada ao vivo'
     );
     await dismissStrayBackdrops(page);
     const pageSettingsBtn = page.locator('praxis-floating-toolbar button[aria-label="Configurações da página"]');
@@ -2528,7 +2563,20 @@ async function main() {
 
     await moveCursorToLocator(page, innerEditorTabs.nth(4), 70);
     await innerEditorTabs.nth(4).click();
-    await sleep(400);
+    await sleep(450);
+
+    // Highlight the new Guided Collection Screen Composer card before scrolling to DataSources & State Binder
+    const guidedComposerCard = page.locator('[data-testid="collection-screen-composer"]');
+    if (await guidedComposerCard.isVisible().catch(() => false)) {
+      await guidedComposerCard.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+      await sleep(350);
+      const collectionTypeSelect = page.locator('[data-testid="composer-collection-type"]');
+      if (await collectionTypeSelect.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, collectionTypeSelect, 140);
+        await sleep(300);
+      }
+      await recorder.captureSyncKeyframe();
+    }
 
     await setFormInput(page, '[data-testid="page-datasources-json"]', PAGE_DATASOURCES_JSON);
     await page.locator('[data-testid="page-datasources-json"]').dispatchEvent('blur');
@@ -2538,8 +2586,10 @@ async function main() {
     await sleep(300);
 
     const tBindStart = Date.now();
-    const autoBindBtn = page.locator('[data-testid="binder-auto-bind-btn"]');
+    const autoBindBtn = page.locator('[data-testid="binder-auto-bind"], [data-testid="binder-auto-bind-btn"]').first();
     await autoBindBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await autoBindBtn.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await sleep(200);
     const autoBindText = await autoBindBtn.innerText();
     console.log(`  [binder:G1] Found Auto-Bind button: "${autoBindText.trim()}"`);
     await moveCursorToLocator(page, autoBindBtn, 120);
@@ -2559,18 +2609,11 @@ async function main() {
     ];
     for (let bIdx = 0; bIdx < progressValueBindings.length; bIdx++) {
       const b = progressValueBindings[bIdx];
-      const tokenChip = page.locator(`[data-testid="binder-token-suggestion-${b.token}"]`);
-      if (await tokenChip.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, tokenChip, 55);
-        await tokenChip.click();
-      } else {
-        await setFormInput(page, '[data-testid="binder-token"]', b.token);
-      }
       await selectMatOption(
         page,
         page.locator('[data-testid="binder-widget"]'),
         (txt, wKey) => wKey === b.widget || txt.includes(b.title) || txt.includes(b.widget),
-        { pauseBeforeClickMs: bIdx === 0 ? 550 : 120 }
+        { pauseBeforeClickMs: bIdx === 0 ? 500 : 120 }
       );
       const pathChip = page.locator(`[data-testid="binder-input-suggestion-${b.path}"]`);
       if (await pathChip.isVisible().catch(() => false)) {
@@ -2579,10 +2622,40 @@ async function main() {
       } else {
         await setFormInput(page, '[data-testid="binder-input-path"]', b.path);
       }
-      const bindBtn = page.locator('[data-testid="binder-bind-btn"]');
+      const tokenChip = page.locator(`[data-testid="binder-token-suggestion-${b.token}"]`);
+      if (await tokenChip.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, tokenChip, 55);
+        await tokenChip.click();
+      } else {
+        await setFormInput(page, '[data-testid="binder-token"]', b.token);
+      }
+
+      // Showcase the new CSP-safe declarative pipe chips & live simulated preview!
+      const defaultPipeChip = page.locator('[data-testid="binder-pipe-suggestion-default:0"]');
+      if (await defaultPipeChip.isVisible().catch(() => false)) {
+        await defaultPipeChip.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+        await moveCursorToLocator(page, defaultPipeChip, 85);
+        await defaultPipeChip.click();
+        await sleep(220);
+      }
+      if (bIdx === 0) {
+        const roundPipeChip = page.locator('[data-testid="binder-pipe-suggestion-round:1"]');
+        if (await roundPipeChip.isVisible().catch(() => false)) {
+          await moveCursorToLocator(page, roundPipeChip, 95);
+          await roundPipeChip.click();
+          await sleep(320);
+        }
+        const livePreview = await page.locator('[data-testid="binder-live-preview"]').innerText().catch(() => '');
+        console.log(`  [binder:pipes] Live simulated preview after clicking CSP-safe pipe chips: "${livePreview.trim()}"`);
+        await recorder.captureSyncKeyframe();
+        await page.screenshot({ path: path.join(ARTIFACT_DIR, 'frame-1080p30-binder-pipes.png') });
+        await sleep(450);
+      }
+
+      const bindBtn = page.locator('[data-testid="binder-apply"], [data-testid="binder-bind-btn"]').first();
       await moveCursorToLocator(page, bindBtn, 60);
       await bindBtn.click();
-      await sleep(100);
+      await sleep(140);
     }
     console.log(`  [binder:G1] Bound all ${activeBindings.length + 4} state tokens in ${Date.now() - tBindStart}ms!`);
 
