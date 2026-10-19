@@ -484,6 +484,19 @@ assert(
   'Todas as 17 páginas de domínio padronizam kpiBand (valueExpr e captionExpr) com pipes declarativos CSP-safe (| number, | round:1, | currency, | default:...) sem concatenações legadas toString()',
 );
 
+const allDomainStatsEligibilityCompliant = domainConfigs.every((relPath) => {
+  const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+  if (!content.includes('/stats/group-by')) return true;
+  const hasFilter = content.includes('filter: {}');
+  const hasInvalidCountField = /\{\s*field:\s*['"][^'"]+['"]\s*,\s*operation:\s*['"]COUNT['"]/i.test(content) ||
+    /\{\s*operation:\s*['"]COUNT['"]\s*,\s*field:\s*['"][^'"]+['"]/i.test(content);
+  return hasFilter && !hasInvalidCountField;
+});
+assert(
+  allDomainStatsEligibilityCompliant,
+  'Todas as páginas de domínio com /stats/group-by respeitam estritamente o contrato StatsEligibility do backend (filter: {} obrigatório e sem field em métricas COUNT)',
+);
+
 // ---------------------------------------------------------------------------
 // 7. Dashboard API Integration Audit (Zero Static Data Invariants)
 // ---------------------------------------------------------------------------
