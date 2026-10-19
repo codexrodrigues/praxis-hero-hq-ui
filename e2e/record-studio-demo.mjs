@@ -1132,9 +1132,9 @@ const TIMELINE_DOC = {
           meta: 'Missão #${activeMissions.1.missaoId} · Status: ${activeMissions.1.statusLabel}',
           opposite: '#${activeMissions.1.missaoId}',
           badge: '${activeMissions.1.prioridadeLabel} · #${activeMissions.1.missaoId}',
-          markerColor: 'accent',
+          markerColor: 'primary',
           markerStyle: 'filled',
-          connectorColor: 'accent',
+          connectorColor: 'primary',
           connectorVariant: 'solid',
           action: {
             actionId: 'navigation.openRoute',
@@ -2547,6 +2547,20 @@ async function main() {
     }
 
     const studioTabs = page.locator('.studio-tabs > .mat-mdc-tab-header .mat-mdc-tab');
+    await moveCursorToLocator(page, studioTabs.nth(1), 70);
+    await studioTabs.nth(1).click();
+    await sleep(450);
+
+    // Highlight the new Guided Collection Screen Composer card in Layout templates tab
+    const guidedComposerCard = page.locator('[data-testid="collection-screen-composer"]');
+    if (await guidedComposerCard.isVisible().catch(() => false)) {
+      const summary = guidedComposerCard.locator('summary').first();
+      await moveCursorToLocator(page, summary, 100);
+      await summary.click();
+      await sleep(450);
+      await recorder.captureSyncKeyframe();
+    }
+
     await moveCursorToLocator(page, studioTabs.nth(3), 70);
     await studioTabs.nth(3).click();
     await sleep(500);
@@ -2564,19 +2578,6 @@ async function main() {
     await moveCursorToLocator(page, innerEditorTabs.nth(4), 70);
     await innerEditorTabs.nth(4).click();
     await sleep(450);
-
-    // Highlight the new Guided Collection Screen Composer card before scrolling to DataSources & State Binder
-    const guidedComposerCard = page.locator('[data-testid="collection-screen-composer"]');
-    if (await guidedComposerCard.isVisible().catch(() => false)) {
-      await guidedComposerCard.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-      await sleep(350);
-      const collectionTypeSelect = page.locator('[data-testid="composer-collection-type"]');
-      if (await collectionTypeSelect.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, collectionTypeSelect, 140);
-        await sleep(300);
-      }
-      await recorder.captureSyncKeyframe();
-    }
 
     await setFormInput(page, '[data-testid="page-datasources-json"]', PAGE_DATASOURCES_JSON);
     await page.locator('[data-testid="page-datasources-json"]').dispatchEvent('blur');
@@ -2631,7 +2632,7 @@ async function main() {
       }
 
       // Showcase the new CSP-safe declarative pipe chips & live simulated preview!
-      const defaultPipeChip = page.locator('[data-testid="binder-pipe-suggestion-default:0"]');
+      const defaultPipeChip = page.locator('[data-testid="binder-pipe-chip-| default:0"]');
       if (await defaultPipeChip.isVisible().catch(() => false)) {
         await defaultPipeChip.evaluate((el) => el.scrollIntoView({ block: 'center' }));
         await moveCursorToLocator(page, defaultPipeChip, 85);
@@ -2639,7 +2640,7 @@ async function main() {
         await sleep(220);
       }
       if (bIdx === 0) {
-        const roundPipeChip = page.locator('[data-testid="binder-pipe-suggestion-round:1"]');
+        const roundPipeChip = page.locator('[data-testid="binder-pipe-chip-| round:1"]');
         if (await roundPipeChip.isVisible().catch(() => false)) {
           await moveCursorToLocator(page, roundPipeChip, 95);
           await roundPipeChip.click();
@@ -2681,7 +2682,7 @@ async function main() {
       resourceMatch: 'risk-intelligence.vw-indicadores-incidentes',
       operationMatch: 'agrupar por',
       dimensionMatch: 'Severidade',
-      metric0: { fieldMatch: 'Contagem', label: 'Ocorrências', aggMatch: 'contagem' },
+      metric0: { fieldMatch: 'count', label: 'Ocorrências', aggMatch: 'contagem' },
       colors: ['#ef4444', '#f97316', '#eab308', '#38bdf8'],
       crossFilterMapping: { severidade: 'severidade' }
     });
