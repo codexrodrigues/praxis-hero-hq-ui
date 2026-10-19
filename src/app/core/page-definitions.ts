@@ -12,7 +12,7 @@ interface ResourcePage {
   readonly kind: 'resource';
   readonly resource: string;
   readonly crudId?: string;
-  readonly domain: { readonly label: string; readonly tone: string };
+  readonly domain?: { readonly label: string; readonly tone: string };
   readonly title?: string;
   readonly subtitle?: string;
   readonly icon?: string;
@@ -81,9 +81,8 @@ export const HERO_PAGE_GROUPS: HeroPageGroup[] = [
           kind: 'resource',
           resource: '',
           crudId: 'studio-funcionarios',
-          title: 'Estúdio CRUD Corporativo',
-          subtitle: 'Conexão de recurso, KPIs táticos, filtros rápidos, colunas ricas e formulário customizado em tempo real.',
-          domain: { label: 'Engenharia Zero-Code & Runtime Studio', tone: 'info' },
+          title: '',
+          subtitle: '',
           loadMetadata: () => Promise.resolve({ component: 'praxis-crud', table: { columns: [] } }),
         },
       },

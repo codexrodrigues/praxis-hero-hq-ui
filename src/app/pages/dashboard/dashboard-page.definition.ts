@@ -101,6 +101,30 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       }
     }
 
+    if (widget.key === 'recentIncidents') {
+      const canonical = canonicalByKey.get('recentIncidents');
+      const cfg = widget.definition?.inputs?.config;
+      const detailItems = cfg?.behavior?.detail?.source?.inlineSchema?.items;
+      const firstCardContent = detailItems?.[0]?.cards?.[0]?.content;
+      const ocorridoCol = Array.isArray(cfg?.columns)
+        ? cfg.columns.find((c: any) => c?.field === 'ocorridoEm')
+        : null;
+      const hasFlatCardContent =
+        Array.isArray(detailItems) &&
+        detailItems.some((item: any) => item?.type === 'cardGrid') &&
+        Array.isArray(firstCardContent) &&
+        firstCardContent[0]?.type === 'metric' &&
+        cfg?.localization?.currency?.code === 'BRL' &&
+        ocorridoCol?.format === 'dd/MM/yyyy HH:mm';
+      if (canonical && !hasFlatCardContent) {
+        upgraded = true;
+        return {
+          ...widget,
+          definition: structuredClone(canonical.definition),
+        };
+      }
+    }
+
     return widget;
   });
 

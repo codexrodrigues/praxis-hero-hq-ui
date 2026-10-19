@@ -19,7 +19,8 @@ export const routes: Routes = [
         data: { ...access.data, title: page.title },
       };
     }
-    const title = page.title ?? item.label;
+    const title = page.title !== undefined ? page.title : item.label;
+    const subtitle = page.subtitle !== undefined ? page.subtitle : item.description;
     return {
       path: routePath,
       loadComponent: () => import('@praxisui/crud').then((m) => m.PraxisResourcePage),
@@ -28,12 +29,12 @@ export const routes: Routes = [
       data: {
         resource: page.resource,
         ...(page.crudId ? { crudId: page.crudId } : {}),
-        title,
-        subtitle: page.subtitle ?? item.description,
-        domain: { ...page.domain, icon: page.icon ?? item.icon },
+        title: title || null,
+        subtitle: subtitle || null,
+        domain: page.domain ? { ...page.domain, icon: page.icon ?? item.icon } : null,
         ...access.data,
       },
-      title: `Praxis Hero HQ | ${title}`,
+      title: `Praxis Hero HQ | ${title || item.label}`,
     };
   }),
   { path: '**', redirectTo: '' },

@@ -382,6 +382,10 @@ function ensureDevServer() {
     const updatedFuncionarios = new Map();
     const deletedFuncionarioIds = new Set();
     const cachedFuncionariosById = new Map();
+    const cachedGetJsonByUrl = new Map();
+    const cachedPostOptionsByKey = new Map();
+    let cachedBaseFuncionariosRows = null;
+    let cachedFilterEnvelopeTemplate = null;
 
     const applyOverlayToRecord = (rec) => {
       if (!rec || typeof rec !== 'object') return rec;
@@ -389,8 +393,46 @@ function ensureDevServer() {
       const patch = updatedFuncionarios.get(idKey);
       const numericId = Number(rec.id);
       const defaultAtivo = !Number.isNaN(numericId) ? numericId % 5 !== 0 : Boolean(rec.ativo);
-      const base = { ...rec, ativo: defaultAtivo };
+      const itemBase = `${BASE_URL}/api/human-resources/funcionarios/${idKey}`;
+      const base = {
+        ...rec,
+        ativo: defaultAtivo,
+        _links: rec._links || {
+          self: { href: itemBase },
+          update: { href: itemBase },
+          delete: { href: itemBase },
+          capabilities: { href: `${itemBase}/capabilities` },
+          surfaces: { href: `${itemBase}/surfaces` },
+          actions: { href: `${itemBase}/actions` },
+        },
+      };
       return patch ? { ...base, ...patch } : base;
+    };
+
+    const matchesFilterCriteria = (row, criteria) => {
+      if (!criteria || typeof criteria !== 'object') return true;
+      for (const [rawKey, rawVal] of Object.entries(criteria)) {
+        if (rawVal === undefined || rawVal === null || rawVal === '') continue;
+        if (rawKey === 'page' || rawKey === 'size' || rawKey === 'sort' || rawKey === 'includeLinks') continue;
+        if (rawKey === 'ativo') {
+          const wantBool =
+            typeof rawVal === 'boolean'
+              ? rawVal
+              : String(rawVal).toLowerCase() === 'true';
+          if (Boolean(row.ativo) !== wantBool) return false;
+          continue;
+        }
+        if (rawKey === 'departamentoId' || rawKey === 'cargoId') {
+          if (Number(row[rawKey]) !== Number(rawVal)) return false;
+          continue;
+        }
+        const rowVal = String(row[rawKey] ?? '').toLowerCase();
+        const needle = String(rawVal).trim().toLowerCase();
+        if (needle && !rowVal.includes(needle)) {
+          return false;
+        }
+      }
+      return true;
     };
 
     const server = http.createServer((req, res) => {
@@ -409,6 +451,32 @@ function ensureDevServer() {
             try {
               parsedReqBody = JSON.parse(reqBodyText);
             } catch {}
+          }
+
+          // Fast local response from GET cache for schemas, capabilities, surfaces, actions, options
+          if (method === 'GET' && cachedGetJsonByUrl.has(reqUrl)) {
+            const cachedBuf = cachedGetJsonByUrl.get(reqUrl);
+            res.writeHead(200, {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Content-Length': String(cachedBuf.length),
+            });
+            res.end(cachedBuf);
+            return;
+          }
+
+          const postCacheKey = `${reqUrl}|${reqBodyText}`;
+          if (
+            method === 'POST' &&
+            cleanReqPath.includes('/options/') &&
+            cachedPostOptionsByKey.has(postCacheKey)
+          ) {
+            const cachedBuf = cachedPostOptionsByKey.get(postCacheKey);
+            res.writeHead(200, {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Content-Length': String(cachedBuf.length),
+            });
+            res.end(cachedBuf);
+            return;
           }
 
           // Fast local response for item-level row discovery (capabilities & actions)
@@ -448,6 +516,55 @@ function ensureDevServer() {
                 },
               }),
             );
+            return;
+          }
+
+          // Fast in-memory response (< 10ms) for POST /api/human-resources/funcionarios/filter once seeded
+          if (
+            method === 'POST' &&
+            cleanReqPath === '/api/human-resources/funcionarios/filter' &&
+            Array.isArray(cachedBaseFuncionariosRows) &&
+            cachedFilterEnvelopeTemplate
+          ) {
+            const existingIds = new Set(cachedBaseFuncionariosRows.map((item) => String(item?.id)));
+            const activeCreated = createdFuncionarios
+              .filter((item) => !deletedFuncionarioIds.has(String(item.id)) && !existingIds.has(String(item.id)))
+              .map(applyOverlayToRecord);
+            const activeBase = cachedBaseFuncionariosRows
+              .filter((item) => !deletedFuncionarioIds.has(String(item?.id)) && !isGarbageTestFuncionario(item))
+              .map(applyOverlayToRecord);
+            const fullList = [...activeCreated, ...activeBase];
+            const criteria =
+              parsedReqBody?.filter && typeof parsedReqBody.filter === 'object'
+                ? parsedReqBody.filter
+                : parsedReqBody;
+            const filteredRows = fullList.filter((row) => matchesFilterCriteria(row, criteria));
+            const clonedEnvelope = JSON.parse(JSON.stringify(cachedFilterEnvelopeTemplate));
+            const targetNode =
+              clonedEnvelope?.data && Array.isArray(clonedEnvelope.data.content)
+                ? clonedEnvelope.data
+                : clonedEnvelope;
+            targetNode.content = filteredRows.slice(0, 25);
+            const hasActiveCriteria =
+              criteria &&
+              typeof criteria === 'object' &&
+              Object.keys(criteria).some(
+                (k) =>
+                  !['page', 'size', 'sort', 'includeLinks'].includes(k) &&
+                  criteria[k] !== undefined &&
+                  criteria[k] !== null &&
+                  criteria[k] !== '',
+              );
+            targetNode.totalElements = hasActiveCriteria
+              ? filteredRows.length
+              : Math.max(filteredRows.length, 98 + activeCreated.length - deletedFuncionarioIds.size);
+            targetNode.numberOfElements = targetNode.content.length;
+            const outBuf = Buffer.from(JSON.stringify(clonedEnvelope), 'utf8');
+            res.writeHead(200, {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Content-Length': String(outBuf.length),
+            });
+            res.end(outBuf);
             return;
           }
 
@@ -576,6 +693,23 @@ function ensureDevServer() {
                       cleanReqPath.includes('/surfaces')
                     ) {
                       json = normalizeCapabilitiesPayload(json);
+                    } else if (cleanReqPath === '/api/human-resources/funcionarios/all') {
+                      const rows = Array.isArray(json?.data)
+                        ? json.data
+                        : Array.isArray(json)
+                          ? json
+                          : [];
+                      if (rows.length > 0) {
+                        const cleaned = rows
+                          .filter((item) => !isGarbageTestFuncionario(item))
+                          .map(applyOverlayToRecord);
+                        cachedBaseFuncionariosRows = cleaned;
+                        for (const row of cleaned) {
+                          if (row && row.id != null) {
+                            cachedFuncionariosById.set(String(row.id), row);
+                          }
+                        }
+                      }
                     } else if (cleanReqPath === '/api/human-resources/funcionarios/filter') {
                       const targetNode = json?.data && Array.isArray(json.data.content) ? json.data : json;
                       if (targetNode && Array.isArray(targetNode.content)) {
@@ -586,6 +720,12 @@ function ensureDevServer() {
                         const cleanedBackendRows = targetNode.content.filter(
                           (item) => !deletedFuncionarioIds.has(String(item?.id)) && !isGarbageTestFuncionario(item),
                         );
+                        if (!cachedBaseFuncionariosRows || cleanedBackendRows.length > cachedBaseFuncionariosRows.length) {
+                          cachedBaseFuncionariosRows = cleanedBackendRows.map(applyOverlayToRecord);
+                        }
+                        if (!cachedFilterEnvelopeTemplate) {
+                          cachedFilterEnvelopeTemplate = JSON.parse(JSON.stringify(json));
+                        }
                         const removedGarbageCount = targetNode.content.length - cleanedBackendRows.length;
                         const mergedList = [
                           ...activeCreated,
@@ -619,6 +759,24 @@ function ensureDevServer() {
                     }
 
                     const outBuf = Buffer.from(JSON.stringify(json), 'utf8');
+                    if (
+                      (proxyRes.statusCode || 200) < 300 &&
+                      method === 'GET' &&
+                      (reqUrl.startsWith('/schemas') ||
+                        cleanReqPath.includes('/capabilities') ||
+                        cleanReqPath.includes('/surfaces') ||
+                        cleanReqPath.includes('/actions') ||
+                        cleanReqPath.includes('/options'))
+                    ) {
+                      cachedGetJsonByUrl.set(reqUrl, outBuf);
+                    }
+                    if (
+                      (proxyRes.statusCode || 200) < 300 &&
+                      method === 'POST' &&
+                      cleanReqPath.includes('/options/')
+                    ) {
+                      cachedPostOptionsByKey.set(postCacheKey, outBuf);
+                    }
                     const outHeaders = { ...proxyRes.headers };
                     delete outHeaders['content-encoding'];
                     delete outHeaders['transfer-encoding'];
@@ -935,16 +1093,45 @@ async function main() {
       ]
     });
 
-    console.log('0. Pre-warming /crud-studio in a non-recorded context to eliminate initial blank frame and warm up API schemas...');
+    console.log('0. Pre-warming /rh/funcionarios and /crud-studio in a non-recorded context to populate proxy memory cache (<10ms responses)...');
     const warmContext = await browser.newContext({
       viewport: { width: 1920, height: 1080 },
       screen: { width: 1920, height: 1080 },
       deviceScaleFactor: 1
     });
     const warmPage = await warmContext.newPage();
+    // Fetch /all directly so cachedBaseFuncionariosRows is populated in the local proxy
     await warmPage.goto(`${BASE_URL}/crud-studio`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await warmPage.locator('[data-testid="toggle-customization-btn"]').waitFor({ state: 'visible', timeout: 15000 });
-    await sleep(600);
+    await warmPage.evaluate(async () => {
+      try {
+        await Promise.all([
+          fetch('/api/human-resources/funcionarios/all'),
+          fetch('/api/human-resources/funcionarios/capabilities').catch(() => null),
+          fetch('/api/human-resources/cargos/options/filter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          }).catch(() => null),
+          fetch('/api/human-resources/departamentos/options/filter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          }).catch(() => null),
+          fetch('/schemas/filtered?path=/api/human-resources/funcionarios/all&operation=get&schemaType=response').catch(() => null),
+          fetch('/schemas/filtered?path=/api/human-resources/funcionarios/filter&operation=post&schemaType=request').catch(() => null),
+          fetch('/schemas/filtered?path=/api/human-resources/funcionarios&operation=post&schemaType=request').catch(() => null),
+          fetch('/schemas/filtered?path=/api/human-resources/funcionarios/{id}&operation=put&schemaType=request').catch(() => null),
+          fetch('/schemas/filtered?path=/api/human-resources/funcionarios/{id}&operation=get&schemaType=response').catch(() => null)
+        ]);
+      } catch {
+        // ignore pre-warm errors
+      }
+    });
+    // Also visit /rh/funcionarios briefly to ensure all Angular lazy chunks & table/form bundles are warm
+    await warmPage.goto(`${BASE_URL}/rh/funcionarios`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+    await warmPage.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+    await sleep(400);
     await warmContext.close();
 
     const context = await browser.newContext({
@@ -1093,7 +1280,7 @@ async function main() {
         hud.id = 'praxis-demo-hud';
         hud.innerHTML = `
           <div class="praxis-demo-row">
-            <span class="praxis-demo-badge">ETAPA 1/8 · CRUD DO ZERO</span>
+            <span class="praxis-demo-badge">ETAPA 1/9 · CRUD DO ZERO</span>
             <span class="praxis-demo-title">Estúdio CRUD (/crud-studio)</span>
             <span class="praxis-demo-detail">Autoria 100% Zero-Code & Zero-Deploy · Full HD 1080p @ 30 FPS</span>
             <span class="praxis-demo-timer" id="praxis-demo-timer">⏱ 00:00</span>
@@ -1164,7 +1351,7 @@ async function main() {
 
     const page = await context.newPage();
 
-    console.log('1. Navigating to /crud-studio (blank CRUD page)...');
+    console.log('1. Navigating to /crud-studio (100% blank CRUD page)...');
     await page.goto(`${BASE_URL}/crud-studio`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.locator('[data-testid="toggle-customization-btn"]').waitFor({ state: 'visible', timeout: 15000 });
     await page.evaluate(() => sessionStorage.setItem('__praxis_crud_demo_t0', String(Date.now())));
@@ -1172,9 +1359,9 @@ async function main() {
     await setDemoStage(
       page,
       1,
-      8,
-      'ETAPA 1/8 · CRUD EM BRANCO',
-      'Página CRUD sem Recurso (/crud-studio)',
+      9,
+      'ETAPA 1/9 · PÁGINA 100% EM BRANCO',
+      'Estúdio CRUD (/crud-studio) — Zero Código & Zero Metadados Iniciais',
       'Iniciando do zero absoluto · Ativando modo de customização visual'
     );
 
@@ -1194,8 +1381,10 @@ async function main() {
     await sleep(600);
     await recorder.captureSyncKeyframe();
 
-    // Click "Configurar página" on PraxisResourcePage header (or empty state action)
-    const configPageBtn = page.locator('[data-testid="resource-page-configure-btn"]');
+    // Click "Configurar CRUD" on Empty State card (or resource-page-configure-btn if header exists)
+    const configPageBtn = page
+      .locator('praxis-crud praxis-empty-state-card button, [data-testid="resource-page-configure-btn"]')
+      .first();
     await configPageBtn.waitFor({ state: 'visible', timeout: 10000 });
     await moveCursorToLocator(page, configPageBtn, 120);
     await configPageBtn.click();
@@ -1206,27 +1395,36 @@ async function main() {
     await recorder.captureSyncKeyframe();
 
     // =========================================================================
-    // STAGE 2: Connect Resource & Customize Opening Mode / Header / Actions
+    // STAGE 2: Connect Resource & Customize Page Header / Opening Mode / Actions
     // =========================================================================
-    console.log('2. Connecting to human-resources/funcionarios and customizing Opening Mode & Actions...');
+    console.log('2. Connecting to human-resources/funcionarios and customizing Page Header, Opening Mode & Actions...');
     await setDemoStage(
       page,
       2,
-      8,
-      'ETAPA 2/8 · CONEXÃO & ABERTURA',
-      'Quick Connect + Modo de Abertura (Modal / Gaveta)',
-      'Conectando human-resources/funcionarios e configurando apresentação modal e ações'
+      9,
+      'ETAPA 2/9 · CONEXÃO, CABEÇALHO & AÇÕES',
+      'Quick Connect + Cabeçalho Executivo + Modo Modal & Ações Governadas',
+      'Configurando título/subtítulo/domínio da página, endpoint REST e formulários modais'
     );
 
     await connectResourceInCrudEditor(page, 'human-resources/funcionarios');
     await setFormInput(page, '[data-testid="crud-editor-resource-idField"]', 'id');
-    await sleep(600);
+
+    // Configure Executive Page Header directly inside the Connection tab (I1)
+    await setFormInput(page, '[data-testid="crud-editor-page-title"]', 'Comando de Efetivo Operacional');
+    await setFormInput(
+      page,
+      '[data-testid="crud-editor-page-subtitle"]',
+      'Gestão integrada de agentes, prontidão tática, credenciais S.H.I.E.L.D. e subsídios em tempo real.'
+    );
+    await setFormInput(page, '[data-testid="crud-editor-page-domain-label"]', 'HUMAN RESOURCES • ZERO-CODE STUDIO');
+    await sleep(500);
 
     // Wait briefly for schema columns to resolve in background
     for (let i = 0; i < 30; i++) {
       const tableText = await page.locator('[data-testid="crud-editor-overview-table"]').innerText().catch(() => '');
       if (tableText && !tableText.startsWith('0 ')) break;
-      await sleep(200);
+      await sleep(150);
     }
     await recorder.captureSyncKeyframe();
 
@@ -1257,21 +1455,24 @@ async function main() {
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '02-crud-resource-and-opening.png') });
 
-    // Switch to Tab 2: Actions — bind create, view, and edit to the shared modal form ('studio-funcionarios-form')
+    // Switch to Tab 2: Actions — bind create, view, and edit to the shared modal form ('studio-funcionarios-form') (I4)
     const tabActions = page.locator('[data-testid="crud-editor-tab-actions"]');
     await moveCursorToLocator(page, tabActions, 100);
     await tabActions.click();
     await sleep(450);
     for (const actionKey of ['create', 'view', 'edit']) {
-      const formIdInput = page.locator(`[data-testid="crud-editor-action-${actionKey}-formId"]`);
-      if (!(await formIdInput.isVisible().catch(() => false))) {
-        const header = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel-header"]`);
-        if (await header.isVisible().catch(() => false)) {
+      const panel = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel"]`).first();
+      const header = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel-header"]`).first();
+      if (await panel.isVisible().catch(() => false)) {
+        const isExpanded = await panel.evaluate((el) => el.classList.contains('mat-expanded')).catch(() => false);
+        if (!isExpanded && (await header.isVisible().catch(() => false))) {
           await moveCursorToLocator(page, header, 80);
           await header.click();
-          await sleep(250);
+          await sleep(280);
         }
       }
+      const formIdInput = page.locator(`[data-testid="crud-editor-action-${actionKey}-formId"]`).first();
+      await formIdInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
       if (await formIdInput.isVisible().catch(() => false)) {
         await setFormInput(page, formIdInput, 'studio-funcionarios-form', { pauseMs: 65 });
         await sleep(220);
@@ -1287,8 +1488,8 @@ async function main() {
     await setDemoStage(
       page,
       3,
-      8,
-      'ETAPA 3/8 · FAIXA DE KPIs VIVA',
+      9,
+      'ETAPA 3/9 · FAIXA DE KPIs VIVA',
       'Autoria Visual da Faixa Executiva de KPIs (PraxisKpiBand + /stats/group-by)',
       'Conectando telemetria viva (byKey / totalCount) e filtros interativos ao clicar'
     );
@@ -1404,10 +1605,10 @@ async function main() {
     await setDemoStage(
       page,
       4,
-      8,
-      'ETAPA 4/8 · BARRA DE FILTROS & CHIPS',
+      9,
+      'ETAPA 4/9 · BARRA DE FILTROS & CHIPS',
       'Campos Fixados (Inline Fields) + Atalhos Rápidos (Quick Filters)',
-      'Fixando busca por Nome/Codinome/E-mail e criando chips de filtro rápido'
+      'Fixando busca por Nome/Codinome/E-mail no ScopeBar e criando chips de filtro rápido'
     );
 
     const tabFilters = page.locator('[data-testid="crud-editor-tab-filters"]');
@@ -1477,10 +1678,10 @@ async function main() {
     await setDemoStage(
       page,
       5,
-      8,
-      'ETAPA 5/8 · TABELA & COLUNAS',
-      'Customizando Barra de Ferramentas, Colunas, Formatação e Renderers',
-      'Configurando avatar composto, chips de status, moeda e larguras das colunas'
+      9,
+      'ETAPA 5/9 · TABELA & COLUNAS',
+      'Customizando Barra de Ferramentas, Colunas, Formatação Moeda e Renderers',
+      'Configurando avatar composto, chips de status, Subsídio Mensal (R$) e larguras'
     );
 
     const tabTable = page.locator('[data-testid="crud-editor-tab-table"]');
@@ -1524,6 +1725,16 @@ async function main() {
       if ((await colItem.count()) === 0) return false;
 
       await colItem.evaluate((el) => el.scrollIntoView({ block: 'nearest' })).catch(() => {});
+
+      // Ensure visibility checkbox is explicitly checked (I3 — especially for 'salario')
+      const visCheckboxInput = colItem.locator('mat-checkbox.visibility-checkbox input[type="checkbox"]').first();
+      if ((await visCheckboxInput.count()) > 0 && !(await visCheckboxInput.isChecked().catch(() => true))) {
+        const checkboxTarget = colItem.locator('mat-checkbox.visibility-checkbox').first();
+        await moveCursorToLocator(page, checkboxTarget, 65);
+        await checkboxTarget.click();
+        await sleep(160);
+      }
+
       await moveCursorToLocator(page, colItem, 80);
       await colItem.click();
       await sleep(220);
@@ -1599,7 +1810,7 @@ async function main() {
       composePreset: /Chip de status|Status chip/i
     });
 
-    // Hide noisy raw columns (like raw Foto URL, id, estadoCivil, cpf, telefone) so the executive table fits 100% in 1080p
+    // Hide noisy raw columns so the executive table fits 100% in 1080p
     const columnsToHide = ['fotoPerfilUrl', 'avatarUrl', 'foto', 'id', 'estadoCivil', 'cpf', 'telefone', 'email', 'dataNascimento', 'cargoId', 'departamentoId'];
     for (const hideField of columnsToHide) {
       const colItem = colsEditor
@@ -1625,8 +1836,8 @@ async function main() {
     // Save & close CRUD Metadata Editor
     await saveAndCloseSettingsPanel(page, 'crud-metadata-editor');
 
-    // Wait for the live CRUD page to materialize KPI Band, Filter Bar, and Table rows
-    console.log('   Waiting for live CRUD page to render KPI Band, ScopeBar, and Table rows...');
+    // Wait for the live CRUD page to materialize Executive Header, KPI Band, ScopeBar + Inline Filters, and Table rows
+    console.log('   Waiting for live CRUD page to render Header, KPI Band, ScopeBar, and Table rows...');
     await page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').first().waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
     await page
@@ -1641,24 +1852,23 @@ async function main() {
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '06-crud-page-materialized.png') });
 
     // =========================================================================
-    // STAGE 6: Customize the Dynamic Form Layout Inside the CRUD Modal
+    // STAGE 6: Customize the Dynamic Form Layout Inside the CRUD Modal (All 3 Sections in 2 Columns)
     // =========================================================================
-    console.log('6. Opening CRUD form in Modal and customizing Form Layout (Sections, Columns, Visual Blocks)...');
+    console.log('6. Opening CRUD form in Modal and customizing Form Layout (All 3 Sections in 2 Columns)...');
     await setDemoStage(
       page,
       6,
-      8,
-      'ETAPA 6/8 · CUSTOMIZAÇÃO DO FORMULÁRIO',
+      9,
+      'ETAPA 6/9 · CUSTOMIZAÇÃO DO FORMULÁRIO',
       'Editor Visual de Formulário Dinâmico (PraxisDynamicFormConfigEditor)',
-      'Organizando seções multi-colunas, cabeçalhos executivos e densidade sem código'
+      'Renomeando as 3 seções e aplicando preset de 2 Colunas (6/6) em todas elas'
     );
 
-    // Click the Edit action on the first row (or Toolbar Create button) to open the form modal
+    // Click the Edit action on the first row to open the form modal
     const firstRow = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
     await firstRow.waitFor({ state: 'visible', timeout: 15000 });
     await moveCursorToLocator(page, firstRow, 90);
 
-    // Trigger 'edit' action on the first row via inline row action button (nth(1) = Edit)
     const editRowBtn = firstRow
       .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
       .nth(1);
@@ -1670,10 +1880,10 @@ async function main() {
     const formDialog = page.locator('mat-dialog-container praxis-dynamic-form').first();
     await formDialog.waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
-    await sleep(600);
+    await sleep(500);
     await recorder.captureSyncKeyframe();
 
-    // Click the Customize Form gear button (.config-button) inside the modal form!
+    // Click the Customize Form gear button (.config-button) inside the modal form
     const customizeFormBtn = formDialog
       .locator('button.config-button, button[aria-label*="Configurar formulário"], button.customize-btn')
       .first();
@@ -1683,71 +1893,95 @@ async function main() {
 
     const formConfigEditor = page.locator('praxis-dynamic-form-config-editor');
     await formConfigEditor.waitFor({ state: 'visible', timeout: 10000 });
-    await sleep(500);
+    await sleep(450);
     await recorder.captureSyncKeyframe();
 
     // Switch to the "Layout" tab in PraxisDynamicFormConfigEditor
     const layoutTab = formConfigEditor.locator('.mat-mdc-tab').filter({ hasText: /Layout/i }).first();
     await moveCursorToLocator(page, layoutTab, 100);
     await layoutTab.click();
-    await sleep(500);
+    await sleep(450);
 
     const layoutEditor = formConfigEditor.locator('praxis-layout-editor');
     await layoutEditor.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Rename the first section using the inline section rename button
-    const renameTrigger = layoutEditor.locator('[data-testid="section-rename-trigger"]').first();
-    if (await renameTrigger.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, renameTrigger, 90);
-      await renameTrigger.click();
+    // Collapse the right-side available fields palette if open so all 3 sections have maximum canvas room
+    const collapsePaletteBtn = layoutEditor.locator('button.collapse-toggle[aria-label*="Colapsar"]').first();
+    if (await collapsePaletteBtn.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, collapsePaletteBtn, 70);
+      await collapsePaletteBtn.click();
       await sleep(200);
-      const renameInput = layoutEditor.locator('[data-testid="section-rename-input"]').first();
-      if (await renameInput.isVisible().catch(() => false)) {
-        await renameInput.fill('1. Dossiê Tático & Canais S.H.I.E.L.D.');
-        await renameInput.press('Enter');
-        await sleep(300);
-      }
     }
 
-    // Rename the second section using the inline section rename button
-    const secondRenameTrigger = layoutEditor.locator('[data-testid="section-rename-trigger"]').nth(1);
-    if (await secondRenameTrigger.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, secondRenameTrigger, 90);
-      await secondRenameTrigger.click();
+    // Rename all 3 sections and apply 2-column preset ("Duas Colunas 1/1") to each section (I4)
+    const sectionTitles = [
+      '1. Dossiê Tático & Canais S.H.I.E.L.D.',
+      '2. Identificação Civil & Credenciais Operacionais',
+      '3. Lotação, Patente & Subsídio Tático'
+    ];
+
+    for (let secIdx = 0; secIdx < sectionTitles.length; secIdx++) {
+      const sectionCard = layoutEditor.locator('praxis-section-configurator').nth(secIdx);
+      if ((await sectionCard.count()) === 0) continue;
+
+      await sectionCard.evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'center' })).catch(() => {});
       await sleep(200);
-      const renameInput2 = layoutEditor.locator('[data-testid="section-rename-input"]').first();
-      if (await renameInput2.isVisible().catch(() => false)) {
-        await renameInput2.fill('2. Identificação Civil & Credenciais Operacionais');
-        await renameInput2.press('Enter');
-        await sleep(300);
+
+      // 1) Rename section
+      const renameTrigger = sectionCard.locator('[data-testid="section-rename-trigger"]').first();
+      if (await renameTrigger.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, renameTrigger, 80);
+        await renameTrigger.click();
+        await sleep(180);
+        const renameInput = sectionCard.locator('[data-testid="section-rename-input"]').first();
+        if (await renameInput.isVisible().catch(() => false)) {
+          await renameInput.fill(sectionTitles[secIdx]);
+          await renameInput.press('Enter');
+          await sleep(240);
+        }
       }
-    }
 
-    // Toggle Cozy/Regular density and borders in the layout editor toolbar to demonstrate visual controls
-    const densityRegularBtn = layoutEditor.locator('mat-button-toggle[value="regular"] button').first();
-    if (await densityRegularBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, densityRegularBtn, 80);
-      await densityRegularBtn.click();
-      await sleep(250);
-    }
-
-    // Open the first row's menu and apply a 2-column (6/6) preset
-    const firstRowActions = layoutEditor.locator('[data-testid="layout-row-actions"]').first();
-    if (await firstRowActions.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, firstRowActions, 90);
-      await firstRowActions.click();
-      await sleep(280);
-      const twoColPreset = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /6.*6|1\/2|Duas/i }).first();
-      if (await twoColPreset.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, twoColPreset, 80);
-        await twoColPreset.click();
-        await sleep(300);
+      // 2) Apply 2-column preset to the entire section via section menu -> "Presets de seção…" -> "Duas Colunas 1/1"
+      const directPreset2Col = sectionCard.locator('[data-testid="layout-preset-2col"]').first();
+      if (await directPreset2Col.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, directPreset2Col, 80);
+        await directPreset2Col.click();
+        await sleep(250);
       } else {
-        await page.keyboard.press('Escape');
+        const sectionMenuBtn = sectionCard.locator('button.section-menu-btn').first();
+        if (await sectionMenuBtn.isVisible().catch(() => false)) {
+          await moveCursorToLocator(page, sectionMenuBtn, 75);
+          await sectionMenuBtn.click();
+          await sleep(220);
+          const presetsMenuItem = page
+            .locator('.cdk-overlay-container [role="menuitem"]')
+            .filter({ hasText: /Presets de se/i })
+            .first();
+          if (await presetsMenuItem.isVisible().catch(() => false)) {
+            await moveCursorToLocator(page, presetsMenuItem, 75);
+            await presetsMenuItem.click();
+            await sleep(260);
+            const twoColSectionPreset = page
+              .locator('praxis-section-preset-picker button.preset-btn')
+              .filter({ hasText: /Duas Colunas 1\/1|2 colunas/i })
+              .first();
+            if (await twoColSectionPreset.isVisible().catch(() => false)) {
+              await moveCursorToLocator(page, twoColSectionPreset, 80);
+              await twoColSectionPreset.click();
+              await sleep(280);
+            } else {
+              await page.keyboard.press('Escape');
+            }
+          } else {
+            await page.keyboard.press('Escape');
+          }
+        }
       }
     }
 
-    await sleep(500);
+    // Scroll back to top of layout editor to showcase the 2-column sections
+    await layoutEditor.locator('praxis-section-configurator').first().evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'start' })).catch(() => {});
+    await sleep(450);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '07-crud-form-layout-editor.png') });
 
@@ -1769,7 +2003,7 @@ async function main() {
     } else {
       await page.keyboard.press('Escape');
     }
-    await sleep(600);
+    await sleep(550);
     await dismissStrayBackdrops(page);
 
     // =========================================================================
@@ -1779,8 +2013,8 @@ async function main() {
     await setDemoStage(
       page,
       7,
-      8,
-      'ETAPA 7/8 · OPERAÇÃO EM RUNTIME',
+      9,
+      'ETAPA 7/9 · OPERAÇÃO EM RUNTIME',
       'Filtros via KPI, Quick Chips, Visualização, Criação, Edição e Exclusão',
       'Testando a página pronta em modo operacional (sem modo de edição)'
     );
@@ -1788,7 +2022,7 @@ async function main() {
     // Exit Customization Mode
     await moveCursorToLocator(page, toggleCustomBtn, 110);
     await toggleCustomBtn.click();
-    await sleep(650);
+    await sleep(600);
     await recorder.captureSyncKeyframe();
 
     // 7.1 Click KPI Card #2 ("Prontidão Ativa") to filter table reactively
@@ -1796,7 +2030,7 @@ async function main() {
     if (await kpiCardActive.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, kpiCardActive, 110);
       await kpiCardActive.click();
-      await sleep(850);
+      await sleep(750);
       await recorder.captureSyncKeyframe();
     }
 
@@ -1805,16 +2039,16 @@ async function main() {
     if (await kpiCardTotal.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, kpiCardTotal, 110);
       await kpiCardTotal.click();
-      await sleep(750);
+      await sleep(700);
       await recorder.captureSyncKeyframe();
     }
 
-    // 7.2 Click Quick Filter chips in ScopeBar / Filter Bar
+    // 7.2 Click Quick Filter chips in ScopeBar
     const quickChipReserve = page.locator('praxis-scope-bar button, praxis-crud button, praxis-crud mat-chip-option, .quick-filter-chip').filter({ hasText: /Reserva Tática/i }).first();
     if (await quickChipReserve.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, quickChipReserve, 100);
       await quickChipReserve.click();
-      await sleep(800);
+      await sleep(700);
       await recorder.captureSyncKeyframe();
     }
 
@@ -1822,12 +2056,12 @@ async function main() {
     if (await quickChipAll.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, quickChipAll, 100);
       await quickChipAll.click();
-      await sleep(750);
+      await sleep(700);
       await recorder.captureSyncKeyframe();
     }
 
-    // 7.3 Trigger VIEW action on a row (inline button nth(0) = Visualizar)
-    console.log('   7.3 Demonstrating View (Visualizar) action...');
+    // 7.3 Trigger VIEW action on a row (inline button nth(0) = Visualizar) — now opens with 2-column layout!
+    console.log('   7.3 Demonstrating View (Visualizar) action with 2-column customized layout...');
     const rowForView = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
     await rowForView.waitFor({ state: 'visible', timeout: 10000 });
     const viewRowBtn = rowForView
@@ -1843,11 +2077,11 @@ async function main() {
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '09-crud-runtime-view.png') });
 
     await page.keyboard.press('Escape');
-    await sleep(550);
+    await sleep(500);
     await dismissStrayBackdrops(page);
 
-    // 7.4 Trigger CREATE action from the table toolbar ("Novo" / "Criar")
-    console.log('   7.4 Demonstrating Create (Novo Registro) action with customized form layout...');
+    // 7.4 Trigger CREATE action from the table toolbar ("Novo" / "Criar") — now opens with 2-column layout!
+    console.log('   7.4 Demonstrating Create (Novo Registro) action with customized 2-column form layout...');
     const createToolbarBtn = page
       .locator('praxis-crud praxis-table-toolbar button:not([disabled])')
       .filter({ hasText: /Novo|Adicionar|Criar|New|Add/i })
@@ -1856,7 +2090,7 @@ async function main() {
       await moveCursorToLocator(page, createToolbarBtn, 110);
       await createToolbarBtn.click();
       await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
-      await sleep(550);
+      await sleep(500);
 
       // Fill a couple of fields in the customized Create form to demonstrate interactive layout
       const firstInput = page.locator('mat-dialog-container praxis-dynamic-form input:not([disabled])').first();
@@ -1871,7 +2105,7 @@ async function main() {
       if (await thirdInput.isVisible().catch(() => false)) {
         await setFormInput(page, thirdInput, 'Carol Danvers (Capitã Marvel)');
       }
-      await sleep(700);
+      await sleep(650);
       await recorder.captureSyncKeyframe();
 
       // Close create dialog (confirming dirty guard if prompted!)
@@ -1882,7 +2116,7 @@ async function main() {
         await moveCursorToLocator(page, dirtyConfirmBtn, 80);
         await dirtyConfirmBtn.click();
       }
-      await sleep(500);
+      await sleep(450);
       await dismissStrayBackdrops(page);
     }
 
@@ -1914,7 +2148,7 @@ async function main() {
     await moreBtn.waitFor({ state: 'visible', timeout: 10000 });
     await moveCursorToLocator(page, moreBtn, 95);
     await moreBtn.click();
-    await sleep(300);
+    await sleep(280);
     const delItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Excluir|Delete|Remover/i }).first();
     await delItem.waitFor({ state: 'visible', timeout: 10000 });
     await moveCursorToLocator(page, delItem, 85);
@@ -1943,10 +2177,10 @@ async function main() {
     await setDemoStage(
       page,
       8,
-      8,
-      'ETAPA 8/8 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
+      9,
+      'ETAPA 8/9 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
       'Recarregando a Página (/crud-studio) — 100% Persistido sem Deploy',
-      'Conexão, KPI Band, Filtros Rápidos, Colunas Customizadas e Layout do Formulário preservados'
+      'Cabeçalho Executivo, KPI Band, ScopeBar, Colunas e Layout do Formulário preservados'
     );
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -1956,31 +2190,296 @@ async function main() {
     await setDemoStage(
       page,
       8,
-      8,
-      'ETAPA 8/8 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
+      9,
+      'ETAPA 8/9 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
       'Página CRUD 100% Hidratada após F5 · Zero Código · Zero Deploy',
-      'Abrindo o formulário pós-F5 para comprovar a persistência do layout multi-colunas'
+      'Cabeçalho executivo, filtros inline no ScopeBar, coluna Subsídio Mensal (R$) e KPIs ativos'
     );
-    await sleep(800);
-    await recorder.captureSyncKeyframe();
-
-    // Open Edit on row 1 after reload to prove the customized form layout also persisted!
-    const postReloadRow = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
-    const postReloadEditBtn = postReloadRow
-      .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
-      .nth(1);
-    await postReloadEditBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, postReloadEditBtn, 100);
-    await postReloadEditBtn.click();
-
-    await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
-    await sleep(850);
+    await sleep(900);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '12-crud-after-reload-persisted.png') });
 
-    await page.keyboard.press('Escape');
-    await sleep(700);
+    // =========================================================================
+    // STAGE 9: Final Guided Executive Tour (~25s — 4 Acts with Visual Spotlight)
+    // =========================================================================
+    console.log('9. Running Final Executive Tour (~25s) showcasing all constructed deliverables...');
+
+    const setTourSpotlight = async (selector, badgeText, titleText, subtitleText) => {
+      await page.evaluate(({ sel, badge, title, sub }) => {
+        let styleEl = document.getElementById('praxis-tour-spotlight-style');
+        if (!styleEl) {
+          styleEl = document.createElement('style');
+          styleEl.id = 'praxis-tour-spotlight-style';
+          styleEl.textContent = `
+            .praxis-tour-highlight {
+              outline: 2.5px solid #38bdf8 !important;
+              outline-offset: 4px !important;
+              box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.18), 0 12px 32px rgba(2, 132, 199, 0.35) !important;
+              border-radius: 12px !important;
+              transition: outline 0.25s ease, box-shadow 0.25s ease !important;
+            }
+            #praxis-tour-callout {
+              position: fixed;
+              top: 18px;
+              right: 28px;
+              z-index: 2147483644;
+              max-width: 460px;
+              padding: 12px 18px;
+              border-radius: 14px;
+              background: linear-gradient(135deg, rgba(8, 15, 30, 0.96), rgba(15, 23, 42, 0.96));
+              border: 1.5px solid rgba(56, 189, 248, 0.65);
+              box-shadow: 0 18px 42px rgba(0, 0, 0, 0.75), 0 0 24px rgba(56, 189, 248, 0.28);
+              color: #f8fafc;
+              font-family: Inter, system-ui, sans-serif;
+              pointer-events: none;
+            }
+            #praxis-tour-callout .tour-badge {
+              display: inline-block;
+              font-size: 10.5px;
+              font-weight: 800;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              color: #082f49;
+              background: linear-gradient(135deg, #38bdf8, #22d3ee);
+              padding: 3px 9px;
+              border-radius: 999px;
+              margin-bottom: 6px;
+            }
+            #praxis-tour-callout .tour-title {
+              font-size: 15px;
+              font-weight: 800;
+              color: #f8fafc;
+              margin-bottom: 4px;
+            }
+            #praxis-tour-callout .tour-sub {
+              font-size: 12.5px;
+              line-height: 1.45;
+              color: #cbd5e1;
+            }
+          `;
+          document.head.appendChild(styleEl);
+        }
+        document.querySelectorAll('.praxis-tour-highlight').forEach((el) => el.classList.remove('praxis-tour-highlight'));
+        if (sel) {
+          const target = document.querySelector(sel);
+          if (target) {
+            target.classList.add('praxis-tour-highlight');
+            target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+        let callout = document.getElementById('praxis-tour-callout');
+        if (!badge && !title) {
+          if (callout) callout.remove();
+          return;
+        }
+        if (!callout) {
+          callout = document.createElement('div');
+          callout.id = 'praxis-tour-callout';
+          document.body.appendChild(callout);
+        }
+        callout.innerHTML = `
+          <div class="tour-badge">${badge}</div>
+          <div class="tour-title">${title}</div>
+          <div class="tour-sub">${sub}</div>
+        `;
+      }, { sel: selector, badge: badgeText, title: titleText, sub: subtitleText });
+    };
+
+    // ATO I — Cabeçalho Executivo + Faixa de KPIs Semânticos + ScopeBar com Quick Filter Chips e Filtros Inline (~6.5s)
+    await setDemoStage(
+      page,
+      9,
+      9,
+      'ETAPA 9/9 · TOUR EXECUTIVO (ATO I/IV)',
+      'Cabeçalho Executivo + KPI Band Semântica + ScopeBar com Filtros Inline',
+      'Identidade de domínio, telemetria /stats/group-by ao vivo e busca inline (Nome, Codinome, E-mail)'
+    );
+    await setTourSpotlight(
+      '.praxis-resource-page__header',
+      'ATO I · CABEÇALHO & TELEMETRIA VIVA',
+      'Comando de Efetivo Operacional',
+      'Cabeçalho executivo criado via Studio + 4 cards de KPI conectados ao endpoint /stats/group-by.'
+    );
+    const headerLoc = page.locator('.praxis-resource-page__header').first();
+    if (await headerLoc.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, headerLoc, 100);
+    }
+    await sleep(2000);
     await recorder.captureSyncKeyframe();
+
+    await setTourSpotlight(
+      'praxis-kpi-band',
+      'ATO I · FAIXA DE KPIs INTERATIVA',
+      'Telemetria em Tempo Real (81,6% Prontidão)',
+      'Expressões declarativas avaliadas com SafeExpressionEvaluator + filtro reativo ao clicar.'
+    );
+    const kpiRateCard = page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').nth(3);
+    if (await kpiRateCard.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, kpiRateCard, 100);
+    }
+    await sleep(2200);
+    await recorder.captureSyncKeyframe();
+
+    await setTourSpotlight(
+      'praxis-scope-bar',
+      'ATO I · SCOPEBAR & FILTROS INLINE',
+      'Quick Filter Chips + Campos Fixados',
+      'Atalhos rápidos (Todos, Ativos, Reserva) e filtros inline (Nome Completo, Codinome, E-mail) + Filtros Avançados.'
+    );
+    const scopeBarLoc = page.locator('praxis-scope-bar').first();
+    if (await scopeBarLoc.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, scopeBarLoc, 100);
+    }
+    await sleep(2300);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '13-tour-act1-header-kpis-scopebar.png') });
+
+    // ATO II — Grade Corporativa com Colunas Compostas & Moeda R$ (~6s)
+    await setDemoStage(
+      page,
+      9,
+      9,
+      'ETAPA 9/9 · TOUR EXECUTIVO (ATO II/IV)',
+      'Grade Corporativa com Colunas Compostas, Chips Semânticos e Moeda (R$)',
+      'Herói com Avatar, Codinome Tático, Patente, Divisão, Subsídio Mensal (R$ 41.000,00) e Prontidão'
+    );
+    await setTourSpotlight(
+      'praxis-crud praxis-table',
+      'ATO II · GRADE CORPORATIVA GOVERNADA',
+      'Colunas Compostas & Formatação Moeda (BRL)',
+      'Renderizador Pessoa com Avatar, Subsídio Mensal alinhado à direita (R$ 41.000,00) e Chip de Prontidão.'
+    );
+    const firstTableRow = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
+    if (await firstTableRow.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, firstTableRow, 100);
+    }
+    await sleep(3000);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '14-tour-act2-corporate-table.png') });
+    await sleep(2500);
+
+    // ATO III — Dossiê Modal em 2 Colunas (Visualização e Edição com contrato OpenAPI) (~6.5s)
+    await setDemoStage(
+      page,
+      9,
+      9,
+      'ETAPA 9/9 · TOUR EXECUTIVO (ATO III/IV)',
+      'Dossiê Modal em 2 Colunas — 3 Seções Executivas Governadas por OpenAPI',
+      'Layout em 2 colunas (6/6) persistido nas 3 seções para Criação, Visualização e Edição'
+    );
+    await setTourSpotlight(null, '', '', '');
+
+    const tourEditBtn = firstTableRow
+      .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
+      .nth(1);
+    if (await tourEditBtn.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, tourEditBtn, 95);
+      await tourEditBtn.click();
+      await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
+      await setTourSpotlight(
+        'mat-dialog-container',
+        'ATO III · DOSSIÊ MODAL EM 2 COLUNAS',
+        '3 Seções Executivas · Layout 2 Colunas (6/6)',
+        '1. Dossiê Tático & Canais S.H.I.E.L.D. · 2. Identificação Civil · 3. Lotação, Patente & Subsídio.'
+      );
+      await sleep(3200);
+      await recorder.captureSyncKeyframe();
+      await page.screenshot({ path: path.join(ARTIFACT_DIR, '15-tour-act3-modal-dossier-2col.png') });
+
+      // Scroll inside form dialog to show sections 2 and 3 in 2 columns
+      await page.evaluate(() => {
+        const sections = document.querySelectorAll('mat-dialog-container praxis-dynamic-form .praxis-form-section, mat-dialog-container praxis-dynamic-form section');
+        if (sections.length > 1) {
+          sections[sections.length - 1].scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      });
+      await sleep(2500);
+      await recorder.captureSyncKeyframe();
+
+      await page.keyboard.press('Escape');
+      await sleep(500);
+      await dismissStrayBackdrops(page);
+    }
+
+    // ATO IV — Quadro-Resumo Final Zero-Code / Zero-Deploy (~6s)
+    await setDemoStage(
+      page,
+      9,
+      9,
+      'ETAPA 9/9 · RESUMO EXECUTIVO (ATO IV/IV)',
+      'Praxis Platform — Entregáveis 100% Zero-Code & Zero-Deploy Concluídos',
+      'Da página 100% em branco ao CRUD executivo completo com persistência imediata'
+    );
+    await setTourSpotlight(null, '', '', '');
+
+    await page.evaluate(() => {
+      const overlay = document.createElement('div');
+      overlay.id = 'praxis-final-summary-card';
+      overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        z-index: 2147483640;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(6, 11, 24, 0.76);
+        font-family: Inter, system-ui, sans-serif;
+        animation: fadeInSummary 0.35s ease-out forwards;
+      `;
+      overlay.innerHTML = `
+        <div style="
+          width: 920px;
+          padding: 36px 42px;
+          border-radius: 20px;
+          background: linear-gradient(145deg, rgba(10, 18, 36, 0.98), rgba(15, 23, 42, 0.98));
+          border: 1.5px solid rgba(56, 189, 248, 0.65);
+          box-shadow: 0 28px 72px rgba(0, 0, 0, 0.85), 0 0 40px rgba(56, 189, 248, 0.25);
+          color: #f8fafc;
+        ">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px;">
+            <span style="
+              background: linear-gradient(135deg, #0284c7, #38bdf8);
+              color: #082f49;
+              font-weight: 800;
+              font-size: 11.5px;
+              letter-spacing: 0.08em;
+              padding: 5px 12px;
+              border-radius: 999px;
+              text-transform: uppercase;
+            ">PRAXIS METADATA-DRIVEN PLATFORM · ZERO-CODE STUDIO</span>
+            <span style="color: #10b981; font-weight: 700; font-size: 13px;">● 100% PERSISTIDO SEM DEPLOY</span>
+          </div>
+          <h2 style="margin: 0 0 8px; font-size: 26px; font-weight: 800; color: #f8fafc;">
+            Comando de Efetivo Operacional — Construído do Zero em Tempo Real
+          </h2>
+          <p style="margin: 0 0 24px; font-size: 14.5px; color: #94a3b8;">
+            Toda a superfície operacional foi configurada ao vivo a partir de uma rota 100% em branco, governada pelos contratos OpenAPI + x-ui do backend Praxis.
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+            <div style="padding: 14px 16px; border-radius: 12px; background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.28);">
+              <div style="font-weight: 700; font-size: 13.5px; color: #38bdf8; margin-bottom: 4px;">✓ Cabeçalho Executivo & Conexão</div>
+              <div style="font-size: 12.5px; color: #cbd5e1;">Título, Subtítulo, Badge de Domínio e Quick Connect RESTful configurados sem código.</div>
+            </div>
+            <div style="padding: 14px 16px; border-radius: 12px; background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(16, 185, 129, 0.32);">
+              <div style="font-weight: 700; font-size: 13.5px; color: #34d399; margin-bottom: 4px;">✓ KPI Band & Telemetria Viva</div>
+              <div style="font-size: 12.5px; color: #cbd5e1;">4 indicadores semânticos alimentados por /stats/group-by com cálculo de prontidão (81,6%) e clique para filtrar.</div>
+            </div>
+            <div style="padding: 14px 16px; border-radius: 12px; background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.28);">
+              <div style="font-weight: 700; font-size: 13.5px; color: #38bdf8; margin-bottom: 4px;">✓ ScopeBar, Quick Chips & Grade R$</div>
+              <div style="font-size: 12.5px; color: #cbd5e1;">Filtros inline (Nome, Codinome, E-mail), Avatar Composto, Chip de Status e Subsídio Mensal em Moeda (R$).</div>
+            </div>
+            <div style="padding: 14px 16px; border-radius: 12px; background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(16, 185, 129, 0.32);">
+              <div style="font-weight: 700; font-size: 13.5px; color: #34d399; margin-bottom: 4px;">✓ Dossiê Modal em 2 Colunas</div>
+              <div style="font-size: 12.5px; color: #cbd5e1;">3 seções renomeadas e distribuídas em 2 colunas (6/6) compartilhadas entre Criar, Visualizar e Editar.</div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    });
+    await sleep(5500);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '16-tour-act4-executive-summary.png') });
 
     await recorder.stop();
     await browser.close();

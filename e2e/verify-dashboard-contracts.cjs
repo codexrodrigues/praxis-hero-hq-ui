@@ -244,6 +244,36 @@ assert(
   'pageDef.deviceLayouts.mobile.canvas empilha todos os 13 widgets em 1 coluna com constraints minColSpan=1 / maxColSpan=1',
 );
 
+// 1.7 Recent Incidents Table Executive Row Expansion Dossier & Localization
+const recentIncidentsWidget = widgetsByKey.get('recentIncidents');
+const recentIncidentsCfg = recentIncidentsWidget?.definition?.inputs?.config || {};
+const recentIncidentsDetail = recentIncidentsCfg?.behavior?.detail || {};
+const recentIncidentsItems = recentIncidentsDetail?.source?.inlineSchema?.items || [];
+const recentIncidentsAllowed = new Set(recentIncidentsDetail?.schemaContract?.allowedNodes || []);
+const recentIncidentsGrid = recentIncidentsItems.find((item) => item?.type === 'cardGrid');
+const recentIncidentsCallout = recentIncidentsItems.find((item) => item?.type === 'richContent');
+const recentIncidentsCols = recentIncidentsCfg?.columns || [];
+const ocorridoEmCol = recentIncidentsCols.find((c) => c?.field === 'ocorridoEm');
+const danosCivisCol = recentIncidentsCols.find((c) => c?.field === 'danosCivis');
+assert(
+  recentIncidentsAllowed.has('cardGrid') &&
+    recentIncidentsAllowed.has('compose') &&
+    recentIncidentsAllowed.has('metric') &&
+    recentIncidentsAllowed.has('richContent') &&
+    recentIncidentsGrid?.columns === 3 &&
+    Array.isArray(recentIncidentsGrid?.cards) &&
+    recentIncidentsGrid.cards.length === 3 &&
+    recentIncidentsGrid.cards.every((card) => card?.content?.[0]?.type === 'metric') &&
+    recentIncidentsCallout?.document?.nodes?.[0]?.type === 'callout' &&
+    String(recentIncidentsCallout?.document?.nodes?.[0]?.messageExpr || '').includes('${row.descricao}') &&
+    recentIncidentsCfg?.localization?.currency?.code === 'BRL' &&
+    ocorridoEmCol?.type === 'date' &&
+    ocorridoEmCol?.format === 'dd/MM/yyyy HH:mm' &&
+    danosCivisCol?.type === 'currency',
+  'recentIncidents configura expansão em Dossiê Tático estruturado (cardGrid de 3 cards flat com métricas/badges + callout forense + localização BRL/pt-BR)',
+);
+
+
 // ---------------------------------------------------------------------------
 // 2. HeroTacticalRadarComponent Invariants
 // ---------------------------------------------------------------------------

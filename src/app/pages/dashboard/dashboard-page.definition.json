@@ -2089,12 +2089,15 @@
                 {
                   "field": "ocorridoEm",
                   "header": "Data / Hora",
-                  "width": "140px",
+                  "type": "date",
+                  "format": "dd/MM/yyyy HH:mm",
+                  "width": "155px",
                   "sortable": true
                 },
                 {
                   "field": "danosCivis",
                   "header": "Danos Civis (R$)",
+                  "type": "currency",
                   "width": "150px",
                   "align": "right",
                   "sortable": true
@@ -2120,6 +2123,16 @@
               },
               "appearance": {
                 "density": "compact"
+              },
+              "localization": {
+                "locale": "pt-BR",
+                "currency": {
+                  "code": "BRL",
+                  "symbol": "R$",
+                  "position": "before",
+                  "spacing": true,
+                  "precision": 0
+                }
               },
               "behavior": {
                 "expansion": {
@@ -2154,6 +2167,10 @@
                       "text",
                       "icon",
                       "badge",
+                      "compose",
+                      "metric",
+                      "progress",
+                      "richContent",
                       "timeline",
                       "list",
                       "tabs",
@@ -2175,51 +2192,163 @@
                       "layout": "stack",
                       "items": [
                         {
-                          "type": "card",
-                          "title": "Relatório Tático de Campo & Análise Forense",
+                          "type": "cardGrid",
+                          "title": "DOSSIÊ TÁTICO DE CAMPO & ANÁLISE FORENSE",
                           "subtitle": "Protocolo de resposta rápida sob governança do Centro de Comando Tático",
-                          "content": [
+                          "columns": 3,
+                          "minCardWidth": 250,
+                          "cards": [
                             {
-                              "type": "stack",
-                              "items": [
+                              "title": "Contexto & Teatro Operacional",
+                              "subtitle": "Geolocalização e vínculo de missão",
+                              "variant": "outlined",
+                              "tone": "primary",
+                              "size": "sm",
+                              "density": "compact",
+                              "content": [
                                 {
-                                  "type": "value",
+                                  "type": "metric",
                                   "label": "Teatro Operacional",
-                                  "valueField": "local"
+                                  "valueExpr": "${row.local | default:Setor em varredura}",
+                                  "captionExpr": "Ocorrência #${row.id} · Missão #${row.missaoId | default:N/A}",
+                                  "icon": "location_on",
+                                  "tone": "primary"
                                 },
                                 {
-                                  "type": "value",
-                                  "label": "Severidade Tática",
-                                  "valueField": "severidade"
+                                  "type": "compose",
+                                  "direction": "row",
+                                  "gap": "xs",
+                                  "items": [
+                                    {
+                                      "type": "badge",
+                                      "labelExpr": "SEVERIDADE ${row.severidade}",
+                                      "icon": "gpp_bad",
+                                      "tone": "danger",
+                                      "visibleWhen": {
+                                        "in": [
+                                          { "var": "row.severidade" },
+                                          ["CRITICA", "CRÍTICA"]
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "type": "badge",
+                                      "labelExpr": "SEVERIDADE ${row.severidade}",
+                                      "icon": "warning",
+                                      "tone": "warning",
+                                      "visibleWhen": {
+                                        "===": [
+                                          { "var": "row.severidade" },
+                                          "ALTA"
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "type": "badge",
+                                      "labelExpr": "SEVERIDADE ${row.severidade}",
+                                      "icon": "shield",
+                                      "tone": "info",
+                                      "visibleWhen": {
+                                        "in": [
+                                          { "var": "row.severidade" },
+                                          ["MEDIA", "MÉDIA", "BAIXA"]
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "type": "badge",
+                                      "labelExpr": "MISSÃO #${row.missaoId | default:N/A}",
+                                      "icon": "radar",
+                                      "tone": "neutral"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "title": "Impacto Humano & Contenção",
+                              "subtitle": "Triagem médica e cordão de isolamento",
+                              "variant": "outlined",
+                              "tone": "warning",
+                              "size": "sm",
+                              "density": "compact",
+                              "content": [
+                                {
+                                  "type": "metric",
+                                  "label": "Vítimas & Feridos em Atendimento",
+                                  "valueExpr": "${row.feridos | default:0 | number} feridos",
+                                  "captionExpr": "${row.mortos | default:0 | number} baixas fatais confirmadas",
+                                  "icon": "medical_services",
+                                  "tone": "warning"
                                 },
                                 {
-                                  "type": "value",
-                                  "label": "Danos Civis Estimados (R$)",
-                                  "valueField": "danosCivis"
+                                  "type": "compose",
+                                  "direction": "row",
+                                  "gap": "xs",
+                                  "items": [
+                                    {
+                                      "type": "badge",
+                                      "label": "ALERTA DE BAIXAS",
+                                      "icon": "emergency",
+                                      "tone": "danger",
+                                      "visibleWhen": {
+                                        ">": [{ "var": "row.mortos" }, 0]
+                                      }
+                                    },
+                                    {
+                                      "type": "badge",
+                                      "label": "ZERO BAIXAS FATAIS",
+                                      "icon": "verified_user",
+                                      "tone": "success",
+                                      "visibleWhen": {
+                                        "===": [{ "var": "row.mortos" }, 0]
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "title": "Auditoria & Impacto Patrimonial",
+                              "subtitle": "Estimativa pericial e registro cronológico",
+                              "variant": "outlined",
+                              "tone": "info",
+                              "size": "sm",
+                              "density": "compact",
+                              "content": [
+                                {
+                                  "type": "metric",
+                                  "label": "Danos Civis Estimados",
+                                  "valueExpr": "${row.danosCivis | default:0 | currency}",
+                                  "captionExpr": "Registro: ${row.ocorridoEm | dateTime}",
+                                  "icon": "account_balance_wallet",
+                                  "tone": "info"
                                 },
                                 {
-                                  "type": "value",
-                                  "label": "Vítimas & Feridos",
-                                  "valueField": "feridos"
-                                },
-                                {
-                                  "type": "value",
-                                  "label": "Baixas Fatais",
-                                  "valueField": "mortos"
-                                },
-                                {
-                                  "type": "value",
-                                  "label": "Missão de Origem (ID)",
-                                  "valueField": "missaoId"
-                                },
-                                {
-                                  "type": "value",
-                                  "label": "Diretiva de Operação",
-                                  "value": "Perímetro isolado com sucesso pela força tática. Esquadrões de perícia coordenando blindagem quântica e monitoramento contínuo."
+                                  "type": "badge",
+                                  "label": "PERÍMETRO ISOLADO · AUDITORIA ATIVA",
+                                  "icon": "policy",
+                                  "tone": "primary"
                                 }
                               ]
                             }
                           ]
+                        },
+                        {
+                          "type": "richContent",
+                          "document": {
+                            "kind": "praxis.rich-content",
+                            "version": "1.0.0",
+                            "nodes": [
+                              {
+                                "type": "callout",
+                                "tone": "info",
+                                "icon": "security",
+                                "title": "Síntese Forense & Diretiva de Contenção",
+                                "messageExpr": "${row.descricao} — Perímetro isolado pela força tática no setor ${row.local} (Missão #${row.missaoId | default:N/A}). Esquadrões de perícia coordenando blindagem e monitoramento contínuo."
+                              }
+                            ]
+                          }
                         }
                       ]
                     }
