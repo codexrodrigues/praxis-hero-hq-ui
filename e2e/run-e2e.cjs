@@ -743,6 +743,81 @@ async function runE2E() {
     await page.waitForTimeout(1000);
 
     assert((await page.locator('praxis-bulk-operation-dialog').count()) === 0, 'Diálogo fechado e tabela pronta para novo ciclo');
+
+    // -------------------------------------------------------------
+    // Test 6: Row Overflow Menu Geometry, Single-Line Typography & Governed Tooltip (/suprimentos/contratos)
+    // -------------------------------------------------------------
+    console.log('\n[Test 6] Validando Geometria, Deduplicação CRUD e Governança do Menu de Overflow em /suprimentos/contratos...');
+    await page.goto(`${BASE_URL}/suprimentos/contratos`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.locator('praxis-table tbody tr, praxis-table mat-row').first().waitFor({ state: 'visible', timeout: 20000 });
+    await page.waitForTimeout(800);
+
+    const firstContractRow = page.locator('praxis-table tbody tr, praxis-table mat-row').first();
+    const moreTrigger = firstContractRow
+      .locator('button[aria-haspopup="menu"], button:has(mat-icon:text-is("more_vert"))')
+      .first();
+    assert((await moreTrigger.count()) > 0, 'Gatilho de overflow (Mais ações) presente na primeira linha de contratos');
+
+    await moreTrigger.click();
+    const menuPanel = page.locator('.mat-mdc-menu-panel.praxis-table-row-menu').first();
+    await menuPanel.waitFor({ state: 'visible', timeout: 5000 });
+    await page.waitForTimeout(80);
+    const boxInitial = await menuPanel.boundingBox();
+
+    // Aguardar estabilização após discovery remoto de capabilities por linha
+    await page.waitForTimeout(1200);
+    const boxSettled = await menuPanel.boundingBox();
+
+    assert(
+      Boolean(boxInitial && boxSettled && boxSettled.width >= 180 && Math.abs(boxInitial.width - boxSettled.width) <= 2 && Math.abs(boxInitial.x - boxSettled.x) <= 2),
+      `Geometria horizontal do menu de overflow estável entre abertura (${Math.round(boxInitial?.width || 0)}px) e pós-discovery (${Math.round(boxSettled?.width || 0)}px)`,
+    );
+
+    const menuDiagnostics = await menuPanel.evaluate((panel) => {
+      const buttons = Array.from(panel.querySelectorAll('button[mat-menu-item]'));
+      return buttons.map((btn) => {
+        const rect = btn.getBoundingClientRect();
+        const richRoot = btn.querySelector('.prx-rich-content-root');
+        const richStyle = richRoot ? window.getComputedStyle(richRoot) : null;
+        const btnStyle = window.getComputedStyle(btn);
+        const labelEl = btn.querySelector('.praxis-action-label, .prx-rich-content-root') || btn;
+        return {
+          text: (labelEl.textContent || '').replace(/\s+/g, ' ').trim(),
+          disabled: btn.hasAttribute('disabled') || btn.getAttribute('aria-disabled') === 'true',
+          pointerEvents: btnStyle.pointerEvents,
+          buttonHeight: Math.round(rect.height),
+          whiteSpace: richStyle ? richStyle.whiteSpace : null,
+        };
+      });
+    });
+
+    assert(
+      menuDiagnostics.length >= 4 && !menuDiagnostics.some((item) => /abrir item/i.test(item.text)),
+      'Menu de overflow lista superfícies e comandos descobertos sem duplicar "Abrir item" com "Ver"',
+    );
+    assert(
+      menuDiagnostics[0]?.text === 'Excluir',
+      `Ação CRUD canônica "Excluir" posicionada no topo do menu de overflow (encontrado: "${menuDiagnostics[0]?.text || ''}")`,
+    );
+    assert(
+      menuDiagnostics.every((item) => item.whiteSpace === 'nowrap' && item.buttonHeight <= 52),
+      'Todos os itens do menu de overflow permanecem em linha única (white-space: nowrap, sem quebra de palavra)',
+    );
+
+    const deleteMenuItem = menuPanel.locator('button[mat-menu-item]:has-text("Excluir")').first();
+    assert(
+      menuDiagnostics[0]?.disabled === true && menuDiagnostics[0]?.pointerEvents === 'auto',
+      'Item governado desabilitado ("Excluir") preserva pointer-events: auto no portal CDK para exibir tooltip explicativo',
+    );
+    await deleteMenuItem.hover();
+    await page.waitForTimeout(500);
+    const tooltipText = (await page.locator('.mdc-tooltip, mat-tooltip-component').allInnerTexts()).join(' ').trim();
+    assert(
+      /sessão autorizada/i.test(tooltipText),
+      `Hover no item desabilitado exibe motivo governado no tooltip ("${tooltipText}")`,
+    );
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
   } catch (err) {
     console.error(`[E2E] Erro inesperado na execução:`, err);
     failures++;
