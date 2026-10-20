@@ -198,5 +198,113 @@ describe('HeroTacticalRadarComponent', () => {
     component.onPaletteCycleClick(clickEvent);
     expect(component.activePaletteKey()).toBe('theme');
   });
+
+  it('reconciles persisted executive dashboard widgets to the canonical evolved definitions', () => {
+    const staleSnapshot = {
+      widgets: [
+        {
+          key: 'kpiFolha',
+          definition: {
+            id: 'praxis-rich-content',
+            inputs: {
+              document: {
+                kind: 'praxis.rich-content',
+                version: '1.0.0',
+                nodes: [{ type: 'card', className: 'glass-panel bento-kpi-card' }],
+              },
+            },
+          },
+        },
+        {
+          key: 'incidentsSeverityDonut',
+          definition: {
+            id: 'praxis-chart',
+            inputs: { config: { sizing: { mode: 'fixed', height: 280 } } },
+          },
+        },
+        {
+          key: 'distressSignalsList',
+          definition: {
+            id: 'praxis-list',
+            inputs: {
+              config: {
+                selection: { showControl: false },
+                layout: { virtualScroll: { viewportHeight: '380px' } },
+                expansion: { sections: [{ id: 'tactical-telemetry', itemsExpr: '[]' }] },
+              },
+            },
+          },
+        },
+        {
+          key: 'recentIncidents',
+          definition: {
+            id: 'praxis-table',
+            inputs: {
+              config: {
+                columns: [{ field: 'severidade' }, { field: 'mortos' }],
+                toolbar: { visible: true, title: 'Incidentes em Campo' },
+              },
+            },
+          },
+        },
+        {
+          key: 'missionsTimeline',
+          definition: {
+            id: 'praxis-rich-content',
+            inputs: {
+              document: {
+                kind: 'praxis.rich-content',
+                version: '1.0.0',
+                nodes: [{ type: 'timeline', markerVariant: 'dot', items: [] }],
+              },
+            },
+          },
+        },
+        {
+          key: 'domainHub',
+          definition: {
+            id: 'praxis-rich-content',
+            inputs: {
+              document: {
+                kind: 'praxis.rich-content',
+                version: '1.0.0',
+                nodes: [{ type: 'compose', items: [{ className: 'glass-panel hub-card-action tone-operations' }] }],
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    const reconciled = reconcilePersistedDashboardPage(staleSnapshot);
+    const byKey = new Map(reconciled.widgets.map((w: any) => [w.key, w]));
+
+    const kpiFolhaNode = (byKey.get('kpiFolha')?.definition as any)?.inputs?.document?.nodes?.[0];
+    expect(kpiFolhaNode?.className).toContain('kpi-tone-rh');
+    expect(kpiFolhaNode?.header?.[0]?.items?.[1]?.label).toBe('${kpis.folhaPercent}% Líquido');
+
+    const donutCfg = (byKey.get('incidentsSeverityDonut')?.definition as any)?.inputs?.config;
+    expect(donutCfg?.sizing?.height).toBe(340);
+
+    const distressCfg = (byKey.get('distressSignalsList')?.definition as any)?.inputs?.config;
+    expect(distressCfg?.layout?.virtualScroll?.viewportHeight).toBe('340px');
+    expect(distressCfg?.expansion?.sections?.[0]?.itemsExpr).toContain('#${item.id}');
+    expect(distressCfg?.expansion?.sections?.[0]?.itemsExpr).toContain('${item.origem}');
+
+    const tableCfg = (byKey.get('recentIncidents')?.definition as any)?.inputs?.config;
+    expect(tableCfg?.toolbar?.appearance?.variant).toBe('integrated');
+    expect(tableCfg?.toolbar?.filters?.quickFilters?.length).toBe(4);
+    const sevCol = tableCfg?.columns?.find((c: any) => c.field === 'severidade');
+    expect(sevCol?.conditionalRenderers?.length).toBe(4);
+    const mortosCol = tableCfg?.columns?.find((c: any) => c.field === 'mortos');
+    expect(mortosCol?.conditionalRenderers?.length).toBe(2);
+
+    const timelineNode = (byKey.get('missionsTimeline')?.definition as any)?.inputs?.document?.nodes?.[0];
+    expect(timelineNode?.markerVariant).toBe('icon');
+    expect(timelineNode?.items?.[0]?.icon).toBe('radar');
+
+    const domainHubItems = (byKey.get('domainHub')?.definition as any)?.inputs?.document?.nodes?.[0]?.items;
+    expect(domainHubItems?.[5]?.className).toContain('tone-cobalt');
+  });
 });
 

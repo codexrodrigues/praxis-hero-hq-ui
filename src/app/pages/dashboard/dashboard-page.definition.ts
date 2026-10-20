@@ -59,10 +59,22 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       const canonical = canonicalByKey.get(widget.key);
       const serialized = JSON.stringify(widget.definition ?? {});
       const isStaleTimeline =
-        widget.key === 'missionsTimeline' && !serialized.includes('activeMissions.0.titulo');
+        widget.key === 'missionsTimeline' &&
+        (!serialized.includes('activeMissions.0.titulo') ||
+          !serialized.includes('"markerVariant":"icon"') ||
+          !serialized.includes('rocket_launch'));
+      const isStaleDomainHub =
+        widget.key === 'domainHub' && !serialized.includes('tone-cobalt');
+      const isStaleKpi =
+        (widget.key === 'kpiProntidao' && !serialized.includes('kpi-tone-ready')) ||
+        (widget.key === 'kpiMissoes' && !serialized.includes('kpi-tone-operations')) ||
+        (widget.key === 'kpiFolha' && !serialized.includes('kpi-tone-rh')) ||
+        (widget.key === 'kpiRiscos' && !serialized.includes('kpi-tone-risk'));
       if (
         canonical &&
         (isStaleTimeline ||
+          isStaleDomainHub ||
+          isStaleKpi ||
           serialized.includes('Interceptação Orbital Completa') ||
           serialized.includes('Arsenal homologado · Telemetria de campo') ||
           serialized.includes('Atividades Recentes de Campo') ||
@@ -87,11 +99,15 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       const canonical = canonicalByKey.get(widget.key);
       const inputs = widget.definition?.inputs;
       const cfg = inputs?.config;
+      const isStaleRow14ChartHeight =
+        (widget.key === 'incidentsSeverityDonut' || widget.key === 'defconGaugeChart') &&
+        cfg?.sizing?.height !== 340;
       const hasLegacyLocalChart =
         Array.isArray(inputs?.data) ||
         cfg?.dataSource?.kind === 'local' ||
         inputs?.chartDocument?.source?.kind === 'derived' ||
-        (widget.key === 'payrollChart' && cfg?.axes?.x?.type !== 'time');
+        (widget.key === 'payrollChart' && cfg?.axes?.x?.type !== 'time') ||
+        isStaleRow14ChartHeight;
       if (canonical && hasLegacyLocalChart) {
         upgraded = true;
         return {
@@ -109,13 +125,23 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       const ocorridoCol = Array.isArray(cfg?.columns)
         ? cfg.columns.find((c: any) => c?.field === 'ocorridoEm')
         : null;
+      const severidadeCol = Array.isArray(cfg?.columns)
+        ? cfg.columns.find((c: any) => c?.field === 'severidade')
+        : null;
+      const mortosCol = Array.isArray(cfg?.columns)
+        ? cfg.columns.find((c: any) => c?.field === 'mortos')
+        : null;
       const hasFlatCardContent =
         Array.isArray(detailItems) &&
         detailItems.some((item: any) => item?.type === 'cardGrid') &&
         Array.isArray(firstCardContent) &&
         firstCardContent[0]?.type === 'metric' &&
         cfg?.localization?.currency?.code === 'BRL' &&
-        ocorridoCol?.format === 'dd/MM/yyyy HH:mm';
+        ocorridoCol?.format === 'dd/MM/yyyy HH:mm' &&
+        cfg?.toolbar?.appearance?.variant === 'integrated' &&
+        Array.isArray(cfg?.toolbar?.filters?.quickFilters) &&
+        Array.isArray(severidadeCol?.conditionalRenderers) &&
+        Array.isArray(mortosCol?.conditionalRenderers);
       if (canonical && !hasFlatCardContent) {
         upgraded = true;
         return {
@@ -128,17 +154,20 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
     if (widget.key === 'distressSignalsList') {
       const canonical = canonicalByKey.get('distressSignalsList');
       const cfg = widget.definition?.inputs?.config;
+      const firstSectionItemsExpr = String(cfg?.expansion?.sections?.[0]?.itemsExpr ?? '');
       const hasUpgradedFeed =
         cfg?.selection?.showControl === false &&
         cfg?.templating?.leading?.expr === 'crisis_alert' &&
         cfg?.templating?.iconColorMap?.['ABERTO'] === 'warn' &&
         Array.isArray(cfg?.layout?.rowLayout?.columns) &&
+        cfg?.layout?.virtualScroll?.viewportHeight === '340px' &&
         cfg?.templating?.identity?.type === 'compose' &&
         cfg?.templating?.risk?.type === 'metric' &&
         Array.isArray(cfg?.rules?.itemStyles) &&
         cfg?.interaction?.expandable === true &&
         Array.isArray(cfg?.expansion?.sections) &&
         cfg.expansion.sections.length > 0 &&
+        firstSectionItemsExpr.includes('${item.id}') &&
         Array.isArray(cfg?.itemActions) &&
         cfg.itemActions.some((a: any) => a?.id === 'despachar-equipe');
       if (canonical && !hasUpgradedFeed) {

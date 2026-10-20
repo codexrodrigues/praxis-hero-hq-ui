@@ -168,6 +168,65 @@ assert.equal(
   'Already-reconciled snapshots must be returned by reference without redundant cloning',
 );
 
+const staleWidgetsSnapshot = {
+  widgets: [
+    {
+      key: 'kpiFolha',
+      definition: {
+        id: 'praxis-rich-content',
+        inputs: { document: { kind: 'praxis.rich-content', version: '1.0.0', nodes: [{ type: 'card', className: 'glass-panel bento-kpi-card' }] } },
+      },
+    },
+    {
+      key: 'incidentsSeverityDonut',
+      definition: { id: 'praxis-chart', inputs: { config: { sizing: { mode: 'fixed', height: 280 } } } },
+    },
+    {
+      key: 'distressSignalsList',
+      definition: {
+        id: 'praxis-list',
+        inputs: {
+          config: {
+            selection: { showControl: false },
+            layout: { virtualScroll: { viewportHeight: '380px' } },
+            expansion: { sections: [{ id: 'tactical-telemetry', itemsExpr: '[]' }] },
+          },
+        },
+      },
+    },
+    {
+      key: 'recentIncidents',
+      definition: {
+        id: 'praxis-table',
+        inputs: { config: { columns: [{ field: 'severidade' }, { field: 'mortos' }], toolbar: { visible: true, title: 'Incidentes em Campo' } } },
+      },
+    },
+    {
+      key: 'missionsTimeline',
+      definition: {
+        id: 'praxis-rich-content',
+        inputs: { document: { kind: 'praxis.rich-content', version: '1.0.0', nodes: [{ type: 'timeline', markerVariant: 'dot', items: [] }] } },
+      },
+    },
+    {
+      key: 'domainHub',
+      definition: {
+        id: 'praxis-rich-content',
+        inputs: { document: { kind: 'praxis.rich-content', version: '1.0.0', nodes: [{ type: 'compose', items: [{ className: 'glass-panel hub-card-action tone-operations' }] }] } },
+      },
+    },
+  ],
+};
+const upgradedWidgets = reconcilePersistedDashboardPage(staleWidgetsSnapshot);
+const byKey = new Map(upgradedWidgets.widgets.map((w) => [w.key, w]));
+assert.ok(byKey.get('kpiFolha').definition.inputs.document.nodes[0].className.includes('kpi-tone-rh'));
+assert.equal(byKey.get('incidentsSeverityDonut').definition.inputs.config.sizing.height, 340);
+assert.equal(byKey.get('distressSignalsList').definition.inputs.config.layout.virtualScroll.viewportHeight, '340px');
+assert.ok(byKey.get('distressSignalsList').definition.inputs.config.expansion.sections[0].itemsExpr.includes('#${item.id}'));
+assert.equal(byKey.get('recentIncidents').definition.inputs.config.toolbar.appearance.variant, 'integrated');
+assert.equal(byKey.get('missionsTimeline').definition.inputs.document.nodes[0].markerVariant, 'icon');
+assert.ok(byKey.get('domainHub').definition.inputs.document.nodes[0].items[5].className.includes('tone-cobalt'));
+
 console.log(
   'PASS: explicit internal navigation only, placeholder sanitization, and non-destructive persisted dashboard snapshot reconciliation verified at runtime',
 );

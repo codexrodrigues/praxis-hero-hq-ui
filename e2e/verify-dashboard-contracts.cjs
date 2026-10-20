@@ -272,6 +272,36 @@ assert(
     danosCivisCol?.type === 'currency',
   'recentIncidents configura expansão em Dossiê Tático estruturado (cardGrid de 3 cards flat com métricas/badges + callout forense + localização BRL/pt-BR)',
 );
+const severidadeCol = recentIncidentsCols.find((c) => c?.field === 'severidade');
+const mortosCol = recentIncidentsCols.find((c) => c?.field === 'mortos');
+assert(
+  recentIncidentsCfg?.toolbar?.appearance?.variant === 'integrated' &&
+    Array.isArray(recentIncidentsCfg?.toolbar?.filters?.quickFilters) &&
+    recentIncidentsCfg.toolbar.filters.quickFilters.length === 4 &&
+    Array.isArray(severidadeCol?.conditionalRenderers) &&
+    severidadeCol.conditionalRenderers.length === 4 &&
+    Array.isArray(mortosCol?.conditionalRenderers) &&
+    mortosCol.conditionalRenderers.length === 2,
+  'recentIncidents possui toolbar integrada (sem cabeçalho duplicado), 4 quickFilters de escopo tático e conditionalRenderers semânticos para severidade e mortos',
+);
+const distressWidget = widgetsByKey.get('distressSignalsList');
+const distressCfg = distressWidget?.definition?.inputs?.config || {};
+const distressItemsExpr = String(distressCfg?.expansion?.sections?.[0]?.itemsExpr || '');
+assert(
+  donutConfig?.sizing?.height === 340 &&
+    defconConfig?.sizing?.height === 340 &&
+    distressCfg?.layout?.virtualScroll?.viewportHeight === '340px' &&
+    distressItemsExpr.includes('#${item.id}') &&
+    distressItemsExpr.includes('${item.origem}') &&
+    distressItemsExpr.includes('${item.local}'),
+  'Row 14 harmoniza altura em 340px (incidentsSeverityDonut, defconGaugeChart, distressSignalsList) e preserva interpolação viva em itemsExpr do Dossiê de Sinais de Socorro',
+);
+assert(
+  timelineNode?.markerVariant === 'icon' &&
+    timelineItems.every((item) => typeof item.icon === 'string' && item.icon.length > 0) &&
+    hubCards[5]?.className?.includes('tone-cobalt'),
+  'missionsTimeline utiliza markerVariant="icon" com ícones táticos por missão e domainHub atribui tone-cobalt exclusivo ao Ranking Reputacional',
+);
 
 
 // ---------------------------------------------------------------------------

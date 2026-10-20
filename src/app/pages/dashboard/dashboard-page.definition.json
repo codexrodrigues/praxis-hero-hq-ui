@@ -1369,7 +1369,7 @@
                   "type": "card",
                   "variant": "unstyled",
                   "tone": "neutral",
-                  "className": "glass-panel bento-kpi-card",
+                  "className": "glass-panel bento-kpi-card kpi-tone-ready",
                   "interaction": {
                     "mode": "action",
                     "action": {
@@ -1439,7 +1439,7 @@
                   "type": "card",
                   "variant": "unstyled",
                   "tone": "neutral",
-                  "className": "glass-panel bento-kpi-card",
+                  "className": "glass-panel bento-kpi-card kpi-tone-operations",
                   "interaction": {
                     "mode": "action",
                     "action": {
@@ -1509,7 +1509,7 @@
                   "type": "card",
                   "variant": "unstyled",
                   "tone": "neutral",
-                  "className": "glass-panel bento-kpi-card",
+                  "className": "glass-panel bento-kpi-card kpi-tone-rh",
                   "interaction": {
                     "mode": "action",
                     "action": {
@@ -1532,7 +1532,7 @@
                         },
                         {
                           "type": "badge",
-                          "label": "${kpis.latestPayrollMonth}",
+                          "label": "${kpis.folhaPercent}% Líquido",
                           "className": "tag-status rh-tag"
                         }
                       ]
@@ -1549,7 +1549,7 @@
                     },
                     {
                       "type": "text",
-                      "text": "Folha de ${kpis.latestPayrollEmployees} colaboradores auditados",
+                      "text": "Folha de ${kpis.latestPayrollEmployees} colaboradores · Comp. ${kpis.latestPayrollMonth}",
                       "className": "card-footnote"
                     }
                   ]
@@ -1579,7 +1579,7 @@
                   "type": "card",
                   "variant": "unstyled",
                   "tone": "neutral",
-                  "className": "glass-panel bento-kpi-card",
+                  "className": "glass-panel bento-kpi-card kpi-tone-risk",
                   "interaction": {
                     "mode": "action",
                     "action": {
@@ -1886,7 +1886,7 @@
               "type": "donut",
               "sizing": {
                 "mode": "fixed",
-                "height": 280
+                "height": 340
               },
               "interactions": {
                 "selection": true,
@@ -1994,7 +1994,7 @@
               "type": "gauge",
               "sizing": {
                 "mode": "fixed",
-                "height": 280
+                "height": 340
               },
               "gauge": {
                 "scale": {
@@ -2137,7 +2137,7 @@
                 "virtualScroll": {
                   "enabled": false,
                   "itemSize": 68,
-                  "viewportHeight": "380px"
+                  "viewportHeight": "340px"
                 }
               },
               "itemActions": [
@@ -2377,7 +2377,7 @@
                     "id": "tactical-telemetry",
                     "title": "Dossiê de Telemetria & Resposta Tática",
                     "type": "key-value",
-                    "itemsExpr": "[{\"key\":\"Protocolo\",\"value\":\"#\"},{\"key\":\"Origem do Sinal\",\"value\":\"\"},{\"key\":\"Setor / Teatro\",\"value\":\"\"},{\"key\":\"Nível de Ameaça\",\"value\":\"Nível  / 5\"},{\"key\":\"Recebido em\",\"value\":\"\"},{\"key\":\"Status Operacional\",\"value\":\"\"}]"
+                    "itemsExpr": "[{\"key\":\"Protocolo\",\"value\":\"#${item.id}\"},{\"key\":\"Origem do Sinal\",\"value\":\"${item.origem}\"},{\"key\":\"Setor / Teatro\",\"value\":\"${item.local}\"},{\"key\":\"Nível de Ameaça\",\"value\":\"Nível ${item.nivelAmeaca} / 5\"},{\"key\":\"Recebido em\",\"value\":\"${item.abertoEm|datetime:pt-BR:short}\"},{\"key\":\"Status Operacional\",\"value\":\"${item.status|map:ABERTO=Aberto — Despacho Imediato;EM_ATENDIMENTO=Em Atendimento;RESOLVIDO=Resolvido;FALSO=Alarme Falso}\"}]"
                   }
                 ]
               }
@@ -2417,9 +2417,74 @@
                 {
                   "field": "severidade",
                   "header": "Severidade",
-                  "width": "120px",
+                  "width": "132px",
                   "align": "center",
-                  "sortable": true
+                  "sortable": true,
+                  "valueMapping": {
+                    "CRITICA": "Crítica",
+                    "ALTA": "Alta",
+                    "MEDIA": "Média",
+                    "BAIXA": "Baixa"
+                  },
+                  "renderer": {
+                    "type": "chip",
+                    "chip": {
+                      "textField": "severidade",
+                      "variant": "soft",
+                      "color": "primary",
+                      "icon": "shield"
+                    }
+                  },
+                  "conditionalRenderers": [
+                    {
+                      "condition": "severidade == 'CRITICA'",
+                      "renderer": {
+                        "type": "chip",
+                        "chip": {
+                          "text": "Crítica",
+                          "variant": "soft",
+                          "color": "warn",
+                          "icon": "gpp_bad"
+                        }
+                      }
+                    },
+                    {
+                      "condition": "severidade == 'ALTA'",
+                      "renderer": {
+                        "type": "chip",
+                        "chip": {
+                          "text": "Alta",
+                          "variant": "soft",
+                          "color": "accent",
+                          "icon": "warning"
+                        }
+                      }
+                    },
+                    {
+                      "condition": "severidade == 'MEDIA'",
+                      "renderer": {
+                        "type": "chip",
+                        "chip": {
+                          "text": "Média",
+                          "variant": "soft",
+                          "color": "primary",
+                          "icon": "shield"
+                        }
+                      }
+                    },
+                    {
+                      "condition": "severidade == 'BAIXA'",
+                      "renderer": {
+                        "type": "chip",
+                        "chip": {
+                          "text": "Baixa",
+                          "variant": "outlined",
+                          "color": "basic",
+                          "icon": "verified_user"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "field": "contencao",
@@ -2487,12 +2552,76 @@
                   "header": "Baixas",
                   "width": "90px",
                   "align": "center",
-                  "sortable": true
+                  "sortable": true,
+                  "conditionalRenderers": [
+                    {
+                      "condition": "mortos > 0",
+                      "renderer": {
+                        "type": "badge",
+                        "badge": {
+                          "textField": "mortos",
+                          "variant": "soft",
+                          "color": "warn",
+                          "icon": "emergency"
+                        }
+                      }
+                    },
+                    {
+                      "condition": "mortos == 0",
+                      "renderer": {
+                        "type": "badge",
+                        "badge": {
+                          "text": "0",
+                          "variant": "plain",
+                          "color": "success"
+                        }
+                      }
+                    }
+                  ]
                 }
               ],
               "toolbar": {
                 "visible": true,
-                "title": "Incidentes em Campo"
+                "appearance": {
+                  "variant": "integrated",
+                  "density": "compact"
+                },
+                "filters": {
+                  "enabled": true,
+                  "showQuickFilters": true,
+                  "quickFilters": [
+                    {
+                      "id": "all",
+                      "label": "Todos",
+                      "icon": "apps",
+                      "filter": {}
+                    },
+                    {
+                      "id": "critica",
+                      "label": "Crítica",
+                      "icon": "gpp_bad",
+                      "filter": {
+                        "severidade": "CRITICA"
+                      }
+                    },
+                    {
+                      "id": "alta",
+                      "label": "Alta",
+                      "icon": "warning",
+                      "filter": {
+                        "severidade": "ALTA"
+                      }
+                    },
+                    {
+                      "id": "media",
+                      "label": "Média",
+                      "icon": "shield",
+                      "filter": {
+                        "severidade": "MEDIA"
+                      }
+                    }
+                  ]
+                }
               },
               "appearance": {
                 "density": "compact"
@@ -2791,10 +2920,10 @@
               "nodes": [
                 {
                   "type": "timeline",
-                  "title": "Missões em Curso no Teatro Operacional (${kpis.inProgressMissions} de ${kpis.totalMissions})",
+                  "title": "Teatro Operacional Ativo · ${kpis.inProgressMissions} em curso de ${kpis.totalMissions} missões",
                   "position": "right",
                   "orientation": "vertical",
-                  "markerVariant": "dot",
+                  "markerVariant": "icon",
                   "markerStyle": "filled",
                   "items": [
                     {
@@ -2812,7 +2941,8 @@
                         "payload": {
                           "path": "/operacoes/missoes"
                         }
-                      }
+                      },
+                      "icon": "radar"
                     },
                     {
                       "title": "${activeMissions.1.titulo} · ${activeMissions.1.local} (${kpis.plannedMissions} Planejadas)",
@@ -2829,7 +2959,8 @@
                         "payload": {
                           "path": "/operacoes/missoes"
                         }
-                      }
+                      },
+                      "icon": "rocket_launch"
                     },
                     {
                       "title": "${activeMissions.2.titulo} · ${activeMissions.2.local} (Prontidão ${kpis.readinessRate}%)",
@@ -2846,7 +2977,8 @@
                         "payload": {
                           "path": "/operacoes/missoes"
                         }
-                      }
+                      },
+                      "icon": "shield"
                     },
                     {
                       "title": "${activeMissions.3.titulo} · ${activeMissions.3.local} (DEFCON ${kpis.defconScore})",
@@ -2863,7 +2995,8 @@
                         "payload": {
                           "path": "/operacoes/missoes"
                         }
-                      }
+                      },
+                      "icon": "verified"
                     }
                   ]
                 }
@@ -3014,7 +3147,7 @@
                           "path": "/rh/reputacao"
                         }
                       },
-                      "className": "glass-panel hub-card-action tone-operations"
+                      "className": "glass-panel hub-card-action tone-cobalt"
                     }
                   ]
                 }
@@ -3030,7 +3163,7 @@
     "type": "donut",
     "sizing": {
       "mode": "fixed",
-      "height": 280
+      "height": 340
     },
     "interactions": {
       "selection": true,
@@ -3123,7 +3256,7 @@
     "type": "gauge",
     "sizing": {
       "mode": "fixed",
-      "height": 280
+      "height": 340
     },
     "gauge": {
       "scale": {
@@ -3251,7 +3384,7 @@
       "virtualScroll": {
         "enabled": false,
         "itemSize": 68,
-        "viewportHeight": "380px"
+        "viewportHeight": "340px"
       }
     },
     "itemActions": [
@@ -3491,7 +3624,7 @@
           "id": "tactical-telemetry",
           "title": "Dossiê de Telemetria & Resposta Tática",
           "type": "key-value",
-          "itemsExpr": "[{\"key\":\"Protocolo\",\"value\":\"#\"},{\"key\":\"Origem do Sinal\",\"value\":\"\"},{\"key\":\"Setor / Teatro\",\"value\":\"\"},{\"key\":\"Nível de Ameaça\",\"value\":\"Nível  / 5\"},{\"key\":\"Recebido em\",\"value\":\"\"},{\"key\":\"Status Operacional\",\"value\":\"\"}]"
+          "itemsExpr": "[{\"key\":\"Protocolo\",\"value\":\"#${item.id}\"},{\"key\":\"Origem do Sinal\",\"value\":\"${item.origem}\"},{\"key\":\"Setor / Teatro\",\"value\":\"${item.local}\"},{\"key\":\"Nível de Ameaça\",\"value\":\"Nível ${item.nivelAmeaca} / 5\"},{\"key\":\"Recebido em\",\"value\":\"${item.abertoEm|datetime:pt-BR:short}\"},{\"key\":\"Status Operacional\",\"value\":\"${item.status|map:ABERTO=Aberto — Despacho Imediato;EM_ATENDIMENTO=Em Atendimento;RESOLVIDO=Resolvido;FALSO=Alarme Falso}\"}]"
         }
       ]
     }
