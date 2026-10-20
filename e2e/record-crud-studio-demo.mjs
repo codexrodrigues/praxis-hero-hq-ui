@@ -1618,7 +1618,7 @@ async function main() {
 
     await setSlideToggle(page, '[data-testid="crud-filterbar-show-advanced"]', true);
 
-    for (const inlineField of ['nomeCompleto', 'codinome', 'email']) {
+    for (const inlineField of ['nomeCompleto', 'codinome', 'cargoNome', 'email']) {
       const suggestionBtn = page.locator(`[data-testid="crud-filterbar-available-field-${inlineField}"]`);
       if (await suggestionBtn.isVisible().catch(() => false)) {
         await moveCursorToLocator(page, suggestionBtn, 80);

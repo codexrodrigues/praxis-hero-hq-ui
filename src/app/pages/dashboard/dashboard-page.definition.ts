@@ -125,6 +125,31 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       }
     }
 
+    if (widget.key === 'distressSignalsList') {
+      const canonical = canonicalByKey.get('distressSignalsList');
+      const cfg = widget.definition?.inputs?.config;
+      const hasUpgradedFeed =
+        cfg?.selection?.showControl === false &&
+        cfg?.templating?.leading?.expr === 'crisis_alert' &&
+        cfg?.templating?.iconColorMap?.['ABERTO'] === 'warn' &&
+        Array.isArray(cfg?.layout?.rowLayout?.columns) &&
+        cfg?.templating?.identity?.type === 'compose' &&
+        cfg?.templating?.risk?.type === 'metric' &&
+        Array.isArray(cfg?.rules?.itemStyles) &&
+        cfg?.interaction?.expandable === true &&
+        Array.isArray(cfg?.expansion?.sections) &&
+        cfg.expansion.sections.length > 0 &&
+        Array.isArray(cfg?.itemActions) &&
+        cfg.itemActions.some((a: any) => a?.id === 'despachar-equipe');
+      if (canonical && !hasUpgradedFeed) {
+        upgraded = true;
+        return {
+          ...widget,
+          definition: structuredClone(canonical.definition),
+        };
+      }
+    }
+
     return widget;
   });
 

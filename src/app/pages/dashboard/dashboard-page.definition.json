@@ -100,17 +100,36 @@
       },
       "derived": {
         "kpis.readinessRate": {
-          "dependsOn": ["kpis.activeHeroes", "kpis.totalHeroes"],
+          "dependsOn": [
+            "kpis.activeHeroes",
+            "kpis.totalHeroes"
+          ],
           "compute": {
             "kind": "json-logic",
             "expression": {
               "if": [
-                { ">": [{ "var": "state.kpis.totalHeroes" }, 0] },
+                {
+                  ">": [
+                    {
+                      "var": "state.kpis.totalHeroes"
+                    },
+                    0
+                  ]
+                },
                 {
                   "round": [
                     {
                       "*": [
-                        { "/": [{ "var": "state.kpis.activeHeroes" }, { "var": "state.kpis.totalHeroes" }] },
+                        {
+                          "/": [
+                            {
+                              "var": "state.kpis.activeHeroes"
+                            },
+                            {
+                              "var": "state.kpis.totalHeroes"
+                            }
+                          ]
+                        },
                         100
                       ]
                     },
@@ -123,17 +142,36 @@
           }
         },
         "kpis.missoesPercent": {
-          "dependsOn": ["kpis.plannedMissions", "kpis.totalMissions"],
+          "dependsOn": [
+            "kpis.plannedMissions",
+            "kpis.totalMissions"
+          ],
           "compute": {
             "kind": "json-logic",
             "expression": {
               "if": [
-                { ">": [{ "var": "state.kpis.totalMissions" }, 0] },
+                {
+                  ">": [
+                    {
+                      "var": "state.kpis.totalMissions"
+                    },
+                    0
+                  ]
+                },
                 {
                   "round": [
                     {
                       "*": [
-                        { "/": [{ "var": "state.kpis.plannedMissions" }, { "var": "state.kpis.totalMissions" }] },
+                        {
+                          "/": [
+                            {
+                              "var": "state.kpis.plannedMissions"
+                            },
+                            {
+                              "var": "state.kpis.totalMissions"
+                            }
+                          ]
+                        },
                         100
                       ]
                     },
@@ -146,17 +184,36 @@
           }
         },
         "kpis.folhaPercent": {
-          "dependsOn": ["kpis.latestPayrollNet", "kpis.latestPayrollGross"],
+          "dependsOn": [
+            "kpis.latestPayrollNet",
+            "kpis.latestPayrollGross"
+          ],
           "compute": {
             "kind": "json-logic",
             "expression": {
               "if": [
-                { ">": [{ "var": "state.kpis.latestPayrollGross" }, 0] },
+                {
+                  ">": [
+                    {
+                      "var": "state.kpis.latestPayrollGross"
+                    },
+                    0
+                  ]
+                },
                 {
                   "round": [
                     {
                       "*": [
-                        { "/": [{ "var": "state.kpis.latestPayrollNet" }, { "var": "state.kpis.latestPayrollGross" }] },
+                        {
+                          "/": [
+                            {
+                              "var": "state.kpis.latestPayrollNet"
+                            },
+                            {
+                              "var": "state.kpis.latestPayrollGross"
+                            }
+                          ]
+                        },
                         100
                       ]
                     },
@@ -169,17 +226,36 @@
           }
         },
         "kpis.riscosPercent": {
-          "dependsOn": ["kpis.criticalIncidents", "kpis.totalIncidents"],
+          "dependsOn": [
+            "kpis.criticalIncidents",
+            "kpis.totalIncidents"
+          ],
           "compute": {
             "kind": "json-logic",
             "expression": {
               "if": [
-                { ">": [{ "var": "state.kpis.totalIncidents" }, 0] },
+                {
+                  ">": [
+                    {
+                      "var": "state.kpis.totalIncidents"
+                    },
+                    0
+                  ]
+                },
                 {
                   "round": [
                     {
                       "*": [
-                        { "/": [{ "var": "state.kpis.criticalIncidents" }, { "var": "state.kpis.totalIncidents" }] },
+                        {
+                          "/": [
+                            {
+                              "var": "state.kpis.criticalIncidents"
+                            },
+                            {
+                              "var": "state.kpis.totalIncidents"
+                            }
+                          ]
+                        },
                         100
                       ]
                     },
@@ -192,41 +268,103 @@
           }
         },
         "kpis.inProgressMissionsBadge": {
-          "dependsOn": ["kpis.inProgressMissions"],
+          "dependsOn": [
+            "kpis.inProgressMissions"
+          ],
           "compute": {
             "kind": "json-logic",
             "expression": {
               "if": [
-                { "<": [{ "var": "state.kpis.inProgressMissions" }, 10] },
-                { "cat": ["0", { "var": "state.kpis.inProgressMissions" }] },
-                { "cat": ["", { "var": "state.kpis.inProgressMissions" }] }
+                {
+                  "<": [
+                    {
+                      "var": "state.kpis.inProgressMissions"
+                    },
+                    10
+                  ]
+                },
+                {
+                  "cat": [
+                    "0",
+                    {
+                      "var": "state.kpis.inProgressMissions"
+                    }
+                  ]
+                },
+                {
+                  "cat": [
+                    "",
+                    {
+                      "var": "state.kpis.inProgressMissions"
+                    }
+                  ]
+                }
               ]
             }
           }
         },
         "kpis.criticalIncidentsBadge": {
-          "dependsOn": ["kpis.criticalIncidents"],
+          "dependsOn": [
+            "kpis.criticalIncidents"
+          ],
           "compute": {
             "kind": "json-logic",
             "expression": {
               "if": [
-                { "<": [{ "var": "state.kpis.criticalIncidents" }, 10] },
-                { "cat": ["0", { "var": "state.kpis.criticalIncidents" }] },
-                { "cat": ["", { "var": "state.kpis.criticalIncidents" }] }
+                {
+                  "<": [
+                    {
+                      "var": "state.kpis.criticalIncidents"
+                    },
+                    10
+                  ]
+                },
+                {
+                  "cat": [
+                    "0",
+                    {
+                      "var": "state.kpis.criticalIncidents"
+                    }
+                  ]
+                },
+                {
+                  "cat": [
+                    "",
+                    {
+                      "var": "state.kpis.criticalIncidents"
+                    }
+                  ]
+                }
               ]
             }
           }
         },
         "kpis.latestPayrollNetMillion": {
-          "dependsOn": ["kpis.latestPayrollNet"],
+          "dependsOn": [
+            "kpis.latestPayrollNet"
+          ],
           "compute": {
             "kind": "json-logic",
             "expression": {
               "if": [
-                { ">": [{ "var": "state.kpis.latestPayrollNet" }, 0] },
+                {
+                  ">": [
+                    {
+                      "var": "state.kpis.latestPayrollNet"
+                    },
+                    0
+                  ]
+                },
                 {
                   "round": [
-                    { "/": [{ "var": "state.kpis.latestPayrollNet" }, 1000000] },
+                    {
+                      "/": [
+                        {
+                          "var": "state.kpis.latestPayrollNet"
+                        },
+                        1000000
+                      ]
+                    },
                     2
                   ]
                 },
@@ -236,12 +374,22 @@
           }
         },
         "kpis.defconScore": {
-          "dependsOn": ["kpis.criticalIncidents", "kpis.totalIncidents"],
+          "dependsOn": [
+            "kpis.criticalIncidents",
+            "kpis.totalIncidents"
+          ],
           "compute": {
             "kind": "json-logic",
             "expression": {
               "if": [
-                { ">": [{ "var": "state.kpis.totalIncidents" }, 0] },
+                {
+                  ">": [
+                    {
+                      "var": "state.kpis.totalIncidents"
+                    },
+                    0
+                  ]
+                },
                 {
                   "max": [
                     1,
@@ -255,7 +403,16 @@
                                 5,
                                 {
                                   "*": [
-                                    { "/": [{ "var": "state.kpis.criticalIncidents" }, { "var": "state.kpis.totalIncidents" }] },
+                                    {
+                                      "/": [
+                                        {
+                                          "var": "state.kpis.criticalIncidents"
+                                        },
+                                        {
+                                          "var": "state.kpis.totalIncidents"
+                                        }
+                                      ]
+                                    },
                                     3.3
                                   ]
                                 }
@@ -1941,18 +2098,65 @@
               "layout": {
                 "variant": "list",
                 "itemAppearance": "card",
-                "itemSpacing": "relaxed",
-                "density": "compact",
+                "itemSpacing": "default",
+                "density": "comfortable",
                 "pageSize": 6,
                 "lines": 2,
                 "dividers": "none",
+                "rowLayout": {
+                  "type": "grid",
+                  "gap": "14px",
+                  "align": "center",
+                  "columns": [
+                    {
+                      "slot": "leading",
+                      "width": "40px",
+                      "align": "center",
+                      "justify": "center"
+                    },
+                    {
+                      "slot": "identity",
+                      "minWidth": "140px",
+                      "width": "1fr",
+                      "align": "center"
+                    },
+                    {
+                      "slot": "risk",
+                      "width": "116px",
+                      "align": "center",
+                      "justify": "end"
+                    },
+                    {
+                      "slot": "trailing",
+                      "width": "auto",
+                      "align": "center",
+                      "justify": "end"
+                    }
+                  ]
+                },
                 "virtualScroll": {
-                  "enabled": true,
-                  "itemSize": 64,
+                  "enabled": false,
+                  "itemSize": 68,
                   "viewportHeight": "380px"
                 }
               },
               "itemActions": [
+                {
+                  "id": "despachar-equipe",
+                  "label": "Despachar Equipe Tática",
+                  "icon": "send",
+                  "kind": "icon",
+                  "color": "warn",
+                  "placement": "trailing",
+                  "showIf": {
+                    "==": [
+                      {
+                        "var": "item.status"
+                      },
+                      "ABERTO"
+                    ]
+                  }
+                },
                 {
                   "id": "atender-chamado",
                   "label": "Atender Chamado",
@@ -1975,13 +2179,140 @@
               },
               "selection": {
                 "mode": "single",
+                "showControl": false,
                 "return": "item"
+              },
+              "rules": {
+                "itemStyles": [
+                  {
+                    "id": "critical-open-signal",
+                    "condition": {
+                      "and": [
+                        {
+                          ">=": [
+                            {
+                              "var": "item.nivelAmeaca"
+                            },
+                            4
+                          ]
+                        },
+                        {
+                          "==": [
+                            {
+                              "var": "item.status"
+                            },
+                            "ABERTO"
+                          ]
+                        }
+                      ]
+                    },
+                    "tone": "danger"
+                  },
+                  {
+                    "id": "in-progress-signal",
+                    "condition": {
+                      "==": [
+                        {
+                          "var": "item.status"
+                        },
+                        "EM_ATENDIMENTO"
+                      ]
+                    },
+                    "tone": "warning"
+                  },
+                  {
+                    "id": "resolved-signal",
+                    "condition": {
+                      "==": [
+                        {
+                          "var": "item.status"
+                        },
+                        "RESOLVIDO"
+                      ]
+                    },
+                    "tone": "success"
+                  }
+                ],
+                "slotOverrides": [
+                  {
+                    "id": "leading-resolved-icon",
+                    "slot": "leading",
+                    "condition": {
+                      "==": [
+                        {
+                          "var": "item.status"
+                        },
+                        "RESOLVIDO"
+                      ]
+                    },
+                    "template": {
+                      "type": "icon",
+                      "expr": "verified",
+                      "color": "success"
+                    }
+                  },
+                  {
+                    "id": "leading-in-progress-icon",
+                    "slot": "leading",
+                    "condition": {
+                      "==": [
+                        {
+                          "var": "item.status"
+                        },
+                        "EM_ATENDIMENTO"
+                      ]
+                    },
+                    "template": {
+                      "type": "icon",
+                      "expr": "shield",
+                      "color": "warning"
+                    }
+                  },
+                  {
+                    "id": "leading-false-alarm-icon",
+                    "slot": "leading",
+                    "condition": {
+                      "==": [
+                        {
+                          "var": "item.status"
+                        },
+                        "FALSO"
+                      ]
+                    },
+                    "template": {
+                      "type": "icon",
+                      "expr": "block",
+                      "color": "neutral"
+                    }
+                  }
+                ]
               },
               "templating": {
                 "leading": {
                   "type": "icon",
-                  "expr": "emergency",
+                  "expr": "crisis_alert",
                   "color": "warn"
+                },
+                "identity": {
+                  "type": "compose",
+                  "props": {
+                    "compose": {
+                      "direction": "column",
+                      "gap": "2px",
+                      "items": [
+                        {
+                          "type": "text",
+                          "expr": "${item.origem} · ${item.local}",
+                          "class": "primary"
+                        },
+                        {
+                          "type": "text",
+                          "expr": "Chamado #${item.id} · ${item.abertoEm|relative:pt-BR}",
+                          "class": "secondary"
+                        }
+                      ]
+                    }
+                  }
                 },
                 "primary": {
                   "type": "text",
@@ -1990,6 +2321,21 @@
                 "secondary": {
                   "type": "text",
                   "expr": "Ameaça Nível ${item.nivelAmeaca}"
+                },
+                "risk": {
+                  "type": "metric",
+                  "expr": "Nível ${item.nivelAmeaca}",
+                  "props": {
+                    "metric": {
+                      "valueExpr": "Nível ${item.nivelAmeaca}",
+                      "toneExpr": "${item.nivelAmeaca|map:5=danger,4=danger,3=warning,2=positive,1=positive,0=neutral}",
+                      "align": "end",
+                      "progress": {
+                        "valueExpr": "${item.nivelAmeaca}",
+                        "max": 5
+                      }
+                    }
+                  }
                 },
                 "meta": {
                   "type": "relative",
@@ -2004,9 +2350,36 @@
                 "chipColorMap": {
                   "ABERTO": "warn",
                   "EM_ATENDIMENTO": "accent",
-                  "RESOLVIDO": "primary",
+                  "RESOLVIDO": "success",
+                  "FALSO": "neutral"
+                },
+                "iconColorMap": {
+                  "ABERTO": "warn",
+                  "EM_ATENDIMENTO": "accent",
+                  "RESOLVIDO": "success",
                   "FALSO": "neutral"
                 }
+              },
+              "interaction": {
+                "expandable": true,
+                "expandTrigger": "row+icon",
+                "expandMode": "single",
+                "expandPlacement": "trailing"
+              },
+              "expansion": {
+                "rendering": {
+                  "shell": "attached",
+                  "columns": 1,
+                  "padding": "12px 16px"
+                },
+                "sections": [
+                  {
+                    "id": "tactical-telemetry",
+                    "title": "Dossiê de Telemetria & Resposta Tática",
+                    "type": "key-value",
+                    "itemsExpr": "[{\"key\":\"Protocolo\",\"value\":\"#\"},{\"key\":\"Origem do Sinal\",\"value\":\"\"},{\"key\":\"Setor / Teatro\",\"value\":\"\"},{\"key\":\"Nível de Ameaça\",\"value\":\"Nível  / 5\"},{\"key\":\"Recebido em\",\"value\":\"\"},{\"key\":\"Status Operacional\",\"value\":\"\"}]"
+                  }
+                ]
               }
             }
           }
@@ -2226,8 +2599,13 @@
                                       "tone": "danger",
                                       "visibleWhen": {
                                         "in": [
-                                          { "var": "row.severidade" },
-                                          ["CRITICA", "CRÍTICA"]
+                                          {
+                                            "var": "row.severidade"
+                                          },
+                                          [
+                                            "CRITICA",
+                                            "CRÍTICA"
+                                          ]
                                         ]
                                       }
                                     },
@@ -2238,7 +2616,9 @@
                                       "tone": "warning",
                                       "visibleWhen": {
                                         "===": [
-                                          { "var": "row.severidade" },
+                                          {
+                                            "var": "row.severidade"
+                                          },
                                           "ALTA"
                                         ]
                                       }
@@ -2250,8 +2630,14 @@
                                       "tone": "info",
                                       "visibleWhen": {
                                         "in": [
-                                          { "var": "row.severidade" },
-                                          ["MEDIA", "MÉDIA", "BAIXA"]
+                                          {
+                                            "var": "row.severidade"
+                                          },
+                                          [
+                                            "MEDIA",
+                                            "MÉDIA",
+                                            "BAIXA"
+                                          ]
                                         ]
                                       }
                                     },
@@ -2292,7 +2678,12 @@
                                       "icon": "emergency",
                                       "tone": "danger",
                                       "visibleWhen": {
-                                        ">": [{ "var": "row.mortos" }, 0]
+                                        ">": [
+                                          {
+                                            "var": "row.mortos"
+                                          },
+                                          0
+                                        ]
                                       }
                                     },
                                     {
@@ -2301,7 +2692,12 @@
                                       "icon": "verified_user",
                                       "tone": "success",
                                       "visibleWhen": {
-                                        "===": [{ "var": "row.mortos" }, 0]
+                                        "===": [
+                                          {
+                                            "var": "row.mortos"
+                                          },
+                                          0
+                                        ]
                                       }
                                     }
                                   ]
@@ -2816,18 +3212,65 @@
     "layout": {
       "variant": "list",
       "itemAppearance": "card",
-      "itemSpacing": "relaxed",
-      "density": "compact",
+      "itemSpacing": "default",
+      "density": "comfortable",
       "pageSize": 6,
       "lines": 2,
       "dividers": "none",
+      "rowLayout": {
+        "type": "grid",
+        "gap": "14px",
+        "align": "center",
+        "columns": [
+          {
+            "slot": "leading",
+            "width": "40px",
+            "align": "center",
+            "justify": "center"
+          },
+          {
+            "slot": "identity",
+            "minWidth": "140px",
+            "width": "1fr",
+            "align": "center"
+          },
+          {
+            "slot": "risk",
+            "width": "116px",
+            "align": "center",
+            "justify": "end"
+          },
+          {
+            "slot": "trailing",
+            "width": "auto",
+            "align": "center",
+            "justify": "end"
+          }
+        ]
+      },
       "virtualScroll": {
-        "enabled": true,
-        "itemSize": 64,
+        "enabled": false,
+        "itemSize": 68,
         "viewportHeight": "380px"
       }
     },
     "itemActions": [
+      {
+        "id": "despachar-equipe",
+        "label": "Despachar Equipe Tática",
+        "icon": "send",
+        "kind": "icon",
+        "color": "warn",
+        "placement": "trailing",
+        "showIf": {
+          "==": [
+            {
+              "var": "item.status"
+            },
+            "ABERTO"
+          ]
+        }
+      },
       {
         "id": "atender-chamado",
         "label": "Atender Chamado",
@@ -2850,13 +3293,140 @@
     },
     "selection": {
       "mode": "single",
+      "showControl": false,
       "return": "item"
+    },
+    "rules": {
+      "itemStyles": [
+        {
+          "id": "critical-open-signal",
+          "condition": {
+            "and": [
+              {
+                ">=": [
+                  {
+                    "var": "item.nivelAmeaca"
+                  },
+                  4
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "item.status"
+                  },
+                  "ABERTO"
+                ]
+              }
+            ]
+          },
+          "tone": "danger"
+        },
+        {
+          "id": "in-progress-signal",
+          "condition": {
+            "==": [
+              {
+                "var": "item.status"
+              },
+              "EM_ATENDIMENTO"
+            ]
+          },
+          "tone": "warning"
+        },
+        {
+          "id": "resolved-signal",
+          "condition": {
+            "==": [
+              {
+                "var": "item.status"
+              },
+              "RESOLVIDO"
+            ]
+          },
+          "tone": "success"
+        }
+      ],
+      "slotOverrides": [
+        {
+          "id": "leading-resolved-icon",
+          "slot": "leading",
+          "condition": {
+            "==": [
+              {
+                "var": "item.status"
+              },
+              "RESOLVIDO"
+            ]
+          },
+          "template": {
+            "type": "icon",
+            "expr": "verified",
+            "color": "success"
+          }
+        },
+        {
+          "id": "leading-in-progress-icon",
+          "slot": "leading",
+          "condition": {
+            "==": [
+              {
+                "var": "item.status"
+              },
+              "EM_ATENDIMENTO"
+            ]
+          },
+          "template": {
+            "type": "icon",
+            "expr": "shield",
+            "color": "warning"
+          }
+        },
+        {
+          "id": "leading-false-alarm-icon",
+          "slot": "leading",
+          "condition": {
+            "==": [
+              {
+                "var": "item.status"
+              },
+              "FALSO"
+            ]
+          },
+          "template": {
+            "type": "icon",
+            "expr": "block",
+            "color": "neutral"
+          }
+        }
+      ]
     },
     "templating": {
       "leading": {
         "type": "icon",
-        "expr": "emergency",
+        "expr": "crisis_alert",
         "color": "warn"
+      },
+      "identity": {
+        "type": "compose",
+        "props": {
+          "compose": {
+            "direction": "column",
+            "gap": "2px",
+            "items": [
+              {
+                "type": "text",
+                "expr": "${item.origem} · ${item.local}",
+                "class": "primary"
+              },
+              {
+                "type": "text",
+                "expr": "Chamado #${item.id} · ${item.abertoEm|relative:pt-BR}",
+                "class": "secondary"
+              }
+            ]
+          }
+        }
       },
       "primary": {
         "type": "text",
@@ -2865,6 +3435,21 @@
       "secondary": {
         "type": "text",
         "expr": "Ameaça Nível ${item.nivelAmeaca}"
+      },
+      "risk": {
+        "type": "metric",
+        "expr": "Nível ${item.nivelAmeaca}",
+        "props": {
+          "metric": {
+            "valueExpr": "Nível ${item.nivelAmeaca}",
+            "toneExpr": "${item.nivelAmeaca|map:5=danger,4=danger,3=warning,2=positive,1=positive,0=neutral}",
+            "align": "end",
+            "progress": {
+              "valueExpr": "${item.nivelAmeaca}",
+              "max": 5
+            }
+          }
+        }
       },
       "meta": {
         "type": "relative",
@@ -2879,9 +3464,36 @@
       "chipColorMap": {
         "ABERTO": "warn",
         "EM_ATENDIMENTO": "accent",
-        "RESOLVIDO": "primary",
+        "RESOLVIDO": "success",
+        "FALSO": "neutral"
+      },
+      "iconColorMap": {
+        "ABERTO": "warn",
+        "EM_ATENDIMENTO": "accent",
+        "RESOLVIDO": "success",
         "FALSO": "neutral"
       }
+    },
+    "interaction": {
+      "expandable": true,
+      "expandTrigger": "row+icon",
+      "expandMode": "single",
+      "expandPlacement": "trailing"
+    },
+    "expansion": {
+      "rendering": {
+        "shell": "attached",
+        "columns": 1,
+        "padding": "12px 16px"
+      },
+      "sections": [
+        {
+          "id": "tactical-telemetry",
+          "title": "Dossiê de Telemetria & Resposta Tática",
+          "type": "key-value",
+          "itemsExpr": "[{\"key\":\"Protocolo\",\"value\":\"#\"},{\"key\":\"Origem do Sinal\",\"value\":\"\"},{\"key\":\"Setor / Teatro\",\"value\":\"\"},{\"key\":\"Nível de Ameaça\",\"value\":\"Nível  / 5\"},{\"key\":\"Recebido em\",\"value\":\"\"},{\"key\":\"Status Operacional\",\"value\":\"\"}]"
+        }
+      ]
     }
   },
   "payrollTrendChartConfig": {
