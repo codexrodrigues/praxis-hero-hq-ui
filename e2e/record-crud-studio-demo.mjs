@@ -951,6 +951,27 @@ async function setDemoStage(page, stepNum, totalSteps, stepBadge, title, detail)
   ).catch(() => {});
 }
 
+async function expandActiveSettingsPanel(page) {
+  const expandBtn = page.locator('[data-testid="settings-panel-toggle-expand"]').last();
+  if (await expandBtn.isVisible().catch(() => false)) {
+    const isExpanded = await expandBtn.getAttribute('aria-expanded').catch(() => 'false');
+    if (isExpanded !== 'true') {
+      await moveCursorToLocator(page, expandBtn, 85);
+      await expandBtn.click();
+      await sleep(320);
+    }
+  }
+}
+
+async function collapseSidebarIfExpanded(page) {
+  const collapseBtn = page.locator('button.praxis-shell__collapse-btn[aria-expanded="true"]').first();
+  if (await collapseBtn.isVisible().catch(() => false)) {
+    await moveCursorToLocator(page, collapseBtn, 85);
+    await collapseBtn.click();
+    await sleep(300);
+  }
+}
+
 async function saveAndCloseSettingsPanel(page, label = '') {
   const saveBtn = page.locator('[data-testid="settings-panel-save"]').last();
   const applyBtn = page.locator('[data-testid="settings-panel-apply"]').last();
@@ -1141,6 +1162,13 @@ async function main() {
     });
 
     await context.addInitScript(() => {
+      // Force Aurora theme ('light-tech') across initial load and F5 reloads
+      try {
+        localStorage.setItem('praxis_hero_hq_theme', 'light-tech');
+        document.documentElement.dataset.theme = 'light-tech';
+        document.documentElement.classList.remove('dark');
+      } catch {}
+
       if (!sessionStorage.getItem('__praxis_crud_demo_cleaned')) {
         sessionStorage.setItem('__praxis_crud_demo_cleaned', '1');
         for (const k of Object.keys(localStorage)) {
@@ -1165,24 +1193,25 @@ async function main() {
           .studio-backdrop {
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
-            background: rgba(6, 10, 20, 0.28) !important;
+            background: rgba(15, 23, 42, 0.22) !important;
           }
           #praxis-demo-hud {
             position: fixed;
-            bottom: 8px;
-            left: 276px;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 2147483645;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            min-width: 680px;
-            max-width: 1120px;
-            padding: 7px 14px 6px;
-            border-radius: 12px;
-            background: rgba(8, 13, 25, 0.96);
-            border: 1px solid rgba(56, 189, 248, 0.55);
-            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.72), 0 0 22px rgba(56, 189, 248, 0.24);
-            color: #f8fafc;
+            gap: 5px;
+            min-width: 780px;
+            max-width: 1220px;
+            padding: 8px 16px 7px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1.5px solid rgba(2, 132, 199, 0.42);
+            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+            color: #0f172a;
             font-family: Inter, system-ui, sans-serif;
             pointer-events: none;
             transition: all 0.25s ease;
@@ -1193,26 +1222,26 @@ async function main() {
             gap: 12px;
           }
           #praxis-demo-hud .praxis-demo-badge {
-            background: linear-gradient(135deg, #0284c7, #38bdf8);
-            color: #082f49;
+            background: linear-gradient(135deg, #0284c7, #0d9488);
+            color: #ffffff;
             font-weight: 800;
             font-size: 11px;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             padding: 4px 10px;
-            border-radius: 6px;
+            border-radius: 7px;
             white-space: nowrap;
           }
           #praxis-demo-hud .praxis-demo-title {
-            font-weight: 700;
+            font-weight: 800;
             font-size: 13.5px;
-            color: #f1f5f9;
+            color: #0f172a;
             white-space: nowrap;
           }
           #praxis-demo-hud .praxis-demo-detail {
             font-size: 12px;
-            color: #cbd5e1;
-            border-left: 1px solid rgba(148, 163, 184, 0.35);
+            color: #475569;
+            border-left: 1.5px solid rgba(148, 163, 184, 0.45);
             padding-left: 12px;
             white-space: nowrap;
             overflow: hidden;
@@ -1223,9 +1252,9 @@ async function main() {
             font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
             font-weight: 700;
-            color: #38bdf8;
-            background: rgba(56, 189, 248, 0.14);
-            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #0369a1;
+            background: rgba(2, 132, 199, 0.1);
+            border: 1px solid rgba(2, 132, 199, 0.28);
             padding: 3px 9px;
             border-radius: 6px;
             white-space: nowrap;
@@ -1233,14 +1262,14 @@ async function main() {
           #praxis-demo-hud .praxis-demo-progress-track {
             width: 100%;
             height: 4px;
-            background: rgba(148, 163, 184, 0.2);
+            background: rgba(148, 163, 184, 0.22);
             border-radius: 999px;
             overflow: hidden;
           }
           #praxis-demo-hud .praxis-demo-progress-fill {
             width: 10%;
             height: 100%;
-            background: linear-gradient(90deg, #0ea5e9, #38bdf8, #10b981);
+            background: linear-gradient(90deg, #0284c7, #0d9488, #10b981);
             border-radius: 999px;
             transition: width 0.35s ease;
           }
@@ -1254,17 +1283,17 @@ async function main() {
             z-index: 2147483647;
             transform: translate3d(960px, 540px, 0);
             transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
-            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 8px rgba(56, 189, 248, 0.55));
+            filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.35)) drop-shadow(0 0 8px rgba(2, 132, 199, 0.45));
           }
           .praxis-click-ripple {
             position: fixed;
-            width: 32px;
-            height: 32px;
-            margin-left: -16px;
-            margin-top: -16px;
+            width: 34px;
+            height: 34px;
+            margin-left: -17px;
+            margin-top: -17px;
             border-radius: 50%;
-            border: 2.5px solid #38bdf8;
-            background: rgba(56, 189, 248, 0.32);
+            border: 2.5px solid #0284c7;
+            background: rgba(2, 132, 199, 0.24);
             pointer-events: none;
             z-index: 2147483646;
             animation: praxisRippleAnim 0.5s ease-out forwards;
@@ -1280,9 +1309,9 @@ async function main() {
         hud.id = 'praxis-demo-hud';
         hud.innerHTML = `
           <div class="praxis-demo-row">
-            <span class="praxis-demo-badge">ETAPA 1/9 · CRUD DO ZERO</span>
+            <span class="praxis-demo-badge">ETAPA 1/8 · TEMA AURORA & PÁGINA VAZIA</span>
             <span class="praxis-demo-title">Estúdio CRUD (/crud-studio)</span>
-            <span class="praxis-demo-detail">Autoria 100% Zero-Code & Zero-Deploy · Full HD 1080p @ 30 FPS</span>
+            <span class="praxis-demo-detail">Autoria Progressiva Zero-Code & Zero-Deploy · Full HD 1080p @ 30 FPS</span>
             <span class="praxis-demo-timer" id="praxis-demo-timer">⏱ 00:00</span>
           </div>
           <div class="praxis-demo-progress-track">
@@ -1295,8 +1324,8 @@ async function main() {
         cursor.id = 'praxis-demo-cursor';
         cursor.innerHTML = `
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 3L12.5 24L15.8 15.8L24 12.5L4 3Z" fill="#38BDF8" stroke="#082F49" stroke-width="2" stroke-linejoin="round"/>
-            <circle cx="4" cy="3" r="2.5" fill="#F8FAFC"/>
+            <path d="M4 3L12.5 24L15.8 15.8L24 12.5L4 3Z" fill="#0284C7" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"/>
+            <circle cx="4" cy="3" r="2.5" fill="#0D9488"/>
           </svg>
         `;
         document.body.appendChild(cursor);
@@ -1351,7 +1380,7 @@ async function main() {
 
     const page = await context.newPage();
 
-    console.log('1. Navigating to /crud-studio (100% blank CRUD page)...');
+    console.log('1. Navigating to /crud-studio in Aurora theme (100% blank CRUD page)...');
     await page.goto(`${BASE_URL}/crud-studio`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.locator('[data-testid="toggle-customization-btn"]').waitFor({ state: 'visible', timeout: 15000 });
     await page.evaluate(() => sessionStorage.setItem('__praxis_crud_demo_t0', String(Date.now())));
@@ -1359,10 +1388,10 @@ async function main() {
     await setDemoStage(
       page,
       1,
-      9,
-      'ETAPA 1/9 · PÁGINA 100% EM BRANCO',
+      8,
+      'ETAPA 1/8 · TEMA AURORA & PÁGINA EM BRANCO',
       'Estúdio CRUD (/crud-studio) — Zero Código & Zero Metadados Iniciais',
-      'Iniciando do zero absoluto · Ativando modo de customização visual'
+      'Demonstrando seletor de Tema Aurora, ampliando o canvas e ativando modo de autoria'
     );
 
     const videoFile = path.join(ARTIFACT_DIR, 'praxis-crud-studio-zero-deploy-demo.webm');
@@ -1370,47 +1399,71 @@ async function main() {
     const recorder = new HighFidelityVideoRecorder(page, videoFile, { width: 1920, height: 1080, fps: 30 });
     await recorder.start();
 
-    await sleep(900);
+    await sleep(600);
+    await recorder.captureSyncKeyframe();
+
+    // Explicitly showcase selecting the Aurora theme from the workspace Appearance menu
+    const appearanceBtn = page.locator('button[title="Aparência do workspace"], button[aria-label*="Aparência"]').first();
+    if (await appearanceBtn.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, appearanceBtn, 95);
+      await appearanceBtn.click();
+      await sleep(320);
+      const auroraOption = page.locator('.cdk-overlay-container [role="menuitemradio"]').filter({ hasText: /Aurora/i }).first();
+      if (await auroraOption.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, auroraOption, 90);
+        await auroraOption.click();
+        await sleep(350);
+      } else {
+        await page.keyboard.press('Escape');
+      }
+    }
+
+    // Collapse the left navigation sidebar so the CRUD page & expanded editors get maximum horizontal canvas
+    await collapseSidebarIfExpanded(page);
+    await sleep(350);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '01-blank-crud-studio.png') });
 
     // Enable Customization Mode
     const toggleCustomBtn = page.locator('[data-testid="toggle-customization-btn"]');
-    await moveCursorToLocator(page, toggleCustomBtn, 120);
+    await moveCursorToLocator(page, toggleCustomBtn, 110);
     await toggleCustomBtn.click();
-    await sleep(600);
+    await sleep(500);
     await recorder.captureSyncKeyframe();
 
-    // Click "Configurar CRUD" on Empty State card (or resource-page-configure-btn if header exists)
+    // Click "Configurar metadados" on Empty State card
     const configPageBtn = page
       .locator('praxis-crud praxis-empty-state-card button, [data-testid="resource-page-configure-btn"]')
       .first();
     await configPageBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, configPageBtn, 120);
+    await moveCursorToLocator(page, configPageBtn, 110);
     await configPageBtn.click();
 
     const crudEditor = page.locator('[data-testid="crud-metadata-editor"]');
     await crudEditor.waitFor({ state: 'visible', timeout: 10000 });
-    await sleep(500);
+    await sleep(350);
+
+    // Expand the CRUD Metadata Editor so all tabs and controls are shown in full width
+    await expandActiveSettingsPanel(page);
     await recorder.captureSyncKeyframe();
 
     // =========================================================================
-    // STAGE 2: Connect Resource & Customize Page Header / Opening Mode / Actions
+    // STAGE 2: Quick Win First — Connect Resource, Set Executive Header & Materialize Live Table Immediately!
     // =========================================================================
-    console.log('2. Connecting to human-resources/funcionarios and customizing Page Header, Opening Mode & Actions...');
+    console.log('2. Connecting to human-resources/funcionarios and materializing the live table immediately...');
     await setDemoStage(
       page,
       2,
-      9,
-      'ETAPA 2/9 · CONEXÃO, CABEÇALHO & AÇÕES',
-      'Quick Connect + Cabeçalho Executivo + Modo Modal & Ações Governadas',
-      'Configurando título/subtítulo/domínio da página, endpoint REST e formulários modais'
+      8,
+      'ETAPA 2/8 · CONEXÃO RÁPIDA & TABELA VIVA',
+      'Quick Connect RESTful + Cabeçalho Executivo → Materialização Imediata da Tabela',
+      'Conectando ao recurso human-resources/funcionarios e trazendo os dados reais para a tela'
     );
 
     await connectResourceInCrudEditor(page, 'human-resources/funcionarios');
     await setFormInput(page, '[data-testid="crud-editor-resource-idField"]', 'id');
 
-    // Configure Executive Page Header directly inside the Connection tab (I1)
+    // Configure Executive Page Header directly inside the Connection tab
     await setFormInput(page, '[data-testid="crud-editor-page-title"]', 'Comando de Efetivo Operacional');
     await setFormInput(
       page,
@@ -1418,7 +1471,7 @@ async function main() {
       'Gestão integrada de agentes, prontidão tática, credenciais S.H.I.E.L.D. e subsídios em tempo real.'
     );
     await setFormInput(page, '[data-testid="crud-editor-page-domain-label"]', 'HUMAN RESOURCES • ZERO-CODE STUDIO');
-    await sleep(500);
+    await sleep(400);
 
     // Wait briefly for schema columns to resolve in background
     for (let i = 0; i < 30; i++) {
@@ -1428,11 +1481,11 @@ async function main() {
     }
     await recorder.captureSyncKeyframe();
 
-    // Switch to Tab 1: Opening / Defaults
+    // Switch to Tab: Opening / Defaults (configure Modal Maximized)
     const tabDefaults = page.locator('[data-testid="crud-editor-tab-defaults"]');
-    await moveCursorToLocator(page, tabDefaults, 100);
+    await moveCursorToLocator(page, tabDefaults, 90);
     await tabDefaults.click();
-    await sleep(400);
+    await sleep(350);
 
     await selectMatOption(
       page,
@@ -1451,61 +1504,277 @@ async function main() {
     await setSlideToggle(page, '[data-testid="crud-editor-modal-startMaximized"]', true);
     await setSlideToggle(page, '[data-testid="crud-editor-modal-rememberLastState"]', true);
     await setSlideToggle(page, '[data-testid="crud-editor-back-confirmOnDirty"]', true);
-    await sleep(500);
+    await sleep(350);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '02-crud-resource-and-opening.png') });
 
-    // Switch to Tab 2: Actions — bind create, view, and edit to the shared modal form ('studio-funcionarios-form') (I4)
+    // Switch to Tab: Actions — bind create, view, and edit to 'studio-funcionarios-form'
     const tabActions = page.locator('[data-testid="crud-editor-tab-actions"]');
-    await moveCursorToLocator(page, tabActions, 100);
+    await moveCursorToLocator(page, tabActions, 90);
     await tabActions.click();
-    await sleep(450);
+    await sleep(350);
     for (const actionKey of ['create', 'view', 'edit']) {
       const panel = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel"]`).first();
       const header = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel-header"]`).first();
       if (await panel.isVisible().catch(() => false)) {
         const isExpanded = await panel.evaluate((el) => el.classList.contains('mat-expanded')).catch(() => false);
         if (!isExpanded && (await header.isVisible().catch(() => false))) {
-          await moveCursorToLocator(page, header, 80);
+          await moveCursorToLocator(page, header, 75);
           await header.click();
-          await sleep(280);
+          await sleep(220);
         }
       }
       const formIdInput = page.locator(`[data-testid="crud-editor-action-${actionKey}-formId"]`).first();
       await formIdInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
       if (await formIdInput.isVisible().catch(() => false)) {
-        await setFormInput(page, formIdInput, 'studio-funcionarios-form', { pauseMs: 65 });
-        await sleep(220);
+        await setFormInput(page, formIdInput, 'studio-funcionarios-form', { pauseMs: 55 });
+        await sleep(180);
       }
     }
-    await sleep(450);
+    await sleep(350);
     await recorder.captureSyncKeyframe();
 
+    // SAVE & CLOSE NOW so the viewer immediately sees the populated table and Executive Header on screen!
+    await saveAndCloseSettingsPanel(page, 'crud-metadata-editor-initial-connect');
+    await page.locator('.praxis-resource-page__header').first().waitFor({ state: 'visible', timeout: 15000 });
+    await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
+    await setDemoStage(
+      page,
+      2,
+      8,
+      'ETAPA 2/8 · TABELA POPULADA EM SEGUNDOS!',
+      'Cabeçalho Executivo + Grade Conectada ao Backend (98 Registros Reais)',
+      'Com a tabela já viva na tela, voltamos ao editor expandido para refinar colunas, KPIs e filtros'
+    );
+    await sleep(1100);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '02b-crud-live-table-first-materialization.png') });
+
     // =========================================================================
-    // STAGE 3: Author KPI Band (4 Executive Cards with Live /stats/group-by Telemetry & Click Filters)
+    // STAGE 3: Re-open Expanded Editor -> Refine Table Columns, Avatar Renderer, Status Chip & BRL Currency (R$)
     // =========================================================================
-    console.log('3. Authoring KPI Band with live /stats/group-by telemetry and 4 interactive cards...');
+    console.log('3. Re-opening expanded editor to refine Table Toolbar, Columns, Avatar Renderer and BRL Currency...');
     await setDemoStage(
       page,
       3,
-      9,
-      'ETAPA 3/9 · FAIXA DE KPIs VIVA',
-      'Autoria Visual da Faixa Executiva de KPIs (PraxisKpiBand + /stats/group-by)',
-      'Conectando telemetria viva (byKey / totalCount) e filtros interativos ao clicar'
+      8,
+      'ETAPA 3/8 · REFINAMENTO VISUAL DA GRADE',
+      'Editor de Colunas Expandido — Avatar Composto, Chip de Prontidão e Moeda (R$)',
+      'Transformando colunas brutas em experiência executiva com formatação Real Brasileiro (R$)'
     );
 
-    const tabKpis = page.locator('[data-testid="crud-editor-tab-kpis"]');
-    await moveCursorToLocator(page, tabKpis, 100);
-    await tabKpis.click();
+    const reopenCrudEditorBtn = page.locator('[data-testid="resource-page-configure-btn"]').first();
+    await reopenCrudEditorBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, reopenCrudEditorBtn, 100);
+    await reopenCrudEditorBtn.click();
+    await crudEditor.waitFor({ state: 'visible', timeout: 10000 });
+    await sleep(320);
+    await expandActiveSettingsPanel(page);
+
+    const tabTable = page.locator('[data-testid="crud-editor-tab-table"]');
+    await moveCursorToLocator(page, tabTable, 95);
+    await tabTable.click();
     await sleep(400);
+
+    await setFormInput(
+      page,
+      '[data-testid="table-inline-editor-toolbar-title"]',
+      'Efetivo Tático S.H.I.E.L.D. — Gestão Operacional de Heróis'
+    );
+    await setFormInput(
+      page,
+      '[data-testid="table-inline-editor-toolbar-subtitle"]',
+      'Catálogo governado em tempo real · KPIs interativos, filtros rápidos e formulários customizados'
+    );
+    await setFormInput(page, '[data-testid="table-inline-editor-toolbar-icon"]', 'shield_person');
+
+    // Expand Columns editor via "Editar colunas do recurso" button
+    const focusColumnsBtn = page.locator('[data-testid="crud-table-focus-columns-btn"]');
+    if (await focusColumnsBtn.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, focusColumnsBtn, 95);
+      await focusColumnsBtn.click();
+      await sleep(450);
+    } else {
+      const colsPanelHeader = page.locator('[data-testid="table-inline-editor-columns-panel"] mat-expansion-panel-header');
+      await moveCursorToLocator(page, colsPanelHeader, 95);
+      await colsPanelHeader.click();
+      await sleep(450);
+    }
+
+    const colsEditor = page.locator('columns-config-editor');
+    await colsEditor.waitFor({ state: 'visible', timeout: 10000 });
+
+    const customizeColumnByField = async (fieldName, { header, width, align, dataType, currencyCode, composePreset }) => {
+      const colItem = colsEditor
+        .locator('.column-item')
+        .filter({ has: page.locator('.column-field', { hasText: new RegExp(`^${fieldName}$`) }) })
+        .first();
+      if ((await colItem.count()) === 0) return false;
+
+      await colItem.evaluate((el) => el.scrollIntoView({ block: 'nearest' })).catch(() => {});
+
+      const visCheckboxInput = colItem.locator('mat-checkbox.visibility-checkbox input[type="checkbox"]').first();
+      if ((await visCheckboxInput.count()) > 0 && !(await visCheckboxInput.isChecked().catch(() => true))) {
+        const checkboxTarget = colItem.locator('mat-checkbox.visibility-checkbox').first();
+        await moveCursorToLocator(page, checkboxTarget, 65);
+        await checkboxTarget.click();
+        await sleep(150);
+      }
+
+      await moveCursorToLocator(page, colItem, 75);
+      await colItem.click();
+      await sleep(200);
+
+      if (header) {
+        await setFormInput(page, colsEditor.locator('input[name="header"]'), header);
+      }
+      if (width) {
+        await setFormInput(page, colsEditor.locator('input[name="width"]'), width);
+      }
+      if (align) {
+        const alignToggle = colsEditor.locator(`mat-button-toggle-group[name="align"] mat-button-toggle[value="${align}"] button`);
+        if (await alignToggle.isVisible().catch(() => false)) {
+          await moveCursorToLocator(page, alignToggle, 65);
+          await alignToggle.click();
+          await sleep(150);
+        }
+      }
+      if (dataType) {
+        const dtSelect = colsEditor.locator('mat-select[name="dataType"]');
+        if (await dtSelect.isVisible().catch(() => false)) {
+          await selectMatOption(page, dtSelect, (txt, val) => val === dataType || /moeda|currency/i.test(txt) || txt.toLowerCase().includes(dataType));
+        }
+      }
+      if (currencyCode) {
+        const formatterPanel = colsEditor.locator('mat-expansion-panel').filter({ hasText: /Formata|Display formatting/i }).first();
+        if (await formatterPanel.isVisible().catch(() => false)) {
+          const isExpanded = await formatterPanel.evaluate((el) => el.classList.contains('mat-expanded'));
+          if (!isExpanded) {
+            const fHeader = formatterPanel.locator('mat-expansion-panel-header');
+            await moveCursorToLocator(page, fHeader, 75);
+            await fHeader.click();
+            await sleep(240);
+          }
+          const currencySelect = formatterPanel.locator('mat-select').first();
+          if (await currencySelect.isVisible().catch(() => false)) {
+            await selectMatOption(page, currencySelect, (txt, val) => val === currencyCode || /BRL|Real Brasileiro/i.test(txt));
+            await sleep(200);
+          }
+        }
+      }
+      if (composePreset) {
+        const rendererPanel = colsEditor.locator('mat-expansion-panel').filter({ hasText: /Renderiza|Cell rendering|photo_filter/i }).first();
+        if (await rendererPanel.isVisible().catch(() => false)) {
+          const isExpanded = await rendererPanel.evaluate((el) => el.classList.contains('mat-expanded'));
+          if (!isExpanded) {
+            const rHeader = rendererPanel.locator('mat-expansion-panel-header');
+            await moveCursorToLocator(page, rHeader, 75);
+            await rHeader.click();
+            await sleep(250);
+          }
+          const presetBtn = rendererPanel.locator('.compose-preset-actions button').filter({ hasText: composePreset }).first();
+          if (await presetBtn.isVisible().catch(() => false)) {
+            await moveCursorToLocator(page, presetBtn, 80);
+            await presetBtn.click();
+            await sleep(240);
+          }
+        }
+      }
+      return true;
+    };
+
+    await customizeColumnByField('nomeCompleto', {
+      header: 'Herói / Nome Completo',
+      width: '260px',
+      composePreset: /Pessoa com avatar|Person with avatar/i
+    });
+    await customizeColumnByField('codinome', {
+      header: 'Codinome Tático',
+      width: '175px'
+    });
+    await customizeColumnByField('cargoNome', {
+      header: 'Patente & Especialidade',
+      width: '220px'
+    });
+    await customizeColumnByField('departamentoNome', {
+      header: 'Divisão Operacional',
+      width: '230px'
+    });
+    await customizeColumnByField('salario', {
+      header: 'Subsídio Mensal',
+      width: '170px',
+      align: 'right',
+      dataType: 'currency',
+      currencyCode: 'BRL'
+    });
+    await customizeColumnByField('ativo', {
+      header: 'Prontidão',
+      width: '140px',
+      align: 'center',
+      composePreset: /Chip de status|Status chip/i
+    });
+
+    // Hide noisy raw columns so the executive table fits 100% cleanly in 1080p
+    const columnsToHide = ['fotoPerfilUrl', 'avatarUrl', 'foto', 'id', 'estadoCivil', 'cpf', 'telefone', 'email', 'dataNascimento', 'cargoId', 'departamentoId'];
+    for (const hideField of columnsToHide) {
+      const colItem = colsEditor
+        .locator('.column-item')
+        .filter({ has: page.locator('.column-field', { hasText: new RegExp(`^${hideField}$`, 'i') }) })
+        .first();
+      if ((await colItem.count()) > 0) {
+        const visCheckbox = colItem.locator('mat-checkbox.visibility-checkbox input[type="checkbox"]').first();
+        if ((await visCheckbox.count()) > 0 && (await visCheckbox.isChecked().catch(() => false))) {
+          await colItem.evaluate((el) => el.scrollIntoView({ block: 'nearest' })).catch(() => {});
+          const checkboxTarget = colItem.locator('mat-checkbox.visibility-checkbox').first();
+          await moveCursorToLocator(page, checkboxTarget, 55);
+          await checkboxTarget.click();
+          await sleep(110);
+        }
+      }
+    }
+
+    await sleep(450);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '05-crud-table-columns-authored.png') });
+
+    // Save & close so the viewer immediately sees the transformed Corporate Table with Avatars, R$ and Status Chips!
+    await saveAndCloseSettingsPanel(page, 'crud-table-columns-refined');
+    await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
+    await sleep(950);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '05b-crud-table-refined-live.png') });
+
+    // =========================================================================
+    // STAGE 4: Add Live Telemetry KPI Band (/stats/group-by) & ScopeBar with Quick Filter Chips
+    // =========================================================================
+    console.log('4. Re-opening expanded editor to author KPI Band and Filter Bar (ScopeBar)...');
+    await setDemoStage(
+      page,
+      4,
+      8,
+      'ETAPA 4/8 · FAIXA DE KPIs & BARRA DE FILTROS',
+      'Adicionando Telemetria Viva (/stats/group-by) + ScopeBar com Quick Filter Chips',
+      'Configurando 4 cards executivos de KPI e filtros fixados acima da grade corporativa'
+    );
+
+    await moveCursorToLocator(page, reopenCrudEditorBtn, 95);
+    await reopenCrudEditorBtn.click();
+    await crudEditor.waitFor({ state: 'visible', timeout: 10000 });
+    await sleep(320);
+    await expandActiveSettingsPanel(page);
+
+    const tabKpis = page.locator('[data-testid="crud-editor-tab-kpis"]');
+    await moveCursorToLocator(page, tabKpis, 95);
+    await tabKpis.click();
+    await sleep(380);
 
     await setSlideToggle(page, '[data-testid="crud-kpi-band-enabled"]', true);
 
     const autoConnectKpiBtn = page.locator('[data-testid="crud-kpi-band-autoconnect-btn"]');
     if (await autoConnectKpiBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, autoConnectKpiBtn, 90);
+      await moveCursorToLocator(page, autoConnectKpiBtn, 85);
       await autoConnectKpiBtn.click();
-      await sleep(250);
+      await sleep(240);
     }
     await setFormInput(page, '[data-testid="crud-kpi-band-groupby-field"]', 'ativo');
 
@@ -1563,9 +1832,9 @@ async function main() {
     const addKpiBtn = page.locator('[data-testid="crud-kpi-add-card-btn"]');
     for (let i = 0; i < kpiDefinitions.length; i++) {
       const def = kpiDefinitions[i];
-      await moveCursorToLocator(page, addKpiBtn, 80);
+      await moveCursorToLocator(page, addKpiBtn, 75);
       await addKpiBtn.click();
-      await sleep(220);
+      await sleep(200);
 
       await setFormInput(page, `[data-testid="crud-kpi-card-label-${i}"]`, def.label);
       await setFormInput(page, `[data-testid="crud-kpi-card-value-${i}"]`, def.value);
@@ -1594,42 +1863,30 @@ async function main() {
     if (await kpiPreview.isVisible().catch(() => false)) {
       await kpiPreview.evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'center' })).catch(() => {});
     }
-    await sleep(600);
+    await sleep(550);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '03-crud-kpi-band-authored.png') });
 
-    // =========================================================================
-    // STAGE 4: Author Filter Bar (Pinned Inline Fields + Custom Quick Filter Chips)
-    // =========================================================================
-    console.log('4. Authoring Filter Bar (inline fields + quick filter chips)...');
-    await setDemoStage(
-      page,
-      4,
-      9,
-      'ETAPA 4/9 · BARRA DE FILTROS & CHIPS',
-      'Campos Fixados (Inline Fields) + Atalhos Rápidos (Quick Filters)',
-      'Fixando busca por Nome/Codinome/E-mail no ScopeBar e criando chips de filtro rápido'
-    );
-
+    // Switch to Tab: Filters (Inline Fields + Quick Filter Chips)
     const tabFilters = page.locator('[data-testid="crud-editor-tab-filters"]');
-    await moveCursorToLocator(page, tabFilters, 100);
+    await moveCursorToLocator(page, tabFilters, 95);
     await tabFilters.click();
-    await sleep(400);
+    await sleep(380);
 
     await setSlideToggle(page, '[data-testid="crud-filterbar-show-advanced"]', true);
 
-    for (const inlineField of ['nomeCompleto', 'codinome', 'cargoNome', 'email']) {
+    for (const inlineField of ['nomeCompleto', 'cargoNome', 'email']) {
       const suggestionBtn = page.locator(`[data-testid="crud-filterbar-available-field-${inlineField}"]`);
       if (await suggestionBtn.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, suggestionBtn, 80);
+        await moveCursorToLocator(page, suggestionBtn, 75);
         await suggestionBtn.click();
-        await sleep(180);
+        await sleep(170);
       } else {
         await setFormInput(page, '[data-testid="crud-filterbar-inline-field-input"]', inlineField);
         const addFieldBtn = page.locator('[data-testid="crud-filterbar-inline-field-add-btn"]');
-        await moveCursorToLocator(page, addFieldBtn, 70);
+        await moveCursorToLocator(page, addFieldBtn, 65);
         await addFieldBtn.click();
-        await sleep(180);
+        await sleep(170);
       }
     }
 
@@ -1648,9 +1905,9 @@ async function main() {
     const addQuickBtn = page.locator('[data-testid="crud-filterbar-add-quick-btn"]');
     for (let i = 0; i < quickFilters.length; i++) {
       const qf = quickFilters[i];
-      await moveCursorToLocator(page, addQuickBtn, 80);
+      await moveCursorToLocator(page, addQuickBtn, 75);
       await addQuickBtn.click();
-      await sleep(220);
+      await sleep(200);
 
       await setFormInput(page, `[data-testid="crud-filterbar-quick-id-${i}"]`, qf.id);
       await setFormInput(page, `[data-testid="crud-filterbar-quick-label-${i}"]`, qf.label);
@@ -1667,176 +1924,13 @@ async function main() {
       }
     }
 
-    await sleep(500);
+    await sleep(450);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '04-crud-filterbar-authored.png') });
 
-    // =========================================================================
-    // STAGE 5: Customize Table Structure, Toolbar & Columns (Presets, Formats, Widths)
-    // =========================================================================
-    console.log('5. Customizing Table Toolbar, Behavior, and Columns...');
-    await setDemoStage(
-      page,
-      5,
-      9,
-      'ETAPA 5/9 · TABELA & COLUNAS',
-      'Customizando Barra de Ferramentas, Colunas, Formatação Moeda e Renderers',
-      'Configurando avatar composto, chips de status, Subsídio Mensal (R$) e larguras'
-    );
+    // Save & close CRUD Metadata Editor to materialize KPI Band + ScopeBar above the refined Table!
+    await saveAndCloseSettingsPanel(page, 'crud-metadata-editor-kpis-and-filters');
 
-    const tabTable = page.locator('[data-testid="crud-editor-tab-table"]');
-    await moveCursorToLocator(page, tabTable, 100);
-    await tabTable.click();
-    await sleep(450);
-
-    await setFormInput(
-      page,
-      '[data-testid="table-inline-editor-toolbar-title"]',
-      'Efetivo Tático S.H.I.E.L.D. — Gestão Operacional de Heróis'
-    );
-    await setFormInput(
-      page,
-      '[data-testid="table-inline-editor-toolbar-subtitle"]',
-      'Catálogo governado em tempo real · KPIs interativos, filtros rápidos e formulários customizados'
-    );
-    await setFormInput(page, '[data-testid="table-inline-editor-toolbar-icon"]', 'shield_person');
-
-    // Expand Columns editor via "Editar colunas do recurso" button
-    const focusColumnsBtn = page.locator('[data-testid="crud-table-focus-columns-btn"]');
-    if (await focusColumnsBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, focusColumnsBtn, 100);
-      await focusColumnsBtn.click();
-      await sleep(500);
-    } else {
-      const colsPanelHeader = page.locator('[data-testid="table-inline-editor-columns-panel"] mat-expansion-panel-header');
-      await moveCursorToLocator(page, colsPanelHeader, 100);
-      await colsPanelHeader.click();
-      await sleep(500);
-    }
-
-    const colsEditor = page.locator('columns-config-editor');
-    await colsEditor.waitFor({ state: 'visible', timeout: 10000 });
-
-    const customizeColumnByField = async (fieldName, { header, width, align, dataType, composePreset }) => {
-      const colItem = colsEditor
-        .locator('.column-item')
-        .filter({ has: page.locator('.column-field', { hasText: new RegExp(`^${fieldName}$`) }) })
-        .first();
-      if ((await colItem.count()) === 0) return false;
-
-      await colItem.evaluate((el) => el.scrollIntoView({ block: 'nearest' })).catch(() => {});
-
-      // Ensure visibility checkbox is explicitly checked (I3 — especially for 'salario')
-      const visCheckboxInput = colItem.locator('mat-checkbox.visibility-checkbox input[type="checkbox"]').first();
-      if ((await visCheckboxInput.count()) > 0 && !(await visCheckboxInput.isChecked().catch(() => true))) {
-        const checkboxTarget = colItem.locator('mat-checkbox.visibility-checkbox').first();
-        await moveCursorToLocator(page, checkboxTarget, 65);
-        await checkboxTarget.click();
-        await sleep(160);
-      }
-
-      await moveCursorToLocator(page, colItem, 80);
-      await colItem.click();
-      await sleep(220);
-
-      if (header) {
-        await setFormInput(page, colsEditor.locator('input[name="header"]'), header);
-      }
-      if (width) {
-        await setFormInput(page, colsEditor.locator('input[name="width"]'), width);
-      }
-      if (align) {
-        const alignToggle = colsEditor.locator(`mat-button-toggle-group[name="align"] mat-button-toggle[value="${align}"] button`);
-        if (await alignToggle.isVisible().catch(() => false)) {
-          await moveCursorToLocator(page, alignToggle, 70);
-          await alignToggle.click();
-          await sleep(160);
-        }
-      }
-      if (dataType) {
-        const dtSelect = colsEditor.locator('mat-select[name="dataType"]');
-        if (await dtSelect.isVisible().catch(() => false)) {
-          await selectMatOption(page, dtSelect, (txt, val) => val === dataType || /moeda|currency/i.test(txt) || txt.toLowerCase().includes(dataType));
-        }
-      }
-      if (composePreset) {
-        const rendererPanel = colsEditor.locator('mat-expansion-panel').filter({ hasText: /Renderiza|Cell rendering|photo_filter/i }).first();
-        if (await rendererPanel.isVisible().catch(() => false)) {
-          const isExpanded = await rendererPanel.evaluate((el) => el.classList.contains('mat-expanded'));
-          if (!isExpanded) {
-            const rHeader = rendererPanel.locator('mat-expansion-panel-header');
-            await moveCursorToLocator(page, rHeader, 80);
-            await rHeader.click();
-            await sleep(280);
-          }
-          const presetBtn = rendererPanel.locator('.compose-preset-actions button').filter({ hasText: composePreset }).first();
-          if (await presetBtn.isVisible().catch(() => false)) {
-            await moveCursorToLocator(page, presetBtn, 85);
-            await presetBtn.click();
-            await sleep(260);
-          }
-        }
-      }
-      return true;
-    };
-
-    await customizeColumnByField('nomeCompleto', {
-      header: 'Herói / Nome Completo',
-      width: '260px',
-      composePreset: /Pessoa com avatar|Person with avatar/i
-    });
-    await customizeColumnByField('codinome', {
-      header: 'Codinome Tático',
-      width: '170px'
-    });
-    await customizeColumnByField('cargoNome', {
-      header: 'Patente / Especialidade',
-      width: '200px'
-    });
-    await customizeColumnByField('departamentoNome', {
-      header: 'Divisão Operacional',
-      width: '190px'
-    });
-    await customizeColumnByField('salario', {
-      header: 'Subsídio Mensal',
-      width: '160px',
-      align: 'right',
-      dataType: 'currency'
-    });
-    await customizeColumnByField('ativo', {
-      header: 'Prontidão',
-      width: '140px',
-      align: 'center',
-      composePreset: /Chip de status|Status chip/i
-    });
-
-    // Hide noisy raw columns so the executive table fits 100% in 1080p
-    const columnsToHide = ['fotoPerfilUrl', 'avatarUrl', 'foto', 'id', 'estadoCivil', 'cpf', 'telefone', 'email', 'dataNascimento', 'cargoId', 'departamentoId'];
-    for (const hideField of columnsToHide) {
-      const colItem = colsEditor
-        .locator('.column-item')
-        .filter({ has: page.locator('.column-field', { hasText: new RegExp(`^${hideField}$`, 'i') }) })
-        .first();
-      if ((await colItem.count()) > 0) {
-        const visCheckbox = colItem.locator('mat-checkbox.visibility-checkbox input[type="checkbox"]').first();
-        if ((await visCheckbox.count()) > 0 && (await visCheckbox.isChecked().catch(() => false))) {
-          await colItem.evaluate((el) => el.scrollIntoView({ block: 'nearest' })).catch(() => {});
-          const checkboxTarget = colItem.locator('mat-checkbox.visibility-checkbox').first();
-          await moveCursorToLocator(page, checkboxTarget, 60);
-          await checkboxTarget.click();
-          await sleep(120);
-        }
-      }
-    }
-
-    await sleep(500);
-    await recorder.captureSyncKeyframe();
-    await page.screenshot({ path: path.join(ARTIFACT_DIR, '05-crud-table-columns-authored.png') });
-
-    // Save & close CRUD Metadata Editor
-    await saveAndCloseSettingsPanel(page, 'crud-metadata-editor');
-
-    // Wait for the live CRUD page to materialize Executive Header, KPI Band, ScopeBar + Inline Filters, and Table rows
     console.log('   Waiting for live CRUD page to render Header, KPI Band, ScopeBar, and Table rows...');
     await page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').first().waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
@@ -1847,65 +1941,83 @@ async function main() {
       .first()
       .waitFor({ state: 'visible', timeout: 10000 })
       .catch(() => {});
-    await sleep(600);
+    await sleep(750);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '06-crud-page-materialized.png') });
 
     // =========================================================================
-    // STAGE 6: Customize the Dynamic Form Layout Inside the CRUD Modal (All 3 Sections in 2 Columns)
+    // STAGE 5: Customize the Dynamic Form Layout Inside the CRUD Modal (Expanded Flat-Section Editor + Layout Scope)
     // =========================================================================
-    console.log('6. Opening CRUD form in Modal and customizing Form Layout (All 3 Sections in 2 Columns)...');
+    console.log('5. Opening CRUD form in Modal and customizing Form Layout in Expanded Flat-Section Editor...');
     await setDemoStage(
       page,
-      6,
-      9,
-      'ETAPA 6/9 · CUSTOMIZAÇÃO DO FORMULÁRIO',
-      'Editor Visual de Formulário Dinâmico (PraxisDynamicFormConfigEditor)',
-      'Renomeando as 3 seções e aplicando preset de 2 Colunas (6/6) em todas elas'
+      5,
+      8,
+      'ETAPA 5/8 · EDITOR DE FORMULÁRIO EXPANDIDO',
+      'Flat Sections + Escopo Compartilhado entre Modos + 3 Seções em 2 Colunas (6/6)',
+      'Configurando escopo compartilhado (Criar, Editar e Visualizar) e layout em 2 colunas'
     );
 
-    // Click the Edit action on the first row to open the form modal
     const firstRow = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
     await firstRow.waitFor({ state: 'visible', timeout: 15000 });
-    await moveCursorToLocator(page, firstRow, 90);
+    await moveCursorToLocator(page, firstRow, 85);
 
     const editRowBtn = firstRow
       .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
       .nth(1);
     await editRowBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, editRowBtn, 95);
+    await moveCursorToLocator(page, editRowBtn, 90);
     await editRowBtn.click();
 
-    // Wait for DynamicFormDialogHostComponent modal and form to finish loading
     const formDialog = page.locator('mat-dialog-container praxis-dynamic-form').first();
     await formDialog.waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
-    await sleep(500);
+    await sleep(450);
     await recorder.captureSyncKeyframe();
 
-    // Click the Customize Form gear button (.config-button) inside the modal form
     const customizeFormBtn = formDialog
       .locator('button.config-button, button[aria-label*="Configurar formulário"], button.customize-btn')
       .first();
     await customizeFormBtn.waitFor({ state: 'visible', timeout: 15000 });
-    await moveCursorToLocator(page, customizeFormBtn, 110);
+    await moveCursorToLocator(page, customizeFormBtn, 100);
     await customizeFormBtn.click();
 
     const formConfigEditor = page.locator('praxis-dynamic-form-config-editor');
     await formConfigEditor.waitFor({ state: 'visible', timeout: 10000 });
-    await sleep(450);
+    await sleep(350);
+
+    // Expand the Form Config Editor Settings Panel to showcase all tabs & controls in wide view
+    await expandActiveSettingsPanel(page);
     await recorder.captureSyncKeyframe();
 
     // Switch to the "Layout" tab in PraxisDynamicFormConfigEditor
     const layoutTab = formConfigEditor.locator('.mat-mdc-tab').filter({ hasText: /Layout/i }).first();
-    await moveCursorToLocator(page, layoutTab, 100);
+    await moveCursorToLocator(page, layoutTab, 95);
     await layoutTab.click();
-    await sleep(450);
+    await sleep(400);
+
+    // Highlight the new Layout Scope Control ("Compartilhar entre Criar, Editar e Visualizar" vs "Somente neste modo")
+    const layoutScopeToggle = formConfigEditor.locator('[data-testid="layout-scope-toggle"]').first();
+    if (await layoutScopeToggle.isVisible().catch(() => false)) {
+      const modeOnlyToggleBtn = layoutScopeToggle.locator('mat-button-toggle[value="mode-only"] button').first();
+      const sharedToggleBtn = layoutScopeToggle.locator('mat-button-toggle[value="shared"] button').first();
+      if (await modeOnlyToggleBtn.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, modeOnlyToggleBtn, 95);
+        await modeOnlyToggleBtn.click();
+        await sleep(450);
+        await recorder.captureSyncKeyframe();
+      }
+      if (await sharedToggleBtn.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, sharedToggleBtn, 95);
+        await sharedToggleBtn.click();
+        await sleep(450);
+        await recorder.captureSyncKeyframe();
+      }
+    }
 
     const layoutEditor = formConfigEditor.locator('praxis-layout-editor');
     await layoutEditor.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Collapse the right-side available fields palette if open so all 3 sections have maximum canvas room
     const collapsePaletteBtn = layoutEditor.locator('button.collapse-toggle[aria-label*="Colapsar"]').first();
     if (await collapsePaletteBtn.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, collapsePaletteBtn, 70);
@@ -1913,7 +2025,6 @@ async function main() {
       await sleep(200);
     }
 
-    // Rename all 3 sections and apply 2-column preset ("Duas Colunas 1/1") to each section (I4)
     const sectionTitles = [
       '1. Dossiê Tático & Canais S.H.I.E.L.D.',
       '2. Identificação Civil & Credenciais Operacionais',
@@ -1927,32 +2038,30 @@ async function main() {
       await sectionCard.evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'center' })).catch(() => {});
       await sleep(200);
 
-      // 1) Rename section
       const renameTrigger = sectionCard.locator('[data-testid="section-rename-trigger"]').first();
       if (await renameTrigger.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, renameTrigger, 80);
+        await moveCursorToLocator(page, renameTrigger, 75);
         await renameTrigger.click();
-        await sleep(180);
+        await sleep(170);
         const renameInput = sectionCard.locator('[data-testid="section-rename-input"]').first();
         if (await renameInput.isVisible().catch(() => false)) {
           await renameInput.fill(sectionTitles[secIdx]);
           await renameInput.press('Enter');
-          await sleep(240);
+          await sleep(220);
         }
       }
 
-      // 2) Apply 2-column preset to the entire section via section menu -> "Presets de seção…" -> "Duas Colunas 1/1"
       const directPreset2Col = sectionCard.locator('[data-testid="layout-preset-2col"]').first();
       if (await directPreset2Col.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, directPreset2Col, 80);
+        await moveCursorToLocator(page, directPreset2Col, 75);
         await directPreset2Col.click();
-        await sleep(250);
+        await sleep(240);
       } else {
         const sectionMenuBtn = sectionCard.locator('button.section-menu-btn').first();
         if (await sectionMenuBtn.isVisible().catch(() => false)) {
           await moveCursorToLocator(page, sectionMenuBtn, 75);
           await sectionMenuBtn.click();
-          await sleep(220);
+          await sleep(200);
           const presetsMenuItem = page
             .locator('.cdk-overlay-container [role="menuitem"]')
             .filter({ hasText: /Presets de se/i })
@@ -1960,15 +2069,15 @@ async function main() {
           if (await presetsMenuItem.isVisible().catch(() => false)) {
             await moveCursorToLocator(page, presetsMenuItem, 75);
             await presetsMenuItem.click();
-            await sleep(260);
+            await sleep(240);
             const twoColSectionPreset = page
               .locator('praxis-section-preset-picker button.preset-btn')
               .filter({ hasText: /Duas Colunas 1\/1|2 colunas/i })
               .first();
             if (await twoColSectionPreset.isVisible().catch(() => false)) {
-              await moveCursorToLocator(page, twoColSectionPreset, 80);
+              await moveCursorToLocator(page, twoColSectionPreset, 75);
               await twoColSectionPreset.click();
-              await sleep(280);
+              await sleep(260);
             } else {
               await page.keyboard.press('Escape');
             }
@@ -1979,9 +2088,9 @@ async function main() {
       }
     }
 
-    // Scroll back to top of layout editor to showcase the 2-column sections
-    await layoutEditor.locator('praxis-section-configurator').first().evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'start' })).catch(() => {});
-    await sleep(450);
+    // Scroll back to top of layout editor to showcase the flat sections and layout scope banner
+    await formConfigEditor.locator('.layout-scope-banner').first().evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'start' })).catch(() => {});
+    await sleep(500);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '07-crud-form-layout-editor.png') });
 
@@ -1998,77 +2107,76 @@ async function main() {
       .locator('mat-dialog-container [data-testid="crud-dialog-close-btn"], mat-dialog-container button[aria-label*="Fechar"], mat-dialog-container button[aria-label*="Close"], mat-dialog-container button[mat-dialog-close]')
       .first();
     if (await closeFormDialogBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, closeFormDialogBtn, 90);
+      await moveCursorToLocator(page, closeFormDialogBtn, 85);
       await closeFormDialogBtn.click();
     } else {
       await page.keyboard.press('Escape');
     }
-    await sleep(550);
+    await sleep(500);
     await dismissStrayBackdrops(page);
 
     // =========================================================================
-    // STAGE 7: Full CRUD Runtime Lifecycle (KPI Filter, Quick Chips, View, Create, Edit, Delete)
+    // STAGE 6: Full CRUD Runtime Lifecycle (KPI Filter, Quick Chips, View, Create, Edit, Delete)
     // =========================================================================
-    console.log('7. Exiting Customization Mode and demonstrating full CRUD Runtime Lifecycle...');
+    console.log('6. Exiting Customization Mode and demonstrating full CRUD Runtime Lifecycle...');
     await setDemoStage(
       page,
-      7,
-      9,
-      'ETAPA 7/9 · OPERAÇÃO EM RUNTIME',
+      6,
+      8,
+      'ETAPA 6/8 · OPERAÇÃO EM RUNTIME',
       'Filtros via KPI, Quick Chips, Visualização, Criação, Edição e Exclusão',
-      'Testando a página pronta em modo operacional (sem modo de edição)'
+      'Testando a página pronta em modo operacional (Visualizar e Criar herdam o layout em 2 colunas)'
     );
 
-    // Exit Customization Mode
-    await moveCursorToLocator(page, toggleCustomBtn, 110);
+    await moveCursorToLocator(page, toggleCustomBtn, 100);
     await toggleCustomBtn.click();
-    await sleep(600);
+    await sleep(550);
     await recorder.captureSyncKeyframe();
 
-    // 7.1 Click KPI Card #2 ("Prontidão Ativa") to filter table reactively
+    // 6.1 Click KPI Card #2 ("Prontidão Ativa") to filter table reactively
     const kpiCardActive = page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').nth(1);
     if (await kpiCardActive.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, kpiCardActive, 110);
+      await moveCursorToLocator(page, kpiCardActive, 100);
       await kpiCardActive.click();
-      await sleep(750);
+      await sleep(700);
       await recorder.captureSyncKeyframe();
     }
 
     // Click KPI Card #1 ("Efetivo Tático Total") to clear filter
     const kpiCardTotal = page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').nth(0);
     if (await kpiCardTotal.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, kpiCardTotal, 110);
+      await moveCursorToLocator(page, kpiCardTotal, 100);
       await kpiCardTotal.click();
-      await sleep(700);
+      await sleep(650);
       await recorder.captureSyncKeyframe();
     }
 
-    // 7.2 Click Quick Filter chips in ScopeBar
+    // 6.2 Click Quick Filter chips in ScopeBar
     const quickChipReserve = page.locator('praxis-scope-bar button, praxis-crud button, praxis-crud mat-chip-option, .quick-filter-chip').filter({ hasText: /Reserva Tática/i }).first();
     if (await quickChipReserve.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, quickChipReserve, 100);
+      await moveCursorToLocator(page, quickChipReserve, 95);
       await quickChipReserve.click();
-      await sleep(700);
+      await sleep(650);
       await recorder.captureSyncKeyframe();
     }
 
     const quickChipAll = page.locator('praxis-scope-bar button, praxis-crud button, praxis-crud mat-chip-option, .quick-filter-chip').filter({ hasText: /Todos os Agentes/i }).first();
     if (await quickChipAll.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, quickChipAll, 100);
+      await moveCursorToLocator(page, quickChipAll, 95);
       await quickChipAll.click();
-      await sleep(700);
+      await sleep(650);
       await recorder.captureSyncKeyframe();
     }
 
-    // 7.3 Trigger VIEW action on a row (inline button nth(0) = Visualizar) — now opens with 2-column layout!
-    console.log('   7.3 Demonstrating View (Visualizar) action with 2-column customized layout...');
+    // 6.3 Trigger VIEW action on a row — opens with 2-column layout inherited via shared scope!
+    console.log('   6.3 Demonstrating View (Visualizar) action with 2-column customized layout...');
     const rowForView = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
     await rowForView.waitFor({ state: 'visible', timeout: 10000 });
     const viewRowBtn = rowForView
       .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
       .nth(0);
     await viewRowBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, viewRowBtn, 100);
+    await moveCursorToLocator(page, viewRowBtn, 95);
     await viewRowBtn.click();
 
     await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
@@ -2077,22 +2185,21 @@ async function main() {
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '09-crud-runtime-view.png') });
 
     await page.keyboard.press('Escape');
-    await sleep(500);
+    await sleep(450);
     await dismissStrayBackdrops(page);
 
-    // 7.4 Trigger CREATE action from the table toolbar ("Novo" / "Criar") — now opens with 2-column layout!
-    console.log('   7.4 Demonstrating Create (Novo Registro) action with customized 2-column form layout...');
+    // 6.4 Trigger CREATE action from the table toolbar ("Criar") — opens with 2-column layout!
+    console.log('   6.4 Demonstrating Create (Novo Registro) action with customized 2-column form layout...');
     const createToolbarBtn = page
       .locator('praxis-crud praxis-table-toolbar button:not([disabled])')
       .filter({ hasText: /Novo|Adicionar|Criar|New|Add/i })
       .first();
     if (await createToolbarBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, createToolbarBtn, 110);
+      await moveCursorToLocator(page, createToolbarBtn, 100);
       await createToolbarBtn.click();
       await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
-      await sleep(500);
+      await sleep(450);
 
-      // Fill a couple of fields in the customized Create form to demonstrate interactive layout
       const firstInput = page.locator('mat-dialog-container praxis-dynamic-form input:not([disabled])').first();
       if (await firstInput.isVisible().catch(() => false)) {
         await setFormInput(page, firstInput, 'carol.danvers@shield.gov');
@@ -2105,104 +2212,104 @@ async function main() {
       if (await thirdInput.isVisible().catch(() => false)) {
         await setFormInput(page, thirdInput, 'Carol Danvers (Capitã Marvel)');
       }
-      await sleep(650);
+      await sleep(600);
       await recorder.captureSyncKeyframe();
 
-      // Close create dialog (confirming dirty guard if prompted!)
       await page.keyboard.press('Escape');
-      await sleep(350);
+      await sleep(320);
       const dirtyConfirmBtn = page.locator('.cdk-overlay-container mat-dialog-container button').filter({ hasText: /Sair|Confirmar|Descartar|Sim|Leave/i }).first();
       if (await dirtyConfirmBtn.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, dirtyConfirmBtn, 80);
+        await moveCursorToLocator(page, dirtyConfirmBtn, 75);
         await dirtyConfirmBtn.click();
       }
-      await sleep(450);
+      await sleep(400);
       await dismissStrayBackdrops(page);
     }
 
-    // 7.5 Trigger EDIT action on the first row showing the customized multi-column layout pre-populated
-    console.log('   7.5 Demonstrating Edit (Editar) action with pre-populated customized layout...');
+    // 6.5 Trigger EDIT action on the first row showing the customized multi-column layout pre-populated
+    console.log('   6.5 Demonstrating Edit (Editar) action with pre-populated customized layout...');
     const rowForEdit = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
     const editBtn2 = rowForEdit
       .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
       .nth(1);
     await editBtn2.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, editBtn2, 100);
+    await moveCursorToLocator(page, editBtn2, 95);
     await editBtn2.click();
 
     await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
-    await sleep(750);
+    await sleep(700);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '10-crud-runtime-edit.png') });
 
     await page.keyboard.press('Escape');
-    await sleep(500);
+    await sleep(450);
     await dismissStrayBackdrops(page);
 
-    // 7.6 Trigger DELETE action to showcase the governed Confirmation Dialog
-    console.log('   7.6 Demonstrating Delete (Excluir) confirmation dialog...');
+    // 6.6 Trigger DELETE action to showcase the governed Confirmation Dialog
+    console.log('   6.6 Demonstrating Delete (Excluir) confirmation dialog...');
     const rowForDelete = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').nth(1);
     const moreBtn = rowForDelete
       .locator('td.praxis-actions-cell button.praxis-more-btn:not([disabled]), td.praxis-actions-cell button[aria-haspopup="menu"]:not([disabled])')
       .first();
     await moreBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, moreBtn, 95);
+    await moveCursorToLocator(page, moreBtn, 90);
     await moreBtn.click();
-    await sleep(280);
+    await sleep(260);
     const delItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Excluir|Delete|Remover/i }).first();
     await delItem.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, delItem, 85);
+    await moveCursorToLocator(page, delItem, 80);
     await delItem.click();
 
     const confirmDialog = page.locator('.cdk-overlay-container mat-dialog-container').first();
     await confirmDialog.waitFor({ state: 'visible', timeout: 10000 });
-    await sleep(500);
+    await sleep(480);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '11-crud-runtime-delete.png') });
 
     const cancelDeleteBtn = confirmDialog.locator('button').filter({ hasText: /Cancelar|Cancel|Não/i }).first();
     if (await cancelDeleteBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, cancelDeleteBtn, 90);
+      await moveCursorToLocator(page, cancelDeleteBtn, 85);
       await cancelDeleteBtn.click();
-      await sleep(450);
+      await sleep(400);
     } else {
       await page.keyboard.press('Escape');
-      await sleep(400);
+      await sleep(380);
     }
 
     // =========================================================================
-    // STAGE 8: F5 Reload — Prove 100% Zero-Code, Zero-Deploy Persistence
+    // STAGE 7: F5 Reload — Prove 100% Zero-Code, Zero-Deploy Persistence
     // =========================================================================
-    console.log('8. Reloading page (F5) to prove 100% persistence without code or deploy...');
+    console.log('7. Reloading page (F5) to prove 100% persistence without code or deploy...');
     await setDemoStage(
       page,
+      7,
       8,
-      9,
-      'ETAPA 8/9 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
+      'ETAPA 7/8 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
       'Recarregando a Página (/crud-studio) — 100% Persistido sem Deploy',
-      'Cabeçalho Executivo, KPI Band, ScopeBar, Colunas e Layout do Formulário preservados'
+      'Tema Aurora, Cabeçalho Executivo, KPI Band, ScopeBar, Grade R$ e Layout em 2 Colunas preservados'
     );
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').first().waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
+    await collapseSidebarIfExpanded(page);
 
     await setDemoStage(
       page,
+      7,
       8,
-      9,
-      'ETAPA 8/9 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
+      'ETAPA 7/8 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
       'Página CRUD 100% Hidratada após F5 · Zero Código · Zero Deploy',
-      'Cabeçalho executivo, filtros inline no ScopeBar, coluna Subsídio Mensal (R$) e KPIs ativos'
+      'Cabeçalho executivo, filtros inline (Nome Civil, Cargo, E-mail), Subsídio Mensal (R$) e KPIs ativos'
     );
-    await sleep(900);
+    await sleep(850);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '12-crud-after-reload-persisted.png') });
 
     // =========================================================================
-    // STAGE 9: Final Guided Executive Tour (~25s — 4 Acts with Visual Spotlight)
+    // STAGE 8: Final Guided Executive Tour (~25s — 4 Acts with Aurora Visual Spotlight)
     // =========================================================================
-    console.log('9. Running Final Executive Tour (~25s) showcasing all constructed deliverables...');
+    console.log('8. Running Final Executive Tour (~25s) showcasing all constructed deliverables...');
 
     const setTourSpotlight = async (selector, badgeText, titleText, subtitleText) => {
       await page.evaluate(({ sel, badge, title, sub }) => {
@@ -2212,24 +2319,24 @@ async function main() {
           styleEl.id = 'praxis-tour-spotlight-style';
           styleEl.textContent = `
             .praxis-tour-highlight {
-              outline: 2.5px solid #38bdf8 !important;
+              outline: 2.5px solid #0284c7 !important;
               outline-offset: 4px !important;
-              box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.18), 0 12px 32px rgba(2, 132, 199, 0.35) !important;
+              box-shadow: 0 0 0 6px rgba(2, 132, 199, 0.16), 0 12px 32px rgba(2, 132, 199, 0.22) !important;
               border-radius: 12px !important;
               transition: outline 0.25s ease, box-shadow 0.25s ease !important;
             }
             #praxis-tour-callout {
               position: fixed;
-              top: 18px;
+              bottom: 76px;
               right: 28px;
               z-index: 2147483644;
-              max-width: 460px;
-              padding: 12px 18px;
-              border-radius: 14px;
-              background: linear-gradient(135deg, rgba(8, 15, 30, 0.96), rgba(15, 23, 42, 0.96));
-              border: 1.5px solid rgba(56, 189, 248, 0.65);
-              box-shadow: 0 18px 42px rgba(0, 0, 0, 0.75), 0 0 24px rgba(56, 189, 248, 0.28);
-              color: #f8fafc;
+              max-width: 470px;
+              padding: 14px 20px;
+              border-radius: 16px;
+              background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.98));
+              border: 1.5px solid rgba(2, 132, 199, 0.55);
+              box-shadow: 0 20px 44px rgba(15, 23, 42, 0.18), 0 0 24px rgba(2, 132, 199, 0.14);
+              color: #0f172a;
               font-family: Inter, system-ui, sans-serif;
               pointer-events: none;
             }
@@ -2239,22 +2346,22 @@ async function main() {
               font-weight: 800;
               letter-spacing: 0.08em;
               text-transform: uppercase;
-              color: #082f49;
-              background: linear-gradient(135deg, #38bdf8, #22d3ee);
-              padding: 3px 9px;
+              color: #ffffff;
+              background: linear-gradient(135deg, #0284c7, #0d9488);
+              padding: 3px 10px;
               border-radius: 999px;
               margin-bottom: 6px;
             }
             #praxis-tour-callout .tour-title {
               font-size: 15px;
               font-weight: 800;
-              color: #f8fafc;
+              color: #0f172a;
               margin-bottom: 4px;
             }
             #praxis-tour-callout .tour-sub {
               font-size: 12.5px;
               line-height: 1.45;
-              color: #cbd5e1;
+              color: #334155;
             }
           `;
           document.head.appendChild(styleEl);
@@ -2288,11 +2395,11 @@ async function main() {
     // ATO I — Cabeçalho Executivo + Faixa de KPIs Semânticos + ScopeBar com Quick Filter Chips e Filtros Inline (~6.5s)
     await setDemoStage(
       page,
-      9,
-      9,
-      'ETAPA 9/9 · TOUR EXECUTIVO (ATO I/IV)',
+      8,
+      8,
+      'ETAPA 8/8 · TOUR EXECUTIVO (ATO I/IV)',
       'Cabeçalho Executivo + KPI Band Semântica + ScopeBar com Filtros Inline',
-      'Identidade de domínio, telemetria /stats/group-by ao vivo e busca inline (Nome, Codinome, E-mail)'
+      'Identidade de domínio, telemetria /stats/group-by ao vivo e busca inline (Nome Civil, Cargo e E-mail)'
     );
     await setTourSpotlight(
       '.praxis-resource-page__header',
@@ -2304,7 +2411,7 @@ async function main() {
     if (await headerLoc.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, headerLoc, 100);
     }
-    await sleep(2000);
+    await sleep(1900);
     await recorder.captureSyncKeyframe();
 
     await setTourSpotlight(
@@ -2317,31 +2424,31 @@ async function main() {
     if (await kpiRateCard.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, kpiRateCard, 100);
     }
-    await sleep(2200);
+    await sleep(2100);
     await recorder.captureSyncKeyframe();
 
     await setTourSpotlight(
       'praxis-scope-bar',
       'ATO I · SCOPEBAR & FILTROS INLINE',
       'Quick Filter Chips + Campos Fixados',
-      'Atalhos rápidos (Todos, Ativos, Reserva) e filtros inline (Nome Completo, Codinome, E-mail) + Filtros Avançados.'
+      'Atalhos rápidos (Todos, Ativos, Reserva) e filtros inline (Nome Civil, Cargo e E-mail) + Filtros Avançados.'
     );
     const scopeBarLoc = page.locator('praxis-scope-bar').first();
     if (await scopeBarLoc.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, scopeBarLoc, 100);
     }
-    await sleep(2300);
+    await sleep(2200);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '13-tour-act1-header-kpis-scopebar.png') });
 
-    // ATO II — Grade Corporativa com Colunas Compostas & Moeda R$ (~6s)
+    // ATO II — Grade Corporativa com Colunas Compostas & Moeda R$ (~5.5s)
     await setDemoStage(
       page,
-      9,
-      9,
-      'ETAPA 9/9 · TOUR EXECUTIVO (ATO II/IV)',
+      8,
+      8,
+      'ETAPA 8/8 · TOUR EXECUTIVO (ATO II/IV)',
       'Grade Corporativa com Colunas Compostas, Chips Semânticos e Moeda (R$)',
-      'Herói com Avatar, Codinome Tático, Patente, Divisão, Subsídio Mensal (R$ 41.000,00) e Prontidão'
+      'Herói com Avatar, Patente & Especialidade, Divisão, Subsídio Mensal (R$ 41.000,00) e Prontidão'
     );
     await setTourSpotlight(
       'praxis-crud praxis-table',
@@ -2353,19 +2460,19 @@ async function main() {
     if (await firstTableRow.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, firstTableRow, 100);
     }
-    await sleep(3000);
+    await sleep(2800);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '14-tour-act2-corporate-table.png') });
-    await sleep(2500);
+    await sleep(2200);
 
-    // ATO III — Dossiê Modal em 2 Colunas (Visualização e Edição com contrato OpenAPI) (~6.5s)
+    // ATO III — Dossiê Modal em 2 Colunas (Visualização e Edição com contrato OpenAPI) (~6s)
     await setDemoStage(
       page,
-      9,
-      9,
-      'ETAPA 9/9 · TOUR EXECUTIVO (ATO III/IV)',
+      8,
+      8,
+      'ETAPA 8/8 · TOUR EXECUTIVO (ATO III/IV)',
       'Dossiê Modal em 2 Colunas — 3 Seções Executivas Governadas por OpenAPI',
-      'Layout em 2 colunas (6/6) persistido nas 3 seções para Criação, Visualização e Edição'
+      'Layout em 2 colunas (6/6) persistido e compartilhado entre Criação, Visualização e Edição'
     );
     await setTourSpotlight(null, '', '', '');
 
@@ -2382,33 +2489,32 @@ async function main() {
         '3 Seções Executivas · Layout 2 Colunas (6/6)',
         '1. Dossiê Tático & Canais S.H.I.E.L.D. · 2. Identificação Civil · 3. Lotação, Patente & Subsídio.'
       );
-      await sleep(3200);
+      await sleep(3000);
       await recorder.captureSyncKeyframe();
       await page.screenshot({ path: path.join(ARTIFACT_DIR, '15-tour-act3-modal-dossier-2col.png') });
 
-      // Scroll inside form dialog to show sections 2 and 3 in 2 columns
       await page.evaluate(() => {
         const sections = document.querySelectorAll('mat-dialog-container praxis-dynamic-form .praxis-form-section, mat-dialog-container praxis-dynamic-form section');
         if (sections.length > 1) {
           sections[sections.length - 1].scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
       });
-      await sleep(2500);
+      await sleep(2300);
       await recorder.captureSyncKeyframe();
 
       await page.keyboard.press('Escape');
-      await sleep(500);
+      await sleep(450);
       await dismissStrayBackdrops(page);
     }
 
-    // ATO IV — Quadro-Resumo Final Zero-Code / Zero-Deploy (~6s)
+    // ATO IV — Quadro-Resumo Final Zero-Code / Zero-Deploy em Estilo Aurora (~5.5s)
     await setDemoStage(
       page,
-      9,
-      9,
-      'ETAPA 9/9 · RESUMO EXECUTIVO (ATO IV/IV)',
+      8,
+      8,
+      'ETAPA 8/8 · RESUMO EXECUTIVO (ATO IV/IV)',
       'Praxis Platform — Entregáveis 100% Zero-Code & Zero-Deploy Concluídos',
-      'Da página 100% em branco ao CRUD executivo completo com persistência imediata'
+      'Da página em branco à Grade Viva em segundos e evolução progressiva completa'
     );
     await setTourSpotlight(null, '', '', '');
 
@@ -2422,62 +2528,62 @@ async function main() {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(6, 11, 24, 0.76);
+        background: rgba(15, 23, 42, 0.42);
         font-family: Inter, system-ui, sans-serif;
         animation: fadeInSummary 0.35s ease-out forwards;
       `;
       overlay.innerHTML = `
         <div style="
-          width: 920px;
+          width: 940px;
           padding: 36px 42px;
-          border-radius: 20px;
-          background: linear-gradient(145deg, rgba(10, 18, 36, 0.98), rgba(15, 23, 42, 0.98));
-          border: 1.5px solid rgba(56, 189, 248, 0.65);
-          box-shadow: 0 28px 72px rgba(0, 0, 0, 0.85), 0 0 40px rgba(56, 189, 248, 0.25);
-          color: #f8fafc;
+          border-radius: 22px;
+          background: linear-gradient(145deg, rgba(255, 255, 255, 0.99), rgba(241, 245, 249, 0.98));
+          border: 1.5px solid rgba(2, 132, 199, 0.45);
+          box-shadow: 0 28px 72px rgba(15, 23, 42, 0.25), 0 0 36px rgba(2, 132, 199, 0.14);
+          color: #0f172a;
         ">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px;">
             <span style="
-              background: linear-gradient(135deg, #0284c7, #38bdf8);
-              color: #082f49;
+              background: linear-gradient(135deg, #0284c7, #0d9488);
+              color: #ffffff;
               font-weight: 800;
               font-size: 11.5px;
               letter-spacing: 0.08em;
               padding: 5px 12px;
               border-radius: 999px;
               text-transform: uppercase;
-            ">PRAXIS METADATA-DRIVEN PLATFORM · ZERO-CODE STUDIO</span>
-            <span style="color: #10b981; font-weight: 700; font-size: 13px;">● 100% PERSISTIDO SEM DEPLOY</span>
+            ">PRAXIS METADATA-DRIVEN PLATFORM · ZERO-CODE STUDIO · TEMA AURORA</span>
+            <span style="color: #059669; font-weight: 800; font-size: 13px;">● 100% PERSISTIDO SEM DEPLOY</span>
           </div>
-          <h2 style="margin: 0 0 8px; font-size: 26px; font-weight: 800; color: #f8fafc;">
-            Comando de Efetivo Operacional — Construído do Zero em Tempo Real
+          <h2 style="margin: 0 0 8px; font-size: 26px; font-weight: 800; color: #0f172a;">
+            Comando de Efetivo Operacional — Construído Progressivamente em Tempo Real
           </h2>
-          <p style="margin: 0 0 24px; font-size: 14.5px; color: #94a3b8;">
-            Toda a superfície operacional foi configurada ao vivo a partir de uma rota 100% em branco, governada pelos contratos OpenAPI + x-ui do backend Praxis.
+          <p style="margin: 0 0 24px; font-size: 14.5px; color: #475569;">
+            Tabela viva materializada nos primeiros segundos via Quick Connect e enriquecida em camadas com editores expandidos, sem código e sem deploy.
           </p>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
-            <div style="padding: 14px 16px; border-radius: 12px; background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.28);">
-              <div style="font-weight: 700; font-size: 13.5px; color: #38bdf8; margin-bottom: 4px;">✓ Cabeçalho Executivo & Conexão</div>
-              <div style="font-size: 12.5px; color: #cbd5e1;">Título, Subtítulo, Badge de Domínio e Quick Connect RESTful configurados sem código.</div>
+            <div style="padding: 14px 16px; border-radius: 14px; background: rgba(248, 250, 252, 0.95); border: 1px solid rgba(2, 132, 199, 0.28);">
+              <div style="font-weight: 800; font-size: 13.5px; color: #0284c7; margin-bottom: 4px;">✓ Quick Connect & Tabela Viva Imediata</div>
+              <div style="font-size: 12.5px; color: #334155;">Conexão ao catálogo RESTful, Cabeçalho Executivo e 98 registros reais em segundos.</div>
             </div>
-            <div style="padding: 14px 16px; border-radius: 12px; background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(16, 185, 129, 0.32);">
-              <div style="font-weight: 700; font-size: 13.5px; color: #34d399; margin-bottom: 4px;">✓ KPI Band & Telemetria Viva</div>
-              <div style="font-size: 12.5px; color: #cbd5e1;">4 indicadores semânticos alimentados por /stats/group-by com cálculo de prontidão (81,6%) e clique para filtrar.</div>
+            <div style="padding: 14px 16px; border-radius: 14px; background: rgba(248, 250, 252, 0.95); border: 1px solid rgba(13, 148, 136, 0.28);">
+              <div style="font-weight: 800; font-size: 13.5px; color: #0d9488; margin-bottom: 4px;">✓ Grade Corporativa & Moeda BRL (R$)</div>
+              <div style="font-size: 12.5px; color: #334155;">Pessoa com Avatar, Chip de Prontidão e Subsídio Mensal formatado em Real Brasileiro (R$).</div>
             </div>
-            <div style="padding: 14px 16px; border-radius: 12px; background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.28);">
-              <div style="font-weight: 700; font-size: 13.5px; color: #38bdf8; margin-bottom: 4px;">✓ ScopeBar, Quick Chips & Grade R$</div>
-              <div style="font-size: 12.5px; color: #cbd5e1;">Filtros inline (Nome, Codinome, E-mail), Avatar Composto, Chip de Status e Subsídio Mensal em Moeda (R$).</div>
+            <div style="padding: 14px 16px; border-radius: 14px; background: rgba(248, 250, 252, 0.95); border: 1px solid rgba(2, 132, 199, 0.28);">
+              <div style="font-weight: 800; font-size: 13.5px; color: #0284c7; margin-bottom: 4px;">✓ KPI Band Viva & ScopeBar</div>
+              <div style="font-size: 12.5px; color: #334155;">4 indicadores conectados a /stats/group-by (81,6% prontidão), Quick Chips e filtros inline.</div>
             </div>
-            <div style="padding: 14px 16px; border-radius: 12px; background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(16, 185, 129, 0.32);">
-              <div style="font-weight: 700; font-size: 13.5px; color: #34d399; margin-bottom: 4px;">✓ Dossiê Modal em 2 Colunas</div>
-              <div style="font-size: 12.5px; color: #cbd5e1;">3 seções renomeadas e distribuídas em 2 colunas (6/6) compartilhadas entre Criar, Visualizar e Editar.</div>
+            <div style="padding: 14px 16px; border-radius: 14px; background: rgba(248, 250, 252, 0.95); border: 1px solid rgba(13, 148, 136, 0.28);">
+              <div style="font-weight: 800; font-size: 13.5px; color: #0d9488; margin-bottom: 4px;">✓ Editor Flat Sections & Escopo por Modo</div>
+              <div style="font-size: 12.5px; color: #334155;">3 seções em 2 colunas (6/6) com escopo compartilhado entre Criar, Visualizar e Editar.</div>
             </div>
           </div>
         </div>
       `;
       document.body.appendChild(overlay);
     });
-    await sleep(5500);
+    await sleep(5200);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '16-tour-act4-executive-summary.png') });
 
@@ -2487,7 +2593,7 @@ async function main() {
 
     await convertWebmToMp4(videoFile, mp4File);
     console.log('\n================================================================');
-    console.log(' [SUCCESS] Praxis CRUD Zero-Code Studio Demo Recorded!');
+    console.log(' [SUCCESS] Praxis CRUD Zero-Code Studio Demo (Aurora Theme) Recorded!');
     console.log(` - WebM: ${videoFile}`);
     console.log(` - MP4:  ${mp4File}`);
     console.log('================================================================\n');

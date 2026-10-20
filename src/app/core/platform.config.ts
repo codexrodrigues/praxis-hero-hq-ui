@@ -115,6 +115,17 @@ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
       overlayVariant: 'card',
       overlayBackdrop: true,
     },
+    localization: {
+      locale: 'pt-BR',
+      direction: 'ltr',
+      currency: {
+        code: 'BRL',
+        symbol: 'R$',
+        position: 'before',
+        spacing: true,
+        precision: 2,
+      },
+    },
   },
 };
 

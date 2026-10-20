@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  DEFAULT_CURRENCY_CODE,
   importProvidersFrom,
   inject,
   LOCALE_ID,
@@ -455,6 +456,7 @@ export const appConfig: ApplicationConfig = {
     ...providePraxisLoadingDefaults(),
     importProvidersFrom(MatDialogModule),
     { provide: LOCALE_ID, useValue: 'pt-BR' },
+    { provide: DEFAULT_CURRENCY_CODE, useValue: 'BRL' },
     { provide: API_URL, useValue: API_URL_VALUE },
     GenericCrudService,
     GlobalActionService,

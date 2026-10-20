@@ -296,12 +296,16 @@ describe('HeroTacticalRadarComponent', () => {
     expect(tableCfg?.toolbar?.filters?.quickFilters?.length).toBe(4);
     const sevCol = tableCfg?.columns?.find((c: any) => c.field === 'severidade');
     expect(sevCol?.conditionalRenderers?.length).toBe(4);
+    expect(typeof sevCol?.conditionalRenderers?.[0]?.condition).toBe('object');
     const mortosCol = tableCfg?.columns?.find((c: any) => c.field === 'mortos');
     expect(mortosCol?.conditionalRenderers?.length).toBe(2);
+    expect(typeof mortosCol?.conditionalRenderers?.[0]?.condition).toBe('object');
+    expect(mortosCol?.conditionalRenderers?.[1]?.renderer?.badge?.variant).toBe('soft');
 
     const timelineNode = (byKey.get('missionsTimeline')?.definition as any)?.inputs?.document?.nodes?.[0];
     expect(timelineNode?.markerVariant).toBe('icon');
     expect(timelineNode?.items?.[0]?.icon).toBe('radar');
+    expect(timelineNode?.items?.[1]?.markerColor).toBe('info');
 
     const domainHubItems = (byKey.get('domainHub')?.definition as any)?.inputs?.document?.nodes?.[0]?.items;
     expect(domainHubItems?.[5]?.className).toContain('tone-cobalt');

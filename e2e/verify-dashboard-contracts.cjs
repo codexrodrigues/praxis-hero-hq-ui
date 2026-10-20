@@ -280,8 +280,11 @@ assert(
     recentIncidentsCfg.toolbar.filters.quickFilters.length === 4 &&
     Array.isArray(severidadeCol?.conditionalRenderers) &&
     severidadeCol.conditionalRenderers.length === 4 &&
+    severidadeCol.conditionalRenderers.every((r) => typeof r?.condition === 'object' && r.condition !== null) &&
     Array.isArray(mortosCol?.conditionalRenderers) &&
-    mortosCol.conditionalRenderers.length === 2,
+    mortosCol.conditionalRenderers.length === 2 &&
+    mortosCol.conditionalRenderers.every((r) => typeof r?.condition === 'object' && r.condition !== null) &&
+    mortosCol.conditionalRenderers[1]?.renderer?.badge?.variant === 'soft',
   'recentIncidents possui toolbar integrada (sem cabeçalho duplicado), 4 quickFilters de escopo tático e conditionalRenderers semânticos para severidade e mortos',
 );
 const distressWidget = widgetsByKey.get('distressSignalsList');
@@ -299,6 +302,7 @@ assert(
 assert(
   timelineNode?.markerVariant === 'icon' &&
     timelineItems.every((item) => typeof item.icon === 'string' && item.icon.length > 0) &&
+    timelineItems.every((item) => ['error', 'info', 'warning', 'success', 'primary', 'secondary'].includes(item.markerColor)) &&
     hubCards[5]?.className?.includes('tone-cobalt'),
   'missionsTimeline utiliza markerVariant="icon" com ícones táticos por missão e domainHub atribui tone-cobalt exclusivo ao Ranking Reputacional',
 );

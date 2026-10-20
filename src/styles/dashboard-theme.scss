@@ -670,7 +670,7 @@ praxis-widget-shell .prx-rich-timeline__item-opposite {
   border: 1px solid color-mix(in oklab, var(--primary) 24%, transparent) !important;
 }
 
-praxis-widget-shell .prx-rich-timeline__marker[data-variant='icon'] {
+praxis-widget-shell .prx-rich-timeline[data-marker-variant='icon'] .prx-rich-timeline__item-marker {
   width: 30px !important;
   height: 30px !important;
   box-shadow: 0 0 14px color-mix(in oklab, var(--prx-timeline-marker-color, var(--primary)) 28%, transparent) !important;
@@ -685,16 +685,18 @@ praxis-widget-shell .prx-rich-timeline__item-body {
   background: color-mix(in oklab, var(--card) 92%, var(--background)) !important;
 }
 
-praxis-widget-shell .prx-rich-timeline__item:has(.prx-rich-timeline__marker[data-color='error']) .prx-rich-timeline__item-body {
+praxis-widget-shell .prx-rich-timeline__item[data-marker-color='error'] .prx-rich-timeline__item-body,
+praxis-widget-shell .prx-rich-timeline__item[data-marker-color='danger'] .prx-rich-timeline__item-body {
   border-left-color: var(--destructive, #ef4444) !important;
 }
-praxis-widget-shell .prx-rich-timeline__item:has(.prx-rich-timeline__marker[data-color='accent']) .prx-rich-timeline__item-body {
+praxis-widget-shell .prx-rich-timeline__item[data-marker-color='info'] .prx-rich-timeline__item-body,
+praxis-widget-shell .prx-rich-timeline__item[data-marker-color='secondary'] .prx-rich-timeline__item-body {
   border-left-color: var(--cobalt, #8b5cf6) !important;
 }
-praxis-widget-shell .prx-rich-timeline__item:has(.prx-rich-timeline__marker[data-color='warning']) .prx-rich-timeline__item-body {
+praxis-widget-shell .prx-rich-timeline__item[data-marker-color='warning'] .prx-rich-timeline__item-body {
   border-left-color: var(--operations, #f59e0b) !important;
 }
-praxis-widget-shell .prx-rich-timeline__item:has(.prx-rich-timeline__marker[data-color='success']) .prx-rich-timeline__item-body {
+praxis-widget-shell .prx-rich-timeline__item[data-marker-color='success'] .prx-rich-timeline__item-body {
   border-left-color: var(--ready, #10b981) !important;
 }
 

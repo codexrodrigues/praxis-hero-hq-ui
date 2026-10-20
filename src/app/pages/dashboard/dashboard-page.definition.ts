@@ -62,7 +62,8 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
         widget.key === 'missionsTimeline' &&
         (!serialized.includes('activeMissions.0.titulo') ||
           !serialized.includes('"markerVariant":"icon"') ||
-          !serialized.includes('rocket_launch'));
+          !serialized.includes('rocket_launch') ||
+          serialized.includes('"markerColor":"accent"'));
       const isStaleDomainHub =
         widget.key === 'domainHub' && !serialized.includes('tone-cobalt');
       const isStaleKpi =
@@ -141,7 +142,9 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
         cfg?.toolbar?.appearance?.variant === 'integrated' &&
         Array.isArray(cfg?.toolbar?.filters?.quickFilters) &&
         Array.isArray(severidadeCol?.conditionalRenderers) &&
-        Array.isArray(mortosCol?.conditionalRenderers);
+        typeof severidadeCol.conditionalRenderers[0]?.condition === 'object' &&
+        Array.isArray(mortosCol?.conditionalRenderers) &&
+        typeof mortosCol.conditionalRenderers[0]?.condition === 'object';
       if (canonical && !hasFlatCardContent) {
         upgraded = true;
         return {

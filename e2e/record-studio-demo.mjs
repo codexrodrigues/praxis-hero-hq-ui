@@ -900,49 +900,55 @@ const HERO_COMMAND_HEADER_DOC = {
 };
 
 const KPI_HEROES_DOC = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
+  "kind": "praxis.rich-content",
+  "version": "1.0.0",
+  "nodes": [
     {
-      type: 'card',
-      variant: 'unstyled',
-      tone: 'neutral',
-      className: 'glass-panel bento-kpi-card',
-      interaction: {
-        mode: 'action',
-        action: {
-          actionId: 'navigation.openRoute',
-          payload: { path: '/rh/funcionarios' }
+      "type": "card",
+      "variant": "unstyled",
+      "tone": "neutral",
+      "className": "glass-panel bento-kpi-card kpi-tone-ready",
+      "interaction": {
+        "mode": "action",
+        "action": {
+          "actionId": "navigation.openRoute",
+          "payload": {
+            "path": "/rh/funcionarios"
+          }
         }
       },
-      header: [
+      "header": [
         {
-          type: 'compose',
-          direction: 'row',
-          gap: 'sm',
-          items: [
-            { type: 'icon', icon: 'verified_user', className: 'card-icon tone-ready' },
+          "type": "compose",
+          "direction": "row",
+          "gap": "sm",
+          "items": [
             {
-              type: 'badge',
-              label: '${kpis.readinessRate}% Força Pronta',
-              className: 'tag-status ready-tag'
+              "type": "icon",
+              "icon": "verified_user",
+              "className": "card-icon tone-ready"
+            },
+            {
+              "type": "badge",
+              "label": "${kpis.readinessRate}% Força",
+              "className": "tag-status ready-tag"
             }
           ]
         }
       ],
-      title: '${kpis.activeHeroes} Heróis Ativos',
-      subtitle: 'Prontidão Operacional da Base',
-      content: [
+      "title": "${kpis.activeHeroes} Ativos",
+      "subtitle": "Prontidão Operacional",
+      "content": [
         {
-          type: 'progress',
-          valueExpr: 'progressValue | round:1 | default:0',
-          showPercent: false,
-          className: 'fill-ready'
+          "type": "progress",
+          "valueExpr": "progressValue | round:1 | default:0",
+          "showPercent": false,
+          "className": "fill-ready"
         },
         {
-          type: 'text',
-          text: '${kpis.activeHeroes} de ${kpis.totalHeroes} heróis mobilizados em prontidão imediata',
-          className: 'card-footnote'
+          "type": "text",
+          "text": "${kpis.activeHeroes} de ${kpis.totalHeroes} heróis prontos para ação",
+          "className": "card-footnote"
         }
       ]
     }
@@ -950,49 +956,55 @@ const KPI_HEROES_DOC = {
 };
 
 const KPI_MISSIONS_DOC = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
+  "kind": "praxis.rich-content",
+  "version": "1.0.0",
+  "nodes": [
     {
-      type: 'card',
-      variant: 'unstyled',
-      tone: 'neutral',
-      className: 'glass-panel bento-kpi-card',
-      interaction: {
-        mode: 'action',
-        action: {
-          actionId: 'navigation.openRoute',
-          payload: { path: '/operacoes/missoes' }
+      "type": "card",
+      "variant": "unstyled",
+      "tone": "neutral",
+      "className": "glass-panel bento-kpi-card kpi-tone-operations",
+      "interaction": {
+        "mode": "action",
+        "action": {
+          "actionId": "navigation.openRoute",
+          "payload": {
+            "path": "/operacoes/missoes"
+          }
         }
       },
-      header: [
+      "header": [
         {
-          type: 'compose',
-          direction: 'row',
-          gap: 'sm',
-          items: [
-            { type: 'icon', icon: 'military_tech', className: 'card-icon tone-operations' },
+          "type": "compose",
+          "direction": "row",
+          "gap": "sm",
+          "items": [
             {
-              type: 'badge',
-              label: '${kpis.inProgressMissionsBadge} Em Curso',
-              className: 'tag-status operations-tag'
+              "type": "icon",
+              "icon": "military_tech",
+              "className": "card-icon tone-operations"
+            },
+            {
+              "type": "badge",
+              "label": "${kpis.inProgressMissionsBadge} Em Curso",
+              "className": "tag-status operations-tag"
             }
           ]
         }
       ],
-      title: '${kpis.plannedMissions} Planejadas',
-      subtitle: 'Teatro de Missões Táticas',
-      content: [
+      "title": "${kpis.plannedMissions} Planejadas",
+      "subtitle": "Missões Operacionais",
+      "content": [
         {
-          type: 'progress',
-          valueExpr: 'progressValue | round:0 | default:0',
-          showPercent: false,
-          className: 'fill-operations'
+          "type": "progress",
+          "valueExpr": "progressValue | round:0 | default:0",
+          "showPercent": false,
+          "className": "fill-operations"
         },
         {
-          type: 'text',
-          text: '${kpis.inProgressMissions} em curso · ${kpis.completedMissions} concluídas de ${kpis.totalMissions} missões',
-          className: 'card-footnote'
+          "type": "text",
+          "text": "${kpis.inProgressMissions} em curso · ${kpis.completedMissions} concluídas de ${kpis.totalMissions} missões",
+          "className": "card-footnote"
         }
       ]
     }
@@ -1000,49 +1012,55 @@ const KPI_MISSIONS_DOC = {
 };
 
 const KPI_PAYROLL_DOC = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
+  "kind": "praxis.rich-content",
+  "version": "1.0.0",
+  "nodes": [
     {
-      type: 'card',
-      variant: 'unstyled',
-      tone: 'neutral',
-      className: 'glass-panel bento-kpi-card',
-      interaction: {
-        mode: 'action',
-        action: {
-          actionId: 'navigation.openRoute',
-          payload: { path: '/rh/folha-pagamento' }
+      "type": "card",
+      "variant": "unstyled",
+      "tone": "neutral",
+      "className": "glass-panel bento-kpi-card kpi-tone-rh",
+      "interaction": {
+        "mode": "action",
+        "action": {
+          "actionId": "navigation.openRoute",
+          "payload": {
+            "path": "/rh/folha-pagamento"
+          }
         }
       },
-      header: [
+      "header": [
         {
-          type: 'compose',
-          direction: 'row',
-          gap: 'sm',
-          items: [
-            { type: 'icon', icon: 'payments', className: 'card-icon tone-rh' },
+          "type": "compose",
+          "direction": "row",
+          "gap": "sm",
+          "items": [
             {
-              type: 'badge',
-              label: '${kpis.latestPayrollMonth}',
-              className: 'tag-status rh-tag'
+              "type": "icon",
+              "icon": "payments",
+              "className": "card-icon tone-rh"
+            },
+            {
+              "type": "badge",
+              "label": "${kpis.folhaPercent}% Líquido",
+              "className": "tag-status rh-tag"
             }
           ]
         }
       ],
-      title: 'R$ ${kpis.latestPayrollNetMillion} M',
-      subtitle: 'Execução da Folha Líquida',
-      content: [
+      "title": "R$ ${kpis.latestPayrollNetMillion} M",
+      "subtitle": "Execução da Folha",
+      "content": [
         {
-          type: 'progress',
-          valueExpr: 'progressValue | round:1 | default:0',
-          showPercent: false,
-          className: 'fill-rh'
+          "type": "progress",
+          "valueExpr": "progressValue | round:1 | default:0",
+          "showPercent": false,
+          "className": "fill-rh"
         },
         {
-          type: 'text',
-          text: 'Folha auditada para ${kpis.latestPayrollEmployees} colaboradores ativos',
-          className: 'card-footnote'
+          "type": "text",
+          "text": "Folha de ${kpis.latestPayrollEmployees} colaboradores · Comp. ${kpis.latestPayrollMonth}",
+          "className": "card-footnote"
         }
       ]
     }
@@ -1050,49 +1068,55 @@ const KPI_PAYROLL_DOC = {
 };
 
 const KPI_INCIDENTS_DOC = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
+  "kind": "praxis.rich-content",
+  "version": "1.0.0",
+  "nodes": [
     {
-      type: 'card',
-      variant: 'unstyled',
-      tone: 'neutral',
-      className: 'glass-panel bento-kpi-card',
-      interaction: {
-        mode: 'action',
-        action: {
-          actionId: 'navigation.openRoute',
-          payload: { path: '/operacoes/incidentes' }
+      "type": "card",
+      "variant": "unstyled",
+      "tone": "neutral",
+      "className": "glass-panel bento-kpi-card kpi-tone-risk",
+      "interaction": {
+        "mode": "action",
+        "action": {
+          "actionId": "navigation.openRoute",
+          "payload": {
+            "path": "/operacoes/incidentes"
+          }
         }
       },
-      header: [
+      "header": [
         {
-          type: 'compose',
-          direction: 'row',
-          gap: 'sm',
-          items: [
-            { type: 'icon', icon: 'emergency', className: 'card-icon tone-risk' },
+          "type": "compose",
+          "direction": "row",
+          "gap": "sm",
+          "items": [
             {
-              type: 'badge',
-              label: '${kpis.totalIncidents} Ocorrências',
-              className: 'tag-status risk-tag'
+              "type": "icon",
+              "icon": "emergency",
+              "className": "card-icon tone-risk"
+            },
+            {
+              "type": "badge",
+              "label": "${kpis.totalIncidents} Incidentes",
+              "className": "tag-status risk-tag"
             }
           ]
         }
       ],
-      title: '${kpis.criticalIncidentsBadge} Críticos',
-      subtitle: 'Pressão de Ameaças & Risco',
-      content: [
+      "title": "${kpis.criticalIncidentsBadge} Críticos",
+      "subtitle": "Ameaças & Incidentes",
+      "content": [
         {
-          type: 'progress',
-          valueExpr: 'progressValue | round:0 | default:0',
-          showPercent: false,
-          className: 'fill-risk'
+          "type": "progress",
+          "valueExpr": "progressValue | round:0 | default:0",
+          "showPercent": false,
+          "className": "fill-risk"
         },
         {
-          type: 'text',
-          text: '${kpis.riscosPercent}% críticos · ${kpis.highIncidents} de severidade alta em ${kpis.totalIncidents} ocorrências',
-          className: 'card-footnote'
+          "type": "text",
+          "text": "${kpis.riscosPercent}% críticos · ${kpis.highIncidents} de severidade alta em ${kpis.totalIncidents} ocorrências",
+          "className": "card-footnote"
         }
       ]
     }
@@ -1100,76 +1124,88 @@ const KPI_INCIDENTS_DOC = {
 };
 
 const TIMELINE_DOC = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
+  "kind": "praxis.rich-content",
+  "version": "1.0.0",
+  "nodes": [
     {
-      type: 'timeline',
-      title: 'Missões em Curso no Teatro Operacional (${kpis.inProgressMissions} de ${kpis.totalMissions})',
-      position: 'right',
-      orientation: 'vertical',
-      markerVariant: 'dot',
-      markerStyle: 'filled',
-      items: [
+      "type": "timeline",
+      "title": "Teatro Operacional Ativo · ${kpis.inProgressMissions} em curso de ${kpis.totalMissions} missões",
+      "position": "right",
+      "orientation": "vertical",
+      "markerVariant": "icon",
+      "markerStyle": "filled",
+      "items": [
         {
-          title: '${activeMissions.0.titulo} · ${activeMissions.0.local} (${kpis.inProgressMissions} em Curso)',
-          subtitle: 'Alvo tático: ${activeMissions.0.ameaca} · ${activeMissions.0.qtdHerois} heróis mobilizados em ${activeMissions.0.qtdEventos} eventos (${kpis.completedMissions}/${kpis.totalMissions} concluídas).',
-          meta: 'Missão #${activeMissions.0.missaoId} · Status: ${activeMissions.0.statusLabel} · ${kpis.inUseAssets}/${kpis.totalAssets} ativos em suporte',
-          opposite: '#${activeMissions.0.missaoId}',
-          badge: '${activeMissions.0.prioridadeLabel} · ${kpis.inProgressMissionsBadge} Ativas',
-          markerColor: 'error',
-          markerStyle: 'filled',
-          connectorColor: 'error',
-          connectorVariant: 'solid',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/operacoes/missoes' }
-          }
+          "title": "${activeMissions.0.titulo} · ${activeMissions.0.local} (${kpis.inProgressMissions} em Curso)",
+          "subtitle": "Alvo tático: ${activeMissions.0.ameaca} · ${activeMissions.0.qtdHerois} heróis mobilizados em ${activeMissions.0.qtdEventos} eventos (${kpis.completedMissions}/${kpis.totalMissions} concluídas).",
+          "meta": "Missão #${activeMissions.0.missaoId} · Status: ${activeMissions.0.statusLabel} · ${kpis.inUseAssets}/${kpis.totalAssets} ativos em suporte",
+          "opposite": "#${activeMissions.0.missaoId}",
+          "badge": "${activeMissions.0.prioridadeLabel} · ${kpis.inProgressMissionsBadge} Ativas",
+          "markerColor": "error",
+          "markerStyle": "filled",
+          "connectorColor": "error",
+          "connectorVariant": "solid",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/operacoes/missoes"
+            }
+          },
+          "icon": "radar"
         },
         {
-          title: '${activeMissions.1.titulo} · ${activeMissions.1.local} (${kpis.plannedMissions} Planejadas)',
-          subtitle: 'Alvo tático: ${activeMissions.1.ameaca} · ${activeMissions.1.qtdHerois} heróis mobilizados em ${activeMissions.1.qtdEventos} eventos (${kpis.pausedMissions} em espera tática).',
-          meta: 'Missão #${activeMissions.1.missaoId} · Status: ${activeMissions.1.statusLabel}',
-          opposite: '#${activeMissions.1.missaoId}',
-          badge: '${activeMissions.1.prioridadeLabel} · #${activeMissions.1.missaoId}',
-          markerColor: 'primary',
-          markerStyle: 'filled',
-          connectorColor: 'primary',
-          connectorVariant: 'solid',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/operacoes/missoes' }
-          }
+          "title": "${activeMissions.1.titulo} · ${activeMissions.1.local} (${kpis.plannedMissions} Planejadas)",
+          "subtitle": "Alvo tático: ${activeMissions.1.ameaca} · ${activeMissions.1.qtdHerois} heróis mobilizados em ${activeMissions.1.qtdEventos} eventos (${kpis.pausedMissions} em espera tática).",
+          "meta": "Missão #${activeMissions.1.missaoId} · Status: ${activeMissions.1.statusLabel}",
+          "opposite": "#${activeMissions.1.missaoId}",
+          "badge": "${activeMissions.1.prioridadeLabel} · #${activeMissions.1.missaoId}",
+          "markerColor": "info",
+          "markerStyle": "filled",
+          "connectorColor": "info",
+          "connectorVariant": "solid",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/operacoes/missoes"
+            }
+          },
+          "icon": "rocket_launch"
         },
         {
-          title: '${activeMissions.2.titulo} · ${activeMissions.2.local} (Prontidão ${kpis.readinessRate}%)',
-          subtitle: 'Alvo tático: ${activeMissions.2.ameaca} · ${activeMissions.2.qtdHerois} heróis mobilizados em ${activeMissions.2.qtdEventos} eventos (${kpis.activeHeroes}/${kpis.totalHeroes} heróis prontos).',
-          meta: 'Missão #${activeMissions.2.missaoId} · Status: ${activeMissions.2.statusLabel}',
-          opposite: '#${activeMissions.2.missaoId}',
-          badge: '${activeMissions.2.prioridadeLabel} · #${activeMissions.2.missaoId}',
-          markerColor: 'warning',
-          markerStyle: 'outlined',
-          connectorColor: 'warning',
-          connectorVariant: 'dashed',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/operacoes/missoes' }
-          }
+          "title": "${activeMissions.2.titulo} · ${activeMissions.2.local} (Prontidão ${kpis.readinessRate}%)",
+          "subtitle": "Alvo tático: ${activeMissions.2.ameaca} · ${activeMissions.2.qtdHerois} heróis mobilizados em ${activeMissions.2.qtdEventos} eventos (${kpis.activeHeroes}/${kpis.totalHeroes} heróis prontos).",
+          "meta": "Missão #${activeMissions.2.missaoId} · Status: ${activeMissions.2.statusLabel}",
+          "opposite": "#${activeMissions.2.missaoId}",
+          "badge": "${activeMissions.2.prioridadeLabel} · #${activeMissions.2.missaoId}",
+          "markerColor": "warning",
+          "markerStyle": "outlined",
+          "connectorColor": "warning",
+          "connectorVariant": "dashed",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/operacoes/missoes"
+            }
+          },
+          "icon": "shield"
         },
         {
-          title: '${activeMissions.3.titulo} · ${activeMissions.3.local} (DEFCON ${kpis.defconScore})',
-          subtitle: 'Alvo tático: ${activeMissions.3.ameaca} · ${activeMissions.3.qtdHerois} heróis mobilizados em ${activeMissions.3.qtdEventos} eventos (${kpis.criticalIncidents} incidentes críticos).',
-          meta: 'Missão #${activeMissions.3.missaoId} · Status: ${activeMissions.3.statusLabel}',
-          opposite: '#${activeMissions.3.missaoId}',
-          badge: '${activeMissions.3.prioridadeLabel} · ${kpis.criticalIncidentsBadge} Críticos',
-          markerColor: 'success',
-          markerStyle: 'filled',
-          connectorColor: 'success',
-          connectorVariant: 'solid',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/operacoes/missoes' }
-          }
+          "title": "${activeMissions.3.titulo} · ${activeMissions.3.local} (DEFCON ${kpis.defconScore})",
+          "subtitle": "Alvo tático: ${activeMissions.3.ameaca} · ${activeMissions.3.qtdHerois} heróis mobilizados em ${activeMissions.3.qtdEventos} eventos (${kpis.criticalIncidents} incidentes críticos).",
+          "meta": "Missão #${activeMissions.3.missaoId} · Status: ${activeMissions.3.statusLabel}",
+          "opposite": "#${activeMissions.3.missaoId}",
+          "badge": "${activeMissions.3.prioridadeLabel} · ${kpis.criticalIncidentsBadge} Críticos",
+          "markerColor": "success",
+          "markerStyle": "filled",
+          "connectorColor": "success",
+          "connectorVariant": "solid",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/operacoes/missoes"
+            }
+          },
+          "icon": "verified"
         }
       ]
     }
@@ -1177,106 +1213,118 @@ const TIMELINE_DOC = {
 };
 
 const HUB_DOC = {
-  kind: 'praxis.rich-content',
-  version: '1.0.0',
-  nodes: [
+  "kind": "praxis.rich-content",
+  "version": "1.0.0",
+  "nodes": [
     {
-      type: 'compose',
-      layout: 'grid',
-      columns: 'auto-fit',
-      minColumnWidth: '240px',
-      gap: 'md',
-      className: 'hub-action-cards-grid',
-      items: [
+      "type": "compose",
+      "layout": "grid",
+      "columns": "auto-fit",
+      "minColumnWidth": "240px",
+      "gap": "md",
+      "className": "hub-action-cards-grid",
+      "items": [
         {
-          type: 'actionCard',
-          variant: 'unstyled',
-          title: 'Heróis & Colaboradores',
-          subtitle: 'Cadastros completos, identidades civis, remunerações e histórico funcional.',
-          meta: '${kpis.activeHeroes}/${kpis.totalHeroes} ativos · ${kpis.readinessRate}% prontidão',
-          icon: 'group',
-          ctaLabel: 'Acessar RH',
-          ctaIcon: 'arrow_forward',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/rh/funcionarios' }
+          "type": "actionCard",
+          "variant": "unstyled",
+          "title": "Heróis & Colaboradores",
+          "subtitle": "Cadastros completos, identidades civis, remunerações e histórico funcional.",
+          "meta": "${kpis.activeHeroes}/${kpis.totalHeroes} ativos · ${kpis.readinessRate}% prontidão",
+          "icon": "group",
+          "ctaLabel": "Acessar RH",
+          "ctaIcon": "arrow_forward",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/rh/funcionarios"
+            }
           },
-          className: 'glass-panel hub-card-action tone-rh'
+          "className": "glass-panel hub-card-action tone-rh"
         },
         {
-          type: 'actionCard',
-          variant: 'unstyled',
-          title: 'Centro de Missões',
-          subtitle: 'Despacho tático, formação de squads, diário de bordo e desfechos operacionais.',
-          meta: '${kpis.inProgressMissions} em curso · ${kpis.plannedMissions} planejadas',
-          icon: 'military_tech',
-          ctaLabel: 'Operações',
-          ctaIcon: 'arrow_forward',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/operacoes/missoes' }
+          "type": "actionCard",
+          "variant": "unstyled",
+          "title": "Centro de Missões",
+          "subtitle": "Despacho tático, formação de squads, diário de bordo e desfechos operacionais.",
+          "meta": "${kpis.inProgressMissions} em curso · ${kpis.plannedMissions} planejadas",
+          "icon": "military_tech",
+          "ctaLabel": "Operações",
+          "ctaIcon": "arrow_forward",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/operacoes/missoes"
+            }
           },
-          className: 'glass-panel hub-card-action tone-operations'
+          "className": "glass-panel hub-card-action tone-operations"
         },
         {
-          type: 'actionCard',
-          variant: 'unstyled',
-          title: 'Ativos & Armaduras',
-          subtitle: 'Controle de custódia, manutenção preventiva de trajes e frota aérea/terrestre.',
-          meta: '${kpis.inUseAssets}/${kpis.totalAssets} em uso · ${kpis.maintenanceAssets} manutenção',
-          icon: 'inventory_2',
-          ctaLabel: 'Ver Ativos',
-          ctaIcon: 'arrow_forward',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/ativos/equipamentos' }
+          "type": "actionCard",
+          "variant": "unstyled",
+          "title": "Ativos & Armaduras",
+          "subtitle": "Controle de custódia, manutenção preventiva de trajes e frota aérea/terrestre.",
+          "meta": "${kpis.inUseAssets}/${kpis.totalAssets} em uso · ${kpis.maintenanceAssets} manutenção",
+          "icon": "inventory_2",
+          "ctaLabel": "Ver Ativos",
+          "ctaIcon": "arrow_forward",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/ativos/equipamentos"
+            }
           },
-          className: 'glass-panel hub-card-action tone-assets'
+          "className": "glass-panel hub-card-action tone-assets"
         },
         {
-          type: 'actionCard',
-          variant: 'unstyled',
-          title: 'Suprimentos & Contratos',
-          subtitle: 'Fornecedores homologados, requisições de compra e tecnologia bélica avançada.',
-          meta: 'Folha R$ ${kpis.latestPayrollNetMillion} M · ${kpis.latestPayrollMonth}',
-          icon: 'contract',
-          ctaLabel: 'Contratos',
-          ctaIcon: 'arrow_forward',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/suprimentos/contratos' }
+          "type": "actionCard",
+          "variant": "unstyled",
+          "title": "Suprimentos & Contratos",
+          "subtitle": "Fornecedores homologados, requisições de compra e tecnologia bélica avançada.",
+          "meta": "Folha R$ ${kpis.latestPayrollNetMillion} M · ${kpis.latestPayrollMonth}",
+          "icon": "contract",
+          "ctaLabel": "Contratos",
+          "ctaIcon": "arrow_forward",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/suprimentos/contratos"
+            }
           },
-          className: 'glass-panel hub-card-action tone-supplies'
+          "className": "glass-panel hub-card-action tone-supplies"
         },
         {
-          type: 'actionCard',
-          variant: 'unstyled',
-          title: 'Inteligência & Ameaças',
-          subtitle: 'Monitoramento geoespacial de vilões, acordos regulatórios e indenizações públicas.',
-          meta: '${kpis.confrontationThreats}/${kpis.totalThreats} em confronto · ${kpis.criticalIncidents} críticos',
-          icon: 'radar',
-          ctaLabel: 'Monitorar',
-          ctaIcon: 'arrow_forward',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/risco/ameacas' }
+          "type": "actionCard",
+          "variant": "unstyled",
+          "title": "Inteligência & Ameaças",
+          "subtitle": "Monitoramento geoespacial de vilões, acordos regulatórios e indenizações públicas.",
+          "meta": "${kpis.confrontationThreats}/${kpis.totalThreats} em confronto · ${kpis.criticalIncidents} críticos",
+          "icon": "radar",
+          "ctaLabel": "Monitorar",
+          "ctaIcon": "arrow_forward",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/risco/ameacas"
+            }
           },
-          className: 'glass-panel hub-card-action tone-risk'
+          "className": "glass-panel hub-card-action tone-risk"
         },
         {
-          type: 'actionCard',
-          variant: 'unstyled',
-          title: 'Ranking Reputacional',
-          subtitle: 'Índices consolidados de aprovação popular, respaldo governamental e governança.',
-          meta: '${kpis.totalIncidents} ocorrências auditadas no ciclo',
-          icon: 'monitoring',
-          ctaLabel: 'Métricas',
-          ctaIcon: 'arrow_forward',
-          action: {
-            actionId: 'navigation.openRoute',
-            payload: { path: '/rh/reputacao' }
+          "type": "actionCard",
+          "variant": "unstyled",
+          "title": "Ranking Reputacional",
+          "subtitle": "Índices consolidados de aprovação popular, respaldo governamental e governança.",
+          "meta": "${kpis.totalIncidents} ocorrências auditadas no ciclo",
+          "icon": "monitoring",
+          "ctaLabel": "Métricas",
+          "ctaIcon": "arrow_forward",
+          "action": {
+            "actionId": "navigation.openRoute",
+            "payload": {
+              "path": "/rh/reputacao"
+            }
           },
-          className: 'glass-panel hub-card-action tone-operations'
+          "className": "glass-panel hub-card-action tone-cobalt"
         }
       ]
     }
@@ -1284,266 +1332,785 @@ const HUB_DOC = {
 };
 
 const SOS_LIST_CONFIG = {
-  id: 'studio-distress-signals-list',
-  dataSource: {
-    resourcePath: 'operations/sinais-socorro',
-    query: { sort: ['abertoEm,desc'] }
-  },
-  i18n: { locale: 'pt-BR' },
-  layout: {
-    variant: 'list',
-    itemAppearance: 'card',
-    itemSpacing: 'relaxed',
-    density: 'compact',
-    pageSize: 6,
-    lines: 2,
-    dividers: 'none',
-    virtualScroll: {
-      enabled: true,
-      itemSize: 64,
-      viewportHeight: '380px'
+  "id": "studio-distress-signals-list",
+  "dataSource": {
+    "resourcePath": "operations/sinais-socorro",
+    "query": {
+      "sort": [
+        "abertoEm,desc"
+      ]
     }
   },
-  itemActions: [
+  "i18n": {
+    "locale": "pt-BR"
+  },
+  "layout": {
+    "variant": "list",
+    "itemAppearance": "card",
+    "itemSpacing": "default",
+    "density": "comfortable",
+    "pageSize": 6,
+    "lines": 2,
+    "dividers": "none",
+    "rowLayout": {
+      "type": "grid",
+      "gap": "14px",
+      "align": "center",
+      "columns": [
+        {
+          "slot": "leading",
+          "width": "40px",
+          "align": "center",
+          "justify": "center"
+        },
+        {
+          "slot": "identity",
+          "minWidth": "140px",
+          "width": "1fr",
+          "align": "center"
+        },
+        {
+          "slot": "risk",
+          "width": "116px",
+          "align": "center",
+          "justify": "end"
+        },
+        {
+          "slot": "trailing",
+          "width": "auto",
+          "align": "center",
+          "justify": "end"
+        }
+      ]
+    },
+    "virtualScroll": {
+      "enabled": false,
+      "itemSize": 68,
+      "viewportHeight": "340px"
+    }
+  },
+  "itemActions": [
     {
-      id: 'atender-chamado',
-      label: 'Atender Chamado',
-      icon: 'support_agent',
-      kind: 'menu-item',
-      placement: 'menu',
-      hateoasRel: 'update'
+      "id": "despachar-equipe",
+      "label": "Despachar Equipe Tática",
+      "icon": "send",
+      "kind": "icon",
+      "color": "warn",
+      "placement": "trailing",
+      "showIf": {
+        "==": [
+          {
+            "var": "item.status"
+          },
+          "ABERTO"
+        ]
+      }
     },
     {
-      id: 'ver-detalhes',
-      label: 'Ver Detalhes',
-      icon: 'visibility',
-      kind: 'menu-item',
-      placement: 'menu'
+      "id": "atender-chamado",
+      "label": "Atender Chamado",
+      "icon": "support_agent",
+      "kind": "menu-item",
+      "placement": "menu",
+      "hateoasRel": "update"
+    },
+    {
+      "id": "ver-detalhes",
+      "label": "Ver Detalhes",
+      "icon": "visibility",
+      "kind": "menu-item",
+      "placement": "menu"
     }
   ],
-  skin: {
-    type: 'glass',
-    radius: '12px'
+  "skin": {
+    "type": "glass",
+    "radius": "12px"
   },
-  selection: {
-    mode: 'single',
-    return: 'item'
+  "selection": {
+    "mode": "single",
+    "showControl": false,
+    "return": "item"
   },
-  templating: {
-    leading: { type: 'icon', expr: 'emergency', color: 'warn' },
-    primary: { type: 'text', expr: '${item.origem} · ${item.local}' },
-    secondary: { type: 'text', expr: 'Ameaça Nível ${item.nivelAmeaca}' },
-    meta: { type: 'relative', expr: '${item.abertoEm}' },
-    trailing: { type: 'chip', expr: '${item.status}', variant: 'outlined', color: 'accent' },
-    chipColorMap: {
-      ABERTO: 'warn',
-      EM_ATENDIMENTO: 'accent',
-      RESOLVIDO: 'primary',
-      FALSO: 'neutral'
+  "rules": {
+    "itemStyles": [
+      {
+        "id": "critical-open-signal",
+        "condition": {
+          "and": [
+            {
+              ">=": [
+                {
+                  "var": "item.nivelAmeaca"
+                },
+                4
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "item.status"
+                },
+                "ABERTO"
+              ]
+            }
+          ]
+        },
+        "tone": "danger"
+      },
+      {
+        "id": "in-progress-signal",
+        "condition": {
+          "==": [
+            {
+              "var": "item.status"
+            },
+            "EM_ATENDIMENTO"
+          ]
+        },
+        "tone": "warning"
+      },
+      {
+        "id": "resolved-signal",
+        "condition": {
+          "==": [
+            {
+              "var": "item.status"
+            },
+            "RESOLVIDO"
+          ]
+        },
+        "tone": "success"
+      }
+    ],
+    "slotOverrides": [
+      {
+        "id": "leading-resolved-icon",
+        "slot": "leading",
+        "condition": {
+          "==": [
+            {
+              "var": "item.status"
+            },
+            "RESOLVIDO"
+          ]
+        },
+        "template": {
+          "type": "icon",
+          "expr": "verified",
+          "color": "success"
+        }
+      },
+      {
+        "id": "leading-in-progress-icon",
+        "slot": "leading",
+        "condition": {
+          "==": [
+            {
+              "var": "item.status"
+            },
+            "EM_ATENDIMENTO"
+          ]
+        },
+        "template": {
+          "type": "icon",
+          "expr": "shield",
+          "color": "warning"
+        }
+      },
+      {
+        "id": "leading-false-alarm-icon",
+        "slot": "leading",
+        "condition": {
+          "==": [
+            {
+              "var": "item.status"
+            },
+            "FALSO"
+          ]
+        },
+        "template": {
+          "type": "icon",
+          "expr": "block",
+          "color": "neutral"
+        }
+      }
+    ]
+  },
+  "templating": {
+    "leading": {
+      "type": "icon",
+      "expr": "crisis_alert",
+      "color": "warn"
+    },
+    "identity": {
+      "type": "compose",
+      "props": {
+        "compose": {
+          "direction": "column",
+          "gap": "2px",
+          "items": [
+            {
+              "type": "text",
+              "expr": "${item.origem} · ${item.local}",
+              "class": "primary"
+            },
+            {
+              "type": "text",
+              "expr": "Chamado #${item.id} · ${item.abertoEm|relative:pt-BR}",
+              "class": "secondary"
+            }
+          ]
+        }
+      }
+    },
+    "primary": {
+      "type": "text",
+      "expr": "${item.origem} · ${item.local}"
+    },
+    "secondary": {
+      "type": "text",
+      "expr": "Ameaça Nível ${item.nivelAmeaca}"
+    },
+    "risk": {
+      "type": "metric",
+      "expr": "Nível ${item.nivelAmeaca}",
+      "props": {
+        "metric": {
+          "valueExpr": "Nível ${item.nivelAmeaca}",
+          "toneExpr": "${item.nivelAmeaca|map:5=danger,4=danger,3=warning,2=positive,1=positive,0=neutral}",
+          "align": "end",
+          "progress": {
+            "valueExpr": "${item.nivelAmeaca}",
+            "max": 5
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": "relative",
+      "expr": "${item.abertoEm}"
+    },
+    "trailing": {
+      "type": "chip",
+      "expr": "${item.status}",
+      "variant": "outlined",
+      "color": "accent"
+    },
+    "chipColorMap": {
+      "ABERTO": "warn",
+      "EM_ATENDIMENTO": "accent",
+      "RESOLVIDO": "success",
+      "FALSO": "neutral"
+    },
+    "iconColorMap": {
+      "ABERTO": "warn",
+      "EM_ATENDIMENTO": "accent",
+      "RESOLVIDO": "success",
+      "FALSO": "neutral"
     }
+  },
+  "interaction": {
+    "expandable": true,
+    "expandTrigger": "row+icon",
+    "expandMode": "single",
+    "expandPlacement": "trailing"
+  },
+  "expansion": {
+    "rendering": {
+      "shell": "attached",
+      "columns": 1,
+      "padding": "12px 16px"
+    },
+    "sections": [
+      {
+        "id": "tactical-telemetry",
+        "title": "Dossiê de Telemetria & Resposta Tática",
+        "type": "key-value",
+        "itemsExpr": "[{\"key\":\"Protocolo\",\"value\":\"#${item.id}\"},{\"key\":\"Origem do Sinal\",\"value\":\"${item.origem}\"},{\"key\":\"Setor / Teatro\",\"value\":\"${item.local}\"},{\"key\":\"Nível de Ameaça\",\"value\":\"Nível ${item.nivelAmeaca} / 5\"},{\"key\":\"Recebido em\",\"value\":\"${item.abertoEm|datetime:pt-BR:short}\"},{\"key\":\"Status Operacional\",\"value\":\"${item.status|map:ABERTO=Aberto — Despacho Imediato;EM_ATENDIMENTO=Em Atendimento;RESOLVIDO=Resolvido;FALSO=Alarme Falso}\"}]"
+      }
+    ]
   }
 };
 
 const INCIDENTS_TABLE_EDITOR_JSON = {
-  kind: 'praxis.table.editor',
-  version: 1,
-  bindings: {
-    resourcePath: 'operations/incidentes',
-    tableId: 'studio-incidentes-recentes',
-    horizontalScroll: 'auto'
+  "kind": "praxis.table.editor",
+  "version": 1,
+  "bindings": {
+    "resourcePath": "operations/incidentes",
+    "tableId": "studio-incidentes-recentes",
+    "horizontalScroll": "auto"
   },
-  config: {
-    columns: [
-      { field: 'id', header: 'Código', width: '100px', align: 'center', sortable: true },
-      { field: 'descricao', header: 'Ocorrência / Sinistro', width: '300px', sortable: true },
-      { field: 'severidade', header: 'Severidade', width: '120px', align: 'center', sortable: true },
+  "config": {
+    "columns": [
       {
-        field: 'contencao',
-        header: 'Contenção Tática',
-        width: '180px',
-        renderer: {
-          type: 'microVisualization',
-          microVisualization: {
-            visualization: {
-              kind: 'radial',
-              surface: 'table-cell',
-              valueExpr: '= max(15, 100 - round(min(85, (danosCivis / 4000000) * 100)))',
-              total: 100,
-              thresholds: [
-                { min: 70, tone: 'success' },
-                { min: 40, max: 69, tone: 'warning' },
-                { max: 39, tone: 'danger' }
+        "field": "id",
+        "header": "Código",
+        "width": "100px",
+        "align": "center",
+        "sortable": true
+      },
+      {
+        "field": "descricao",
+        "header": "Ocorrência / Sinistro",
+        "width": "300px",
+        "sortable": true
+      },
+      {
+        "field": "severidade",
+        "header": "Severidade",
+        "width": "132px",
+        "align": "center",
+        "sortable": true,
+        "valueMapping": {
+          "CRITICA": "Crítica",
+          "ALTA": "Alta",
+          "MEDIA": "Média",
+          "BAIXA": "Baixa"
+        },
+        "renderer": {
+          "type": "chip",
+          "chip": {
+            "textField": "severidade",
+            "variant": "soft",
+            "color": "primary",
+            "icon": "shield"
+          }
+        },
+        "conditionalRenderers": [
+          {
+            "condition": {
+              "==": [
+                {
+                  "var": "severidade"
+                },
+                "CRITICA"
+              ]
+            },
+            "renderer": {
+              "type": "chip",
+              "chip": {
+                "text": "Crítica",
+                "variant": "soft",
+                "color": "warn",
+                "icon": "gpp_bad"
+              }
+            }
+          },
+          {
+            "condition": {
+              "==": [
+                {
+                  "var": "severidade"
+                },
+                "ALTA"
+              ]
+            },
+            "renderer": {
+              "type": "chip",
+              "chip": {
+                "text": "Alta",
+                "variant": "soft",
+                "color": "accent",
+                "icon": "warning"
+              }
+            }
+          },
+          {
+            "condition": {
+              "==": [
+                {
+                  "var": "severidade"
+                },
+                "MEDIA"
+              ]
+            },
+            "renderer": {
+              "type": "chip",
+              "chip": {
+                "text": "Média",
+                "variant": "soft",
+                "color": "primary",
+                "icon": "shield"
+              }
+            }
+          },
+          {
+            "condition": {
+              "==": [
+                {
+                  "var": "severidade"
+                },
+                "BAIXA"
+              ]
+            },
+            "renderer": {
+              "type": "chip",
+              "chip": {
+                "text": "Baixa",
+                "variant": "outlined",
+                "color": "basic",
+                "icon": "verified_user"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "field": "contencao",
+        "header": "Contenção Tática",
+        "width": "180px",
+        "renderer": {
+          "type": "microVisualization",
+          "microVisualization": {
+            "visualization": {
+              "kind": "radial",
+              "surface": "table-cell",
+              "valueExpr": "= max(15, 100 - round(min(85, (danosCivis / 4000000) * 100)))",
+              "total": 100,
+              "thresholds": [
+                {
+                  "min": 70,
+                  "tone": "success"
+                },
+                {
+                  "min": 40,
+                  "max": 69,
+                  "tone": "warning"
+                },
+                {
+                  "max": 39,
+                  "tone": "danger"
+                }
               ],
-              fallbackText: 'Contenção Tática'
+              "fallbackText": "Contenção Tática"
             }
           }
         }
       },
-      { field: 'local', header: 'Teatro Operacional', width: '180px', sortable: true },
-      { field: 'ocorridoEm', header: 'Data / Hora', type: 'date', format: 'dd/MM/yyyy HH:mm', width: '155px', sortable: true },
-      { field: 'danosCivis', header: 'Danos Civis (R$)', type: 'currency', width: '150px', align: 'right', sortable: true },
-      { field: 'feridos', header: 'Feridos', width: '90px', align: 'center', sortable: true },
-      { field: 'mortos', header: 'Baixas', width: '90px', align: 'center', sortable: true }
+      {
+        "field": "local",
+        "header": "Teatro Operacional",
+        "width": "180px",
+        "sortable": true
+      },
+      {
+        "field": "ocorridoEm",
+        "header": "Data / Hora",
+        "type": "date",
+        "format": "dd/MM/yyyy HH:mm",
+        "width": "155px",
+        "sortable": true
+      },
+      {
+        "field": "danosCivis",
+        "header": "Danos Civis (R$)",
+        "type": "currency",
+        "width": "150px",
+        "align": "right",
+        "sortable": true
+      },
+      {
+        "field": "feridos",
+        "header": "Feridos",
+        "width": "90px",
+        "align": "center",
+        "sortable": true
+      },
+      {
+        "field": "mortos",
+        "header": "Baixas",
+        "width": "90px",
+        "align": "center",
+        "sortable": true,
+        "conditionalRenderers": [
+          {
+            "condition": {
+              ">": [
+                {
+                  "var": "mortos"
+                },
+                0
+              ]
+            },
+            "renderer": {
+              "type": "badge",
+              "badge": {
+                "textField": "mortos",
+                "variant": "soft",
+                "color": "warn",
+                "icon": "emergency"
+              }
+            }
+          },
+          {
+            "condition": {
+              "==": [
+                {
+                  "var": "mortos"
+                },
+                0
+              ]
+            },
+            "renderer": {
+              "type": "badge",
+              "badge": {
+                "text": "0",
+                "variant": "soft",
+                "color": "success",
+                "icon": "verified_user"
+              }
+            }
+          }
+        ]
+      }
     ],
-    toolbar: {
-      visible: true,
-      title: 'Incidentes em Campo (Conectado ao Gráfico de Severidade)'
-    },
-    appearance: {
-      density: 'compact'
-    },
-    localization: {
-      locale: 'pt-BR',
-      currency: {
-        code: 'BRL',
-        symbol: 'R$',
-        position: 'before',
-        spacing: true,
-        precision: 0
+    "toolbar": {
+      "visible": true,
+      "appearance": {
+        "variant": "integrated",
+        "density": "compact"
+      },
+      "filters": {
+        "enabled": true,
+        "showQuickFilters": true,
+        "quickFilters": [
+          {
+            "id": "all",
+            "label": "Todos",
+            "icon": "apps",
+            "filter": {}
+          },
+          {
+            "id": "critica",
+            "label": "Crítica",
+            "icon": "gpp_bad",
+            "filter": {
+              "severidade": "CRITICA"
+            }
+          },
+          {
+            "id": "alta",
+            "label": "Alta",
+            "icon": "warning",
+            "filter": {
+              "severidade": "ALTA"
+            }
+          },
+          {
+            "id": "media",
+            "label": "Média",
+            "icon": "shield",
+            "filter": {
+              "severidade": "MEDIA"
+            }
+          }
+        ]
       }
     },
-    behavior: {
-      expansion: {
-        enabled: true,
-        contractVersion: '1.0.0',
-        identity: {
-          rowKeySource: 'table.idField',
-          requireStableIdField: true
+    "appearance": {
+      "density": "compact"
+    },
+    "localization": {
+      "locale": "pt-BR",
+      "currency": {
+        "code": "BRL",
+        "symbol": "R$",
+        "position": "before",
+        "spacing": true,
+        "precision": 0
+      }
+    },
+    "behavior": {
+      "expansion": {
+        "enabled": true,
+        "contractVersion": "1.0.0",
+        "identity": {
+          "rowKeySource": "table.idField",
+          "requireStableIdField": true
         },
-        state: { mode: 'uncontrolled' },
-        interaction: {
-          trigger: 'icon',
-          toggleOnRowClick: false
+        "state": {
+          "mode": "uncontrolled"
         },
-        limits: {
-          allowMultiple: false,
-          maxExpandedRows: 1,
-          onOverflow: 'collapseOldest'
+        "interaction": {
+          "trigger": "icon",
+          "toggleOnRowClick": false
+        },
+        "limits": {
+          "allowMultiple": false,
+          "maxExpandedRows": 1,
+          "onOverflow": "collapseOldest"
         }
       },
-      detail: {
-        schemaContract: {
-          kind: 'praxis.detail.schema',
-          version: '1.0.0',
-          compat: 'semver',
-          allowedNodes: [
-            'card', 'value', 'stack', 'text', 'icon', 'badge', 'compose', 'metric', 'progress', 'richContent', 'timeline', 'list', 'tabs', 'tab', 'mediaBlock', 'cardGrid'
+      "detail": {
+        "schemaContract": {
+          "kind": "praxis.detail.schema",
+          "version": "1.0.0",
+          "compat": "semver",
+          "allowedNodes": [
+            "card",
+            "value",
+            "stack",
+            "text",
+            "icon",
+            "badge",
+            "compose",
+            "metric",
+            "progress",
+            "richContent",
+            "timeline",
+            "list",
+            "tabs",
+            "tab",
+            "mediaBlock",
+            "cardGrid"
           ],
-          sanitization: 'strict'
+          "sanitization": "strict"
         },
-        rendering: {
-          strategy: 'registry',
-          registryId: 'praxis.detail.default',
-          rendererVersion: '1.0.0',
-          fallbackNodePolicy: 'failClosed'
+        "rendering": {
+          "strategy": "registry",
+          "registryId": "praxis.detail.default",
+          "rendererVersion": "1.0.0",
+          "fallbackNodePolicy": "failClosed"
         },
-        source: {
-          mode: 'inline',
-          inlineSchema: {
-            layout: 'stack',
-            items: [
+        "source": {
+          "mode": "inline",
+          "inlineSchema": {
+            "layout": "stack",
+            "items": [
               {
-                type: 'cardGrid',
-                title: 'DOSSIÊ TÁTICO DE CAMPO & ANÁLISE FORENSE',
-                subtitle: 'Protocolo de resposta rápida sob governança do Centro de Comando Tático',
-                columns: 3,
-                minCardWidth: 250,
-                cards: [
+                "type": "cardGrid",
+                "title": "DOSSIÊ TÁTICO DE CAMPO & ANÁLISE FORENSE",
+                "subtitle": "Protocolo de resposta rápida sob governança do Centro de Comando Tático",
+                "columns": 3,
+                "minCardWidth": 250,
+                "cards": [
                   {
-                    title: 'Contexto & Teatro Operacional',
-                    subtitle: 'Geolocalização e vínculo de missão',
-                    variant: 'outlined',
-                    tone: 'primary',
-                    size: 'sm',
-                    density: 'compact',
-                    content: [
+                    "title": "Contexto & Teatro Operacional",
+                    "subtitle": "Geolocalização e vínculo de missão",
+                    "variant": "outlined",
+                    "tone": "primary",
+                    "size": "sm",
+                    "density": "compact",
+                    "content": [
                       {
-                        type: 'metric',
-                        label: 'Teatro Operacional',
-                        valueExpr: '${row.local | default:Setor em varredura}',
-                        captionExpr: 'Ocorrência #${row.id} · Missão #${row.missaoId | default:N/A}',
-                        icon: 'location_on',
-                        tone: 'primary'
+                        "type": "metric",
+                        "label": "Teatro Operacional",
+                        "valueExpr": "${row.local | default:Setor em varredura}",
+                        "captionExpr": "Ocorrência #${row.id} · Missão #${row.missaoId | default:N/A}",
+                        "icon": "location_on",
+                        "tone": "primary"
                       },
                       {
-                        type: 'compose',
-                        direction: 'row',
-                        gap: 'xs',
-                        items: [
+                        "type": "compose",
+                        "direction": "row",
+                        "gap": "xs",
+                        "items": [
                           {
-                            type: 'badge',
-                            labelExpr: 'SEVERIDADE ${row.severidade}',
-                            icon: 'gpp_bad',
-                            tone: 'danger',
-                            visibleWhen: {
-                              in: [{ var: 'row.severidade' }, ['CRITICA', 'CRÍTICA']]
+                            "type": "badge",
+                            "labelExpr": "SEVERIDADE ${row.severidade}",
+                            "icon": "gpp_bad",
+                            "tone": "danger",
+                            "visibleWhen": {
+                              "in": [
+                                {
+                                  "var": "row.severidade"
+                                },
+                                [
+                                  "CRITICA",
+                                  "CRÍTICA"
+                                ]
+                              ]
                             }
                           },
                           {
-                            type: 'badge',
-                            labelExpr: 'SEVERIDADE ${row.severidade}',
-                            icon: 'warning',
-                            tone: 'warning',
-                            visibleWhen: {
-                              '===': [{ var: 'row.severidade' }, 'ALTA']
+                            "type": "badge",
+                            "labelExpr": "SEVERIDADE ${row.severidade}",
+                            "icon": "warning",
+                            "tone": "warning",
+                            "visibleWhen": {
+                              "===": [
+                                {
+                                  "var": "row.severidade"
+                                },
+                                "ALTA"
+                              ]
                             }
                           },
                           {
-                            type: 'badge',
-                            labelExpr: 'SEVERIDADE ${row.severidade}',
-                            icon: 'shield',
-                            tone: 'info',
-                            visibleWhen: {
-                              in: [{ var: 'row.severidade' }, ['MEDIA', 'MÉDIA', 'BAIXA']]
+                            "type": "badge",
+                            "labelExpr": "SEVERIDADE ${row.severidade}",
+                            "icon": "shield",
+                            "tone": "info",
+                            "visibleWhen": {
+                              "in": [
+                                {
+                                  "var": "row.severidade"
+                                },
+                                [
+                                  "MEDIA",
+                                  "MÉDIA",
+                                  "BAIXA"
+                                ]
+                              ]
                             }
                           },
                           {
-                            type: 'badge',
-                            labelExpr: 'MISSÃO #${row.missaoId | default:N/A}',
-                            icon: 'radar',
-                            tone: 'neutral'
+                            "type": "badge",
+                            "labelExpr": "MISSÃO #${row.missaoId | default:N/A}",
+                            "icon": "radar",
+                            "tone": "neutral"
                           }
                         ]
                       }
                     ]
                   },
                   {
-                    title: 'Impacto Humano & Contenção',
-                    subtitle: 'Triagem médica e cordão de isolamento',
-                    variant: 'outlined',
-                    tone: 'warning',
-                    size: 'sm',
-                    density: 'compact',
-                    content: [
+                    "title": "Impacto Humano & Contenção",
+                    "subtitle": "Triagem médica e cordão de isolamento",
+                    "variant": "outlined",
+                    "tone": "warning",
+                    "size": "sm",
+                    "density": "compact",
+                    "content": [
                       {
-                        type: 'metric',
-                        label: 'Vítimas & Feridos em Atendimento',
-                        valueExpr: '${row.feridos | default:0 | number} feridos',
-                        captionExpr: '${row.mortos | default:0 | number} baixas fatais confirmadas',
-                        icon: 'medical_services',
-                        tone: 'warning'
+                        "type": "metric",
+                        "label": "Vítimas & Feridos em Atendimento",
+                        "valueExpr": "${row.feridos | default:0 | number} feridos",
+                        "captionExpr": "${row.mortos | default:0 | number} baixas fatais confirmadas",
+                        "icon": "medical_services",
+                        "tone": "warning"
                       },
                       {
-                        type: 'compose',
-                        direction: 'row',
-                        gap: 'xs',
-                        items: [
+                        "type": "compose",
+                        "direction": "row",
+                        "gap": "xs",
+                        "items": [
                           {
-                            type: 'badge',
-                            label: 'ALERTA DE BAIXAS',
-                            icon: 'emergency',
-                            tone: 'danger',
-                            visibleWhen: {
-                              '>': [{ var: 'row.mortos' }, 0]
+                            "type": "badge",
+                            "label": "ALERTA DE BAIXAS",
+                            "icon": "emergency",
+                            "tone": "danger",
+                            "visibleWhen": {
+                              ">": [
+                                {
+                                  "var": "row.mortos"
+                                },
+                                0
+                              ]
                             }
                           },
                           {
-                            type: 'badge',
-                            label: 'ZERO BAIXAS FATAIS',
-                            icon: 'verified_user',
-                            tone: 'success',
-                            visibleWhen: {
-                              '===': [{ var: 'row.mortos' }, 0]
+                            "type": "badge",
+                            "label": "ZERO BAIXAS FATAIS",
+                            "icon": "verified_user",
+                            "tone": "success",
+                            "visibleWhen": {
+                              "===": [
+                                {
+                                  "var": "row.mortos"
+                                },
+                                0
+                              ]
                             }
                           }
                         ]
@@ -1551,43 +2118,43 @@ const INCIDENTS_TABLE_EDITOR_JSON = {
                     ]
                   },
                   {
-                    title: 'Auditoria & Impacto Patrimonial',
-                    subtitle: 'Estimativa pericial e registro cronológico',
-                    variant: 'outlined',
-                    tone: 'info',
-                    size: 'sm',
-                    density: 'compact',
-                    content: [
+                    "title": "Auditoria & Impacto Patrimonial",
+                    "subtitle": "Estimativa pericial e registro cronológico",
+                    "variant": "outlined",
+                    "tone": "info",
+                    "size": "sm",
+                    "density": "compact",
+                    "content": [
                       {
-                        type: 'metric',
-                        label: 'Danos Civis Estimados',
-                        valueExpr: '${row.danosCivis | default:0 | currency}',
-                        captionExpr: 'Registro: ${row.ocorridoEm | dateTime}',
-                        icon: 'account_balance_wallet',
-                        tone: 'info'
+                        "type": "metric",
+                        "label": "Danos Civis Estimados",
+                        "valueExpr": "${row.danosCivis | default:0 | currency}",
+                        "captionExpr": "Registro: ${row.ocorridoEm | dateTime}",
+                        "icon": "account_balance_wallet",
+                        "tone": "info"
                       },
                       {
-                        type: 'badge',
-                        label: 'PERÍMETRO ISOLADO · AUDITORIA ATIVA',
-                        icon: 'policy',
-                        tone: 'primary'
+                        "type": "badge",
+                        "label": "PERÍMETRO ISOLADO · AUDITORIA ATIVA",
+                        "icon": "policy",
+                        "tone": "primary"
                       }
                     ]
                   }
                 ]
               },
               {
-                type: 'richContent',
-                document: {
-                  kind: 'praxis.rich-content',
-                  version: '1.0.0',
-                  nodes: [
+                "type": "richContent",
+                "document": {
+                  "kind": "praxis.rich-content",
+                  "version": "1.0.0",
+                  "nodes": [
                     {
-                      type: 'callout',
-                      tone: 'info',
-                      icon: 'security',
-                      title: 'Síntese Forense & Diretiva de Contenção',
-                      messageExpr: '${row.descricao} — Perímetro isolado pela força tática no setor ${row.local} (Missão #${row.missaoId | default:N/A}). Esquadrões de perícia coordenando blindagem e monitoramento contínuo.'
+                      "type": "callout",
+                      "tone": "info",
+                      "icon": "security",
+                      "title": "Síntese Forense & Diretiva de Contenção",
+                      "messageExpr": "${row.descricao} — Perímetro isolado pela força tática no setor ${row.local} (Missão #${row.missaoId | default:N/A}). Esquadrões de perícia coordenando blindagem e monitoramento contínuo."
                     }
                   ]
                 }
@@ -3055,7 +3622,7 @@ async function main() {
         subtitle: '',
         shellTitle: 'Distribuição de Severidade',
         kindLabel: 'Rosca',
-        height: 290,
+        height: 340,
         sourceKind: 'praxis.stats',
         resourceMatch: 'risk-intelligence.vw-indicadores-incidentes',
         operationMatch: 'agrupar por',
@@ -3081,7 +3648,7 @@ async function main() {
         subtitle: '',
         shellTitle: 'Nível de Defesa Tática (DEFCON)',
         kindLabel: 'Velocímetro',
-        height: 290,
+        height: 340,
         sourceKind: 'praxis.stats',
         resourceMatch: 'human-resources.vw-ranking-reputacao',
         operationMatch: 'agrupar por',
@@ -3108,7 +3675,7 @@ async function main() {
         subtitle: '',
         shellTitle: 'Evolução da Folha Salarial & Benefícios',
         kindLabel: 'Área',
-        height: 300,
+        height: 320,
         sourceKind: 'praxis.stats',
         resourceMatch: 'human-resources.vw-analytics-folha-pagamento',
         operationMatch: 'série temporal',
@@ -3135,7 +3702,7 @@ async function main() {
         subtitle: '',
         shellTitle: 'Mobilização Tática & Eventos por Missão',
         kindLabel: 'Barra',
-        height: 300,
+        height: 320,
         sourceKind: 'praxis.stats',
         resourceMatch: 'operations.vw-resumo-missoes',
         operationMatch: 'agrupar por',

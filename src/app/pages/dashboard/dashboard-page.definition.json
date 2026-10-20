@@ -2437,7 +2437,14 @@
                   },
                   "conditionalRenderers": [
                     {
-                      "condition": "severidade == 'CRITICA'",
+                      "condition": {
+                        "==": [
+                          {
+                            "var": "severidade"
+                          },
+                          "CRITICA"
+                        ]
+                      },
                       "renderer": {
                         "type": "chip",
                         "chip": {
@@ -2449,7 +2456,14 @@
                       }
                     },
                     {
-                      "condition": "severidade == 'ALTA'",
+                      "condition": {
+                        "==": [
+                          {
+                            "var": "severidade"
+                          },
+                          "ALTA"
+                        ]
+                      },
                       "renderer": {
                         "type": "chip",
                         "chip": {
@@ -2461,7 +2475,14 @@
                       }
                     },
                     {
-                      "condition": "severidade == 'MEDIA'",
+                      "condition": {
+                        "==": [
+                          {
+                            "var": "severidade"
+                          },
+                          "MEDIA"
+                        ]
+                      },
                       "renderer": {
                         "type": "chip",
                         "chip": {
@@ -2473,7 +2494,14 @@
                       }
                     },
                     {
-                      "condition": "severidade == 'BAIXA'",
+                      "condition": {
+                        "==": [
+                          {
+                            "var": "severidade"
+                          },
+                          "BAIXA"
+                        ]
+                      },
                       "renderer": {
                         "type": "chip",
                         "chip": {
@@ -2555,7 +2583,14 @@
                   "sortable": true,
                   "conditionalRenderers": [
                     {
-                      "condition": "mortos > 0",
+                      "condition": {
+                        ">": [
+                          {
+                            "var": "mortos"
+                          },
+                          0
+                        ]
+                      },
                       "renderer": {
                         "type": "badge",
                         "badge": {
@@ -2567,13 +2602,21 @@
                       }
                     },
                     {
-                      "condition": "mortos == 0",
+                      "condition": {
+                        "==": [
+                          {
+                            "var": "mortos"
+                          },
+                          0
+                        ]
+                      },
                       "renderer": {
                         "type": "badge",
                         "badge": {
                           "text": "0",
-                          "variant": "plain",
-                          "color": "success"
+                          "variant": "soft",
+                          "color": "success",
+                          "icon": "verified_user"
                         }
                       }
                     }
@@ -2950,9 +2993,9 @@
                       "meta": "Missão #${activeMissions.1.missaoId} · Status: ${activeMissions.1.statusLabel}",
                       "opposite": "#${activeMissions.1.missaoId}",
                       "badge": "${activeMissions.1.prioridadeLabel} · #${activeMissions.1.missaoId}",
-                      "markerColor": "accent",
+                      "markerColor": "info",
                       "markerStyle": "filled",
-                      "connectorColor": "accent",
+                      "connectorColor": "info",
                       "connectorVariant": "solid",
                       "action": {
                         "actionId": "navigation.openRoute",
