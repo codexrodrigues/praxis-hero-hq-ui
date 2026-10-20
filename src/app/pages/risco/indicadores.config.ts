@@ -58,6 +58,10 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['missao', 'local', 'severidade'],
+  },
   table: {
     meta: { idField: 'incidenteId' },
     columnProjection: {
@@ -98,7 +102,41 @@ export const INDICADORES_CRUD_METADATA: CrudMetadata = {
         incidenteId: { width: '90px', align: 'center', header: 'Registro' },
         missao: { width: '200px', header: 'Missão de Origem' },
         local: { width: '150px', header: 'Local do Dano' },
-        severidade: { width: '120px', align: 'center', header: 'Severidade' },
+        severidade: {
+          width: '140px',
+          align: 'center',
+          header: 'Severidade',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'severidade' }, 'CRITICA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Crítica', variant: 'soft', color: 'warn', icon: 'gpp_bad' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'severidade' }, 'ALTA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Alta', variant: 'soft', color: 'accent', icon: 'warning' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'severidade' }, 'MEDIA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Média', variant: 'soft', color: 'primary', icon: 'shield' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'severidade' }, 'BAIXA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Baixa', variant: 'outlined', color: 'basic', icon: 'verified_user' },
+              },
+            },
+          ],
+        },
         danosCivis: { width: '170px', align: 'right', header: 'Prejuízo Civil Estimado' },
         totalIndenizacoes: { width: '170px', align: 'right', header: 'Indenizações Totais' },
         totalPago: { width: '160px', align: 'right', header: 'Total Indenizado' },

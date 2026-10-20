@@ -59,6 +59,10 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['nome', 'classe', 'status', 'planeta'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -90,7 +94,34 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
         classe: { width: '130px', align: 'center', header: 'Classe Tática' },
         planeta: { width: '140px', header: 'Origem Planetária' },
         nivel: { width: '80px', align: 'center', type: 'number', header: 'Nível' },
-        status: { width: '150px', align: 'center', header: 'Status de Contenção' },
+        status: {
+          width: '160px',
+          align: 'center',
+          header: 'Status de Contenção',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'status' }, 'CONFRONTO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Confronto', variant: 'soft', color: 'warn', icon: 'crisis_alert' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'MONITORADO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Monitorado', variant: 'soft', color: 'accent', icon: 'radar' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'CAPTURADO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Contido (Raft)', variant: 'soft', color: 'primary', icon: 'lock' },
+              },
+            },
+          ],
+        },
         recompensa: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Recompensa Fixada' },
       },
     },
@@ -110,6 +141,128 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
           settings: {
             alwaysVisibleFields: ['nome', 'classe', 'status', 'planeta'],
           },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: {
+          rowKeySource: 'table.idField',
+          requireStableIdField: true,
+        },
+        state: {
+          mode: 'uncontrolled',
+        },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: {
+          allowMultiple: false,
+          maxExpandedRows: 1,
+          onOverflow: 'collapseOldest',
+        },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: ['cardGrid', 'card', 'metric', 'compose', 'badge', 'richContent', 'stack', 'text', 'value', 'icon'],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'DOSSIÊ DE INTELIGÊNCIA DE RISCO & PROTOCOLO DE CONTENÇÃO',
+                subtitle: 'Monitoramento contínuo pelo Radar de Ameaças Globais do Centro de Comando',
+                columns: 3,
+                minCardWidth: 250,
+                cards: [
+                  {
+                    title: 'Perfil & Origem Tática',
+                    subtitle: 'Classificação e teatro de origem',
+                    variant: 'outlined',
+                    tone: 'primary',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
+                      {
+                        type: 'metric',
+                        label: 'Designação do Alvo',
+                        valueExpr: '${row.nome}',
+                        captionExpr: 'Classe: ${row.classe} · Origem: ${row.planeta | default:Terra}',
+                        icon: 'radar',
+                        tone: 'primary',
+                      },
+                    ],
+                  },
+                  {
+                    title: 'Grau de Letalidade',
+                    subtitle: 'Escala global de periculosidade',
+                    variant: 'outlined',
+                    tone: 'warning',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
+                      {
+                        type: 'metric',
+                        label: 'Nível de Ameaça',
+                        valueExpr: 'Nível ${row.nivel} / 10',
+                        captionExpr: 'Status atual: ${row.status}',
+                        icon: 'crisis_alert',
+                        tone: 'warning',
+                      },
+                    ],
+                  },
+                  {
+                    title: 'Recompensa Governada',
+                    subtitle: 'Acordo de Sokovia & Custódia Raft',
+                    variant: 'outlined',
+                    tone: 'info',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
+                      {
+                        type: 'metric',
+                        label: 'Recompensa Fixada',
+                        valueExpr: '${row.recompensa | default:0 | currency}',
+                        captionExpr: 'Registro de Inteligência #${row.id}',
+                        icon: 'payments',
+                        tone: 'info',
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: 'richContent',
+                document: {
+                  kind: 'praxis.rich-content',
+                  version: '1.0.0',
+                  nodes: [
+                    {
+                      type: 'callout',
+                      tone: 'warning',
+                      icon: 'gpp_maybe',
+                      title: 'Diretiva de Contenção & Engajamento',
+                      messageExpr:
+                        'Alvo "${row.nome}" (${row.classe}, Nível ${row.nivel}) de origem ${row.planeta | default:Terra} sob status ${row.status}. Mobilização sujeita aos protocolos táticos do Acordo de Sokovia.',
+                    },
+                  ],
+                },
+              },
+            ],
+          } as any,
         },
       },
     },

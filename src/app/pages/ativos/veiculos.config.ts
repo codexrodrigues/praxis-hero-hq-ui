@@ -59,6 +59,10 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['nome', 'tipo', 'status', 'proprietarioId'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -91,7 +95,34 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
         tipo: { width: '140px', align: 'center', header: 'Plataforma' },
         capacidade: { width: '140px', align: 'center', header: 'Tripulação / Carga' },
         proprietarioNome: { width: '220px', header: 'Custodiante / Piloto' },
-        status: { width: '150px', align: 'center', header: 'Disponibilidade' },
+        status: {
+          width: '160px',
+          align: 'center',
+          header: 'Disponibilidade',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'status' }, 'OPERACIONAL'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Operacional', variant: 'soft', color: 'primary', icon: 'verified' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'MANUTENCAO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Hangar', variant: 'soft', color: 'accent', icon: 'build' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'INDISPONIVEL'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Indisponível', variant: 'soft', color: 'warn', icon: 'warning' },
+              },
+            },
+          ],
+        },
       },
     },
     toolbar: {

@@ -52,6 +52,10 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['nome', 'tipo', 'sigilo', 'planeta'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -81,8 +85,62 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
       overrides: {
         id: { width: '80px', align: 'center', header: 'ID' },
         nome: { width: '260px', header: 'Nome da Instalação / Base' },
-        tipo: { width: '180px', align: 'center', header: 'Tipo de Instalação' },
-        sigilo: { width: '160px', align: 'center', header: 'Nível de Sigilo' },
+        tipo: {
+          width: '180px',
+          align: 'center',
+          header: 'Tipo de Instalação',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'tipo' }, 'ORBITAL'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Estação Orbital', variant: 'soft', color: 'primary', icon: 'satellite_alt' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'tipo' }, 'QUARTEL_GENERAL'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Quartel-General', variant: 'soft', color: 'accent', icon: 'hub' },
+              },
+            },
+          ],
+        },
+        sigilo: {
+          width: '170px',
+          align: 'center',
+          header: 'Nível de Sigilo',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'sigilo' }, 'ULTRA_SECRETA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Ultra-Secreta', variant: 'soft', color: 'warn', icon: 'security' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'sigilo' }, 'SECRETA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Secreta', variant: 'soft', color: 'accent', icon: 'lock' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'sigilo' }, 'CONFIDENCIAL'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Confidencial', variant: 'soft', color: 'primary', icon: 'verified_user' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'sigilo' }, 'PUBLICA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Pública', variant: 'outlined', color: 'basic', icon: 'public' },
+              },
+            },
+          ],
+        },
         planeta: { width: '150px', align: 'center', header: 'Planeta / Teatro' },
       },
     },

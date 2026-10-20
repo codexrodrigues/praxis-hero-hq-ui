@@ -56,6 +56,10 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['local', 'severidade', 'descricao'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -93,7 +97,41 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
         id: { width: '90px', align: 'center', header: 'Registro' },
         descricao: { width: '320px', header: 'Descrição do Sinistro / Impacto' },
         local: { width: '200px', header: 'Teatro do Dano' },
-        severidade: { width: '130px', align: 'center', header: 'Severidade' },
+        severidade: {
+          width: '140px',
+          align: 'center',
+          header: 'Severidade',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'severidade' }, 'CRITICA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Crítica', variant: 'soft', color: 'warn', icon: 'gpp_bad' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'severidade' }, 'ALTA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Alta', variant: 'soft', color: 'accent', icon: 'warning' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'severidade' }, 'MEDIA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Média', variant: 'soft', color: 'primary', icon: 'shield' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'severidade' }, 'BAIXA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Baixa', variant: 'outlined', color: 'basic', icon: 'verified_user' },
+              },
+            },
+          ],
+        },
         danosCivis: { width: '170px', align: 'right', type: 'currency', format: 'BRL', header: 'Prejuízo Civil (R$)' },
         feridos: { width: '90px', align: 'center', header: 'Feridos' },
         ocorridoEm: { width: '150px', align: 'center', type: 'date', header: 'Data do Ocorrido' },
@@ -118,6 +156,128 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
           settings: {
             alwaysVisibleFields: ['local', 'severidade', 'descricao'],
           },
+        },
+      },
+      expansion: {
+        enabled: true,
+        contractVersion: '1.0.0',
+        identity: {
+          rowKeySource: 'table.idField',
+          requireStableIdField: true,
+        },
+        state: {
+          mode: 'uncontrolled',
+        },
+        interaction: {
+          trigger: 'icon',
+          toggleOnRowClick: false,
+        },
+        limits: {
+          allowMultiple: false,
+          maxExpandedRows: 1,
+          onOverflow: 'collapseOldest',
+        },
+      },
+      detail: {
+        schemaContract: {
+          kind: 'praxis.detail.schema',
+          version: '1.0.0',
+          compat: 'semver',
+          allowedNodes: ['cardGrid', 'card', 'metric', 'compose', 'badge', 'richContent', 'stack', 'text', 'value', 'icon'],
+          sanitization: 'strict',
+        },
+        rendering: {
+          strategy: 'registry',
+          registryId: 'praxis.detail.default',
+          fallbackNodePolicy: 'failClosed',
+        },
+        source: {
+          mode: 'inline',
+          inlineSchema: {
+            layout: 'stack',
+            items: [
+              {
+                type: 'cardGrid',
+                title: 'DOSSIÊ FORENSE DE INCIDENTE & CONTENÇÃO DE DANOS',
+                subtitle: 'Avaliação pericial do impacto civil e rastreabilidade operacional',
+                columns: 3,
+                minCardWidth: 250,
+                cards: [
+                  {
+                    title: 'Geolocalização & Severidade',
+                    subtitle: 'Setor afetado e classificação de risco',
+                    variant: 'outlined',
+                    tone: 'primary',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
+                      {
+                        type: 'metric',
+                        label: 'Teatro do Dano',
+                        valueExpr: '${row.local | default:Setor em varredura}',
+                        captionExpr: 'Ocorrência #${row.id} · Severidade: ${row.severidade}',
+                        icon: 'location_on',
+                        tone: 'primary',
+                      },
+                    ],
+                  },
+                  {
+                    title: 'Impacto Humano & Socorro',
+                    subtitle: 'Vítimas civis e evacuação médica',
+                    variant: 'outlined',
+                    tone: 'warning',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
+                      {
+                        type: 'metric',
+                        label: 'Feridos Atendidos',
+                        valueExpr: '${row.feridos | default:0 | number} vítimas',
+                        captionExpr: 'Baixas confirmadas: ${row.mortos | default:0 | number}',
+                        icon: 'medical_services',
+                        tone: 'warning',
+                      },
+                    ],
+                  },
+                  {
+                    title: 'Auditoria Patrimonial',
+                    subtitle: 'Cobertura pelo Fundo Tático de Indenizações',
+                    variant: 'outlined',
+                    tone: 'info',
+                    size: 'sm',
+                    density: 'compact',
+                    content: [
+                      {
+                        type: 'metric',
+                        label: 'Prejuízo Civil Estimado',
+                        valueExpr: '${row.danosCivis | default:0 | currency}',
+                        captionExpr: 'Data do sinistro: ${row.ocorridoEm | dateTime}',
+                        icon: 'account_balance',
+                        tone: 'info',
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: 'richContent',
+                document: {
+                  kind: 'praxis.rich-content',
+                  version: '1.0.0',
+                  nodes: [
+                    {
+                      type: 'callout',
+                      tone: 'info',
+                      icon: 'security',
+                      title: 'Síntese Pericial da Ocorrência',
+                      messageExpr:
+                        '${row.descricao} — Perímetro isolado no setor ${row.local}. Protocolo de mitigação e auditoria indenizatória ativo.',
+                    },
+                  ],
+                },
+              },
+            ],
+          } as any,
         },
       },
     },

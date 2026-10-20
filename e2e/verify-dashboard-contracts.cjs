@@ -561,6 +561,65 @@ assert(
   'Todas as páginas de domínio com /stats/group-by respeitam estritamente o contrato StatsEligibility do backend (filter: {} obrigatório e sem field em métricas COUNT)',
 );
 
+const allDomainScopeBarUnified = domainConfigs.every((relPath) => {
+  const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+  return (
+    content.includes("placement: 'scope-bar'") &&
+    content.includes('inlineFields: [')
+  );
+});
+assert(
+  allDomainScopeBarUnified,
+  'Todas as 17 páginas de domínio unificam quickFilters e inlineFields no <praxis-scope-bar> via filterBar.placement="scope-bar" + inlineFields (zero barra de filtros duplicada)',
+);
+
+const domainConfigsWithChips = [
+  'src/app/pages/rh/funcionarios.config.ts',
+  'src/app/pages/rh/eventos-folha.config.ts',
+  'src/app/pages/rh/afastamentos.config.ts',
+  'src/app/pages/operacoes/missoes.config.ts',
+  'src/app/pages/operacoes/missao-participantes.config.ts',
+  'src/app/pages/operacoes/equipes.config.ts',
+  'src/app/pages/operacoes/bases.config.ts',
+  'src/app/pages/operacoes/incidentes.config.ts',
+  'src/app/pages/ativos/equipamentos.config.ts',
+  'src/app/pages/ativos/veiculos.config.ts',
+  'src/app/pages/suprimentos/contratos.config.ts',
+  'src/app/pages/suprimentos/pedidos.config.ts',
+  'src/app/pages/risco/ameacas.config.ts',
+  'src/app/pages/risco/indicadores.config.ts',
+];
+const allDomainConditionalRenderersJsonLogic = domainConfigsWithChips.every((relPath) => {
+  const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+  const hasConditionalRenderers = content.includes('conditionalRenderers:');
+  const hasJsonLogicCondition = content.includes("condition: { '==': [{ var:");
+  const hasStringCondition = /condition:\s*['"]/.test(content);
+  return hasConditionalRenderers && hasJsonLogicCondition && !hasStringCondition;
+});
+assert(
+  allDomainConditionalRenderersJsonLogic,
+  `Todas as ${domainConfigsWithChips.length} páginas de domínio com colunas de status/severidade/prioridade usam conditionalRenderers canônicos com objetos JsonLogic`,
+);
+
+const domainConfigsWithDossier = [
+  'src/app/pages/operacoes/missoes.config.ts',
+  'src/app/pages/operacoes/incidentes.config.ts',
+  'src/app/pages/risco/ameacas.config.ts',
+];
+const allDomainDossiersCanonical = domainConfigsWithDossier.every((relPath) => {
+  const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+  return (
+    content.includes("kind: 'praxis.detail.schema'") &&
+    content.includes("registryId: 'praxis.detail.default'") &&
+    content.includes("type: 'cardGrid'") &&
+    content.includes("type: 'richContent'")
+  );
+});
+assert(
+  allDomainDossiersCanonical,
+  'As 3 páginas táticas críticas (missoes, incidentes, ameacas) possuem dossiês inline de expansão (praxis.detail.schema com cardGrid + richContent callout)',
+);
+
 // ---------------------------------------------------------------------------
 // 7. Dashboard API Integration Audit (Zero Static Data Invariants)
 // ---------------------------------------------------------------------------

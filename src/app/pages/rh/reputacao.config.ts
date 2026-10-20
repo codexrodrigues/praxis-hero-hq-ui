@@ -51,6 +51,10 @@ export const REPUTACAO_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['codinome', 'nomeCompleto', 'equipe'],
+  },
   table: {
     columnProjection: {
       source: 'schema',

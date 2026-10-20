@@ -60,6 +60,10 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['companyId', 'supplierId', 'status'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -91,7 +95,41 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
         orderDate: { width: '130px', align: 'center', header: 'Data do Pedido' },
         quantity: { width: '120px', align: 'center', header: 'Qtd. Lote' },
         currency: { width: '90px', align: 'center', header: 'Moeda' },
-        status: { width: '140px', align: 'center', header: 'Status' },
+        status: {
+          width: '150px',
+          align: 'center',
+          header: 'Status',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'status' }, 'RECEIVED'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Recebido', variant: 'soft', color: 'primary', icon: 'inventory' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'APPROVED'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Aprovado', variant: 'soft', color: 'primary', icon: 'verified' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'DRAFT'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Análise', variant: 'soft', color: 'accent', icon: 'pending_actions' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'CANCELLED'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Cancelado', variant: 'outlined', color: 'basic', icon: 'cancel' },
+              },
+            },
+          ],
+        },
         approvedAt: { width: '130px', align: 'center', header: 'Aprovado Em' },
         receivedAt: { width: '130px', align: 'center', header: 'Recebido Em' },
         disabledReason: { width: '220px', header: 'Observações' },

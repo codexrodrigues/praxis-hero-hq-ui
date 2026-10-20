@@ -60,6 +60,10 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['nome', 'tipo', 'status'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -88,7 +92,34 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
           },
         },
         proprietarioNome: { width: '220px', header: 'Custodiante / Herói' },
-        status: { width: '160px', align: 'center', header: 'Status de Custódia' },
+        status: {
+          width: '160px',
+          align: 'center',
+          header: 'Status de Custódia',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'status' }, 'EM_USO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Custódia', variant: 'soft', color: 'primary', icon: 'verified_user' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'MANUTENCAO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Manutenção', variant: 'soft', color: 'accent', icon: 'build' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'ESTOQUE'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Arsenal', variant: 'outlined', color: 'basic', icon: 'inventory_2' },
+              },
+            },
+          ],
+        },
       },
     },
     toolbar: {

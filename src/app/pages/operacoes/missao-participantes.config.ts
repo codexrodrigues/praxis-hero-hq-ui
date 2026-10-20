@@ -60,6 +60,10 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['papel', 'principal', 'resultado'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -69,10 +73,84 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
         id: { width: '90px', align: 'center', header: 'Escala ID' },
         missaoTitulo: { width: '240px', header: 'Missão Operacional' },
         funcionarioNome: { width: '220px', header: 'Herói / Operador' },
-        papel: { width: '160px', align: 'center', header: 'Papel Tático' },
+        papel: {
+          width: '160px',
+          align: 'center',
+          header: 'Papel Tático',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'papel' }, 'LIDER'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Líder Tático', variant: 'soft', color: 'primary', icon: 'military_tech' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'papel' }, 'COMBATENTE'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Combatente', variant: 'soft', color: 'accent', icon: 'swords' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'papel' }, 'SUPORTE'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Suporte / Tático', variant: 'outlined', color: 'basic', icon: 'shield' },
+              },
+            },
+          ],
+        },
         ordem: { width: '110px', align: 'center', type: 'number', header: 'Ordem' },
-        principal: { width: '130px', align: 'center', header: 'Líder Principal' },
-        resultado: { width: '160px', align: 'center', header: 'Resultado Individual' },
+        principal: {
+          width: '140px',
+          align: 'center',
+          header: 'Líder Principal',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'principal' }, true] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Principal', variant: 'soft', color: 'primary', icon: 'star' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'principal' }, false] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Integrante', variant: 'outlined', color: 'basic', icon: 'person' },
+              },
+            },
+          ],
+        },
+        resultado: {
+          width: '160px',
+          align: 'center',
+          header: 'Resultado Individual',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'resultado' }, 'OK'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Missão Cumprida', variant: 'soft', color: 'primary', icon: 'verified' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'resultado' }, 'FERIDO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Ferido em Ação', variant: 'soft', color: 'warn', icon: 'healing' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'resultado' }, 'MIA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Desaparecido (MIA)', variant: 'soft', color: 'warn', icon: 'crisis_alert' },
+              },
+            },
+          ],
+        },
       },
     },
     toolbar: {

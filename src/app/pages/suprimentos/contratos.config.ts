@@ -60,6 +60,10 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['companyId', 'supplierId', 'number', 'status'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -91,7 +95,41 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
         supplierName: { width: '240px', header: 'Fornecedor / Fabricante' },
         currency: { width: '90px', align: 'center', header: 'Moeda' },
         validUntil: { width: '140px', align: 'center', header: 'Vigência Até' },
-        status: { width: '150px', align: 'center', header: 'Status Contratual' },
+        status: {
+          width: '160px',
+          align: 'center',
+          header: 'Status Contratual',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'status' }, 'ACTIVE'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Vigente', variant: 'soft', color: 'primary', icon: 'verified' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'SIGNED'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Assinado', variant: 'soft', color: 'primary', icon: 'task_alt' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'EXPIRED'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Expirado', variant: 'soft', color: 'warn', icon: 'event_busy' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'DRAFT'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Minuta / Draft', variant: 'outlined', color: 'basic', icon: 'edit_note' },
+              },
+            },
+          ],
+        },
         disabledReason: { width: '240px', header: 'Observações / Motivo' },
       },
     },

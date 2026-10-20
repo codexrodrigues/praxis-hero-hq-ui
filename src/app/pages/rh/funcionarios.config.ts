@@ -58,6 +58,10 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['nomeCompleto', 'departamentoNome', 'ativo'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -103,7 +107,27 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         nomeCompleto: { width: '240px', header: 'Nome Completo / Civil' },
         cargoNome: { width: '220px', header: 'Cargo' },
         departamentoNome: { width: '240px', header: 'Departamento' },
-        ativo: { width: '132px', header: 'Status' },
+        ativo: {
+          width: '150px',
+          align: 'center',
+          header: 'Status Operacional',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'ativo' }, true] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Prontidão Ativa', variant: 'soft', color: 'primary', icon: 'verified_user' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'ativo' }, false] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Reserva / Licença', variant: 'outlined', color: 'basic', icon: 'person_off' },
+              },
+            },
+          ],
+        },
         dataAdmissao: { width: '160px', header: 'Data de Admissão' },
       },
     },

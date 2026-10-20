@@ -49,6 +49,10 @@ export const DEPARTAMENTOS_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['nome', 'codigo', 'responsavelId'],
+  },
   table: {
     columnProjection: {
       source: 'schema',

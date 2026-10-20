@@ -51,6 +51,10 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['nome', 'status', 'sigla'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -82,7 +86,34 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
         nome: { width: '260px', header: 'Nome da Equipe / Esquadrão' },
         sigla: { width: '120px', align: 'center', header: 'Sigla' },
         basePrincipalNome: { width: '240px', header: 'Base Principal Designada' },
-        status: { width: '140px', align: 'center', header: 'Status Tático' },
+        status: {
+          width: '160px',
+          align: 'center',
+          header: 'Status Tático',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'status' }, 'ATIVA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Prontidão Ativa', variant: 'soft', color: 'primary', icon: 'verified_user' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'EM_MISSAO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Missão', variant: 'soft', color: 'accent', icon: 'flight_takeoff' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'RESERVA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Reserva Tática', variant: 'outlined', color: 'basic', icon: 'shield' },
+              },
+            },
+          ],
+        },
       },
     },
     toolbar: {

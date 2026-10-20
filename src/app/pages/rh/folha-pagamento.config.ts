@@ -53,6 +53,7 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
   },
   filterBar: {
     placement: 'scope-bar',
+    inlineFields: ['mes', 'ano', 'funcionarioId'],
   },
   table: {
     columnProjection: {

@@ -52,6 +52,10 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['descricao', 'tipo', 'status'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -60,10 +64,57 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
       overrides: {
         id: { width: '90px', align: 'center', header: 'Evento ID' },
         descricao: { width: '280px', header: 'Descrição da Rubrica / Evento' },
-        tipo: { width: '160px', align: 'center', header: 'Natureza (Provento/Desconto)' },
+        tipo: {
+          width: '170px',
+          align: 'center',
+          header: 'Natureza (Provento/Desconto)',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'tipo' }, 'PROVENTO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Provento', variant: 'soft', color: 'primary', icon: 'trending_up' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'tipo' }, 'DESCONTO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Desconto', variant: 'soft', color: 'accent', icon: 'trending_down' },
+              },
+            },
+          ],
+        },
         valor: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Valor Financeiro' },
         folhaPagamentoNome: { width: '220px', header: 'Folha de Competência' },
-        status: { width: '150px', align: 'center', header: 'Status do Workflow' },
+        status: {
+          width: '160px',
+          align: 'center',
+          header: 'Status do Workflow',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'status' }, 'APROVADO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Homologado', variant: 'soft', color: 'primary', icon: 'task_alt' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'PENDENTE'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Pendente', variant: 'soft', color: 'accent', icon: 'pending_actions' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'REJEITADO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Glosado', variant: 'soft', color: 'warn', icon: 'cancel' },
+              },
+            },
+          ],
+        },
       },
     },
     toolbar: {

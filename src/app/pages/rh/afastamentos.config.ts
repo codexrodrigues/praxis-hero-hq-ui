@@ -59,6 +59,10 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
       },
     ],
   },
+  filterBar: {
+    placement: 'scope-bar',
+    inlineFields: ['tipo', 'funcionarioId', 'dataInicioBetween'],
+  },
   table: {
     columnProjection: {
       source: 'schema',
@@ -87,7 +91,27 @@ export const AFASTAMENTOS_CRUD_METADATA: CrudMetadata = {
       ],
       overrides: {
         id: { width: '80px', align: 'center', header: 'ID' },
-        tipo: { width: '180px', align: 'left', header: 'Tipo de Licença / Ausência' },
+        tipo: {
+          width: '190px',
+          align: 'center',
+          header: 'Tipo de Licença / Ausência',
+          conditionalRenderers: [
+            {
+              condition: { '==': [{ var: 'tipo' }, 'AFASTAMENTO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Licença Médica / Combate', variant: 'soft', color: 'warn', icon: 'health_and_safety' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'tipo' }, 'FERIAS'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Férias Regulamentares', variant: 'soft', color: 'primary', icon: 'beach_access' },
+              },
+            },
+          ],
+        },
         funcionarioId: { width: '140px', align: 'center', header: 'Colaborador ID' },
         dataInicio: { width: '150px', align: 'center', type: 'date', format: 'dd/MM/yyyy', header: 'Início da Vigência' },
         dataFim: { width: '150px', align: 'center', type: 'date', format: 'dd/MM/yyyy', header: 'Término Previsto' },
