@@ -929,6 +929,58 @@ praxis-widget-shell praxis-list .list-row-slot--risk {
   }
 }
 
+praxis-widget-shell praxis-list .item-expansion {
+  white-space: normal;
+  min-width: 0;
+  border-top: 1px solid color-mix(in oklab, var(--border) 65%, transparent) !important;
+  background: color-mix(in oklab, var(--background) 48%, var(--card)) !important;
+
+  .expansion-section-title {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--primary);
+  }
+
+  .expansion-key-value {
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 10px 12px;
+  }
+
+  .expansion-key-value-row {
+    min-width: 0;
+    overflow: hidden;
+    align-content: start;
+    gap: 4px;
+    padding: 8px 11px;
+    border-radius: 9px;
+    background: color-mix(in oklab, var(--card) 82%, transparent);
+    border: 1px solid color-mix(in oklab, var(--border) 68%, transparent);
+  }
+
+  .expansion-key-value-row dt {
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.25;
+    color: var(--muted-foreground);
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  .expansion-key-value-row dd {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--foreground);
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+}
+
 /* 9. Executive Tactical Row Expansion Dossier (PraxisTable) */
 .pfx-expansion-detail-row {
   background: color-mix(in oklab, var(--card) 96%, var(--background) 4%) !important;
