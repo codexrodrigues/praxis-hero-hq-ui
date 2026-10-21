@@ -107,10 +107,17 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
               },
             },
             {
-              condition: { '==': [{ var: 'status' }, 'MONITORADO'] },
+              condition: { '==': [{ var: 'status' }, 'LIVRE'] },
               renderer: {
                 type: 'chip',
-                chip: { text: 'Monitorado', variant: 'soft', color: 'accent', icon: 'radar' },
+                chip: { text: 'Ativo / Livre', variant: 'soft', color: 'warn', icon: 'warning' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'EM_OBSERVACAO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Observação', variant: 'soft', color: 'accent', icon: 'radar' },
               },
             },
             {
@@ -118,6 +125,13 @@ export const AMEACAS_CRUD_METADATA: CrudMetadata = {
               renderer: {
                 type: 'chip',
                 chip: { text: 'Contido (Raft)', variant: 'soft', color: 'primary', icon: 'lock' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'ELIMINADO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Neutralizado', variant: 'outlined', color: 'basic', icon: 'verified_user' },
               },
             },
           ],

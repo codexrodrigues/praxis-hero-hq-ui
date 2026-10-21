@@ -98,10 +98,38 @@ export const BASES_CRUD_METADATA: CrudMetadata = {
               },
             },
             {
-              condition: { '==': [{ var: 'tipo' }, 'QUARTEL_GENERAL'] },
+              condition: { '==': [{ var: 'tipo' }, 'TERRESTRE'] },
               renderer: {
                 type: 'chip',
-                chip: { text: 'Quartel-General', variant: 'soft', color: 'accent', icon: 'hub' },
+                chip: { text: 'Base Terrestre', variant: 'soft', color: 'accent', icon: 'hub' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'tipo' }, 'SUBTERRANEA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Bunker Subterrâneo', variant: 'soft', color: 'primary', icon: 'shield' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'tipo' }, 'SUBAQUATICA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Subaquática', variant: 'soft', color: 'primary', icon: 'water' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'tipo' }, 'MOVEL'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Plataforma Móvel', variant: 'soft', color: 'accent', icon: 'flight_takeoff' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'tipo' }, 'OTHER'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Especial / Outra', variant: 'outlined', color: 'basic', icon: 'domain' },
               },
             },
           ],

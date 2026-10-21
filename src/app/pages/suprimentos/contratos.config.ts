@@ -128,6 +128,13 @@ export const CONTRATOS_CRUD_METADATA: CrudMetadata = {
                 chip: { text: 'Minuta / Draft', variant: 'outlined', color: 'basic', icon: 'edit_note' },
               },
             },
+            {
+              condition: { '==': [{ var: 'status' }, 'CANCELLED'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Rescindido', variant: 'outlined', color: 'basic', icon: 'cancel' },
+              },
+            },
           ],
         },
         disabledReason: { width: '240px', header: 'Observações / Motivo' },

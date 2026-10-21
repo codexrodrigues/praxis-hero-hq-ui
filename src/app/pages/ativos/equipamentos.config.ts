@@ -118,6 +118,20 @@ export const EQUIPAMENTOS_CRUD_METADATA: CrudMetadata = {
                 chip: { text: 'Em Arsenal', variant: 'outlined', color: 'basic', icon: 'inventory_2' },
               },
             },
+            {
+              condition: { '==': [{ var: 'status' }, 'QUEBRADO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Danificado', variant: 'soft', color: 'warn', icon: 'broken_image' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'PERDIDO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Extraviado', variant: 'soft', color: 'warn', icon: 'gpp_bad' },
+              },
+            },
           ],
         },
       },

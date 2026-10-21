@@ -53,7 +53,7 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
   },
   filterBar: {
     placement: 'scope-bar',
-    inlineFields: ['mes', 'ano', 'funcionarioId'],
+    inlineFields: ['anoBetween', 'mesBetween', 'funcionarioId'],
   },
   table: {
     columnProjection: {
@@ -109,7 +109,7 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
       filtering: {
         advancedFilters: {
           settings: {
-            alwaysVisibleFields: ['mes', 'ano', 'funcionarioId'],
+            alwaysVisibleFields: ['anoBetween', 'mesBetween', 'funcionarioId'],
           },
         },
       },

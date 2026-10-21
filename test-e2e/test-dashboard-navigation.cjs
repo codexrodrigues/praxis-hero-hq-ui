@@ -225,6 +225,10 @@ assert.equal(byKey.get('distressSignalsList').definition.inputs.config.layout.vi
 assert.ok(byKey.get('distressSignalsList').definition.inputs.config.expansion.sections[0].itemsExpr.includes('#${item.id}'));
 assert.equal(byKey.get('recentIncidents').definition.inputs.config.toolbar.appearance.variant, 'integrated');
 assert.equal(byKey.get('missionsTimeline').definition.inputs.document.nodes[0].markerVariant, 'icon');
+assert.equal(byKey.get('missionsTimeline').definition.inputs.document.nodes[0].itemLayout, 'split');
+assert.equal(byKey.get('missionsTimeline').definition.inputs.document.nodes[0].markerStyle, 'soft');
+assert.equal(byKey.get('distressSignalsList').definition.inputs.config.templating.risk.props.metric.align, 'center');
+assert.equal(byKey.get('distressSignalsList').definition.inputs.config.templating.risk.props.metric.label, 'AMEAÇA');
 assert.ok(byKey.get('domainHub').definition.inputs.document.nodes[0].items[5].className.includes('tone-cobalt'));
 
 console.log(

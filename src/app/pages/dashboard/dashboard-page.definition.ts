@@ -62,6 +62,9 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
         widget.key === 'missionsTimeline' &&
         (!serialized.includes('activeMissions.0.titulo') ||
           !serialized.includes('"markerVariant":"icon"') ||
+          !serialized.includes('"itemLayout":"split"') ||
+          !serialized.includes('"markerStyle":"soft"') ||
+          !serialized.includes('"badgeTone"') ||
           !serialized.includes('rocket_launch') ||
           serialized.includes('"markerColor":"accent"'));
       const isStaleDomainHub =
@@ -158,14 +161,21 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       const canonical = canonicalByKey.get('distressSignalsList');
       const cfg = widget.definition?.inputs?.config;
       const firstSectionItemsExpr = String(cfg?.expansion?.sections?.[0]?.itemsExpr ?? '');
+      const trailingCol = Array.isArray(cfg?.layout?.rowLayout?.columns)
+        ? cfg.layout.rowLayout.columns.find((c: any) => c?.slot === 'trailing')
+        : null;
       const hasUpgradedFeed =
         cfg?.selection?.showControl === false &&
         cfg?.templating?.leading?.expr === 'crisis_alert' &&
-        cfg?.templating?.iconColorMap?.['ABERTO'] === 'warn' &&
+        cfg?.templating?.iconColorMap?.['ABERTO'] === 'danger' &&
+        cfg?.templating?.chipColorMap?.['ABERTO'] === 'danger' &&
+        trailingCol?.width === '216px' &&
         Array.isArray(cfg?.layout?.rowLayout?.columns) &&
         cfg?.layout?.virtualScroll?.viewportHeight === '340px' &&
         cfg?.templating?.identity?.type === 'compose' &&
         cfg?.templating?.risk?.type === 'metric' &&
+        cfg?.templating?.risk?.props?.metric?.align === 'center' &&
+        cfg?.templating?.risk?.props?.metric?.captionPosition === 'below-progress' &&
         Array.isArray(cfg?.rules?.itemStyles) &&
         cfg?.interaction?.expandable === true &&
         Array.isArray(cfg?.expansion?.sections) &&

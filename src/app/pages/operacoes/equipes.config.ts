@@ -99,17 +99,17 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
               },
             },
             {
-              condition: { '==': [{ var: 'status' }, 'EM_MISSAO'] },
-              renderer: {
-                type: 'chip',
-                chip: { text: 'Em Missão', variant: 'soft', color: 'accent', icon: 'flight_takeoff' },
-              },
-            },
-            {
               condition: { '==': [{ var: 'status' }, 'RESERVA'] },
               renderer: {
                 type: 'chip',
-                chip: { text: 'Reserva Tática', variant: 'outlined', color: 'basic', icon: 'shield' },
+                chip: { text: 'Reserva Tática', variant: 'soft', color: 'accent', icon: 'shield' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'status' }, 'DISSOLVIDA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Dissolvida', variant: 'outlined', color: 'basic', icon: 'block' },
               },
             },
           ],
@@ -122,7 +122,7 @@ export const EQUIPES_CRUD_METADATA: CrudMetadata = {
           { id: 'all', label: 'Todos os Esquadrões', filter: {}, icon: 'diversity_3' },
           { id: 'ativa', label: 'Prontidão Ativa', filter: { status: 'ATIVA' }, icon: 'verified_user' },
           { id: 'reserva', label: 'Reserva Tática', filter: { status: 'RESERVA' }, icon: 'shield' },
-          { id: 'missoes', label: 'Em Missão', filter: { status: 'EM_MISSAO' }, icon: 'flight_takeoff' },
+          { id: 'dissolvida', label: 'Dissolvidas', filter: { status: 'DISSOLVIDA' }, icon: 'block' },
         ],
       },
     },

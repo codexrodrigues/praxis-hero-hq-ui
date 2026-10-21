@@ -637,6 +637,11 @@
 }
 
 /* 8. Executive Tactical Timeline (Diário Operacional de Missões) */
+praxis-widget-shell .prx-rich-timeline,
+praxis-widget-shell .pdx-rich-timeline {
+  container-type: inline-size;
+}
+
 praxis-widget-shell .prx-rich-timeline__title,
 praxis-widget-shell .pdx-rich-timeline__title {
   font-family: var(--font-mono) !important;
@@ -655,6 +660,45 @@ praxis-widget-shell .prx-rich-timeline[data-orientation='vertical'][data-positio
   column-gap: 12px !important;
 }
 
+@container (max-width: 520px) {
+  praxis-widget-shell .prx-rich-timeline[data-orientation='vertical'][data-position='right'] .prx-rich-timeline__item--has-opposite {
+    grid-template-columns: 44px 28px minmax(0, 1fr) !important;
+    column-gap: 8px !important;
+  }
+}
+
+praxis-widget-shell .prx-rich-timeline[data-item-layout='split'] .prx-rich-timeline__item-row,
+praxis-widget-shell .prx-rich-timeline[data-item-layout='stacked'] .prx-rich-timeline__item-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px 14px !important;
+  width: 100% !important;
+}
+
+praxis-widget-shell .prx-rich-timeline .prx-rich-timeline__item-main {
+  flex: 1 1 240px !important;
+  min-width: 0 !important;
+  gap: 4px !important;
+}
+
+praxis-widget-shell .prx-rich-timeline .prx-rich-timeline__item-trailing {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 6px !important;
+  flex: 0 0 auto !important;
+  max-width: 100% !important;
+}
+
+praxis-widget-shell .prx-rich-timeline .prx-rich-timeline__item-title {
+  width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.35 !important;
+}
+
 praxis-widget-shell .prx-rich-timeline__item-opposite {
   align-self: flex-start !important;
   justify-self: end !important;
@@ -670,10 +714,8 @@ praxis-widget-shell .prx-rich-timeline__item-opposite {
   border: 1px solid color-mix(in oklab, var(--primary) 24%, transparent) !important;
 }
 
-praxis-widget-shell .prx-rich-timeline[data-marker-variant='icon'] .prx-rich-timeline__item-marker {
-  width: 30px !important;
-  height: 30px !important;
-  box-shadow: 0 0 14px color-mix(in oklab, var(--prx-timeline-marker-color, var(--primary)) 28%, transparent) !important;
+praxis-widget-shell .prx-rich-timeline[data-marker-variant='icon'] .prx-rich-timeline__item-icon {
+  box-shadow: 0 0 14px color-mix(in oklab, var(--prx-rich-timeline-marker-color, var(--primary)) 26%, transparent) !important;
 }
 
 praxis-widget-shell .prx-rich-timeline__item-body {
@@ -701,22 +743,60 @@ praxis-widget-shell .prx-rich-timeline__item[data-marker-color='success'] .prx-r
 }
 
 praxis-widget-shell .prx-rich-timeline__item-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+praxis-widget-shell .prx-rich-timeline__item-badge .prx-rich-badge {
   font-family: var(--font-mono) !important;
-  font-size: 0.66rem !important;
+  font-size: 0.65rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
+  line-height: 1.4 !important;
   padding: 3px 10px !important;
   border-radius: 9999px !important;
   background: color-mix(in oklab, var(--primary) 12%, transparent) !important;
   color: var(--primary) !important;
-  border: 1px solid color-mix(in oklab, var(--primary) 26%, transparent) !important;
+  border: 1px solid color-mix(in oklab, var(--primary) 28%, transparent) !important;
+  white-space: nowrap !important;
+}
+
+praxis-widget-shell .prx-rich-timeline__item-badge .prx-rich-badge[data-tone='danger'],
+praxis-widget-shell .prx-rich-timeline__item-badge .prx-rich-badge[data-tone='error'] {
+  background: color-mix(in oklab, var(--destructive, #ef4444) 14%, transparent) !important;
+  color: var(--destructive, #ef4444) !important;
+  border-color: color-mix(in oklab, var(--destructive, #ef4444) 32%, transparent) !important;
+}
+
+praxis-widget-shell .prx-rich-timeline__item-badge .prx-rich-badge[data-tone='info'] {
+  background: color-mix(in oklab, var(--cobalt, #8b5cf6) 14%, transparent) !important;
+  color: var(--cobalt, #8b5cf6) !important;
+  border-color: color-mix(in oklab, var(--cobalt, #8b5cf6) 32%, transparent) !important;
+}
+
+praxis-widget-shell .prx-rich-timeline__item-badge .prx-rich-badge[data-tone='warning'] {
+  background: color-mix(in oklab, var(--operations, #f59e0b) 14%, transparent) !important;
+  color: var(--operations, #f59e0b) !important;
+  border-color: color-mix(in oklab, var(--operations, #f59e0b) 32%, transparent) !important;
+}
+
+praxis-widget-shell .prx-rich-timeline__item-badge .prx-rich-badge[data-tone='success'] {
+  background: color-mix(in oklab, var(--ready, #10b981) 14%, transparent) !important;
+  color: var(--ready, #10b981) !important;
+  border-color: color-mix(in oklab, var(--ready, #10b981) 32%, transparent) !important;
 }
 
 praxis-widget-shell .prx-rich-timeline__item-meta {
   font-family: var(--font-mono) !important;
   font-size: 0.72rem !important;
   letter-spacing: 0.02em !important;
+  color: var(--muted-foreground) !important;
 }
 
 .prx-rich-timeline__item-body--actionable,
@@ -747,6 +827,106 @@ praxis-widget-shell .praxis-table-surface.has-data-card {
 
 praxis-widget-shell .praxis-table-toolbar-host {
   margin-bottom: 6px !important;
+}
+
+/* 8c. Executive Tactical Distress Signals List (PraxisList inside Widget Shell) */
+praxis-widget-shell praxis-list {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  --p-color-warning: var(--operations, #f59e0b);
+  --p-color-success: var(--ready, #10b981);
+  --md-sys-color-error: var(--destructive, #ef4444);
+}
+
+praxis-widget-shell praxis-list .praxis-list-container {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+praxis-widget-shell praxis-list .mat-mdc-list-item .list-row-shell--selectable,
+praxis-widget-shell praxis-list .mat-mdc-list-item .list-item-content--row-layout {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+praxis-widget-shell praxis-list .list-row-slot--identity {
+  min-width: 0;
+  overflow: hidden;
+
+  .primary,
+  .primary .prx-rich-text {
+    display: block !important;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.86rem;
+    color: var(--foreground);
+    line-height: 1.3;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100%;
+  }
+
+  .secondary,
+  .secondary .prx-rich-text {
+    display: block !important;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted-foreground);
+    line-height: 1.3;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100%;
+  }
+}
+
+praxis-widget-shell praxis-list .list-row-slot--risk {
+  justify-content: center;
+  min-width: 0;
+
+  praxis-list-metric {
+    width: 100%;
+  }
+
+  .p-list-metric--align-center {
+    align-items: center;
+    text-align: center;
+
+    .p-list-metric__main {
+      justify-content: center;
+    }
+
+    .p-list-metric__label {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+    }
+
+    .p-list-metric__value {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .p-list-metric__caption--below-progress {
+      display: block;
+      width: 100%;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--muted-foreground);
+    }
+  }
 }
 
 /* 9. Executive Tactical Row Expansion Dossier (PraxisTable) */

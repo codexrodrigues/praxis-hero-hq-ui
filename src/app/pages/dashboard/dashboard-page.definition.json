@@ -2105,7 +2105,7 @@
                 "dividers": "none",
                 "rowLayout": {
                   "type": "grid",
-                  "gap": "14px",
+                  "gap": "10px",
                   "align": "center",
                   "columns": [
                     {
@@ -2116,19 +2116,19 @@
                     },
                     {
                       "slot": "identity",
-                      "minWidth": "140px",
+                      "minWidth": "0px",
                       "width": "1fr",
                       "align": "center"
                     },
                     {
                       "slot": "risk",
-                      "width": "116px",
+                      "width": "96px",
                       "align": "center",
-                      "justify": "end"
+                      "justify": "center"
                     },
                     {
                       "slot": "trailing",
-                      "width": "auto",
+                      "width": "216px",
                       "align": "center",
                       "justify": "end"
                     }
@@ -2291,7 +2291,7 @@
                 "leading": {
                   "type": "icon",
                   "expr": "crisis_alert",
-                  "color": "warn"
+                  "color": "danger"
                 },
                 "identity": {
                   "type": "compose",
@@ -2327,13 +2327,16 @@
                   "expr": "Nível ${item.nivelAmeaca}",
                   "props": {
                     "metric": {
+                      "label": "AMEAÇA",
                       "valueExpr": "Nível ${item.nivelAmeaca}",
                       "toneExpr": "${item.nivelAmeaca|map:5=danger,4=danger,3=warning,2=positive,1=positive,0=neutral}",
-                      "align": "end",
+                      "align": "center",
                       "progress": {
                         "valueExpr": "${item.nivelAmeaca}",
                         "max": 5
-                      }
+                      },
+                      "caption": "${item.nivelAmeaca|map:5=Crítico,4=Alto,3=Moderado,2=Baixo,1=Mínimo,0=Nulo}",
+                      "captionPosition": "below-progress"
                     }
                   }
                 },
@@ -2345,17 +2348,17 @@
                   "type": "chip",
                   "expr": "${item.status}",
                   "variant": "outlined",
-                  "color": "accent"
+                  "color": "warning"
                 },
                 "chipColorMap": {
-                  "ABERTO": "warn",
-                  "EM_ATENDIMENTO": "accent",
+                  "ABERTO": "danger",
+                  "EM_ATENDIMENTO": "warning",
                   "RESOLVIDO": "success",
                   "FALSO": "neutral"
                 },
                 "iconColorMap": {
-                  "ABERTO": "warn",
-                  "EM_ATENDIMENTO": "accent",
+                  "ABERTO": "danger",
+                  "EM_ATENDIMENTO": "warning",
                   "RESOLVIDO": "success",
                   "FALSO": "neutral"
                 }
@@ -2966,17 +2969,18 @@
                   "title": "Teatro Operacional Ativo · ${kpis.inProgressMissions} em curso de ${kpis.totalMissions} missões",
                   "position": "right",
                   "orientation": "vertical",
+                  "itemLayout": "split",
                   "markerVariant": "icon",
-                  "markerStyle": "filled",
+                  "markerStyle": "soft",
                   "items": [
                     {
                       "title": "${activeMissions.0.titulo} · ${activeMissions.0.local} (${kpis.inProgressMissions} em Curso)",
-                      "subtitle": "Alvo tático: ${activeMissions.0.ameaca} · ${activeMissions.0.qtdHerois} heróis mobilizados em ${activeMissions.0.qtdEventos} eventos (${kpis.completedMissions}/${kpis.totalMissions} concluídas).",
-                      "meta": "Missão #${activeMissions.0.missaoId} · Status: ${activeMissions.0.statusLabel} · ${kpis.inUseAssets}/${kpis.totalAssets} ativos em suporte",
+                      "subtitle": "Alvo tático: ${activeMissions.0.ameaca} · ${activeMissions.0.qtdHerois} heróis mobilizados em ${activeMissions.0.qtdEventos} eventos (${kpis.completedMissions}/${kpis.totalMissions} concluídas · ${kpis.inUseAssets}/${kpis.totalAssets} ativos em suporte).",
+                      "meta": "Missão #${activeMissions.0.missaoId} · Status: ${activeMissions.0.statusLabel}",
                       "opposite": "#${activeMissions.0.missaoId}",
                       "badge": "${activeMissions.0.prioridadeLabel} · ${kpis.inProgressMissionsBadge} Ativas",
                       "markerColor": "error",
-                      "markerStyle": "filled",
+                      "markerStyle": "soft",
                       "connectorColor": "error",
                       "connectorVariant": "solid",
                       "action": {
@@ -2985,7 +2989,8 @@
                           "path": "/operacoes/missoes"
                         }
                       },
-                      "icon": "radar"
+                      "icon": "radar",
+                      "badgeTone": "danger"
                     },
                     {
                       "title": "${activeMissions.1.titulo} · ${activeMissions.1.local} (${kpis.plannedMissions} Planejadas)",
@@ -2994,7 +2999,7 @@
                       "opposite": "#${activeMissions.1.missaoId}",
                       "badge": "${activeMissions.1.prioridadeLabel} · #${activeMissions.1.missaoId}",
                       "markerColor": "info",
-                      "markerStyle": "filled",
+                      "markerStyle": "soft",
                       "connectorColor": "info",
                       "connectorVariant": "solid",
                       "action": {
@@ -3003,7 +3008,8 @@
                           "path": "/operacoes/missoes"
                         }
                       },
-                      "icon": "rocket_launch"
+                      "icon": "rocket_launch",
+                      "badgeTone": "info"
                     },
                     {
                       "title": "${activeMissions.2.titulo} · ${activeMissions.2.local} (Prontidão ${kpis.readinessRate}%)",
@@ -3021,7 +3027,8 @@
                           "path": "/operacoes/missoes"
                         }
                       },
-                      "icon": "shield"
+                      "icon": "shield",
+                      "badgeTone": "warning"
                     },
                     {
                       "title": "${activeMissions.3.titulo} · ${activeMissions.3.local} (DEFCON ${kpis.defconScore})",
@@ -3030,7 +3037,7 @@
                       "opposite": "#${activeMissions.3.missaoId}",
                       "badge": "${activeMissions.3.prioridadeLabel} · ${kpis.criticalIncidentsBadge} Críticos",
                       "markerColor": "success",
-                      "markerStyle": "filled",
+                      "markerStyle": "soft",
                       "connectorColor": "success",
                       "connectorVariant": "solid",
                       "action": {
@@ -3039,7 +3046,8 @@
                           "path": "/operacoes/missoes"
                         }
                       },
-                      "icon": "verified"
+                      "icon": "verified",
+                      "badgeTone": "success"
                     }
                   ]
                 }
@@ -3395,7 +3403,7 @@
       "dividers": "none",
       "rowLayout": {
         "type": "grid",
-        "gap": "14px",
+        "gap": "10px",
         "align": "center",
         "columns": [
           {
@@ -3406,19 +3414,19 @@
           },
           {
             "slot": "identity",
-            "minWidth": "140px",
+            "minWidth": "0px",
             "width": "1fr",
             "align": "center"
           },
           {
             "slot": "risk",
-            "width": "116px",
+            "width": "96px",
             "align": "center",
-            "justify": "end"
+            "justify": "center"
           },
           {
             "slot": "trailing",
-            "width": "auto",
+            "width": "216px",
             "align": "center",
             "justify": "end"
           }
@@ -3581,7 +3589,7 @@
       "leading": {
         "type": "icon",
         "expr": "crisis_alert",
-        "color": "warn"
+        "color": "danger"
       },
       "identity": {
         "type": "compose",
@@ -3617,13 +3625,16 @@
         "expr": "Nível ${item.nivelAmeaca}",
         "props": {
           "metric": {
+            "label": "AMEAÇA",
             "valueExpr": "Nível ${item.nivelAmeaca}",
             "toneExpr": "${item.nivelAmeaca|map:5=danger,4=danger,3=warning,2=positive,1=positive,0=neutral}",
-            "align": "end",
+            "align": "center",
             "progress": {
               "valueExpr": "${item.nivelAmeaca}",
               "max": 5
-            }
+            },
+            "caption": "${item.nivelAmeaca|map:5=Crítico,4=Alto,3=Moderado,2=Baixo,1=Mínimo,0=Nulo}",
+            "captionPosition": "below-progress"
           }
         }
       },
@@ -3635,17 +3646,17 @@
         "type": "chip",
         "expr": "${item.status}",
         "variant": "outlined",
-        "color": "accent"
+        "color": "warning"
       },
       "chipColorMap": {
-        "ABERTO": "warn",
-        "EM_ATENDIMENTO": "accent",
+        "ABERTO": "danger",
+        "EM_ATENDIMENTO": "warning",
         "RESOLVIDO": "success",
         "FALSO": "neutral"
       },
       "iconColorMap": {
-        "ABERTO": "warn",
-        "EM_ATENDIMENTO": "accent",
+        "ABERTO": "danger",
+        "EM_ATENDIMENTO": "warning",
         "RESOLVIDO": "success",
         "FALSO": "neutral"
       }

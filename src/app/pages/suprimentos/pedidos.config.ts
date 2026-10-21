@@ -81,7 +81,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
               visualization: {
                 kind: 'radial',
                 surface: 'table-cell',
-                valueExpr: "= row.status === 'RECEIVED' ? 100 : row.status === 'APPROVED' ? 75 : row.status === 'PENDING' ? 35 : 10",
+                valueExpr: "= row.status === 'RECEIVED' ? 100 : row.status === 'APPROVED' ? 75 : row.status === 'DRAFT' ? 35 : 10",
                 total: 100,
                 toneExpr: "= row.status === 'RECEIVED' ? 'success' : row.status === 'APPROVED' ? 'info' : 'warning'",
                 fallbackText: 'Progresso',

@@ -162,6 +162,13 @@ export const MISSOES_CRUD_METADATA: CrudMetadata = {
                 chip: { text: 'Em Espera', variant: 'outlined', color: 'basic', icon: 'pause_circle' },
               },
             },
+            {
+              condition: { '==': [{ var: 'status' }, 'FALHOU'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Falhou', variant: 'soft', color: 'warn', icon: 'gpp_bad' },
+              },
+            },
           ],
         },
         local: { width: '170px', header: 'Teatro de Operações' },

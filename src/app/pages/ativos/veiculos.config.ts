@@ -115,10 +115,10 @@ export const VEICULOS_CRUD_METADATA: CrudMetadata = {
               },
             },
             {
-              condition: { '==': [{ var: 'status' }, 'INDISPONIVEL'] },
+              condition: { '==': [{ var: 'status' }, 'INOPERANTE'] },
               renderer: {
                 type: 'chip',
-                chip: { text: 'Indisponível', variant: 'soft', color: 'warn', icon: 'warning' },
+                chip: { text: 'Inoperante', variant: 'soft', color: 'warn', icon: 'warning' },
               },
             },
           ],

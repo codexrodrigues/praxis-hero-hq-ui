@@ -301,11 +301,31 @@ assert(
 );
 assert(
   timelineNode?.markerVariant === 'icon' &&
+    timelineNode?.itemLayout === 'split' &&
+    timelineNode?.markerStyle === 'soft' &&
     timelineItems.every((item) => typeof item.icon === 'string' && item.icon.length > 0) &&
+    timelineItems.every((item) => ['danger', 'error', 'info', 'warning', 'success', 'primary', 'secondary'].includes(item.badgeTone)) &&
     timelineItems.every((item) => ['error', 'info', 'warning', 'success', 'primary', 'secondary'].includes(item.markerColor)) &&
     hubCards[5]?.className?.includes('tone-cobalt'),
-  'missionsTimeline utiliza markerVariant="icon" com ícones táticos por missão e domainHub atribui tone-cobalt exclusivo ao Ranking Reputacional',
+  'missionsTimeline utiliza markerVariant="icon", itemLayout="split", markerStyle="soft" e badgeTone semântico com ícones táticos por missão e domainHub atribui tone-cobalt exclusivo ao Ranking Reputacional',
 );
+assert(
+  distressCfg?.templating?.risk?.props?.metric?.align === 'center' &&
+    distressCfg?.templating?.risk?.props?.metric?.label === 'AMEAÇA' &&
+    distressCfg?.templating?.risk?.props?.metric?.captionPosition === 'below-progress' &&
+    String(distressCfg?.templating?.risk?.props?.metric?.caption || '').includes('Crítico') &&
+    themeSrcFallback(),
+  'distressSignalsList configura métrica de risco centralizada (align="center", label="AMEAÇA", captionPosition="below-progress" semântico) e estilos executivos dedicados em dashboard-theme.scss',
+);
+
+function themeSrcFallback() {
+  const css = fs.readFileSync(path.join(ROOT, 'src/styles/dashboard-theme.scss'), 'utf8');
+  return (
+    css.includes("[data-item-layout='split']") &&
+    css.includes('.p-list-metric--align-center') &&
+    css.includes('.list-row-slot--identity')
+  );
+}
 
 
 // ---------------------------------------------------------------------------
@@ -523,14 +543,14 @@ const allDomainMicroVizCanonical = domainConfigs.every((relPath) => {
   const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
   return (
     !content.includes('Math.round(') &&
-    !content.includes("|| row.status ===") &&
-    !content.includes('mesBetween') &&
-    !content.includes('anoBetween')
+    !content.includes('|| row.status ===') &&
+    !content.includes('filter: { mesBetween') &&
+    !content.includes('filter: { anoBetween')
   );
 });
 assert(
   allDomainMicroVizCanonical,
-  'Todas as 17 páginas de domínio utilizam expressões microVisualization compatíveis com SafeExpressionEvaluator (sem Math.round/||) e chaves de filtro válidas no backend (mes/ano)',
+  'Todas as 17 páginas de domínio utilizam expressões microVisualization compatíveis com SafeExpressionEvaluator (sem Math.round/||) e filtros escalares válidos em quickFilters/kpiBand (mes/ano)',
 );
 
 const allDomainKpiDeclarativePipes = domainConfigs.every((relPath) => {
@@ -620,6 +640,24 @@ assert(
   'As 3 páginas táticas críticas (missoes, incidentes, ameacas) possuem dossiês inline de expansão (praxis.detail.schema com cardGrid + richContent callout)',
 );
 
+const invalidBackendEnumValues = [
+  'EM_MISSAO',
+  'INDISPONIVEL',
+  'QUARTEL_GENERAL',
+  'COMBATENTE',
+  "'MIA'",
+  'MONITORADO',
+  'PENDING',
+];
+const allDomainEnumsAlignedWithBackend = domainConfigs.every((relPath) => {
+  const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+  return invalidBackendEnumValues.every((invalidVal) => !content.includes(invalidVal));
+});
+assert(
+  allDomainEnumsAlignedWithBackend,
+  'Nenhuma das 17 páginas de domínio utiliza valores de Enum inexistentes no backend (como EM_MISSAO, INDISPONIVEL, QUARTEL_GENERAL, COMBATENTE, MIA, MONITORADO ou PENDING)',
+);
+
 // ---------------------------------------------------------------------------
 // 7. Dashboard API Integration Audit (Zero Static Data Invariants)
 // ---------------------------------------------------------------------------
@@ -672,8 +710,13 @@ assert(
     studioDemoSrc.includes('activeMissions.3.titulo') &&
     studioDemoSrc.includes('kpis.inUseAssets') &&
     studioDemoSrc.includes('progressValue | round:1 | default:0') &&
-    studioDemoSrc.includes('{{state.kpis.folhaPercent}}'),
-  'record-studio-demo.mjs elimina todos os textos/valores estáticos residuais em HERO_COMMAND_HEADER_DOC, KPI_*_DOC, TIMELINE_DOC e HUB_DOC',
+    studioDemoSrc.includes('{{state.kpis.folhaPercent}}') &&
+    studioDemoSrc.includes('"itemLayout": "split"') &&
+    studioDemoSrc.includes('"markerStyle": "soft"') &&
+    studioDemoSrc.includes('"label": "AMEAÇA"') &&
+    studioDemoSrc.includes('"captionPosition": "below-progress"') &&
+    studioDemoSrc.includes('"caption": "${item.nivelAmeaca|map:5=Crítico'),
+  'record-studio-demo.mjs elimina todos os textos/valores estáticos residuais e alinha TIMELINE_DOC (split/soft) e SOS_LIST_CONFIG (métrica AMEAÇA centralizada com captionPosition=below-progress) em HERO_COMMAND_HEADER_DOC, KPI_*_DOC, TIMELINE_DOC e HUB_DOC',
 );
 
 assert(

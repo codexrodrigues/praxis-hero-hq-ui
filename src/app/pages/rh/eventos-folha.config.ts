@@ -77,6 +77,13 @@ export const EVENTOS_FOLHA_CRUD_METADATA: CrudMetadata = {
               },
             },
             {
+              condition: { '==': [{ var: 'tipo' }, 'ADICIONAL'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Adicional Tático', variant: 'soft', color: 'primary', icon: 'add_circle' },
+              },
+            },
+            {
               condition: { '==': [{ var: 'tipo' }, 'DESCONTO'] },
               renderer: {
                 type: 'chip',

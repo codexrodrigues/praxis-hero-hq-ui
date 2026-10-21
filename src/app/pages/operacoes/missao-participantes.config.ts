@@ -74,7 +74,7 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
         missaoTitulo: { width: '240px', header: 'Missão Operacional' },
         funcionarioNome: { width: '220px', header: 'Herói / Operador' },
         papel: {
-          width: '160px',
+          width: '170px',
           align: 'center',
           header: 'Papel Tático',
           conditionalRenderers: [
@@ -86,17 +86,31 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
               },
             },
             {
-              condition: { '==': [{ var: 'papel' }, 'COMBATENTE'] },
+              condition: { '==': [{ var: 'papel' }, 'COMBATE'] },
               renderer: {
                 type: 'chip',
-                chip: { text: 'Combatente', variant: 'soft', color: 'accent', icon: 'swords' },
+                chip: { text: 'Combate', variant: 'soft', color: 'accent', icon: 'swords' },
               },
             },
             {
               condition: { '==': [{ var: 'papel' }, 'SUPORTE'] },
               renderer: {
                 type: 'chip',
-                chip: { text: 'Suporte / Tático', variant: 'outlined', color: 'basic', icon: 'shield' },
+                chip: { text: 'Suporte Tático', variant: 'soft', color: 'primary', icon: 'shield' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'papel' }, 'INTEL'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Inteligência', variant: 'soft', color: 'accent', icon: 'radar' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'papel' }, 'NEGOCIACAO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Negociação', variant: 'outlined', color: 'basic', icon: 'handshake' },
               },
             },
           ],
@@ -124,7 +138,7 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
           ],
         },
         resultado: {
-          width: '160px',
+          width: '170px',
           align: 'center',
           header: 'Resultado Individual',
           conditionalRenderers: [
@@ -139,14 +153,28 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
               condition: { '==': [{ var: 'resultado' }, 'FERIDO'] },
               renderer: {
                 type: 'chip',
-                chip: { text: 'Ferido em Ação', variant: 'soft', color: 'warn', icon: 'healing' },
+                chip: { text: 'Ferido em Ação', variant: 'soft', color: 'accent', icon: 'healing' },
               },
             },
             {
-              condition: { '==': [{ var: 'resultado' }, 'MIA'] },
+              condition: { '==': [{ var: 'resultado' }, 'DESAPARECIDO'] },
               renderer: {
                 type: 'chip',
-                chip: { text: 'Desaparecido (MIA)', variant: 'soft', color: 'warn', icon: 'crisis_alert' },
+                chip: { text: 'Desaparecido', variant: 'soft', color: 'warn', icon: 'crisis_alert' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'resultado' }, 'MORTO'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Baixa em Combate', variant: 'soft', color: 'warn', icon: 'emergency' },
+              },
+            },
+            {
+              condition: { '==': [{ var: 'resultado' }, 'NA'] },
+              renderer: {
+                type: 'chip',
+                chip: { text: 'Em Curso (N/A)', variant: 'outlined', color: 'basic', icon: 'schedule' },
               },
             },
           ],

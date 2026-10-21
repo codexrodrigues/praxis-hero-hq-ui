@@ -73,6 +73,10 @@ class HighFidelityVideoRecorder {
   }
 
   async start() {
+    if (process.env.PAX_SKIP_VIDEO === '1') {
+      this.isStopped = true;
+      return;
+    }
     const args = [
       '-loglevel', 'error',
       '-f', 'image2pipe',
@@ -99,8 +103,8 @@ class HighFidelityVideoRecorder {
       '-bufsize', '36M',
       '-max-intra-rate', '0',
       '-overshoot-pct', '100',
-      '-deadline', 'good',
-      '-cpu-used', '2',
+      '-deadline', 'realtime',
+      '-cpu-used', '6',
       '-threads', '4',
       '-g', String(this.fps * 2),
       this.outputFile
@@ -120,15 +124,13 @@ class HighFidelityVideoRecorder {
 
     await this.cdp.send('Page.startScreencast', {
       format: 'jpeg',
-      quality: 100,
+      quality: 92,
       maxWidth: this.width,
       maxHeight: this.height,
       everyNthFrame: 1
     });
 
     this.startWallSec = performance.now() / 1000;
-    const initialJpeg = await this.page.screenshot({ type: 'jpeg', quality: 100, scale: 'css' });
-    this.onFrame(initialJpeg);
 
     this.heartbeatTimer = setInterval(() => {
       if (!this.isStopped && this.lastFrameBuffer) {
@@ -172,11 +174,8 @@ class HighFidelityVideoRecorder {
   }
 
   async captureSyncKeyframe() {
-    if (this.isStopped) return;
-    try {
-      const jpeg = await this.page.screenshot({ type: 'jpeg', quality: 100, scale: 'css' });
-      this.onFrame(jpeg);
-    } catch {}
+    if (this.isStopped || !this.lastFrameBuffer) return;
+    this.onFrame(this.lastFrameBuffer);
   }
 
   async stop() {
@@ -865,6 +864,11 @@ async function setFormInput(page, selectorOrLocator, value, { pauseMs = 70 } = {
   await loc.fill(String(value));
   await loc.dispatchEvent('input');
   await loc.dispatchEvent('change');
+  const openAutocomplete = page.locator('.mat-mdc-autocomplete-panel.mat-mdc-autocomplete-visible');
+  if (await openAutocomplete.count().catch(() => 0)) {
+    await page.keyboard.press('Escape').catch(() => {});
+    await sleep(60);
+  }
   await loc.blur();
 }
 
@@ -920,7 +924,8 @@ async function setSlideToggle(page, selectorOrLocator, desiredChecked) {
 async function dismissStrayBackdrops(page) {
   for (let i = 0; i < 4; i++) {
     const backdrop = page.locator('.cdk-overlay-transparent-backdrop.cdk-overlay-backdrop-showing');
-    if ((await backdrop.count()) === 0) break;
+    const autocomplete = page.locator('.mat-mdc-autocomplete-panel.mat-mdc-autocomplete-visible');
+    if ((await backdrop.count()) === 0 && (await autocomplete.count()) === 0) break;
     await page.keyboard.press('Escape').catch(() => {});
     await sleep(150);
     if ((await backdrop.count()) > 0) {
@@ -973,6 +978,7 @@ async function collapseSidebarIfExpanded(page) {
 }
 
 async function saveAndCloseSettingsPanel(page, label = '') {
+  await dismissStrayBackdrops(page);
   const saveBtn = page.locator('[data-testid="settings-panel-save"]').last();
   const applyBtn = page.locator('[data-testid="settings-panel-apply"]').last();
   await saveBtn.waitFor({ state: 'visible', timeout: 10000 });
@@ -1008,27 +1014,42 @@ async function connectResourceInCrudEditor(page, resourcePath) {
   // Wait up to 8s for catalog to load
   for (let i = 0; i < 40; i++) {
     const loadingCount = await rqc.locator('.pdx-quick-connect__status').count();
-    const hasSelect = (await rqc.locator('mat-select').count()) > 0;
+    const hasTrigger = (await rqc.locator('.pdx-material-collection-trigger, [data-testid="quick-connect-change-resource-btn"]').count()) > 0;
     const hasSearch = (await rqc.locator('[data-testid="quick-connect-search-input"]').count()) > 0;
-    if (hasSelect || hasSearch || loadingCount === 0) break;
+    if ((hasTrigger || hasSearch) && loadingCount === 0) break;
     await sleep(200);
   }
 
-  const matSelect = rqc.locator('mat-select').first();
+  const changeBtn = rqc.locator('[data-testid="quick-connect-change-resource-btn"]').first();
+  const collectionTrigger = rqc.locator('button.pdx-material-collection-trigger[role="combobox"]').first();
   const searchInput = rqc.locator('[data-testid="quick-connect-search-input"]').first();
 
-  if (await matSelect.isVisible().catch(() => false)) {
-    await selectMatOption(
-      page,
-      matSelect,
-      (txt, val) =>
-        txt.toLowerCase().includes('funcion') ||
-        txt.toLowerCase().includes('herói') ||
-        txt.toLowerCase().includes('heroi') ||
-        txt.toLowerCase().includes(resourcePath.toLowerCase()) ||
-        val.toLowerCase().includes(resourcePath.toLowerCase()),
-      { pauseBeforeClickMs: 300 }
-    );
+  if (await changeBtn.isVisible().catch(() => false)) {
+    await moveCursorToLocator(page, changeBtn, 90);
+    await changeBtn.click();
+    await sleep(260);
+  } else if (await collectionTrigger.isVisible().catch(() => false)) {
+    await moveCursorToLocator(page, collectionTrigger, 90);
+    await collectionTrigger.click();
+    await sleep(260);
+  }
+
+  const overlayPanel = page.locator('.pdx-material-select-panel, .pdx-collection-overlay').first();
+  if (await overlayPanel.isVisible().catch(() => false)) {
+    const overlaySearch = overlayPanel.locator('input').first();
+    if (await overlaySearch.isVisible().catch(() => false)) {
+      await setFormInput(page, overlaySearch, 'funcionarios');
+      await sleep(260);
+    }
+    const overlayOpt = overlayPanel
+      .locator('.pdx-material-select-option-button')
+      .filter({ hasText: /funcionarios|Funcionários|Heróis/i })
+      .first();
+    if (await overlayOpt.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, overlayOpt, 90);
+      await overlayOpt.click();
+      await sleep(320);
+    }
   } else if (await searchInput.isVisible().catch(() => false)) {
     await setFormInput(page, searchInput, 'funcionarios');
     await sleep(350);
@@ -1043,22 +1064,25 @@ async function connectResourceInCrudEditor(page, resourcePath) {
     }
   }
 
-  // Also ensure the advanced resourcePath input has the exact canonical path
-  const details = rqc.locator('details.pdx-quick-connect__advanced');
-  if (await details.isVisible().catch(() => false)) {
-    const isOpen = await details.evaluate((el) => el.hasAttribute('open'));
-    if (!isOpen) {
-      const summary = details.locator('summary');
-      await moveCursorToLocator(page, summary, 70);
-      await summary.click();
-      await sleep(200);
-    }
-    const pathInput = details.locator('input[matinput]').first();
-    if (await pathInput.isVisible().catch(() => false)) {
-      const currentVal = await pathInput.inputValue();
-      if (currentVal.trim() !== resourcePath) {
-        await setFormInput(page, pathInput, resourcePath);
-        await sleep(300);
+  // Fallback to advanced route input ONLY if no catalog resource card was resolved
+  const selectedCard = rqc.locator('[data-testid="quick-connect-selected-card"]').first();
+  if (!(await selectedCard.isVisible().catch(() => false))) {
+    const details = rqc.locator('details.pdx-quick-connect__advanced');
+    if (await details.isVisible().catch(() => false)) {
+      const isOpen = await details.evaluate((el) => el.hasAttribute('open'));
+      if (!isOpen) {
+        const summary = details.locator('summary');
+        await moveCursorToLocator(page, summary, 70);
+        await summary.click();
+        await sleep(200);
+      }
+      const pathInput = details.locator('input[matinput]').first();
+      if (await pathInput.isVisible().catch(() => false)) {
+        const currentVal = await pathInput.inputValue();
+        if (currentVal.trim() !== resourcePath) {
+          await setFormInput(page, pathInput, resourcePath);
+          await sleep(300);
+        }
       }
     }
   }
@@ -1195,22 +1219,41 @@ async function main() {
             -webkit-backdrop-filter: none !important;
             background: rgba(15, 23, 42, 0.22) !important;
           }
+          #praxis-demo-toplayer {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            pointer-events: none !important;
+            overflow: visible !important;
+            z-index: 2147483647 !important;
+          }
+          #praxis-demo-toplayer::backdrop {
+            background: transparent !important;
+            pointer-events: none !important;
+          }
           #praxis-demo-hud {
             position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 8px;
+            left: 24px;
+            transform: none;
             z-index: 2147483645;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            min-width: 780px;
-            max-width: 1220px;
-            padding: 8px 16px 7px;
-            border-radius: 14px;
+            gap: 4px;
+            min-width: 560px;
+            max-width: 780px;
+            padding: 7px 15px 6px;
+            border-radius: 13px;
             background: rgba(255, 255, 255, 0.96);
             border: 1.5px solid rgba(2, 132, 199, 0.42);
-            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.85) inset;
             color: #0f172a;
             font-family: Inter, system-ui, sans-serif;
             pointer-events: none;
@@ -1219,30 +1262,30 @@ async function main() {
           #praxis-demo-hud .praxis-demo-row {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
           }
           #praxis-demo-hud .praxis-demo-badge {
             background: linear-gradient(135deg, #0284c7, #0d9488);
             color: #ffffff;
             font-weight: 800;
-            font-size: 11px;
+            font-size: 10.5px;
             letter-spacing: 0.06em;
             text-transform: uppercase;
-            padding: 4px 10px;
+            padding: 3.5px 9px;
             border-radius: 7px;
             white-space: nowrap;
           }
           #praxis-demo-hud .praxis-demo-title {
             font-weight: 800;
-            font-size: 13.5px;
+            font-size: 13px;
             color: #0f172a;
             white-space: nowrap;
           }
           #praxis-demo-hud .praxis-demo-detail {
-            font-size: 12px;
+            font-size: 11.5px;
             color: #475569;
             border-left: 1.5px solid rgba(148, 163, 184, 0.45);
-            padding-left: 12px;
+            padding-left: 10px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1250,18 +1293,18 @@ async function main() {
           #praxis-demo-hud .praxis-demo-timer {
             margin-left: auto;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 700;
             color: #0369a1;
             background: rgba(2, 132, 199, 0.1);
             border: 1px solid rgba(2, 132, 199, 0.28);
-            padding: 3px 9px;
+            padding: 2.5px 8px;
             border-radius: 6px;
             white-space: nowrap;
           }
           #praxis-demo-hud .praxis-demo-progress-track {
             width: 100%;
-            height: 4px;
+            height: 3.5px;
             background: rgba(148, 163, 184, 0.22);
             border-radius: 999px;
             overflow: hidden;
@@ -1305,6 +1348,14 @@ async function main() {
         `;
         document.head.appendChild(style);
 
+        const topLayer = document.createElement('div');
+        topLayer.id = 'praxis-demo-toplayer';
+        topLayer.setAttribute('popover', 'manual');
+        document.body.appendChild(topLayer);
+        try {
+          topLayer.showPopover();
+        } catch {}
+
         const hud = document.createElement('div');
         hud.id = 'praxis-demo-hud';
         hud.innerHTML = `
@@ -1318,7 +1369,7 @@ async function main() {
             <div class="praxis-demo-progress-fill"></div>
           </div>
         `;
-        document.body.appendChild(hud);
+        topLayer.appendChild(hud);
 
         const cursor = document.createElement('div');
         cursor.id = 'praxis-demo-cursor';
@@ -1328,7 +1379,35 @@ async function main() {
             <circle cx="4" cy="3" r="2.5" fill="#0D9488"/>
           </svg>
         `;
-        document.body.appendChild(cursor);
+        topLayer.appendChild(cursor);
+
+        const promoteTopLayer = () => {
+          try {
+            if (topLayer.isConnected && typeof topLayer.showPopover === 'function') {
+              topLayer.hidePopover();
+              topLayer.showPopover();
+            }
+          } catch {}
+        };
+
+        const observer = new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            for (const node of m.addedNodes) {
+              if (
+                node &&
+                node.nodeType === 1 &&
+                (node.classList?.contains('cdk-overlay-popover') ||
+                  node.classList?.contains('cdk-overlay-pane') ||
+                  node.querySelector?.('.cdk-overlay-popover, .cdk-overlay-pane, mat-dialog-container, praxis-settings-panel'))
+              ) {
+                setTimeout(promoteTopLayer, 15);
+                setTimeout(promoteTopLayer, 120);
+                break;
+              }
+            }
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
 
         if (!sessionStorage.getItem('__praxis_crud_demo_t0')) {
           sessionStorage.setItem('__praxis_crud_demo_t0', String(Date.now()));
@@ -1340,10 +1419,7 @@ async function main() {
           const ss = String(sec % 60).padStart(2, '0');
           const timerEl = document.getElementById('praxis-demo-timer');
           if (timerEl) timerEl.textContent = `⏱ ${mm}:${ss}`;
-          if (hud.parentNode === document.body && document.body.lastElementChild !== cursor) {
-            document.body.appendChild(hud);
-            document.body.appendChild(cursor);
-          }
+          promoteTopLayer();
         }, 250);
 
         window.__praxisMoveCursor = (x, y, showRipple = false) => {
@@ -1356,7 +1432,7 @@ async function main() {
             ripple.className = 'praxis-click-ripple';
             ripple.style.left = `${Math.round(x)}px`;
             ripple.style.top = `${Math.round(y)}px`;
-            document.body.appendChild(ripple);
+            (document.getElementById('praxis-demo-toplayer') || document.body).appendChild(ripple);
             setTimeout(() => ripple.remove(), 520);
           }
         };
@@ -1448,16 +1524,16 @@ async function main() {
     await recorder.captureSyncKeyframe();
 
     // =========================================================================
-    // STAGE 2: Quick Win First — Connect Resource, Set Executive Header & Materialize Live Table Immediately!
+    // STAGE 2: Quick Win First — Connect Resource, Set Executive Header & Materialize Zero-Config Table Immediately!
     // =========================================================================
-    console.log('2. Connecting to human-resources/funcionarios and materializing the live table immediately...');
+    console.log('2. Connecting to human-resources/funcionarios and materializing the Zero-Config live table immediately...');
     await setDemoStage(
       page,
       2,
       8,
-      'ETAPA 2/8 · CONEXÃO RÁPIDA & TABELA VIVA',
-      'Quick Connect RESTful + Cabeçalho Executivo → Materialização Imediata da Tabela',
-      'Conectando ao recurso human-resources/funcionarios e trazendo os dados reais para a tela'
+      'ETAPA 2/8 · CONEXÃO RÁPIDA & TABELA ZERO-CONFIG',
+      'Quick Connect RESTful + Cabeçalho Executivo → Materialização Imediata da Grade',
+      'Conectando ao recurso human-resources/funcionarios: colunas e formatos nascem prontos do DTO'
     );
 
     await connectResourceInCrudEditor(page, 'human-resources/funcionarios');
@@ -1480,61 +1556,21 @@ async function main() {
       await sleep(150);
     }
     await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '02a-crud-connection-maximized.png') });
 
-    // Switch to Tab: Opening / Defaults (configure Modal Maximized)
-    const tabDefaults = page.locator('[data-testid="crud-editor-tab-defaults"]');
-    await moveCursorToLocator(page, tabDefaults, 90);
-    await tabDefaults.click();
-    await sleep(350);
-
-    await selectMatOption(
-      page,
-      page.locator('[data-testid="crud-editor-defaults-openMode"]'),
-      (txt, val) => val === 'modal' || txt.toLowerCase().includes('modal')
-    );
-    await setFormInput(page, '[data-testid="crud-editor-header-backLabel"]', 'Voltar ao Catálogo');
-    await selectMatOption(
-      page,
-      page.locator('[data-testid="crud-editor-header-variant"]'),
-      (txt, val) => val === 'tonal' || txt.toLowerCase().includes('tonal')
-    );
-    await setSlideToggle(page, '[data-testid="crud-editor-header-sticky"]', true);
-    await setSlideToggle(page, '[data-testid="crud-editor-header-divider"]', true);
-    await setSlideToggle(page, '[data-testid="crud-editor-modal-canMaximize"]', true);
-    await setSlideToggle(page, '[data-testid="crud-editor-modal-startMaximized"]', true);
-    await setSlideToggle(page, '[data-testid="crud-editor-modal-rememberLastState"]', true);
-    await setSlideToggle(page, '[data-testid="crud-editor-back-confirmOnDirty"]', true);
-    await sleep(350);
-    await recorder.captureSyncKeyframe();
-    await page.screenshot({ path: path.join(ARTIFACT_DIR, '02-crud-resource-and-opening.png') });
-
-    // Switch to Tab: Actions — bind create, view, and edit to 'studio-funcionarios-form'
-    const tabActions = page.locator('[data-testid="crud-editor-tab-actions"]');
-    await moveCursorToLocator(page, tabActions, 90);
-    await tabActions.click();
-    await sleep(350);
-    for (const actionKey of ['create', 'view', 'edit']) {
-      const panel = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel"]`).first();
-      const header = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel-header"]`).first();
-      if (await panel.isVisible().catch(() => false)) {
-        const isExpanded = await panel.evaluate((el) => el.classList.contains('mat-expanded')).catch(() => false);
-        if (!isExpanded && (await header.isVisible().catch(() => false))) {
-          await moveCursorToLocator(page, header, 75);
-          await header.click();
-          await sleep(220);
-        }
-      }
-      const formIdInput = page.locator(`[data-testid="crud-editor-action-${actionKey}-formId"]`).first();
-      await formIdInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-      if (await formIdInput.isVisible().catch(() => false)) {
-        await setFormInput(page, formIdInput, 'studio-funcionarios-form', { pauseMs: 55 });
-        await sleep(180);
-      }
+    // Briefly open the full-width Resource Lookup Picker via "Trocar recurso" to capture the open lookup evidence
+    const changeResourceBtn = page.locator('[data-testid="quick-connect-change-resource-btn"]').first();
+    if (await changeResourceBtn.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, changeResourceBtn, 80);
+      await changeResourceBtn.click();
+      await sleep(280);
+      await recorder.captureSyncKeyframe();
+      await page.screenshot({ path: path.join(ARTIFACT_DIR, '02a-crud-connection-lookup-open.png') });
+      await changeResourceBtn.click();
+      await sleep(220);
     }
-    await sleep(350);
-    await recorder.captureSyncKeyframe();
 
-    // SAVE & CLOSE NOW so the viewer immediately sees the populated table and Executive Header on screen!
+    // SAVE & CLOSE IMMEDIATELY so the viewer sees the Zero-Config populated table in seconds!
     await saveAndCloseSettingsPanel(page, 'crud-metadata-editor-initial-connect');
     await page.locator('.praxis-resource-page__header').first().waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
@@ -1542,25 +1578,25 @@ async function main() {
       page,
       2,
       8,
-      'ETAPA 2/8 · TABELA POPULADA EM SEGUNDOS!',
-      'Cabeçalho Executivo + Grade Conectada ao Backend (98 Registros Reais)',
-      'Com a tabela já viva na tela, voltamos ao editor expandido para refinar colunas, KPIs e filtros'
+      'ETAPA 2/8 · TABELA ZERO-CONFIG EM SEGUNDOS!',
+      'Grade Viva Derivada 100% do DTO (Código #194, Foto Avatar, Datas e Status)',
+      'Sem configurar colunas manualmente: Foto circular, Código inteiro (#194), Datas (dd/MM/yyyy) e Status'
     );
-    await sleep(1100);
+    await sleep(1200);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '02b-crud-live-table-first-materialization.png') });
 
     // =========================================================================
-    // STAGE 3: Re-open Expanded Editor -> Refine Table Columns, Avatar Renderer, Status Chip & BRL Currency (R$)
+    // STAGE 3: Re-open Expanded Editor -> Curate Columns, Reveal LGPD Salary (already BRL!) & Status Chip
     // =========================================================================
-    console.log('3. Re-opening expanded editor to refine Table Toolbar, Columns, Avatar Renderer and BRL Currency...');
+    console.log('3. Re-opening expanded editor to curate Executive Columns and reveal governed BRL Salary column...');
     await setDemoStage(
       page,
       3,
       8,
-      'ETAPA 3/8 · REFINAMENTO VISUAL DA GRADE',
-      'Editor de Colunas Expandido — Avatar Composto, Chip de Prontidão e Moeda (R$)',
-      'Transformando colunas brutas em experiência executiva com formatação Real Brasileiro (R$)'
+      'ETAPA 3/8 · CURADORIA DE COLUNAS & GOVERNANÇA',
+      'Editor de Colunas Expandido — Exibindo Subsídio Mensal (R$ do DTO) e Chip de Prontidão',
+      'A coluna Salário (oculta por padrão via LGPD) já traz formatação BRL automática do backend'
     );
 
     const reopenCrudEditorBtn = page.locator('[data-testid="resource-page-configure-btn"]').first();
@@ -1683,14 +1719,23 @@ async function main() {
       return true;
     };
 
+    // Keep 'id' (#194) and 'avatarUrl' (Foto circular avatar) from DTO, curate headers/widths,
+    // and reveal 'salario' (which already brings type='currency' and format='BRL|symbol|2' from FuncionarioDTO!)
+    await customizeColumnByField('id', {
+      header: 'Cód.',
+      width: '105px'
+    });
+    await customizeColumnByField('avatarUrl', {
+      header: 'Foto',
+      width: '92px'
+    });
     await customizeColumnByField('nomeCompleto', {
       header: 'Herói / Nome Completo',
-      width: '260px',
-      composePreset: /Pessoa com avatar|Person with avatar/i
+      width: '230px'
     });
     await customizeColumnByField('codinome', {
       header: 'Codinome Tático',
-      width: '175px'
+      width: '160px'
     });
     await customizeColumnByField('cargoNome', {
       header: 'Patente & Especialidade',
@@ -1698,24 +1743,26 @@ async function main() {
     });
     await customizeColumnByField('departamentoNome', {
       header: 'Divisão Operacional',
-      width: '230px'
+      width: '215px'
+    });
+    await customizeColumnByField('dataAdmissao', {
+      header: 'Admissão',
+      width: '125px'
     });
     await customizeColumnByField('salario', {
       header: 'Subsídio Mensal',
-      width: '170px',
-      align: 'right',
-      dataType: 'currency',
-      currencyCode: 'BRL'
+      width: '165px',
+      align: 'right'
     });
     await customizeColumnByField('ativo', {
       header: 'Prontidão',
-      width: '140px',
+      width: '130px',
       align: 'center',
       composePreset: /Chip de status|Status chip/i
     });
 
-    // Hide noisy raw columns so the executive table fits 100% cleanly in 1080p
-    const columnsToHide = ['fotoPerfilUrl', 'avatarUrl', 'foto', 'id', 'estadoCivil', 'cpf', 'telefone', 'email', 'dataNascimento', 'cargoId', 'departamentoId'];
+    // Hide auxiliary contact/FK columns so the executive table fits 100% cleanly in 1080p alongside Código (#194) and Foto (Avatar)
+    const columnsToHide = ['estadoCivil', 'cpf', 'telefone', 'email', 'dataNascimento', 'cargoId', 'departamentoId'];
     for (const hideField of columnsToHide) {
       const colItem = colsEditor
         .locator('.column-item')
@@ -1737,7 +1784,7 @@ async function main() {
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '05-crud-table-columns-authored.png') });
 
-    // Save & close so the viewer immediately sees the transformed Corporate Table with Avatars, R$ and Status Chips!
+    // Save & close so the viewer immediately sees the curated Corporate Table with #194, Avatar, Admissão, R$ and Status Chips!
     await saveAndCloseSettingsPanel(page, 'crud-table-columns-refined');
     await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
     await sleep(950);
@@ -1745,16 +1792,16 @@ async function main() {
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '05b-crud-table-refined-live.png') });
 
     // =========================================================================
-    // STAGE 4: Add Live Telemetry KPI Band (/stats/group-by) & ScopeBar with Quick Filter Chips
+    // STAGE 4: Add Live Telemetry KPI Band (/stats/group-by), ScopeBar & Modal/Form Actions
     // =========================================================================
-    console.log('4. Re-opening expanded editor to author KPI Band and Filter Bar (ScopeBar)...');
+    console.log('4. Re-opening expanded editor to author KPI Band, Filter Bar (ScopeBar), Modal Opening and Form Actions...');
     await setDemoStage(
       page,
       4,
       8,
-      'ETAPA 4/8 · FAIXA DE KPIs & BARRA DE FILTROS',
-      'Adicionando Telemetria Viva (/stats/group-by) + ScopeBar com Quick Filter Chips',
-      'Configurando 4 cards executivos de KPI e filtros fixados acima da grade corporativa'
+      'ETAPA 4/8 · KPIs, SCOPEBAR & ABERTURA MODAL',
+      'Telemetria Viva (/stats/group-by) + Quick Filter Chips + Abertura Modal Maximizada',
+      'Configurando 4 cards executivos de KPI, filtros rápidos e vínculo com o Dossiê Modal'
     );
 
     await moveCursorToLocator(page, reopenCrudEditorBtn, 95);
@@ -1762,6 +1809,59 @@ async function main() {
     await crudEditor.waitFor({ state: 'visible', timeout: 10000 });
     await sleep(320);
     await expandActiveSettingsPanel(page);
+
+    // Switch to Tab: Opening / Defaults (configure Modal Maximized)
+    const tabDefaults = page.locator('[data-testid="crud-editor-tab-defaults"]');
+    await moveCursorToLocator(page, tabDefaults, 90);
+    await tabDefaults.click();
+    await sleep(350);
+
+    await selectMatOption(
+      page,
+      page.locator('[data-testid="crud-editor-defaults-openMode"]'),
+      (txt, val) => val === 'modal' || txt.toLowerCase().includes('modal')
+    );
+    await setFormInput(page, '[data-testid="crud-editor-header-backLabel"]', 'Voltar ao Catálogo');
+    await selectMatOption(
+      page,
+      page.locator('[data-testid="crud-editor-header-variant"]'),
+      (txt, val) => val === 'tonal' || txt.toLowerCase().includes('tonal')
+    );
+    await setSlideToggle(page, '[data-testid="crud-editor-header-sticky"]', true);
+    await setSlideToggle(page, '[data-testid="crud-editor-header-divider"]', true);
+    await setSlideToggle(page, '[data-testid="crud-editor-modal-canMaximize"]', true);
+    await setSlideToggle(page, '[data-testid="crud-editor-modal-startMaximized"]', true);
+    await setSlideToggle(page, '[data-testid="crud-editor-modal-rememberLastState"]', true);
+    await setSlideToggle(page, '[data-testid="crud-editor-back-confirmOnDirty"]', true);
+    await sleep(300);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '02-crud-resource-and-opening.png') });
+
+    // Switch to Tab: Actions — bind create, view, and edit to 'studio-funcionarios-form'
+    const tabActions = page.locator('[data-testid="crud-editor-tab-actions"]');
+    await moveCursorToLocator(page, tabActions, 90);
+    await tabActions.click();
+    await sleep(350);
+    for (const actionKey of ['create', 'view', 'edit']) {
+      const panel = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel"]`).first();
+      const header = page.locator(`[data-testid="crud-editor-action-${actionKey}-panel-header"]`).first();
+      if (await panel.isVisible().catch(() => false)) {
+        const isExpanded = await panel.evaluate((el) => el.classList.contains('mat-expanded')).catch(() => false);
+        if (!isExpanded && (await header.isVisible().catch(() => false))) {
+          await moveCursorToLocator(page, header, 75);
+          await header.click();
+          await sleep(220);
+        }
+      }
+      const formIdInput = page.locator(`[data-testid="crud-editor-action-${actionKey}-formId"]`).first();
+      await formIdInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      if (await formIdInput.isVisible().catch(() => false)) {
+        await setFormInput(page, formIdInput, 'studio-funcionarios-form', { pauseMs: 55 });
+        await sleep(180);
+      }
+    }
+    await sleep(300);
+    await recorder.captureSyncKeyframe();
 
     const tabKpis = page.locator('[data-testid="crud-editor-tab-kpis"]');
     await moveCursorToLocator(page, tabKpis, 95);
@@ -2089,8 +2189,18 @@ async function main() {
     }
 
     // Scroll back to top of layout editor to showcase the flat sections and layout scope banner
-    await formConfigEditor.locator('.layout-scope-banner').first().evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'start' })).catch(() => {});
-    await sleep(500);
+    await page.evaluate(() => {
+      document
+        .querySelectorAll('.settings-panel-body, .mat-mdc-tab-body-content, .layout-editor-container')
+        .forEach((sc) => {
+          sc.scrollTop = 0;
+        });
+      const scopeCard = document.querySelector('praxis-dynamic-form-config-editor .scope-card');
+      if (scopeCard) {
+        scopeCard.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }
+    });
+    await sleep(600);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '07-crud-form-layout-editor.png') });
 
@@ -2129,7 +2239,7 @@ async function main() {
     );
 
     await moveCursorToLocator(page, toggleCustomBtn, 100);
-    await toggleCustomBtn.click();
+    await toggleCustomBtn.click({ force: true, timeout: 10000 }).catch(() => {});
     await sleep(550);
     await recorder.captureSyncKeyframe();
 
@@ -2137,7 +2247,7 @@ async function main() {
     const kpiCardActive = page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').nth(1);
     if (await kpiCardActive.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, kpiCardActive, 100);
-      await kpiCardActive.click();
+      await kpiCardActive.click({ force: true, timeout: 10000 }).catch(() => {});
       await sleep(700);
       await recorder.captureSyncKeyframe();
     }
@@ -2146,7 +2256,7 @@ async function main() {
     const kpiCardTotal = page.locator('praxis-crud praxis-kpi-band .praxis-kpi-card').nth(0);
     if (await kpiCardTotal.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, kpiCardTotal, 100);
-      await kpiCardTotal.click();
+      await kpiCardTotal.click({ force: true, timeout: 10000 }).catch(() => {});
       await sleep(650);
       await recorder.captureSyncKeyframe();
     }
@@ -2155,7 +2265,7 @@ async function main() {
     const quickChipReserve = page.locator('praxis-scope-bar button, praxis-crud button, praxis-crud mat-chip-option, .quick-filter-chip').filter({ hasText: /Reserva Tática/i }).first();
     if (await quickChipReserve.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, quickChipReserve, 95);
-      await quickChipReserve.click();
+      await quickChipReserve.click({ force: true, timeout: 10000 }).catch(() => {});
       await sleep(650);
       await recorder.captureSyncKeyframe();
     }
@@ -2163,7 +2273,7 @@ async function main() {
     const quickChipAll = page.locator('praxis-scope-bar button, praxis-crud button, praxis-crud mat-chip-option, .quick-filter-chip').filter({ hasText: /Todos os Agentes/i }).first();
     if (await quickChipAll.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, quickChipAll, 95);
-      await quickChipAll.click();
+      await quickChipAll.click({ force: true, timeout: 10000 }).catch(() => {});
       await sleep(650);
       await recorder.captureSyncKeyframe();
     }
@@ -2217,12 +2327,27 @@ async function main() {
 
       await page.keyboard.press('Escape');
       await sleep(320);
-      const dirtyConfirmBtn = page.locator('.cdk-overlay-container mat-dialog-container button').filter({ hasText: /Sair|Confirmar|Descartar|Sim|Leave/i }).first();
-      if (await dirtyConfirmBtn.isVisible().catch(() => false)) {
-        await moveCursorToLocator(page, dirtyConfirmBtn, 75);
-        await dirtyConfirmBtn.click();
+      // Ensure the Create Form Modal is completely closed before proceeding
+      for (let closeAttempt = 0; closeAttempt < 4; closeAttempt++) {
+        if ((await page.locator('.cdk-overlay-container mat-dialog-container').count()) === 0) break;
+        const dirtyConfirmBtn = page.locator('.cdk-overlay-container mat-dialog-container button').filter({ hasText: /Sair|Confirmar|Descartar|Sim|Leave/i }).first();
+        if (await dirtyConfirmBtn.isVisible().catch(() => false)) {
+          await moveCursorToLocator(page, dirtyConfirmBtn, 70);
+          await dirtyConfirmBtn.click({ force: true });
+          await sleep(320);
+          continue;
+        }
+        const closeModalBtn = page.locator('.cdk-overlay-container mat-dialog-container button[data-testid="crud-dialog-close-btn"], .cdk-overlay-container mat-dialog-container button[aria-label*="Fechar"], .cdk-overlay-container mat-dialog-container button[aria-label*="Close"], .cdk-overlay-container mat-dialog-container button[mat-dialog-close]').first();
+        if (await closeModalBtn.isVisible().catch(() => false)) {
+          await moveCursorToLocator(page, closeModalBtn, 70);
+          await closeModalBtn.click({ force: true });
+          await sleep(320);
+          continue;
+        }
+        await page.keyboard.press('Escape').catch(() => {});
+        await sleep(300);
       }
-      await sleep(400);
+      await sleep(350);
       await dismissStrayBackdrops(page);
     }
 
@@ -2232,18 +2357,19 @@ async function main() {
     const editBtn2 = rowForEdit
       .locator('td.praxis-actions-cell button.praxis-icon-btn:not([disabled])')
       .nth(1);
-    await editBtn2.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, editBtn2, 95);
-    await editBtn2.click();
+    if (await editBtn2.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, editBtn2, 95);
+      await editBtn2.click({ force: true });
 
-    await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 });
-    await sleep(700);
-    await recorder.captureSyncKeyframe();
-    await page.screenshot({ path: path.join(ARTIFACT_DIR, '10-crud-runtime-edit.png') });
+      await page.locator('mat-dialog-container praxis-dynamic-form form.praxis-dynamic-form').first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+      await sleep(700);
+      await recorder.captureSyncKeyframe();
+      await page.screenshot({ path: path.join(ARTIFACT_DIR, '10-crud-runtime-edit.png') });
 
-    await page.keyboard.press('Escape');
-    await sleep(450);
-    await dismissStrayBackdrops(page);
+      await page.keyboard.press('Escape');
+      await sleep(450);
+      await dismissStrayBackdrops(page);
+    }
 
     // 6.6 Trigger DELETE action to showcase the governed Confirmation Dialog
     console.log('   6.6 Demonstrating Delete (Excluir) confirmation dialog...');
@@ -2251,29 +2377,31 @@ async function main() {
     const moreBtn = rowForDelete
       .locator('td.praxis-actions-cell button.praxis-more-btn:not([disabled]), td.praxis-actions-cell button[aria-haspopup="menu"]:not([disabled])')
       .first();
-    await moreBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, moreBtn, 90);
-    await moreBtn.click();
-    await sleep(260);
-    const delItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Excluir|Delete|Remover/i }).first();
-    await delItem.waitFor({ state: 'visible', timeout: 10000 });
-    await moveCursorToLocator(page, delItem, 80);
-    await delItem.click();
+    if (await moreBtn.isVisible().catch(() => false)) {
+      await moveCursorToLocator(page, moreBtn, 90);
+      await moreBtn.click({ force: true });
+      await sleep(260);
+      const delItem = page.locator('.cdk-overlay-container [role="menuitem"]').filter({ hasText: /Excluir|Delete|Remover/i }).first();
+      if (await delItem.isVisible().catch(() => false)) {
+        await moveCursorToLocator(page, delItem, 80);
+        await delItem.click({ force: true });
 
-    const confirmDialog = page.locator('.cdk-overlay-container mat-dialog-container').first();
-    await confirmDialog.waitFor({ state: 'visible', timeout: 10000 });
-    await sleep(480);
-    await recorder.captureSyncKeyframe();
-    await page.screenshot({ path: path.join(ARTIFACT_DIR, '11-crud-runtime-delete.png') });
+        const confirmDialog = page.locator('.cdk-overlay-container mat-dialog-container').first();
+        await confirmDialog.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+        await sleep(480);
+        await recorder.captureSyncKeyframe();
+        await page.screenshot({ path: path.join(ARTIFACT_DIR, '11-crud-runtime-delete.png') });
 
-    const cancelDeleteBtn = confirmDialog.locator('button').filter({ hasText: /Cancelar|Cancel|Não/i }).first();
-    if (await cancelDeleteBtn.isVisible().catch(() => false)) {
-      await moveCursorToLocator(page, cancelDeleteBtn, 85);
-      await cancelDeleteBtn.click();
-      await sleep(400);
-    } else {
-      await page.keyboard.press('Escape');
-      await sleep(380);
+        const cancelDeleteBtn = confirmDialog.locator('button').filter({ hasText: /Cancelar|Cancel|Não/i }).first();
+        if (await cancelDeleteBtn.isVisible().catch(() => false)) {
+          await moveCursorToLocator(page, cancelDeleteBtn, 85);
+          await cancelDeleteBtn.click({ force: true });
+          await sleep(400);
+        } else {
+          await page.keyboard.press('Escape');
+          await sleep(380);
+        }
+      }
     }
 
     // =========================================================================
@@ -2327,10 +2455,10 @@ async function main() {
             }
             #praxis-tour-callout {
               position: fixed;
-              bottom: 76px;
-              right: 28px;
+              bottom: 74px;
+              left: 68px;
               z-index: 2147483644;
-              max-width: 470px;
+              max-width: 460px;
               padding: 14px 20px;
               border-radius: 16px;
               background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.98));
@@ -2382,7 +2510,13 @@ async function main() {
         if (!callout) {
           callout = document.createElement('div');
           callout.id = 'praxis-tour-callout';
-          document.body.appendChild(callout);
+          const host = document.getElementById('praxis-demo-toplayer') || document.body;
+          const cursorEl = document.getElementById('praxis-demo-cursor');
+          if (cursorEl && cursorEl.parentNode === host) {
+            host.insertBefore(callout, cursorEl);
+          } else {
+            host.appendChild(callout);
+          }
         }
         callout.innerHTML = `
           <div class="tour-badge">${badge}</div>
@@ -2441,20 +2575,20 @@ async function main() {
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '13-tour-act1-header-kpis-scopebar.png') });
 
-    // ATO II — Grade Corporativa com Colunas Compostas & Moeda R$ (~5.5s)
+    // ATO II — Grade Corporativa Zero-Config + Curadoria & Moeda R$ (~5.5s)
     await setDemoStage(
       page,
       8,
       8,
       'ETAPA 8/8 · TOUR EXECUTIVO (ATO II/IV)',
-      'Grade Corporativa com Colunas Compostas, Chips Semânticos e Moeda (R$)',
-      'Herói com Avatar, Patente & Especialidade, Divisão, Subsídio Mensal (R$ 41.000,00) e Prontidão'
+      'Grade Corporativa com Herança @UISchema Zero-Config, Avatar e Moeda (R$)',
+      'Código (#194), Foto Avatar, Admissão (dd/MM/yyyy), Subsídio Mensal (R$ 41.000,00) e Chip de Prontidão'
     );
     await setTourSpotlight(
       'praxis-crud praxis-table',
       'ATO II · GRADE CORPORATIVA GOVERNADA',
-      'Colunas Compostas & Formatação Moeda (BRL)',
-      'Renderizador Pessoa com Avatar, Subsídio Mensal alinhado à direita (R$ 41.000,00) e Chip de Prontidão.'
+      'Herança Canônica @UISchema & Curadoria Studio',
+      'Código (#194), Foto circular, Admissão (dd/MM/yyyy) e Moeda BRL (R$) projetados automaticamente do DTO.'
     );
     const firstTableRow = page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first();
     if (await firstTableRow.isVisible().catch(() => false)) {
@@ -2563,12 +2697,12 @@ async function main() {
           </p>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
             <div style="padding: 14px 16px; border-radius: 14px; background: rgba(248, 250, 252, 0.95); border: 1px solid rgba(2, 132, 199, 0.28);">
-              <div style="font-weight: 800; font-size: 13.5px; color: #0284c7; margin-bottom: 4px;">✓ Quick Connect & Tabela Viva Imediata</div>
-              <div style="font-size: 12.5px; color: #334155;">Conexão ao catálogo RESTful, Cabeçalho Executivo e 98 registros reais em segundos.</div>
+              <div style="font-weight: 800; font-size: 13.5px; color: #0284c7; margin-bottom: 4px;">✓ Quick Connect & Projeção Zero-Config</div>
+              <div style="font-size: 12.5px; color: #334155;">Código (#194), Foto Avatar, Admissão (dd/MM/yyyy) e 98 registros reais projetados direto do DTO.</div>
             </div>
             <div style="padding: 14px 16px; border-radius: 14px; background: rgba(248, 250, 252, 0.95); border: 1px solid rgba(13, 148, 136, 0.28);">
-              <div style="font-weight: 800; font-size: 13.5px; color: #0d9488; margin-bottom: 4px;">✓ Grade Corporativa & Moeda BRL (R$)</div>
-              <div style="font-size: 12.5px; color: #334155;">Pessoa com Avatar, Chip de Prontidão e Subsídio Mensal formatado em Real Brasileiro (R$).</div>
+              <div style="font-weight: 800; font-size: 13.5px; color: #0d9488; margin-bottom: 4px;">✓ Curadoria de Colunas & Moeda BRL (R$)</div>
+              <div style="font-size: 12.5px; color: #334155;">Subsídio Mensal herdando BRL do @UISchema, Chip de Prontidão e ocultação de colunas auxiliares.</div>
             </div>
             <div style="padding: 14px 16px; border-radius: 14px; background: rgba(248, 250, 252, 0.95); border: 1px solid rgba(2, 132, 199, 0.28);">
               <div style="font-weight: 800; font-size: 13.5px; color: #0284c7; margin-bottom: 4px;">✓ KPI Band Viva & ScopeBar</div>
@@ -2581,7 +2715,13 @@ async function main() {
           </div>
         </div>
       `;
-      document.body.appendChild(overlay);
+      const host = document.getElementById('praxis-demo-toplayer') || document.body;
+      const hudEl = document.getElementById('praxis-demo-hud');
+      if (hudEl && hudEl.parentNode === host) {
+        host.insertBefore(overlay, hudEl);
+      } else {
+        host.appendChild(overlay);
+      }
     });
     await sleep(5200);
     await recorder.captureSyncKeyframe();
