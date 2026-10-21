@@ -2137,7 +2137,7 @@
                 "virtualScroll": {
                   "enabled": false,
                   "itemSize": 68,
-                  "viewportHeight": "340px"
+                  "viewportHeight": "380px"
                 }
               },
               "itemActions": [
@@ -3435,7 +3435,7 @@
       "virtualScroll": {
         "enabled": false,
         "itemSize": 68,
-        "viewportHeight": "340px"
+        "viewportHeight": "380px"
       }
     },
     "itemActions": [

@@ -854,6 +854,25 @@ praxis-widget-shell praxis-list .mat-mdc-list-item .list-item-content--row-layou
 }
 
 praxis-widget-shell praxis-list .list-row-slot--identity {
+  praxis-list-compose,
+  .p-list-compose,
+  praxis-rich-content,
+  .prx-rich-content-root,
+  .prx-rich-node {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .prx-rich-node--compose {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
   min-width: 0;
   overflow: hidden;
 
@@ -978,6 +997,12 @@ praxis-widget-shell praxis-list .item-expansion {
     color: var(--foreground);
     white-space: normal;
     overflow-wrap: break-word;
+  }
+}
+
+@media (max-width: 640px) {
+  praxis-widget-shell praxis-list .list-item-content--row-layout .list-row-slot--risk {
+    grid-column: 1 / 3 !important;
   }
 }
 
