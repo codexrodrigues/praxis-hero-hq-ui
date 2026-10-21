@@ -51,3 +51,4 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRAXIS_HERO_HQ }}'
           channelId: live
           projectId: praxis-hero-hq
+          firebaseToolsVersion: '15.34.0'
