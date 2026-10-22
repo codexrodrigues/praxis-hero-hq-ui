@@ -71,19 +71,19 @@ export const HERO_PAGE_GROUPS: HeroPageGroup[] = [
         },
       },
       {
-        label: 'Estúdio CRUD (Studio)',
-        path: '/crud-studio',
+        label: 'Workspace de Recurso (Studio)',
+        path: '/workspace-studio',
         icon: 'table_chart',
-        description: 'Página CRUD corporativa construída e customizada do zero, sem código e sem deploy.',
+        description: 'Workspace corporativo de recurso construído a partir de página em branco no Page Builder, sem código e sem deploy.',
         badge: 'STUDIO',
         badgeTone: 'info',
         page: {
-          kind: 'resource',
-          resource: '',
-          crudId: 'studio-funcionarios',
-          title: '',
-          subtitle: '',
-          loadMetadata: () => Promise.resolve({ component: 'praxis-crud', table: { columns: [] } }),
+          kind: 'component',
+          title: 'Praxis Hero HQ | Workspace de Recurso (Studio)',
+          loadComponent: () =>
+            import('../pages/workspace-studio/workspace-studio-page.component').then(
+              (m) => m.WorkspaceStudioPageComponent,
+            ),
         },
       },
     ],

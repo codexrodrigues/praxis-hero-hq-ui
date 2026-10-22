@@ -36,7 +36,7 @@ const definitions = HERO_PAGE_GROUPS.flatMap(group => group.items);
 const plain = value => JSON.parse(JSON.stringify(value));
 // Independent product inventory: removing a page from both projections must fail.
 const expectedDestinations = [
-  '/', '/comando-studio', '/crud-studio', '/rh/funcionarios', '/rh/folha-pagamento',
+  '/', '/comando-studio', '/workspace-studio', '/rh/funcionarios', '/rh/folha-pagamento',
   '/rh/eventos-folha', '/rh/afastamentos', '/rh/cargos-departamentos', '/rh/reputacao',
   '/operacoes/missoes', '/operacoes/missao-participantes', '/operacoes/equipes',
   '/operacoes/bases', '/operacoes/incidentes', '/ativos/equipamentos', '/ativos/veiculos',

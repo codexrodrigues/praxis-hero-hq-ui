@@ -466,7 +466,8 @@ function ensureDevServer() {
           const postCacheKey = `${reqUrl}|${reqBodyText}`;
           if (
             method === 'POST' &&
-            cleanReqPath.includes('/options/') &&
+            (cleanReqPath.includes('/options/') || cleanReqPath.endsWith('/filter')) &&
+            cleanReqPath !== '/api/human-resources/funcionarios/filter' &&
             cachedPostOptionsByKey.has(postCacheKey)
           ) {
             const cachedBuf = cachedPostOptionsByKey.get(postCacheKey);
@@ -772,7 +773,8 @@ function ensureDevServer() {
                     if (
                       (proxyRes.statusCode || 200) < 300 &&
                       method === 'POST' &&
-                      cleanReqPath.includes('/options/')
+                      (cleanReqPath.includes('/options/') || cleanReqPath.endsWith('/filter')) &&
+                      cleanReqPath !== '/api/human-resources/funcionarios/filter'
                     ) {
                       cachedPostOptionsByKey.set(postCacheKey, outBuf);
                     }
@@ -982,7 +984,15 @@ async function saveAndCloseSettingsPanel(page, label = '') {
   const saveBtn = page.locator('[data-testid="settings-panel-save"]').last();
   const applyBtn = page.locator('[data-testid="settings-panel-apply"]').last();
   await saveBtn.waitFor({ state: 'visible', timeout: 10000 });
-  await sleep(300);
+
+  // Wait up to 8s if the editor is busy fetching schema/capabilities so Save becomes enabled
+  for (let i = 0; i < 40; i++) {
+    const saveDisabled = await saveBtn.isDisabled().catch(() => true);
+    const applyDisabled = await applyBtn.isDisabled().catch(() => true);
+    if (!saveDisabled || !applyDisabled) break;
+    await sleep(200);
+  }
+  await sleep(200);
 
   if (!(await saveBtn.isDisabled())) {
     await moveCursorToLocator(page, saveBtn, 90);
@@ -1011,6 +1021,10 @@ async function connectResourceInCrudEditor(page, resourcePath) {
   const rqc = page.locator('[data-testid="crud-editor-resource-path"]');
   await rqc.waitFor({ state: 'visible', timeout: 10000 });
 
+  const slug = String(resourcePath || '').split('/').filter(Boolean).pop() || resourcePath;
+  const escapedSlug = slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const matchRegex = new RegExp(escapedSlug, 'i');
+
   // Wait up to 8s for catalog to load
   for (let i = 0; i < 40; i++) {
     const loadingCount = await rqc.locator('.pdx-quick-connect__status').count();
@@ -1038,12 +1052,12 @@ async function connectResourceInCrudEditor(page, resourcePath) {
   if (await overlayPanel.isVisible().catch(() => false)) {
     const overlaySearch = overlayPanel.locator('input').first();
     if (await overlaySearch.isVisible().catch(() => false)) {
-      await setFormInput(page, overlaySearch, 'funcionarios');
+      await setFormInput(page, overlaySearch, slug);
       await sleep(260);
     }
     const overlayOpt = overlayPanel
       .locator('.pdx-material-select-option-button')
-      .filter({ hasText: /funcionarios|Funcionários|Heróis/i })
+      .filter({ hasText: matchRegex })
       .first();
     if (await overlayOpt.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, overlayOpt, 90);
@@ -1051,11 +1065,11 @@ async function connectResourceInCrudEditor(page, resourcePath) {
       await sleep(320);
     }
   } else if (await searchInput.isVisible().catch(() => false)) {
-    await setFormInput(page, searchInput, 'funcionarios');
+    await setFormInput(page, searchInput, slug);
     await sleep(350);
     const optBtn = rqc
       .locator('.pdx-quick-connect__option-item')
-      .filter({ hasText: /funcionarios|Funcionários|Heróis/i })
+      .filter({ hasText: matchRegex })
       .first();
     if (await optBtn.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, optBtn, 90);
@@ -1064,9 +1078,11 @@ async function connectResourceInCrudEditor(page, resourcePath) {
     }
   }
 
-  // Fallback to advanced route input ONLY if no catalog resource card was resolved
+  // Fallback to advanced route input ONLY if no catalog resource card was resolved or if it doesn't match
   const selectedCard = rqc.locator('[data-testid="quick-connect-selected-card"]').first();
-  if (!(await selectedCard.isVisible().catch(() => false))) {
+  const cardText = (await selectedCard.innerText().catch(() => '')) || '';
+  console.log(`  [connectResourceInCrudEditor] target=${resourcePath}, cardVisible=${await selectedCard.isVisible().catch(() => false)}, cardText=${JSON.stringify(cardText)}`);
+  if (!(await selectedCard.isVisible().catch(() => false)) || !matchRegex.test(cardText)) {
     const details = rqc.locator('details.pdx-quick-connect__advanced');
     if (await details.isVisible().catch(() => false)) {
       const isOpen = await details.evaluate((el) => el.hasAttribute('open'));
@@ -1079,6 +1095,7 @@ async function connectResourceInCrudEditor(page, resourcePath) {
       const pathInput = details.locator('input[matinput]').first();
       if (await pathInput.isVisible().catch(() => false)) {
         const currentVal = await pathInput.inputValue();
+        console.log(`  [connectResourceInCrudEditor] fallback pathInput current=${JSON.stringify(currentVal)} -> setting=${resourcePath}`);
         if (currentVal.trim() !== resourcePath) {
           await setFormInput(page, pathInput, resourcePath);
           await sleep(300);
@@ -1138,21 +1155,38 @@ async function main() {
       ]
     });
 
-    console.log('0. Pre-warming /rh/funcionarios and /crud-studio in a non-recorded context to populate proxy memory cache (<10ms responses)...');
+    console.log('0. Pre-warming /rh/funcionarios and /workspace-studio in a non-recorded context to populate proxy memory cache (<10ms responses)...');
     const warmContext = await browser.newContext({
       viewport: { width: 1920, height: 1080 },
       screen: { width: 1920, height: 1080 },
       deviceScaleFactor: 1
     });
     const warmPage = await warmContext.newPage();
-    // Fetch /all directly so cachedBaseFuncionariosRows is populated in the local proxy
-    await warmPage.goto(`${BASE_URL}/crud-studio`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Fetch /all directly so cachedBaseFuncionariosRows and multi-resource schemas are populated in the local proxy
+    await warmPage.goto(`${BASE_URL}/workspace-studio`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await warmPage.locator('[data-testid="toggle-customization-btn"]').waitFor({ state: 'visible', timeout: 15000 });
     await warmPage.evaluate(async () => {
       try {
         await Promise.all([
+          fetch('/schemas/catalog').catch(() => null),
           fetch('/api/human-resources/funcionarios/all'),
           fetch('/api/human-resources/funcionarios/capabilities').catch(() => null),
+          fetch('/api/human-resources/folhas-pagamento/filter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ page: 0, size: 10 })
+          }).catch(() => null),
+          fetch('/api/human-resources/folhas-pagamento/capabilities').catch(() => null),
+          fetch('/schemas/filtered?path=/api/human-resources/folhas-pagamento/all&operation=get&schemaType=response').catch(() => null),
+          fetch('/schemas/filtered?path=/api/human-resources/folhas-pagamento/filter&operation=post&schemaType=request').catch(() => null),
+          fetch('/api/operations/incidentes/filter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ page: 0, size: 10 })
+          }).catch(() => null),
+          fetch('/api/operations/incidentes/capabilities').catch(() => null),
+          fetch('/schemas/filtered?path=/api/operations/incidentes/all&operation=get&schemaType=response').catch(() => null),
+          fetch('/schemas/filtered?path=/api/operations/incidentes/filter&operation=post&schemaType=request').catch(() => null),
           fetch('/api/human-resources/cargos/options/filter', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1197,10 +1231,14 @@ async function main() {
         sessionStorage.setItem('__praxis_crud_demo_cleaned', '1');
         for (const k of Object.keys(localStorage)) {
           if (
+            k.includes('workspace-studio') ||
             k.includes('studio-funcionarios') ||
             k.includes('human-resources-funcionarios') ||
+            k.includes('folhas-pagamento') ||
+            k.includes('incidentes') ||
             k.includes('crud-authoring:') ||
-            k.includes('crud-overrides:')
+            k.includes('crud-overrides:') ||
+            k.includes('praxis-crud-')
           ) {
             localStorage.removeItem(k);
           }
@@ -1360,8 +1398,8 @@ async function main() {
         hud.id = 'praxis-demo-hud';
         hud.innerHTML = `
           <div class="praxis-demo-row">
-            <span class="praxis-demo-badge">ETAPA 1/8 · TEMA AURORA & PÁGINA VAZIA</span>
-            <span class="praxis-demo-title">Estúdio CRUD (/crud-studio)</span>
+            <span class="praxis-demo-badge">ETAPA 1/8 · PÁGINA EM BRANCO (PAGE BUILDER)</span>
+            <span class="praxis-demo-title">Workspace de Recurso (/workspace-studio)</span>
             <span class="praxis-demo-detail">Autoria Progressiva Zero-Code & Zero-Deploy · Full HD 1080p @ 30 FPS</span>
             <span class="praxis-demo-timer" id="praxis-demo-timer">⏱ 00:00</span>
           </div>
@@ -1455,9 +1493,13 @@ async function main() {
     });
 
     const page = await context.newPage();
+    page.on('pageerror', (err) => console.error('[pageerror]', err.message));
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') console.error('[console.error]', msg.text());
+    });
 
-    console.log('1. Navigating to /crud-studio in Aurora theme (100% blank CRUD page)...');
-    await page.goto(`${BASE_URL}/crud-studio`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    console.log('1. Navigating to /workspace-studio in Aurora theme (100% blank Page Builder canvas)...');
+    await page.goto(`${BASE_URL}/workspace-studio`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.locator('[data-testid="toggle-customization-btn"]').waitFor({ state: 'visible', timeout: 15000 });
     await page.evaluate(() => sessionStorage.setItem('__praxis_crud_demo_t0', String(Date.now())));
 
@@ -1465,9 +1507,9 @@ async function main() {
       page,
       1,
       8,
-      'ETAPA 1/8 · TEMA AURORA & PÁGINA EM BRANCO',
-      'Estúdio CRUD (/crud-studio) — Zero Código & Zero Metadados Iniciais',
-      'Demonstrando seletor de Tema Aurora, ampliando o canvas e ativando modo de autoria'
+      'ETAPA 1/8 · PÁGINA 100% EM BRANCO (PAGE BUILDER)',
+      'Workspace de Recurso (/workspace-studio) — Canvas Vazio Sem Componente Pré-Fixado',
+      'Selecionando Tema Aurora, ativando customização e inserindo o componente Workspace de Recurso'
     );
 
     const videoFile = path.join(ARTIFACT_DIR, 'praxis-crud-studio-zero-deploy-demo.webm');
@@ -1494,20 +1536,52 @@ async function main() {
       }
     }
 
-    // Collapse the left navigation sidebar so the CRUD page & expanded editors get maximum horizontal canvas
+    // Collapse the left navigation sidebar so the Page Builder canvas & expanded editors get maximum horizontal space
     await collapseSidebarIfExpanded(page);
     await sleep(350);
     await recorder.captureSyncKeyframe();
     await page.screenshot({ path: path.join(ARTIFACT_DIR, '01-blank-crud-studio.png') });
 
-    // Enable Customization Mode
+    // Enable Customization Mode on the blank Page Builder canvas
     const toggleCustomBtn = page.locator('[data-testid="toggle-customization-btn"]');
     await moveCursorToLocator(page, toggleCustomBtn, 110);
     await toggleCustomBtn.click();
     await sleep(500);
     await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '01b-page-builder-canvas-empty.png') });
 
-    // Click "Configurar metadados" on Empty State card
+    // Open Component Palette Dialog from Page Builder Floating Toolbar ("Inserir componente")
+    const insertComponentBtn = page
+      .locator('praxis-floating-toolbar button[aria-label="Inserir componente"], praxis-floating-toolbar button[aria-label="Insert component"]')
+      .first();
+    await insertComponentBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, insertComponentBtn, 110);
+    await insertComponentBtn.click();
+
+    const paletteDialog = page.locator('praxis-component-palette-dialog');
+    await paletteDialog.waitFor({ state: 'visible', timeout: 10000 });
+    await sleep(350);
+
+    // Search for "Workspace de Recurso" in the Component Palette
+    const paletteSearch = paletteDialog.locator('[data-testid="component-palette-search"]');
+    await setFormInput(page, paletteSearch, 'Workspace de Recurso');
+    await sleep(350);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '01c-component-palette-workspace-recurso.png') });
+
+    // Click the "Workspace de Recurso" card to insert it onto the 12-column canvas
+    const workspaceCard = paletteDialog
+      .locator('button.pdx-card')
+      .filter({ hasText: /Workspace de Recurso|praxis-crud/i })
+      .first();
+    await workspaceCard.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, workspaceCard, 110);
+    await workspaceCard.click();
+    await sleep(550);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '01d-workspace-widget-empty-state.png') });
+
+    // Click "Configurar Workspace" on the newly inserted Workspace widget's Empty State card
     const configPageBtn = page
       .locator('praxis-crud praxis-empty-state-card button, [data-testid="resource-page-configure-btn"]')
       .first();
@@ -1519,22 +1593,80 @@ async function main() {
     await crudEditor.waitFor({ state: 'visible', timeout: 10000 });
     await sleep(350);
 
-    // Expand the CRUD Metadata Editor so all tabs and controls are shown in full width
+    // Expand the Workspace Metadata Editor so all tabs and controls are shown in full width
     await expandActiveSettingsPanel(page);
     await recorder.captureSyncKeyframe();
 
     // =========================================================================
-    // STAGE 2: Quick Win First — Connect Resource, Set Executive Header & Materialize Zero-Config Table Immediately!
+    // STAGE 2: Episode 1 ("Efeito Camaleão") — Multi-Resource Switching on the Same Route & Component!
     // =========================================================================
-    console.log('2. Connecting to human-resources/funcionarios and materializing the Zero-Config live table immediately...');
+    console.log('2. Demonstrating Episode 1 (Chameleon Effect): switching across 3 resources on the same route & component...');
     await setDemoStage(
       page,
       2,
       8,
-      'ETAPA 2/8 · CONEXÃO RÁPIDA & TABELA ZERO-CONFIG',
-      'Quick Connect RESTful + Cabeçalho Executivo → Materialização Imediata da Grade',
-      'Conectando ao recurso human-resources/funcionarios: colunas e formatos nascem prontos do DTO'
+      'ETAPA 2/8 · EFEITO CAMALEÃO (RECURSO 1/3: FOLHA DE PAGAMENTO)',
+      'Mesma Rota (/workspace-studio) + Mesmo Componente → Conectando a folhas-pagamento',
+      'Selecionando Folha de Pagamento no catálogo da API: colunas de Competência e Moeda (R$) nascem do DTO'
     );
+
+    // 2.1 Connect Resource #1: human-resources/folhas-pagamento
+    await connectResourceInCrudEditor(page, 'human-resources/folhas-pagamento');
+    await setFormInput(page, '[data-testid="crud-editor-resource-idField"]', 'id');
+    await sleep(350);
+    await saveAndCloseSettingsPanel(page, 'chameleon-1-folhas-pagamento');
+    try {
+      await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
+    } catch (err) {
+      const crudHtml = await page.locator('praxis-crud').innerHTML().catch(() => 'no praxis-crud');
+      console.error('[DIAG Stage 2.1] praxis-crud HTML snippet:', crudHtml.slice(0, 1500));
+      await page.screenshot({ path: path.join(ARTIFACT_DIR, 'diag-stage-2-1-fail.png') }).catch(() => {});
+      throw err;
+    }
+    await sleep(1100);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '02a1-chameleon-folhas-pagamento.png') });
+
+    // 2.2 Switch to Resource #2: operations/incidentes on the exact same component!
+    await setDemoStage(
+      page,
+      2,
+      8,
+      'ETAPA 2/8 · EFEITO CAMALEÃO (RECURSO 2/3: INCIDENTES TÁTICOS)',
+      'Trocando apenas o Endpoint no mesmo Workspace → operations/incidentes',
+      'Sem código e sem deploy: o Workspace descarta as colunas anteriores e projeta Severidade, Local e Status'
+    );
+    const reopenForResource2Btn = page.locator('[data-testid="resource-page-configure-btn"]').first();
+    await reopenForResource2Btn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, reopenForResource2Btn, 95);
+    await reopenForResource2Btn.click();
+    await crudEditor.waitFor({ state: 'visible', timeout: 10000 });
+    await sleep(300);
+    await expandActiveSettingsPanel(page);
+    await connectResourceInCrudEditor(page, 'operations/incidentes');
+    await sleep(350);
+    await saveAndCloseSettingsPanel(page, 'chameleon-2-incidentes');
+    await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
+    await sleep(1100);
+    await recorder.captureSyncKeyframe();
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, '02a2-chameleon-incidentes.png') });
+
+    // 2.3 Switch to Resource #3: human-resources/funcionarios + Executive Header!
+    await setDemoStage(
+      page,
+      2,
+      8,
+      'ETAPA 2/8 · EFEITO CAMALEÃO (RECURSO 3/3: HERÓIS & COLABORADORES)',
+      'Conectando a human-resources/funcionarios + Cabeçalho Executivo',
+      'Grade viva com Código (#194), Foto Avatar circular, Datas (dd/MM/yyyy) e Status projetados do DTO'
+    );
+    const reopenForResource3Btn = page.locator('[data-testid="resource-page-configure-btn"]').first();
+    await reopenForResource3Btn.waitFor({ state: 'visible', timeout: 10000 });
+    await moveCursorToLocator(page, reopenForResource3Btn, 95);
+    await reopenForResource3Btn.click();
+    await crudEditor.waitFor({ state: 'visible', timeout: 10000 });
+    await sleep(300);
+    await expandActiveSettingsPanel(page);
 
     await connectResourceInCrudEditor(page, 'human-resources/funcionarios');
     await setFormInput(page, '[data-testid="crud-editor-resource-idField"]', 'id');
@@ -1546,7 +1678,7 @@ async function main() {
       '[data-testid="crud-editor-page-subtitle"]',
       'Gestão integrada de agentes, prontidão tática, credenciais S.H.I.E.L.D. e subsídios em tempo real.'
     );
-    await setFormInput(page, '[data-testid="crud-editor-page-domain-label"]', 'HUMAN RESOURCES • ZERO-CODE STUDIO');
+    await setFormInput(page, '[data-testid="crud-editor-page-domain-label"]', 'HUMAN RESOURCES • WORKSPACE DE RECURSO');
     await sleep(400);
 
     // Wait briefly for schema columns to resolve in background
@@ -1566,19 +1698,19 @@ async function main() {
       await sleep(280);
       await recorder.captureSyncKeyframe();
       await page.screenshot({ path: path.join(ARTIFACT_DIR, '02a-crud-connection-lookup-open.png') });
-      await changeResourceBtn.click();
+      await dismissStrayBackdrops(page);
       await sleep(220);
     }
 
-    // SAVE & CLOSE IMMEDIATELY so the viewer sees the Zero-Config populated table in seconds!
+    // SAVE & CLOSE IMMEDIATELY so the viewer sees the Zero-Config populated table!
     await saveAndCloseSettingsPanel(page, 'crud-metadata-editor-initial-connect');
-    await page.locator('.praxis-resource-page__header').first().waitFor({ state: 'visible', timeout: 15000 });
+    await page.locator('[data-testid="praxis-crud-page-header"]').first().waitFor({ state: 'visible', timeout: 15000 });
     await page.locator('praxis-crud praxis-table tbody tr.mat-mdc-row').first().waitFor({ state: 'visible', timeout: 20000 });
     await setDemoStage(
       page,
       2,
       8,
-      'ETAPA 2/8 · TABELA ZERO-CONFIG EM SEGUNDOS!',
+      'ETAPA 2/8 · WORKSPACE DE RECURSO EM SEGUNDOS!',
       'Grade Viva Derivada 100% do DTO (Código #194, Foto Avatar, Datas e Status)',
       'Sem configurar colunas manualmente: Foto circular, Código inteiro (#194), Datas (dd/MM/yyyy) e Status'
     );
@@ -1932,9 +2064,12 @@ async function main() {
     const addKpiBtn = page.locator('[data-testid="crud-kpi-add-card-btn"]');
     for (let i = 0; i < kpiDefinitions.length; i++) {
       const def = kpiDefinitions[i];
-      await moveCursorToLocator(page, addKpiBtn, 75);
-      await addKpiBtn.click();
-      await sleep(200);
+      const existingKpiLabel = page.locator(`[data-testid="crud-kpi-card-label-${i}"]`);
+      if (!(await existingKpiLabel.isVisible().catch(() => false))) {
+        await moveCursorToLocator(page, addKpiBtn, 75);
+        await addKpiBtn.click();
+        await sleep(220);
+      }
 
       await setFormInput(page, `[data-testid="crud-kpi-card-label-${i}"]`, def.label);
       await setFormInput(page, `[data-testid="crud-kpi-card-value-${i}"]`, def.value);
@@ -2005,9 +2140,12 @@ async function main() {
     const addQuickBtn = page.locator('[data-testid="crud-filterbar-add-quick-btn"]');
     for (let i = 0; i < quickFilters.length; i++) {
       const qf = quickFilters[i];
-      await moveCursorToLocator(page, addQuickBtn, 75);
-      await addQuickBtn.click();
-      await sleep(200);
+      const existingQuickId = page.locator(`[data-testid="crud-filterbar-quick-id-${i}"]`);
+      if (!(await existingQuickId.isVisible().catch(() => false))) {
+        await moveCursorToLocator(page, addQuickBtn, 75);
+        await addQuickBtn.click();
+        await sleep(220);
+      }
 
       await setFormInput(page, `[data-testid="crud-filterbar-quick-id-${i}"]`, qf.id);
       await setFormInput(page, `[data-testid="crud-filterbar-quick-label-${i}"]`, qf.label);
@@ -2021,6 +2159,15 @@ async function main() {
       if (qf.mode === 'fieldEquals') {
         await setFormInput(page, `[data-testid="crud-filterbar-quick-field-${i}"]`, qf.field);
         await setFormInput(page, `[data-testid="crud-filterbar-quick-value-${i}"]`, qf.value);
+      }
+    }
+
+    // Remove any trailing auto-created empty quick filters beyond quickFilters.length
+    for (let extraIdx = 6; extraIdx >= quickFilters.length; extraIdx--) {
+      const extraRemoveBtn = page.locator(`[data-testid="crud-filterbar-quick-remove-${extraIdx}"]`);
+      if (await extraRemoveBtn.isVisible().catch(() => false)) {
+        await extraRemoveBtn.click();
+        await sleep(150);
       }
     }
 
@@ -2413,7 +2560,7 @@ async function main() {
       7,
       8,
       'ETAPA 7/8 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
-      'Recarregando a Página (/crud-studio) — 100% Persistido sem Deploy',
+      'Recarregando a Página (/workspace-studio) — 100% Persistido sem Deploy',
       'Tema Aurora, Cabeçalho Executivo, KPI Band, ScopeBar, Grade R$ e Layout em 2 Colunas preservados'
     );
 
@@ -2427,7 +2574,7 @@ async function main() {
       7,
       8,
       'ETAPA 7/8 · PROVA DE PERSISTÊNCIA (F5 RELOAD)',
-      'Página CRUD 100% Hidratada após F5 · Zero Código · Zero Deploy',
+      'Workspace de Recurso 100% Hidratado após F5 · Zero Código · Zero Deploy',
       'Cabeçalho executivo, filtros inline (Nome Civil, Cargo, E-mail), Subsídio Mensal (R$) e KPIs ativos'
     );
     await sleep(850);
@@ -2536,12 +2683,12 @@ async function main() {
       'Identidade de domínio, telemetria /stats/group-by ao vivo e busca inline (Nome Civil, Cargo e E-mail)'
     );
     await setTourSpotlight(
-      '.praxis-resource-page__header',
+      '[data-testid="praxis-crud-page-header"]',
       'ATO I · CABEÇALHO & TELEMETRIA VIVA',
       'Comando de Efetivo Operacional',
       'Cabeçalho executivo criado via Studio + 4 cards de KPI conectados ao endpoint /stats/group-by.'
     );
-    const headerLoc = page.locator('.praxis-resource-page__header').first();
+    const headerLoc = page.locator('[data-testid="praxis-crud-page-header"]').first();
     if (await headerLoc.isVisible().catch(() => false)) {
       await moveCursorToLocator(page, headerLoc, 100);
     }
