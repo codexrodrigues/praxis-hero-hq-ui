@@ -1,0 +1,144 @@
+{
+  "recordedAt": "2026-10-22T18:44:06.042408+00:00",
+  "baseCommit": "a3190dfa90901be7f2ba0ebad7a303798b3a7f3f",
+  "scope": "Uncommitted visitor lab in praxis-hero-hq-ui; no deploy/push/release",
+  "origin": "http://127.0.0.1:4302",
+  "dependencies": {
+    "@praxisui/*": "10.0.0-rc.37",
+    "Angular": "21.2.14"
+  },
+  "results": {
+    "build": "pass; initial 16.44 MB, warning budget 15 MB",
+    "repository": {
+      "pass": 11
+    },
+    "local-storage": {
+      "pass": 4
+    },
+    "page-validation": {
+      "pass": 10
+    },
+    "context": {
+      "pass": 1
+    },
+    "routes": "pass",
+    "spec-typecheck": "pass",
+    "browser": "pass; API intercepted, zero config writes; desktop/narrow; canonical form editor, local preferences, reload, quota, corruption, persona ABA, copy, menus and deletion",
+    "existing-npm-test": "failed 1/58; preexisting Row14 340px expectation vs distressSignalsList 380px",
+    "existing-dashboard-navigation": "failed same preexisting height invariant"
+  },
+  "baselineForExistingFailure": {
+    "src/app/pages/dashboard/dashboard-page.definition.json": {
+      "headBlob": "a5cd7cad92567dd5b811a08be8816cd1fffbe35a",
+      "currentBlob": "a5cd7cad92567dd5b811a08be8816cd1fffbe35a",
+      "unchanged": true
+    },
+    "src/app/pages/dashboard/dashboard-page.definition.ts": {
+      "headBlob": "c0ac21e50ae730dae342c400bccb7f4a32286815",
+      "currentBlob": "c0ac21e50ae730dae342c400bccb7f4a32286815",
+      "unchanged": true
+    },
+    "e2e/verify-dashboard-contracts.cjs": {
+      "headBlob": "048ac7d98b30838caf0ba08f40dfaec72fb7591e",
+      "currentBlob": "048ac7d98b30838caf0ba08f40dfaec72fb7591e",
+      "unchanged": true
+    },
+    "test-e2e/test-dashboard-navigation.cjs": {
+      "headBlob": "f4d50393cd60b66c5f1c24f1872aa176e1971215",
+      "currentBlob": "f4d50393cd60b66c5f1c24f1872aa176e1971215",
+      "unchanged": true
+    }
+  },
+  "review": {
+    "repository-and-local-storage": "implemented by visitor_repository; reviewed by root; root JSON optional-value refinement reviewed by visitor_repository",
+    "integration": "implemented by root; independently reviewed by visitor_repository; corrections reapplied and reviewed",
+    "validation-guards": "implemented by visitor_repository; root reviewed models, code and actual Core regression tests",
+    "context-test": "implemented by root; independently reviewed and rerun by visitor_repository",
+    "skills": "existente-adequada; canonical sources inspected; no update/sync required"
+  },
+  "sourceSha256": {
+    "README.md": "5c98daec903701b67ad6be0012c35c332a03a8bf53c08b1ada460da1afd9453b",
+    "angular.json": "c2376c93d4f0f13108406e47cd10e3ca8758e0659ffbbc18d88377853c01dc00",
+    "docs/engineering/visitor-lab.md": "161066aadafd168be3d718af015ecb2ec7e30d39f5026f6eadaa3637a2c65969",
+    "package-lock.json": "a3f34f7381161560cc2e3a0907ad21ab87b7ef1d0db1d9aab57dc8a4cd4fc7a2",
+    "package.json": "bee2df6b75fa2b98c5810dc5b28268fe4bd85864e926d4570db27f82f8566e1b",
+    "src/app/app.config.ts": "e6d3f9c01cd8c4d0952eb1d847fd19e9b1f4966829cd088c125490eb8f8514e9",
+    "src/app/app.routes.ts": "81ab7323b31d7781fa39d49b153b7a568ff0778ec4d078594ee4827076f43011",
+    "src/app/app.ts": "2654c2b4aba787979e220614bb381994e0ba80fe49c9ade280ddbfd29c752aa5",
+    "src/app/core/analytical-drawer-schemas.catalog.ts": "5612525092cf96479cfe01baac309a05d484e69892f94a1675dabf0051f73273",
+    "src/app/core/auth-simulation.service.ts": "0dcd5fdf9c8d2ecf3608bb85c76375c48e5e5d5d061ee906025a094df5d6a5cf",
+    "src/app/core/navigation.model.ts": "0836e9ad4993c5e23ef039b437102065a0fbd9895bdae7c852d46786baf680b4",
+    "src/app/core/page-definitions.ts": "fe341d1e9b32652091caa184d7f7c0a615014a394daee40169a4913fa60ce141",
+    "src/app/core/platform.config.ts": "088ff8ea1dca13d43651bc3203bb2dfa8fd357dcc63d48bc19e557a59b10657a",
+    "src/app/core/tactical-access.ts": "29d05268c1ace6575de0654592c044a4e20fd10531eb68c81fb50f3e92556c26",
+    "src/app/core/tactical-clearance.guard.ts": "29ed5f111b14d4ddc69cc211ec2dd03c62e2a4b9e80d67b8d4fd1c375690121f",
+    "src/app/core/theme.model.ts": "01fb092f81ee9c12717fc3545c9c325373a261c4c259bce514cea03c0acef7d3",
+    "src/app/core/theme.service.ts": "9971c3d6a9368efffc41ffc5cd1e4e43afeac20b64d7643fa83c3ea582c6c934",
+    "src/app/core/visitor-workspace.repository.ts": "e21fe2b98338aecb31cbfb39c54ff1ae8658244f065e77a774a888fa38c76d2c",
+    "src/app/core/visitor-workspace.service.ts": "9030234d0b238b513ef1fb57297e1dc332f1381f6649ba646be0112ca798c209",
+    "src/app/pages/ativos/equipamentos.config.ts": "78037da0a596bd26d0f8f29dc6ec9ad9400a1e2053bb7195c7a2d0baa7604158",
+    "src/app/pages/ativos/veiculos.config.ts": "cbcd0ff86a8bd319b58e032ec28e743aa1a92d69cdb512257971a919fe1c440f",
+    "src/app/pages/dashboard/dashboard-page.component.ts": "4a9bc701b29c8582e93dbeeb3ce9d1793d2f87d241cd4fbb5d1d4b29f988f179",
+    "src/app/pages/dashboard/dashboard-page.definition.json": "ac071449b63f3ac1ff5336eb5fdbe97d0144ab8cf9228b7c00c13dee5526f7a8",
+    "src/app/pages/dashboard/dashboard-page.definition.ts": "58101d6b1a4da9ac0814376de1d27793c46b8919bd4dcfca2783e90dfc2d352a",
+    "src/app/pages/dashboard/hero-tactical-radar.component.spec.ts": "cf8adb8add209e26e3896f1db41e118d0f402c7e059d6a55fb2676d038418bfb",
+    "src/app/pages/dashboard/hero-tactical-radar.component.ts": "39aba052e34708a7cf0cb8af9725c4f2503b652e2b516513cf20c10fe4ceffc5",
+    "src/app/pages/dashboard-studio/dashboard-studio-page.component.ts": "e9e8823dd497172a70ab450ae83e8c4424974b47dd1c8601842a4bb18dd2ebe2",
+    "src/app/pages/operacoes/bases.config.ts": "413799daac02a36e79aa7309e51f41dd83680a62a170fed6490503c3dd27330c",
+    "src/app/pages/operacoes/equipes.config.ts": "d6e23f4f4832e7a294900d3754482199d2ffe56ad50cf01d1ee8d99cff090951",
+    "src/app/pages/operacoes/incidentes.config.ts": "a155a48cda4c916ca38454977fba2a7d698c0cd93d940debcb1bfe44bf8dd69d",
+    "src/app/pages/operacoes/missao-participantes.config.ts": "41f127b9476f1c9ac56596becb19859bc23e197185af07aa6515ebc2ccd2c00c",
+    "src/app/pages/operacoes/missoes.config.ts": "e5d40307b3e555ae7995801d5abab2fa49f8626ba9f28db297a969bc385daa3e",
+    "src/app/pages/rh/afastamentos.config.ts": "d7ff57423ce5537b01bbf079669138e67c6bdcd5c1bc7bd73dd4f5b0cd93a934",
+    "src/app/pages/rh/departamentos.config.ts": "9aaec3ae4ca5adabb4465e696b14c07f19420413f0132fefd3bf52cd477148c7",
+    "src/app/pages/rh/eventos-folha.config.ts": "e6ca174553b32685120c6e7c713ff72192ad53f6757cfa15ed1136ab2161d4ca",
+    "src/app/pages/rh/folha-pagamento.config.ts": "f8941d441b717c616e6624df449215772fe5cfef9cddd028e45704c4cfbf4b92",
+    "src/app/pages/rh/funcionarios.config.ts": "458856c746bd5a593f81186c24506fb6ad3903a8e13768ec7d38636a47a3010a",
+    "src/app/pages/rh/reputacao.config.ts": "fa5a06bc917417858b6651a85804139d9421d4bda0543a8413a3151cd97121ff",
+    "src/app/pages/risco/ameacas.config.ts": "5e1a18b48fce2056640bbade699399e6b42715fce160e94a5936cfd423b1bc15",
+    "src/app/pages/risco/indicadores.config.ts": "4dc04ae520fe8f1b2f2f73931c25ab19731fbb9738be9dae496c7ac959da1b9f",
+    "src/app/pages/suprimentos/contratos.config.ts": "7a48ce001548aef82f45a9e94cfbfceecf1e206a6a8157ee55f08b9364115529",
+    "src/app/pages/suprimentos/pedidos.config.ts": "37d94e91a38c0ad716958646b3b462cf8d4fd7b3887d5e65adcb9137d0fefa98",
+    "src/app/pages/visitor-lab/visitor-lab-editor.html": "72b488917011ffdef8e4d0dd269c7573d849b8ed951acf384c729d2152f1002f",
+    "src/app/pages/visitor-lab/visitor-lab-page.component.ts": "5463cd07afe7f6e205ce7bca15a32d45988bf67ac4002f1859a5650809ab56a8",
+    "src/app/pages/visitor-lab/visitor-lab.i18n.ts": "e73b1a017318f8bb55e672d66ba22588e491918b3cf7390f8d3ab5d2ddf13729",
+    "src/app/pages/visitor-lab/visitor-lab.scss": "7fa0ab60e861e8ff0e7ef60042471712a90f83e40ba55642345c872e111f5067",
+    "src/app/pages/visitor-lab/visitor-local-config-storage.ts": "e0678407649226ce7da9090f57142fd4932fe365e2c81e15b52941c7f0d49aae",
+    "src/app/pages/workspace-studio/workspace-studio-page.component.ts": "1331313dceae283be589a56085d6ab187f56c0d8446ac190873ac0853e962ba8",
+    "src/app/shell/hero-app-shell.component.scss": "1072cebffae63273f9917da42d1b165048e82bca63c7ead58adb1a7c8493f0c7",
+    "src/app/shell/hero-app-shell.component.spec.ts": "a62a58b8b920ef5be5b24b039530b362d4f3165ad6499e63b34a1fb5010f1ea4",
+    "src/app/shell/hero-app-shell.component.ts": "9226abfe146f8c798f47da44fa91bf66a471eca437cfb8fb3ae54c3a388e2d79",
+    "src/index.html": "2326a226e18b5b4b9902599f9a776ee1567fb0a2511553cf9319f082d6bb4122",
+    "src/main.ts": "ecc610fb7d56c95a01a8aa6c274a63210d45b2944dd6b9a88b2c8f70b6351037",
+    "src/styles/dashboard-theme.scss": "6c7d70ecfb2fa08b216e4caa8ea505a0baea785394ee7aeadcbeee6b08af82d0",
+    "src/styles/resource-page.scss": "d2a7da43ab5a8ec2eac3fccae3edc3a97ffe18d527b3b438cb749facbd07aea6",
+    "src/styles/theme-praxis.scss": "0a5eb9c4b4ef53c3d38a2879cf41bb4b74b08e508d2c6082b20b5345695665b7",
+    "src/styles/workspace-themes.scss": "3190d1893c5fbf038ddbd5934e1b37c0ec19317cc3d4ba3555732ca6479c6b34",
+    "src/styles.scss": "4a07903e801be2f58b505ccb52e782673f34b30a2f0a659d8bb0682c5885da56",
+    "src/test-globals.d.ts": "2eff1167d4575f63bb0466b040bd29f261b3128e76dc91cb7d57b95657741aa3",
+    "test-e2e/test-route-catalog.cjs": "6bc4afe166c62e770598fdf7210becd15b58cd0cb78849900c64958fea1a2433",
+    "test-e2e/test-visitor-context.cjs": "f8933d8478805571b72fa10c1382240325f7f1177dc43505c4559d1062f287cc",
+    "test-e2e/test-visitor-lab.cjs": "b39daf3fbbebad50537f9987608139e65fc46b5090602a7826e6c3c22b786e4e",
+    "test-e2e/test-visitor-local-storage.cjs": "51d776ab9f5e403bb99ca09b9059aa9fa58f809e252d8ab8f3072d8c62dccc80",
+    "test-e2e/test-visitor-page-validation.cjs": "42de108333a1fe9a9035b72c81834d400845d507616b87a9a6c1670ce672add4",
+    "test-e2e/test-visitor-workspace-repository.cjs": "5e0028771d592d1cb0b6ae19fb2ccade04fc2004085a988af036c57125e8ef3a",
+    "tsconfig.app.json": "e87ee58d4abe3f2dc35dba126e8a633fc13f2f209c93a0589493a011af6a6776",
+    "tsconfig.json": "bff42ba8ae37c6dda6dee94c50306a025d5179ead3a60dac76ea238b151e3b6d",
+    "tsconfig.spec.json": "b5a9e296ca7b13a8470dc7d334c7d7afe526124daf11b6bb8bc9b6f4c8fffb02"
+  },
+  "evidenceSha256": {
+    "browser.log": "2c621a90fc0e1ca0d7a49d4a78946ffd28f8e009812f3f04215c2f6e640216ca",
+    "build.log": "9babb6f035bd2620cdb01ae9f81b6bfabb671aa2a75712ab9b3ffa8ae5b7abc8",
+    "context.log": "57136a710547e3579b6d367f8cf96c5d23f75de0836dcc0988023a767f39f06f",
+    "desktop.png": "d04f9a092d2abf3bda0d74f5d9980bf5fdd08aef8bcc335d5234aded68727af2",
+    "editor-narrow.png": "637e73b5c4a61cd42ab50e1811507523ca7822b4c4639164acd0313b463f43f1",
+    "existing-dashboard-navigation.log": "8eec0f4c4fb7f4f44887d30f0e255e31f04b45f2770a5b45bfaf03611c2fb8de",
+    "existing-npm-test.log": "07cc8e4a8713e6da18b677055ec4f3320cf8482fb2346202910fab8a7aeb6931",
+    "local-storage.log": "f435915a7914eff42f04d8a14279b0ba11e1ca9bb828e8044990cbac9a4297c8",
+    "narrow.png": "19a9b2d66a4cdfd6d15bd397b50e941635a22529e7199bd64c8b2cabf8e4f5c6",
+    "page-validation.log": "df3c91802be43e74addc1ad10fbfad93e7c17830c35f34fdcea004833027387c",
+    "repository.log": "12a3540133609d574787fb01101f0f4e1d681bcb1252c104ed7f9b07b526cb2b",
+    "routes.log": "68b2ae4d381ae291ec3eff74d47418b2aa233b171cd2a55c8372c581d99c6a7b",
+    "spec-typecheck.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

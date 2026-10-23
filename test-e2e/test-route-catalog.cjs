@@ -36,7 +36,7 @@ const definitions = HERO_PAGE_GROUPS.flatMap(group => group.items);
 const plain = value => JSON.parse(JSON.stringify(value));
 // Independent product inventory: removing a page from both projections must fail.
 const expectedDestinations = [
-  '/', '/comando-studio', '/workspace-studio', '/rh/funcionarios', '/rh/folha-pagamento',
+  '/laboratorio', '/', '/comando-studio', '/workspace-studio', '/rh/funcionarios', '/rh/folha-pagamento',
   '/rh/eventos-folha', '/rh/afastamentos', '/rh/cargos-departamentos', '/rh/reputacao',
   '/operacoes/missoes', '/operacoes/missao-participantes', '/operacoes/equipes',
   '/operacoes/bases', '/operacoes/incidentes', '/ativos/equipamentos', '/ativos/veiculos',
@@ -55,7 +55,8 @@ const expectedResources = [
 assert.deepEqual(plain(routes.filter(route => route.data?.resource).map(route => route.data.resource)), expectedResources);
 assert.equal(new Set(items.map(item => item.path)).size, items.length, 'Unique menu destinations');
 assert.equal(new Set(routes.map(route => route.path)).size, routes.length, 'Unique routes');
-assert.equal(routes.length, items.length + 1, 'Only wildcard is outside the menu');
+assert.equal(routes.length, items.length + 2, 'Only wildcard and the visitor page parameter route are outside the static menu');
+assert.equal(typeof routes.find(route => route.path === 'laboratorio/paginas/:pageId')?.loadComponent, 'function', 'Saved visitor pages resolve from their persistent local identity');
 assert.deepEqual(plain(routes.at(-1)), { path: '**', redirectTo: '' });
 for (const definition of definitions) {
   const route = routes.find(route => `/${route.path}` === definition.path);

@@ -43,6 +43,13 @@ export const HERO_PAGE_GROUPS: HeroPageGroup[] = [
     domainKey: 'overview',
     items: [
       {
+        label: 'Meu laboratório', path: '/laboratorio', icon: 'science',
+        description: 'Crie páginas e menus privados neste navegador, sem login.',
+        badge: 'LOCAL', badgeTone: 'info',
+        page: { kind: 'component', title: 'Praxis Hero HQ | Meu laboratório',
+          loadComponent: () => import('../pages/visitor-lab/visitor-lab-page.component').then((m) => m.VisitorLabPageComponent) },
+      },
+      {
         label: 'Dashboard Executivo',
         path: '/',
         icon: 'dashboard',

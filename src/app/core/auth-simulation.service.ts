@@ -50,6 +50,7 @@ export class AuthSimulationService {
   private readonly activeUserId = signal<string>(this.resolveInitialUserId());
 
   readonly personas = HERO_PERSONAS;
+  readonly identityRevision = signal(0);
 
   readonly currentPersona = computed<PersonaProfile>(() => {
     const id = this.activeUserId();
@@ -79,6 +80,7 @@ export class AuthSimulationService {
       return;
     }
 
+    this.identityRevision.update((revision) => revision + 1);
     this.activeUserId.set(target.id);
     this.syncStorage(target);
 

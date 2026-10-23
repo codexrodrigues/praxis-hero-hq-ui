@@ -1,0 +1,84 @@
+
+> praxis-hero-hq-ui@1.0.0 test
+> tsc -p tsconfig.spec.json --noEmit && node e2e/verify-dashboard-contracts.cjs && node test-e2e/test-dashboard-navigation.cjs
+
+================================================================
+ [Hero HQ] Executando Verificação de Contratos e Invariantes...
+================================================================
+
+[Suite 1] Invariantes de dashboard-page.definition.json
+  [PASS] pageDef.dataSources declara os 7 DataSources canônicos (heroesStats, missionsStats, payrollStats, incidentsStats, assetsStats, threatsStats, recentMissionsFeed)
+  [PASS] recentMissionsFeed alimenta state.values.activeMissions via POST operations/vw-resumo-missoes/filter?page=0&size=4
+  [PASS] kpis.folhaPercent é derivado dinamicamente (salarioLiquido / salarioBruto) e missionsStats mapeia o bucket PAUSADA
+  [PASS] heroBanner utiliza media.kind="component" com componentId="hero-hq-tactical-radar"
+  [PASS] heroBanner injeta telemetria viva (readinessRate e todos os 5 contacts TRK-01..TRK-05) em componentInputs do radar
+  [PASS] kpiProntidao possui interaction.mode="action" apontando para "/rh/funcionarios"
+  [PASS] kpiMissoes possui interaction.mode="action" apontando para "/operacoes/missoes"
+  [PASS] kpiFolha possui interaction.mode="action" apontando para "/rh/folha-pagamento"
+  [PASS] kpiRiscos possui interaction.mode="action" apontando para "/operacoes/incidentes"
+  [PASS] kpiMissoes e kpiRiscos alinham semântica entre progress.value e footnote (concluídas/total e % críticos/total)
+  [PASS] Todos os 4 cartões Bento KPI utilizam pipes declarativos CSP-safe (progressValue | round:N | default:0) em progress.valueExpr
+  [PASS] Widget incidentsSeverityDonut e incidentSeverityDonutConfig utilizam dataSource.kind="remote" (praxis.stats) sem inputs.data estático
+  [PASS] Widget defconGaugeChart utilizza dataSource.kind="remote" (praxis.stats) sem inputs.data estático e payrollChart declara eixo temporal (axes.x.type="time")
+  [PASS] missionsTimeline injeta kpis vivos no context de interpolação
+  [PASS] missionsTimeline conecta cada um dos 4 itens a registros reais ${activeMissions.0..3.*} combinados com ${kpis.*} e possui ação navigation.openRoute
+  [PASS] domainHub injeta kpis vivos (RH, missões, ativos, ameaças e incidentes) no context de interpolação
+  [PASS] Todos os 6 cartões de domínio em domainHub interpolam telemetria viva ${kpis.*} em meta e possuem ação navigation.openRoute
+  [PASS] pageDef.deviceLayouts.tablet.canvas define grade responsiva de 6 colunas para todos os 13 widgets (KPIs 2x2 e gráficos sem colisão)
+  [PASS] pageDef.deviceLayouts.mobile.canvas empilha todos os 13 widgets em 1 coluna com constraints minColSpan=1 / maxColSpan=1
+  [PASS] recentIncidents configura expansão em Dossiê Tático estruturado (cardGrid de 3 cards flat com métricas/badges + callout forense + localização BRL/pt-BR)
+  [PASS] recentIncidents possui toolbar integrada (sem cabeçalho duplicado), 4 quickFilters de escopo tático e conditionalRenderers semânticos para severidade e mortos
+  [FAIL] Row 14 harmoniza altura em 340px (incidentsSeverityDonut, defconGaugeChart, distressSignalsList) e preserva interpolação viva em itemsExpr do Dossiê de Sinais de Socorro
+  [PASS] missionsTimeline utiliza markerVariant="icon", itemLayout="split", markerStyle="soft" e badgeTone semântico com ícones táticos por missão e domainHub atribui tone-cobalt exclusivo ao Ranking Reputacional
+  [PASS] distressSignalsList configura métrica de risco centralizada (align="center", label="AMEAÇA", captionPosition="below-progress" semântico) e estilos executivos dedicados em dashboard-theme.scss
+
+[Suite 2] Invariantes de HeroTacticalRadarComponent
+  [PASS] HeroTacticalRadarComponent sincroniza inputs via effect() e sanitiza placeholders ${...} (incluindo sufixos órfãos como %)
+  [PASS] HeroTacticalRadarComponent preserva estado cinemático (x, y, trails, phosphor) entre atualizações de inputs
+  [PASS] HeroTacticalRadarComponent pausa e retoma o loop requestAnimationFrame via IntersectionObserver e visibilitychange
+  [PASS] HeroTacticalRadarComponent implementa navegação acessível por teclado (ArrowLeft/Right, Enter/Space, Escape) e drill-down tático
+
+[Suite 3] Invariantes de HeroAppShellComponent, Command Palette (Ctrl+K) e Headers Multi-Tenant
+  [PASS] HeroAppShellComponent calcula prontidão e nível DEFCON reativamente a partir da telemetria real
+  [PASS] HeroAppShellComponent implementa Command Palette (Ctrl+K) acessível (combobox, aria-activedescendant, scrollIntoView, indicador DEFCON 1)
+  [PASS] HeroAppShellComponent invalida contexto corporativo, limpa alerta authDenied ao trocar persona e não mantém código morto
+  [PASS] HeroAppShellComponent abre o Command Palette imediatamente ao digitar no campo de busca do topbar e limpa o input ao perder foco
+  [PASS] app.config.ts alinha PAX_FETCH_HEADERS com HttpClient e ApiConfigStorage (tenant shield-hq e header X-User-ID)
+  [PASS] app.config.ts deduplica e enriquece POST /stats/group-by (byKey/totalCount) e invalida o cache de telemetria após mutações de domínio
+  [PASS] HeroAppShellComponent recarrega a telemetria de Prontidão e Defcon automaticamente após mutações de domínio
+  [PASS] app.config.ts reconcilia em memória snapshots persistidos legados do dashboard sem mutações HTTP não solicitadas
+  [PASS] dashboard-page.definition.ts exporta reconcilePersistedDashboardPage não-destrutivo (preservando widgets, dataSources e state customizados)
+  [PASS] package.json e tsconfig.spec.json validam tipagem estrita dos arquivos .spec.ts e executam a suíte de contratos
+
+[Suite 4] Invariantes de Acessibilidade e Estilo em dashboard-theme.scss
+  [PASS] dashboard-theme.scss define cursor pointer e :focus-visible para cartões KPI interativos (.bento-kpi-card)
+  [PASS] dashboard-theme.scss estiliza badges de telemetria, itens acionáveis da timeline e responsividade mobile sem truncar KPIs nem cortar o radar
+
+[Suite 5] Invariantes do Catálogo Funcionário 360 — Tabs e Related Resource Outlet (Issue #6)
+  [PASS] app.config.ts importa e registra providePraxisRelatedResourceOutletMetadata() (@praxisui/core) no bootstrap do Hero HQ
+  [PASS] app.config.ts importa e registra providePraxisTabsMetadata() (@praxisui/tabs) no bootstrap do Hero HQ
+  [PASS] Todas as dependências @praxisui/* em package.json estão alinhadas em >= 10.0.0-rc.33 (com suporte nativo a normalizeSourcePayload em PraxisKpiBandComponent e operadores &&/|| em SafeExpressionEvaluator)
+  [PASS] Pacotes instalados @praxisui/core e @praxisui/tabs exportam os providers e metadados canônicos para praxis-related-resource-outlet e praxis-tabs
+
+[Suite 6] Invariantes de Telemetria Viva em kpiBand das 17 Páginas de Domínio
+  [PASS] Todas as 17 páginas de recurso conectam kpiBand a endpoints vivos (/stats/group-by ou /filter?page=0&size=1) com avaliação dinâmica (valueExpr/captionExpr)
+  [PASS] Todas as 17 páginas de domínio utilizam expressões microVisualization compatíveis com SafeExpressionEvaluator (sem Math.round/||) e filtros escalares válidos em quickFilters/kpiBand (mes/ano)
+  [PASS] Todas as 17 páginas de domínio padronizam kpiBand (valueExpr e captionExpr) com pipes declarativos CSP-safe (| number, | round:1, | currency, | default:...) sem concatenações legadas toString()
+  [PASS] Todas as páginas de domínio com /stats/group-by respeitam estritamente o contrato StatsEligibility do backend (filter: {} obrigatório e sem field em métricas COUNT)
+  [PASS] Todas as 17 páginas de domínio unificam quickFilters e inlineFields no <praxis-scope-bar> via filterBar.placement="scope-bar" + inlineFields (zero barra de filtros duplicada)
+  [PASS] Todas as 14 páginas de domínio com colunas de status/severidade/prioridade usam conditionalRenderers canônicos com objetos JsonLogic
+  [PASS] As 3 páginas táticas críticas (missoes, incidentes, ameacas) possuem dossiês inline de expansão (praxis.detail.schema com cardGrid + richContent callout)
+  [PASS] Nenhuma das 17 páginas de domínio utiliza valores de Enum inexistentes no backend (como EM_MISSAO, INDISPONIVEL, QUARTEL_GENERAL, COMBATENTE, MIA, MONITORADO ou PENDING)
+
+[Suite 7] Dashboard API Integration Audit (Zero Static Data Invariants)
+  [PASS] record-studio-demo.mjs não utiliza sourceKind="derived", localRows nem fallbackLocalRows em nenhum widget analítico
+  [PASS] record-studio-demo.mjs configura todos os 4 gráficos analíticos (Donut, Gauge, Área, Barra) exclusivamente via praxis.stats em recursos governados da API
+  [PASS] record-studio-demo.mjs registra todas as 7 DataSources canônicas de telemetria (incluindo assetsStats, threatsStats e recentMissionsFeed -> state.activeMissions)
+  [PASS] record-studio-demo.mjs elimina todos os textos/valores estáticos residuais e alinha TIMELINE_DOC (split/soft) e SOS_LIST_CONFIG (métrica AMEAÇA centralizada com captionPosition=below-progress) em HERO_COMMAND_HEADER_DOC, KPI_*_DOC, TIMELINE_DOC e HUB_DOC
+  [PASS] record-studio-demo.mjs executa a sessão automatizada "Dashboard API Integration Audit" sobre o snapshot persistido da página ao final da gravação
+  [PASS] record-crud-studio-demo.mjs conecta a faixa de KPIs do CRUD Studio a /stats/group-by (valueExpr / captionExpr) sem valores estáticos chumbados
+
+================================================================
+ [FALHA] 1 asserção(ões) falharam (57 passaram).
+================================================================
+

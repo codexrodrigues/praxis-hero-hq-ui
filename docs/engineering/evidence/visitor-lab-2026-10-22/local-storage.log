@@ -1,0 +1,34 @@
+TAP version 13
+# Subtest: preferences are isolated by route and owner
+ok 1 - preferences are isolated by route and owner
+  ---
+  duration_ms: 0.665959
+  type: 'test'
+  ...
+# Subtest: closed, switched and A/B/A editors cannot read or write preferences
+ok 2 - closed, switched and A/B/A editors cannot read or write preferences
+  ---
+  duration_ms: 0.235875
+  type: 'test'
+  ...
+# Subtest: quota, corruption and reentrant serialization never report success
+ok 3 - quota, corruption and reentrant serialization never report success
+  ---
+  duration_ms: 0.105667
+  type: 'test'
+  ...
+# Subtest: all reachable persistence facades resolve within the local editor
+ok 4 - all reachable persistence facades resolve within the local editor
+  ---
+  duration_ms: 0.135625
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5.752041

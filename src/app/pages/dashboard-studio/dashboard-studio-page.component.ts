@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, viewChild } from '@angular/core';
 import { type PageIdentity, type WidgetPageDefinition } from '@praxisui/core';
 import { DynamicPageBuilderComponent } from '@praxisui/page-builder';
 import { AuthSimulationService } from '../../core/auth-simulation.service';
+import { VisitorLabCopyActionComponent } from '../visitor-lab/visitor-lab-copy-action.component';
 
 export const BLANK_STUDIO_PAGE_DEFINITION: WidgetPageDefinition = {
   context: {
@@ -62,14 +63,16 @@ export function createBlankStudioPageDefinition(): WidgetPageDefinition {
 @Component({
   selector: 'app-dashboard-studio-page',
   standalone: true,
-  imports: [DynamicPageBuilderComponent],
+  imports: [DynamicPageBuilderComponent, VisitorLabCopyActionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dashboard-page-wrapper">
+      <app-visitor-lab-copy-action [page]="builder()?.currentPage()" [enabled]="builder()?.canSaveCurrentPage() ?? false" />
       <praxis-dynamic-page-builder
         [page]="pageDefinition"
         [pageIdentity]="pageIdentity()"
         [autoPersist]="true"
+        [enableCustomization]="true"
         [showGovernanceToolbar]="false"
       />
     </div>
@@ -88,6 +91,7 @@ export function createBlankStudioPageDefinition(): WidgetPageDefinition {
   `],
 })
 export class DashboardStudioPageComponent {
+  protected readonly builder = viewChild(DynamicPageBuilderComponent);
   private readonly authService = inject(AuthSimulationService);
 
   protected readonly pageDefinition = createBlankStudioPageDefinition();
