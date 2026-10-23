@@ -65,8 +65,8 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
   table: {
     columnProjection: {
       source: 'schema',
-      include: ['avatarUrl', 'nomeCompleto', 'cargoNome', 'departamentoNome', 'ativo', 'dataAdmissao'],
-      order: ['avatarUrl', 'nomeCompleto', 'cargoNome', 'departamentoNome', 'ativo', 'prontidaoScore', 'dataAdmissao'],
+      include: ['nomeCompleto', 'cargoNome', 'ativo', 'dataAdmissao'],
+      order: ['nomeCompleto', 'cargoNome', 'ativo', 'prontidaoScore', 'dataAdmissao'],
       additions: [
         {
           field: 'prontidaoScore',
@@ -89,24 +89,47 @@ export const HEROES_CRUD_METADATA: CrudMetadata = {
         },
       ],
       overrides: {
-        avatarUrl: {
-          width: '72px',
-          align: 'center',
-          header: 'Avatar',
+        // Media object: foto à esquerda; nome em destaque e código do cadastro logo abaixo.
+        // O "id" é o identificador técnico do cadastro (não há matrícula funcional no DTO), por isso o rótulo "Cód.".
+        nomeCompleto: {
+          width: '280px',
+          header: 'Colaborador',
           renderer: {
-            type: 'avatar',
-            avatar: {
-              srcField: 'avatarUrl',
-              altField: 'nomeCompleto',
-              initialsField: 'nomeCompleto',
-              shape: 'circle',
-              size: 40,
+            type: 'compose',
+            compose: {
+              items: [
+                {
+                  type: 'avatar',
+                  avatar: {
+                    srcField: 'avatarUrl',
+                    altField: 'nomeCompleto',
+                    initialsField: 'nomeCompleto',
+                    shape: 'circle',
+                    size: 38,
+                  },
+                },
+                { type: 'value', field: 'nomeCompleto', emphasis: 'strong' },
+                { type: 'value', field: 'id', prefix: 'Cód. #', emphasis: 'subtle' },
+              ],
+              layout: { direction: 'media', gap: 12, align: 'start', ellipsis: true },
             },
           },
         },
-        nomeCompleto: { width: '240px', header: 'Nome Completo / Civil' },
-        cargoNome: { width: '220px', header: 'Cargo' },
-        departamentoNome: { width: '240px', header: 'Departamento' },
+        // Cargo em destaque com a lotação (departamento) em segunda linha.
+        cargoNome: {
+          width: '260px',
+          header: 'Cargo & Lotação',
+          renderer: {
+            type: 'compose',
+            compose: {
+              items: [
+                { type: 'value', field: 'cargoNome', emphasis: 'strong' },
+                { type: 'value', field: 'departamentoNome', emphasis: 'subtle' },
+              ],
+              layout: { direction: 'column', gap: 2, align: 'start', ellipsis: true },
+            },
+          },
+        },
         ativo: {
           width: '150px',
           align: 'center',

@@ -67,12 +67,49 @@ export const MISSAO_PARTICIPANTES_CRUD_METADATA: CrudMetadata = {
   table: {
     columnProjection: {
       source: 'schema',
-      include: ['id', 'missaoTitulo', 'funcionarioNome', 'papel', 'ordem', 'principal', 'resultado'],
-      order: ['id', 'missaoTitulo', 'funcionarioNome', 'papel', 'ordem', 'principal', 'resultado'],
+      include: ['missaoTitulo', 'funcionarioNome', 'papel', 'ordem', 'principal', 'resultado'],
+      order: ['funcionarioNome', 'missaoTitulo', 'papel', 'ordem', 'principal', 'resultado'],
       overrides: {
-        id: { width: '90px', align: 'center', header: 'Escala ID' },
-        missaoTitulo: { width: '240px', header: 'Missão Operacional' },
-        funcionarioNome: { width: '220px', header: 'Herói / Operador' },
+        // Media object: foto do operador + nome em destaque + papel tático em linha secundária.
+        funcionarioNome: {
+          width: '260px',
+          header: 'Herói / Operador',
+          renderer: {
+            type: 'compose',
+            compose: {
+              items: [
+                {
+                  type: 'avatar',
+                  avatar: {
+                    srcField: 'funcionarioFotoUrl',
+                    altField: 'funcionarioNome',
+                    initialsField: 'funcionarioNome',
+                    shape: 'circle',
+                    size: 36,
+                  },
+                },
+                { type: 'value', field: 'funcionarioNome', emphasis: 'strong' },
+                { type: 'value', field: 'funcionarioId', prefix: 'Operador #', emphasis: 'subtle' },
+              ],
+              layout: { direction: 'media', gap: 12, align: 'start', ellipsis: true },
+            },
+          },
+        },
+        // Missão em destaque com o identificador da escala abaixo.
+        missaoTitulo: {
+          width: '260px',
+          header: 'Missão Operacional',
+          renderer: {
+            type: 'compose',
+            compose: {
+              items: [
+                { type: 'value', field: 'missaoTitulo', emphasis: 'strong' },
+                { type: 'value', field: 'id', prefix: 'Escala #', emphasis: 'subtle' },
+              ],
+              layout: { direction: 'column', gap: 2, align: 'start', ellipsis: true },
+            },
+          },
+        },
         papel: {
           width: '170px',
           align: 'center',
