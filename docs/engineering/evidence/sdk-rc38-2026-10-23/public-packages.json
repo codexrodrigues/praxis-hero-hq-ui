@@ -1,0 +1,137 @@
+{
+  "registry": "https://registry.npmjs.org/",
+  "packages": [
+    {
+      "name": "@praxisui/ai",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/ai/-/ai-10.0.0-rc.38.tgz",
+      "integrity": "sha512-sKfro+mmiI+RKGM0Ojar0JsT/pjg/1xO1pSIf0hvXP3unVg+hHE+dfrl8Gpyrijw3J5vrFNxtKkVMKAI7zBaag=="
+    },
+    {
+      "name": "@praxisui/charts",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/charts/-/charts-10.0.0-rc.38.tgz",
+      "integrity": "sha512-mSLX03jTDv6iuzrn3h6fJ09Ezc2hV8bAYlRZPBmuafzddGZLj0UTp0f6/JSXpFF4Ana6Ej4q2x1TP/3kIKxEDQ=="
+    },
+    {
+      "name": "@praxisui/core",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/core/-/core-10.0.0-rc.38.tgz",
+      "integrity": "sha512-d/STyhLA14dA6gPeE3yEDFXuhcl9K/HmY9gLBt1gXQ/KJZy+4MaPaDzs7fuzaMP++/BHwULhmxJ9yIDM4AjC5w=="
+    },
+    {
+      "name": "@praxisui/cron-builder",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/cron-builder/-/cron-builder-10.0.0-rc.38.tgz",
+      "integrity": "sha512-XddfN6QBs6vrqdJdH7gz17bYmQFiIAqvylVxppXcEmSxrltULoNJvczYWsjJteDdTxzBk/ysTuwd6hoxRvIbSA=="
+    },
+    {
+      "name": "@praxisui/crud",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/crud/-/crud-10.0.0-rc.38.tgz",
+      "integrity": "sha512-ekxKdQNU+y8ya2O0BjIz7B/83wegdjqINHHAfJlBbuDZoe2iziZMmTOkSveK0fs0i1EEaOpoLqj6hcCCUKBorA=="
+    },
+    {
+      "name": "@praxisui/dialog",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/dialog/-/dialog-10.0.0-rc.38.tgz",
+      "integrity": "sha512-7LcaR26w9FoBomCVN3nbrwpnD/5cCEzWEgNsa0mArF05AqVKzWaZXeU5IYa7ycbCrhMSrmdN+6QhfjSO5IuFcQ=="
+    },
+    {
+      "name": "@praxisui/dynamic-fields",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/dynamic-fields/-/dynamic-fields-10.0.0-rc.38.tgz",
+      "integrity": "sha512-lRBOUEeg3pE+iAIGqo16OmXz6AlmawdcTbb2pcKB67pyM6A4k2vhmm0qMHKAT77E3dE+XBrZPfLtPxdVNE3gTw=="
+    },
+    {
+      "name": "@praxisui/dynamic-form",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/dynamic-form/-/dynamic-form-10.0.0-rc.38.tgz",
+      "integrity": "sha512-jYi6zeSeZRA/3B/IhxJ7C/TeNWOOsIVFxAiQMGW1LNc/YbT9OKWDjIkB3EXf0CTtS9Q0bCUZldhcNYGEKbrK+w=="
+    },
+    {
+      "name": "@praxisui/editorial-forms",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/editorial-forms/-/editorial-forms-10.0.0-rc.38.tgz",
+      "integrity": "sha512-ss52kT5pma7/Vq3uAW+ufoNkFTmek2EwmGi2TCzPUwJXkLIZvZEZarRdJvkGp6IDIG9nGOR2ypIFg5kyDcgaFg=="
+    },
+    {
+      "name": "@praxisui/expansion",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/expansion/-/expansion-10.0.0-rc.38.tgz",
+      "integrity": "sha512-/VoXj0E4lsqZUeyvtyNHJTdbLJm6MykRISwsKgdrwXM2IWjQsAASeKZrvr7+iCZ0tVv1sJlWP10dq59Njl0Hbw=="
+    },
+    {
+      "name": "@praxisui/files-upload",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/files-upload/-/files-upload-10.0.0-rc.38.tgz",
+      "integrity": "sha512-pCqx3h3dIaGE6C08fPsEgPAcDIel6e7Cl5EJ688AbJF/ma6VonTQCguWEkvtctuieRYyDCeGkfMFZBeyXzKcCw=="
+    },
+    {
+      "name": "@praxisui/list",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/list/-/list-10.0.0-rc.38.tgz",
+      "integrity": "sha512-n69kzY7rDEaHCTpj/B/hnS5LjOP93S1389q3n2gDdAIVsNLOmghE7f0FoztXLPOjK+dAh22ZDZ1oSFLc8keuDA=="
+    },
+    {
+      "name": "@praxisui/manual-form",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/manual-form/-/manual-form-10.0.0-rc.38.tgz",
+      "integrity": "sha512-7Jqm/6Wzn0ylu/RtDZmxRtYRB0mvIsOYGXjJMsJDYLD25S8RNh7Iw1d/QVqQf8gIS6qOG8HqqRjhqn2QAYD5HA=="
+    },
+    {
+      "name": "@praxisui/metadata-editor",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/metadata-editor/-/metadata-editor-10.0.0-rc.38.tgz",
+      "integrity": "sha512-lqDPMUEm8GHr5tABtgeHZb8x1buNk9oA+rZ5iaOEHg+swhMoXR1NYjJYKZ2e2h9wFyCRMLk6dx5bJwDXMTxKQA=="
+    },
+    {
+      "name": "@praxisui/page-builder",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/page-builder/-/page-builder-10.0.0-rc.38.tgz",
+      "integrity": "sha512-E6W4zocFEw0wvpd8aJY4nOWr2vzYBwhGqCx+prhOwi2zM6iNOLLbn5KBcrE2c1mlU7kk8lsmLgMY/V8CeAYBSw=="
+    },
+    {
+      "name": "@praxisui/rich-content",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/rich-content/-/rich-content-10.0.0-rc.38.tgz",
+      "integrity": "sha512-fM98N7Nii7fLKiQoDBOZEW/8f+f7nrmlVOzImixfuly8oEjwwWKzT4Snf9Lf43ejeBIksWj1+jRW5srIj8dFOA=="
+    },
+    {
+      "name": "@praxisui/settings-panel",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/settings-panel/-/settings-panel-10.0.0-rc.38.tgz",
+      "integrity": "sha512-jLSIwcgCItc2DQpgpAoqzj16P5Uc4cD0EunJRi7Wa+3RwKgaYkjpdfyVHp8ELp8D3mD0DN5xZnoRl6pCjSoT6g=="
+    },
+    {
+      "name": "@praxisui/stepper",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/stepper/-/stepper-10.0.0-rc.38.tgz",
+      "integrity": "sha512-izYebo1x0L0KInrFfgDpYh3WKinrt92I68HDTrOjdcxITBLImIcDgd6IsWby7T1dSz7K69mfazMfVMezefgGzg=="
+    },
+    {
+      "name": "@praxisui/table",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/table/-/table-10.0.0-rc.38.tgz",
+      "integrity": "sha512-gu/Xwf7ql+0d7fj1jISUeDOA90mH4tFstYVA3m9eoV+Fowoa0+jCCdSfnvRAwOe8vPXeIyyMWv/KuvcZ5dYEJA=="
+    },
+    {
+      "name": "@praxisui/table-rule-builder",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/table-rule-builder/-/table-rule-builder-10.0.0-rc.38.tgz",
+      "integrity": "sha512-gTbX7+INJsZUYu7gTVpbC81XLHcLDZvJlofjMpZ5VGwGliJU1iMV/OF7R9UM97bFPlbQpj0Yn8gYc4HHI/0+sA=="
+    },
+    {
+      "name": "@praxisui/tabs",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/tabs/-/tabs-10.0.0-rc.38.tgz",
+      "integrity": "sha512-bDygMTk2myIUvZDTPxeF3PrOtX4zw7NLPpDugfmaBZtw7cNmQBJqajJGWckTKVlj5jw/Xu1e9JjYAsrPMOQp+w=="
+    },
+    {
+      "name": "@praxisui/visual-builder",
+      "version": "10.0.0-rc.38",
+      "tarball": "https://registry.npmjs.org/@praxisui/visual-builder/-/visual-builder-10.0.0-rc.38.tgz",
+      "integrity": "sha512-KWGdPda1oRMAPv7oUZ2eL/BLbMF1jlgbYblsGgqkukbcKzn+9HFwekQax7NoGjRHv3sPchcIda4K4JJ2lpbpdg=="
+    }
+  ]
+}

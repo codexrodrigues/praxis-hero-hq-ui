@@ -12,34 +12,18 @@
     <p role="status">{{ text('missing') }}</p><a mat-flat-button routerLink="/laboratorio">{{ text('back') }}</a>
   } @else {
     @if (pageId()) { <p class="notice">{{ text('copyNotice') }}</p> }
-    <div class="save-row">
-      <mat-form-field appearance="outline"><mat-label>{{ text('name') }}</mat-label>
-        <input matInput data-testid="lab-page-name" [formControl]="title" maxlength="80" />
-      </mat-form-field>
-      <mat-form-field appearance="outline"><mat-label>{{ text('menu') }}</mat-label>
-        <input matInput data-testid="lab-menu-name" [formControl]="menu" maxlength="60" list="visitor-menu-names" />
-        <mat-hint>{{ text('menuHint') }}</mat-hint>
-      </mat-form-field>
-      <datalist id="visitor-menu-names">@for (group of store.workspace().menus; track group.id) { <option [value]="group.label"></option> }</datalist>
-      <mat-form-field appearance="outline"><mat-label>{{ text('icon') }}</mat-label>
-        <mat-select data-testid="lab-menu-icon" [formControl]="menuIcon">
-          <mat-select-trigger><mat-icon aria-hidden="true">{{ menuIcon.value }}</mat-icon> {{ text('icon.' + menuIcon.value) }}</mat-select-trigger>
-          @for (icon of menuIcons; track icon) { <mat-option [value]="icon"><mat-icon aria-hidden="true">{{ icon }}</mat-icon>{{ text('icon.' + icon) }}</mat-option> }
-        </mat-select>
-      </mat-form-field>
-      <button mat-flat-button data-testid="lab-save" type="button" [disabled]="busy() || title.invalid || menu.invalid || !builder()?.canSaveCurrentPage()" (click)="requestSave()">{{ text(busy() ? 'saving' : 'save') }}</button>
-    </div>
-    @if (savedPath()) {
-      <div class="saved" role="status"><span>{{ text('saved') }}</span><a mat-button data-testid="lab-saved-link" [routerLink]="savedPath()">{{ text('open') }}</a><code>{{ savedPath() }}</code></div>
-    }
+    <praxis-page-save-as #saveJourney [adapter]="saveAdapter" [contextKey]="saveContext()"
+      [initialTitle]="title()" [initialMenuLabel]="menu()" [initialIcon]="menuIcon()" [titleMaxLength]="80" [menuMaxLength]="60"
+      [canSave]="!busy() && (builder()?.canSaveCurrentPage() ?? false)"
+      (saveRequested)="builder()?.saveCurrentPage()" (saveFailed)="error.set(store.errorCode($event))" />
     <div class="seed-actions">
-      <button mat-button type="button" [disabled]="busy()" (click)="start('blank')">{{ text('blank') }}</button>
-      <button mat-button type="button" data-testid="lab-dashboard-seed" [disabled]="busy()" (click)="start('dashboard')">{{ text('dashboard') }}</button>
+      <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="start('blank')">{{ text('blank') }}</button>
+      <button mat-button type="button" data-testid="lab-dashboard-seed" [disabled]="busy() || saveAs()?.busy()" (click)="start('dashboard')">{{ text('dashboard') }}</button>
     </div>
     <praxis-dynamic-page-builder [page]="page()" [pageIdentity]="identity()" [autoPersist]="false"
       [enableCustomization]="true" [enableAgenticAuthoring]="false" [authoringCapabilities]="capabilities"
       [showGovernanceToolbar]="false" [showPageLifecycleActions]="false" [strictValidation]="true"
-      (pageSaveRequested)="save($event)" />
+      (pageSaveRequested)="error.set(''); saveJourney.save($event)" />
   }
 
   <section class="library" [attr.aria-label]="text('library')">
@@ -49,8 +33,8 @@
       <div class="library-row" data-testid="lab-library-page">
         <div><strong>{{ saved.title }}</strong><code>{{ pagePath(saved.id) }}</code></div>
         <a mat-button [routerLink]="pagePath(saved.id)">{{ text('editCopy') }}</a>
-        <button mat-button type="button" [disabled]="busy() || menu.invalid" (click)="addToMenu(saved.id)">{{ text('addToMenu') }}</button>
-        <button mat-button type="button" [disabled]="busy()" (click)="removePage(saved.id)">{{ text('removePage') }}</button>
+        <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="addToMenu(saved.id)">{{ text('addToMenu') }}</button>
+        <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="removePage(saved.id)">{{ text('removePage') }}</button>
       </div>
     }
     @if (store.workspace().menus.length) {
@@ -58,8 +42,8 @@
       @for (group of store.workspace().menus; track group.id) {
         <div class="menu-row">
           <mat-form-field appearance="outline"><mat-label>{{ text('menu') }}</mat-label><input matInput #menuLabel [value]="group.label" maxlength="60" /></mat-form-field>
-          <button mat-button type="button" [disabled]="busy()" (click)="renameMenu(group.id, menuLabel.value)">{{ text('rename') }}</button>
-          <button mat-button type="button" [disabled]="busy()" (click)="removeMenu(group.id)">{{ text('removeMenu') }}</button>
+          <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="renameMenu(group.id, menuLabel.value)">{{ text('rename') }}</button>
+          <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="removeMenu(group.id)">{{ text('removeMenu') }}</button>
         </div>
       }
     }

@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { PraxisI18nService, type WidgetPageDefinition } from '@praxisui/core';
 import { AuthSimulationService } from '../../core/auth-simulation.service';
+import { PraxisPageCopyActionComponent } from '@praxisui/page-builder';
 import { provideVisitorLabI18n } from './visitor-lab.i18n';
 
 /** Transient navigation information; saving remains owned by the laboratory. */
@@ -15,16 +16,14 @@ export interface VisitorLabDraft {
 
 @Component({
   selector: 'app-visitor-lab-copy-action',
-  imports: [RouterLink, MatButtonModule, MatIconModule],
+  imports: [RouterLink, MatButtonModule, MatIconModule, PraxisPageCopyActionComponent],
   providers: [provideVisitorLabI18n()],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="copy-action">
       <div><strong>{{ text('copyTitle') }}</strong>
         <p>{{ text('copyIntro') }}</p></div>
-      <button mat-flat-button data-testid="studio-copy-to-lab" [disabled]="!enabled()" (click)="copy()">
-        <mat-icon>content_copy</mat-icon>{{ text('copyAction') }}
-      </button>
+      <praxis-page-copy-action [page]="page()" [canCopy]="enabled()" (copyRequested)="copy($event)" />
       <a mat-button routerLink="/laboratorio">{{ text('copyLibrary') }}</a>
     </div>
   `,
@@ -43,11 +42,10 @@ export class VisitorLabCopyActionComponent {
   private readonly i18n = inject(PraxisI18nService);
   text(key: string): string { return this.i18n.t(`visitorLab.${key}`); }
 
-  copy(): void {
-    const definition = this.page();
-    if (!this.enabled() || !definition) return;
+  copy(definition: WidgetPageDefinition): void {
+    if (!this.enabled()) return;
     const persona = this.auth.currentPersona();
-    const draft: VisitorLabDraft = { definition: structuredClone(definition),
+    const draft: VisitorLabDraft = { definition,
       owner: JSON.stringify([persona.tenant, persona.id]), revision: this.auth.identityRevision() };
     // Router info is transient: no remote write, browser history document or new storage channel.
     void this.router.navigate(['/laboratorio'], { info: { visitorLabDraft: draft } });
