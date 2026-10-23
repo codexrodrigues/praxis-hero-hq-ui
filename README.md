@@ -201,3 +201,7 @@ exibição da credencial, e vale para páginas de recurso e de componente. Badge
 informativos, como STUDIO, não anunciam autorização. O teste de catálogo mantém
 um inventário independente dos destinos e recursos esperados.
 
+
+### Adoção corporativa — P3-C em incrementos
+
+Em [/workspace-corporativo](http://127.0.0.1:4302/workspace-corporativo), consulte a sessão e selecione um contexto permitido pelo servidor. Personas do Hero não autenticam essa sessão. O laboratório local continua disponível sem login. A seleção real depende da integração SESSION/CSRF/CORS do backend; este recorte de UI tem teste de navegador com APIs interceptadas e não encerra a prova HTTP/Neon. Veja [escopo, provas reutilizadas e próximos incrementos](docs/engineering/p3c-host-adoption.md).

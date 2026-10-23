@@ -391,6 +391,11 @@ export const appConfig: ApplicationConfig = {
       withPraxisHttpLoading(),
       withInterceptors([
         (req, next) => {
+          // Corporate runtime identity belongs to the server session, never to
+          // the demo persona or its synthetic bearer token. Core owns context headers.
+          if (req.url.startsWith(`${PRAXIS_API_BASE_URL}/praxis/runtime/`)) {
+            return next(req.clone({ withCredentials: true }));
+          }
           const tenant =
             typeof localStorage !== 'undefined'
               ? localStorage.getItem('pax.api.tenant') || 'shield-hq'

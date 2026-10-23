@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-23",
+  "baseline": "f1c258fe5a740a8c2e31fee482765f3422adec1b",
+  "classification": "transversal host adoption, no public contract change",
+  "origin": "http://127.0.0.1:4302/workspace-corporativo",
+  "scope": "UI P3-C.1 with intercepted APIs and published Core10.0.0-rc.37. Not real HTTP/Neon/SESSION/CSRF proof. No page/navigation provider activation.",
+  "results": {
+    "contextBrowser": "PASS; CAS, reread/reload, pagination, confirmed headers, explicit session credential mode,401/403/409/503,ABA settled callback, local laboratory link",
+    "visitorRegression": "PASS; existing complete form/copy/menu/icon/route/reload/failure/persona flow",
+    "routeCatalog": "PASS",
+    "productionBuild": "PASS6.253s;16.44MB initial/15MB warning; below18MB error budget"
+  },
+  "visual": {
+    "desktop": "1440x1000 ready state",
+    "narrow": "390x844 unavailable state; navigation collapse awaited; no document overflow. Mobile selection and keyboard not claimed."
+  },
+  "review": "Independent p3c_host_inventory reviewed code/docs/test; credentials and tenant label corrected. No blocker in declared UI scope.",
+  "sourceSha256": {
+    "src/app/pages/corporate-context/corporate-context-page.html": "c13c8466fe8483c385191d39adae596ead4a4860e0dea812c5916b92cc0fd42a",
+    "src/app/pages/corporate-context/corporate-context-page.component.ts": "37c96736ff426a15dfda1d996610c88af7f543920ab333080c59fe8d61f78287",
+    "src/app/pages/corporate-context/corporate-context-page.scss": "98fec6adbdcb2e8a8e229c6fae871fa7feaffe46c6b90c629c5b5b08f8152de1",
+    "src/app/app.config.ts": "487258f8908ccbb04cde19eb10bd37524855319018ec3d28573b32a697e6f304",
+    "src/app/core/page-definitions.ts": "2cb4f76198d89817707bfdc50a92861b2d9929b077a1b873d1cae698d6b117bb",
+    "test-e2e/test-corporate-context.cjs": "c73da2735b7d30122137f7baf9d0f3de4ca9da052463d5f364c4c6342f38fa8d",
+    "test-e2e/test-route-catalog.cjs": "459a6d59cf3ea1e3943ea45dded2fed1414bd10d0612dba33c5933cc2370f76b",
+    "package-lock.json": "a3f34f7381161560cc2e3a0907ad21ab87b7ef1d0db1d9aab57dc8a4cd4fc7a2"
+  },
+  "evidenceSha256": {
+    "narrow-error.png": "97ca4e2269db98077856c18d50df2cfc235b2fb99541c7761f48e55031a1c691",
+    "desktop.png": "3c4ecba5a6778d478f1ce0de4fab2fe8f9f6bece4bfbf0293fc66ef1854ed637",
+    "context-browser.log": "6871cc0f94072e48652b2e540bb0b327fe9e71ba79405f16f93d73f976259f32",
+    "visitor-regression.log": "2c621a90fc0e1ca0d7a49d4a78946ffd28f8e009812f3f04215c2f6e640216ca",
+    "build.log": "a88bcde95f07d804f688133f736adfc605e25d2db7b02580790d0aa082c5ed81"
+  }
+}
