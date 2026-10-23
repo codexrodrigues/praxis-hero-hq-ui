@@ -83,6 +83,7 @@ const BASE = 'http://127.0.0.1:4302';
    }
    await page.setViewportSize({ width: 390, height: 844 });
    await expect(page.getByRole('button', { name: 'Fechar navegação', exact: true })).not.toBeInViewport();
+   assert.ok(await page.getByTestId('corporate-context').evaluate(el => [...el.querySelectorAll('header,h1,p,button,a,.actions,.scope-note')].every(child => { const box = child.getBoundingClientRect(); return box.left >= 0 && box.right <= innerWidth; })), 'Mobile text and action bounds fit the viewport, even when the shell clips overflow');
    await page.screenshot({ path: '/tmp/praxis-p3c-context-narrow.png', fullPage: true });
    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'No mobile document overflow');
    await page.setViewportSize({ width: 1440, height: 1000 });
