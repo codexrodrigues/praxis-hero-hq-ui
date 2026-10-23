@@ -2,20 +2,27 @@
 
 O fluxo do laboratório passou a consumir `PraxisPageCopyActionComponent` e `PraxisPageSaveAsComponent` de `@praxisui/page-builder`. O Hero deixou de implementar os controles e a coordenação de save/retry/resultado. Mantém um adapter de poucas linhas, a política local, o repositório atômico já validado, fontes/seeds, a biblioteca de páginas e a integração do shell/rota parametrizada.
 
-## Limite da adoção
+## Adoção pública do SDK
 
-Esta branch é **dependente da publicação/adoção do SDK**. Os manifests públicos deste host ainda fixam rc.37, sem os novos exports. Portanto este PR é draft e não deve ser integrado à branch do laboratório/main com esse lock. A prova local consome os tarballs candidatos oficiais, identificados por hash na evidência; não prova que `npm ci` com o lock público já oferece a API. Nenhum pacote foi publicado e nenhum deploy foi solicitado.
+O Hero fixa os22 pacotes `@praxisui/*` em **10.0.0-rc.38**, com tarballs e integridades do npm público no lock. A publicação oficial passou por build, catálogo, selagem dos tarballs, OIDC e instalação pública no [workflow40017986340](https://github.com/codexrodrigues/praxis-ui-angular/actions/runs/40017986340). Tag: `praxis-ui-v10.0.0-rc.38`, commit `51075de81704596606bb578ab681124df5ae8493`; código integrado pelo PR644. O canal `rc` avançou; `latest` permanece9.0.67.
 
-Reprodução do candidato após build/pack no checkout canônico Angular:
+Reprodução do host, sem pacotes privados ou aliases de source:
 
 ```sh
-node scripts/build-libs.js --only praxis-page-builder
-node scripts/pack-dist-libs.js --only praxis-core,praxis-page-builder
+npm ci --registry=https://registry.npmjs.org/
+npm run build
+npm start
+# Em outro terminal, na mesma pasta:
+node test-e2e/test-route-catalog.cjs
+node test-e2e/test-corporate-context.cjs
+node test-e2e/test-visitor-lab.cjs
 ```
 
-No Hero, instalar os dois arquivos `dist/__local-packs__/praxis-core.tgz` e `praxis-page-builder.tgz` do checkout usado na prova por `npm install --no-save --package-lock=false`, sem aliases de source ou alteração do build. npm10.9.7 falhou na resolução de peers com `edgesOut` nulo; a recuperação desta prova usou `--legacy-peer-deps` com o peer `@google/generative-ai@0.24.1` explícito (versão do lock). Todos os221 peer constraints instalados foram auditados separadamente, sem conflito. Esse workaround é de instalação local, não compatibilidade/flag do produto e não muda o lock público.
+O servidor oficial usa `http://127.0.0.1:4302`. Comece por `/comando-studio`, insira/edite um formulário e use a ação de cópia para abrir `/laboratorio`. Escolha nome, menu e ícone, salve e abra o link confirmado. Recarregar a rota conserva a página no mesmo navegador/persona. Também é possível começar por uma página vazia ou pelo dashboard no laboratório.
 
-Reiniciar pelo `npm start` oficial na porta4302; ao reutilizar candidatos com a mesma versão privada de origem, limpar o cache Angular do host antes do restart evita provar bytes otimizados antigos. A comparação byte a byte dos arquivos instalados contra os tarballs está na evidência.
+A [prova de adoção pública](evidence/sdk-rc38-2026-10-23/validation.json) registra instalação limpa com resolução normal de peers, árvore/lock, build e testes. A prova candidata anterior permanece histórica no [owner](https://github.com/codexrodrigues/praxis-ui-angular/blob/11da15c617d1673ac39308f7747f53a6f2d10fd5/projects/praxis-page-builder/docs/evidence/save-as-2026-10-23/validation.json): seus tarballs privados e workaround de instalação não certificam esta adoção pública e não são necessários para reproduzi-la.
+
+Esta adoção integra o PR15 à branch `codex/visitor-lab-delivery`. Publicação do SDK, integração na branch do laboratório e deploy do Hero são operações distintas; este incremento não publica o Hero no Firebase.
 
 ## Responsabilidades
 
@@ -31,4 +38,4 @@ A definição mantém Form/Table, dashboard/rich-content e outros campos nativos
 
 A revisão independente identificou e acompanhou as correções de preservação do último link, rejeição do picker e bloqueio de save durante escolha de ícone. Alteração preexistente em `incidentes.config.ts` ficou fora do commit; seu hash identifica o baseline de build. Não foram repetidas campanhas Neon ou suites canônicas sem alteração. A falha histórica ampla do dashboard340/380px continua documentada e fora do escopo.
 
-Artefatos derivados: README do owner e seu guia, esta prova, skill canônica `praxis-page-builder-authoring`. Nenhum novo manifest/registro AI, campo persistido ou contrato Config. A documentação pública está no owner; não se anuncia disponibilidade npm no site/playgrounds antes da adoção pública. Status de integração de código, guidance, sincronização local e publicação de pacotes são distintos.
+Artefatos derivados: README do owner e seu guia, esta prova, skill canônica `praxis-page-builder-authoring`. Nenhum novo manifest/registro AI, campo persistido ou contrato Config. A documentação pública do recurso está no owner e foi incluída nos pacotes publicados. Este incremento não modifica o site/playgrounds nem amplia os contratos corporativos. Status de integração de código, guidance, sincronização local e publicação de pacotes são distintos.
