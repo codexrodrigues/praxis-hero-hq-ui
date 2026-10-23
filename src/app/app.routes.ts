@@ -37,6 +37,7 @@ export const routes: Routes = [
       title: `Praxis Hero HQ | ${title || item.label}`,
     };
   }),
+  { path: 'laboratorio/paginas/:pageId', loadComponent: () => import('./pages/visitor-lab/visitor-lab-page.component').then((m) => m.VisitorLabPageComponent), title: 'Praxis Hero HQ | Minha página' },
   { path: '**', redirectTo: '' },
 ];
 

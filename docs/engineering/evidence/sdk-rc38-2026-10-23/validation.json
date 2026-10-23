@@ -1,0 +1,93 @@
+{
+  "recordedAt": "2026-10-23T20:33:22.215672+00:00",
+  "classification": "transversal; public SDK adoption, no new contract",
+  "hostBaseline": "dc9e401869619de1f8649966a65cf862b22cd059",
+  "release": {
+    "version": "10.0.0-rc.38",
+    "channel": "rc",
+    "latestUnchanged": "9.0.67",
+    "source": "11da15c617d1673ac39308f7747f53a6f2d10fd5",
+    "tagCommit": "51075de81704596606bb578ab681124df5ae8493",
+    "prepareRun": 40017933425,
+    "publishRun": 40017986340,
+    "conclusion": "success; build/publish/public install postflight"
+  },
+  "publicInstall": {
+    "command": "npm ci --registry=https://registry.npmjs.org/ --cache=/tmp/praxis-hero-rc38-public-cache",
+    "exitCode": 0,
+    "cleanNodeModules": true,
+    "compatibilityFlags": [],
+    "changedLockEntries": "root +22Praxis only; other dependency entries unchanged",
+    "publicIdentity": "22 installed versions and lock URLs/integrities checked against public npm version metadata",
+    "packageLockSha256": "42d612bdeb0b083699ad3e36b9de60730c5b21e182b8887141ec450af8d7d3a6",
+    "npm": "10.9.7",
+    "node": "22.22.2",
+    "peerProblems": []
+  },
+  "checks": [
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "durationSeconds": 10.533,
+      "bundleInitial": "16.59MB; warning15MB, error18MB"
+    },
+    {
+      "command": "npx --no-install tsc -p tsconfig.spec.json --noEmit",
+      "exitCode": 0
+    },
+    {
+      "command": "node test-e2e/test-route-catalog.cjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node test-e2e/test-visitor-lab.cjs",
+      "exitCode": 0,
+      "coverage": "Form editor apply/save/render; copy; title/menu/native icon; atomic local page/menu; URL/reload; quota/corruption recovery; last confirmed link; personaABA; copy preserves original; additional menu, rename/remove/delete; direct widget settings; zero remote configuration writes; desktop/390px picker"
+    },
+    {
+      "command": "node test-e2e/test-corporate-context.cjs",
+      "exitCode": 0,
+      "coverage": "published Core session/context/choices/CAS wiring, credentials, reload, pagination, errors, obsolete callbacks and laboratory access; desktop/narrow"
+    }
+  ],
+  "proofBoundary": "Actual public npm runtime and local storage; APIs intercepted. No new real corporate HTTP/Neon/SESSION/CSRF/provider acceptance. No Hero Firebase deploy. Full npm test not repeated: historical dashboard340/380px divergence outside changed code. Canonical18 owner specs reused from source evidence, not claimed rerun.",
+  "preexistingUncommittedBuildInput": {
+    "path": "src/app/pages/operacoes/incidentes.config.ts",
+    "sha256": "1c54953040fb0c72d00cbe517499aa804bbed0404ac28c1c1542b200ec17e506",
+    "includedInBuild": true,
+    "includedInCommit": false
+  },
+  "npmAuditNotice": "npm ci reports20 findings; no broad audit/remediation performed. Non-Praxis dependency lock entries unchanged. This is not a security audit.",
+  "skills": {
+    "assessment": "existente-adequada",
+    "canonicalMerge": "08f9a727f7e4c4c39337c15eedcb6473a461cd95",
+    "source": "praxis-page-builder-authoring/SKILL.md; public adoption gate already taught",
+    "localSync": "selected authoring skill synchronized in preceding increment; unrelated local drift untouched"
+  },
+  "review": {
+    "reviewer": "release_adoption_review",
+    "state": "approved: independent reviewer found no blocking issues; apt for PR15 feature-base integration",
+    "scope": "release source and Config pin; train and public lock; host adoption; docs; focal evidence",
+    "verified": "17 artifact hashes and87 source hashes match;22 installed/public/lock package identities; release3jobs; logs; desktop/390px screenshots; skill installed/canonical parity; unrelated input preserved"
+  },
+  "server": "npm start official127.0.0.1:4302; active public rc38 packages",
+  "artifactHashes": {
+    "build.log.txt": "4a2464af861084f5d9e148e89719450bc47a1bc164ca91c23199a3f1c96d0dc4",
+    "ci.log.txt": "81cf68e4177a6767ca0d1d08e48a3cdafa66427cdd7a7fc4f2710951454d29ce",
+    "context-desktop.png": "45b6476aa56a1e8b6218d1c9a29af05eab5662a85b1a298ce0e03d21f0ab196f",
+    "context-narrow.png": "97ca4e2269db98077856c18d50df2cfc235b2fb99541c7761f48e55031a1c691",
+    "context.log.txt": "6871cc0f94072e48652b2e540bb0b327fe9e71ba79405f16f93d73f976259f32",
+    "desktop.png": "6f89d77b7f4201548cf1ebd8aa528b620e0485b8d796e8d0471180911e9d78d9",
+    "editor-narrow.png": "960554052bbe2ec84a0b710dc1cfa5ded0cf85d57232bfc91d0f2fdc4fd70881",
+    "lock.log.txt": "42e9366c61fdf40a06d03fe0bf2c3cf60108a5dbf7c33623d25f885b520464d5",
+    "narrow.png": "eab28d073ecd7e3dff7ab5bee10da021f093c35f61ca78ccb23031ff6ab44fd3",
+    "peer-tree-summary.json": "98eeb32b834e84635491d369b110b185e6d783b0eda00b7e4410d94328150d2c",
+    "picker-narrow.png": "a14d8f59bd9af84556657b647c42947b443a734241692d455350cdeb7c935f3a",
+    "public-packages.json": "f94b98256aad82b15d786e611dd9a3b381607db13b7b0543a2d75dadc356260e",
+    "release.json": "a81d26114b49236adf97584aeb8d25dbc9c500be7f8b6ad6aee0b1c4d8265ba8",
+    "routes.log.txt": "68b2ae4d381ae291ec3eff74d47418b2aa233b171cd2a55c8372c581d99c6a7b",
+    "source-hashes.json": "423bd5bdc057632e7543f07cc4862d8d9c5bb46aea9e894635c93a7749ef5253",
+    "typecheck.log.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "visitor.log.txt": "2c621a90fc0e1ca0d7a49d4a78946ffd28f8e009812f3f04215c2f6e640216ca"
+  }
+}

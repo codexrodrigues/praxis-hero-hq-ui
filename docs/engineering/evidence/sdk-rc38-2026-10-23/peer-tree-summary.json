@@ -1,0 +1,5 @@
+{
+  "command": "npm ls --all --json",
+  "exitCode": 0,
+  "problems": []
+}

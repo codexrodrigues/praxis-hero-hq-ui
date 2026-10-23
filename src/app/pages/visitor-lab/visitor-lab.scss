@@ -1,0 +1,18 @@
+:host { display: block; min-width: 0; }
+.lab { display: grid; gap: 20px; max-width: 1540px; margin: auto; color: var(--md-sys-color-on-surface); }
+.lab-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+h1 { margin: 6px 0 12px; font-size: clamp(24px, 3vw, 38px); letter-spacing: -.035em; }
+h2 { font-size: 20px; margin-block: 20px 12px; }
+p { margin: 0; max-width: 76ch; line-height: 1.6; }
+.eyebrow { color: var(--md-sys-color-primary); font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.scope, .notice { color: var(--md-sys-color-on-surface-variant); font-size: 13px; }
+.scope { white-space: nowrap; padding-top: 4px; }
+.seed-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+code { display: block; overflow-wrap: anywhere; font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
+.error, [role=alert] { color: var(--md-sys-color-error); }
+.library { border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 12px; }
+.library-row, .menu-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding-block: 10px; }
+.library-row > div { flex: 1; min-width: 180px; }
+.menu-row mat-form-field { flex: 1; min-width: 180px; }
+praxis-dynamic-page-builder { display: block; min-width: 0; }
+@media (max-width: 700px) { .lab-header { display: grid; gap: 8px; } .scope { white-space: normal; } .menu-row { align-items: stretch; } }

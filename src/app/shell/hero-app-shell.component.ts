@@ -21,9 +21,10 @@ import {
   PraxisAppShellComponent,
   PraxisCustomizationModeService,
   type PraxisBrandConfig,
-  type PraxisNavGroup,
   type PraxisShellFooterStatus,
 } from '@praxisui/core';
+import { VisitorWorkspaceService } from '../core/visitor-workspace.service';
+import { visitorPagePath } from '../core/visitor-workspace.repository';
 import { HERO_NAVIGATION, type NavItem } from '../core/navigation.model';
 import { PRAXIS_API_BASE_URL } from '../core/platform.config';
 import { ThemeService } from '../core/theme.service';
@@ -57,7 +58,7 @@ interface ShellStatsEnvelope {
   template: `
     <praxis-app-shell
       [brand]="brand"
-      [navigation]="navigation"
+      [navigation]="navigation()"
       [user]="null"
       [footerStatus]="footerStatus()"
       [isDarkTheme]="isDark()"
@@ -386,13 +387,21 @@ export class HeroAppShellComponent {
     href: '/',
   };
 
-  protected readonly navigation: PraxisNavGroup[] = HERO_NAVIGATION;
-  protected readonly allCommandItems: readonly CommandPaletteItem[] = HERO_NAVIGATION.flatMap((group) =>
+  private readonly visitorWorkspace = inject(VisitorWorkspaceService);
+  protected readonly navigation = computed<{ label: string; items: NavItem[] }[]>(() => [
+    ...HERO_NAVIGATION,
+    ...this.visitorWorkspace.workspace().menus.filter((group) => group.items.length).map((group) => ({
+      label: group.label,
+      items: group.items.map((item) => ({ path: visitorPagePath(item.pageId), label: item.label, icon: item.icon ?? 'web', description: 'Página salva neste navegador' })),
+    })),
+  ]);
+  protected readonly allCommandItems = computed<readonly CommandPaletteItem[]>(() => this.navigation().flatMap((group) =>
     group.items.map((item) => ({
       ...item,
       groupLabel: group.label,
+      description: item.description || 'Página salva neste navegador',
     })),
-  );
+  ));
 
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
   @ViewChild('linksList') private linksListRef?: ElementRef<HTMLElement>;
@@ -406,11 +415,11 @@ export class HeroAppShellComponent {
   protected readonly filteredLinks = computed<readonly CommandPaletteItem[]>(() => {
     const rawQuery = this.searchQuery().trim();
     if (!rawQuery) {
-      return this.allCommandItems;
+      return this.allCommandItems();
     }
     const normalizedQuery = HeroAppShellComponent.normalizeSearchText(rawQuery);
     const terms = normalizedQuery.split(/\s+/).filter(Boolean);
-    return this.allCommandItems.filter((item) => {
+    return this.allCommandItems().filter((item) => {
       const haystack = HeroAppShellComponent.normalizeSearchText(
         `${item.label} ${item.groupLabel} ${item.description} ${item.path} ${item.badge ?? ''}`,
       );

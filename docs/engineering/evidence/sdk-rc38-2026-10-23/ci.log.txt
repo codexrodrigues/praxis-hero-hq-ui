@@ -1,0 +1,17 @@
+npm warn deprecated @angular/platform-browser-dynamic@21.2.14: @angular/platform-browser-dynamic is deprecated. Use `@angular/platform-browser` instead.
+npm warn deprecated @angular/animations@21.2.14: @angular/animations is deprecated. Use `animate.enter` and `animate.leave` instead. For more information see: https://v22.angular.dev/guide/animations.
+
+added 448 packages, and audited 449 packages in 4s
+
+102 packages are looking for funding
+  run `npm fund` for details
+
+20 vulnerabilities (2 low, 6 moderate, 11 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues, run:
+  npm audit fix --force
+
+Run `npm audit` for details.
