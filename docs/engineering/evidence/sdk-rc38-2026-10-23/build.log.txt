@@ -50,4 +50,3 @@ Application bundle generation complete. [10.533 seconds] - 2026-10-23T20:31:48.3
 
 
 Output location: <hero-root>/dist/praxis-hero-hq-ui
-
