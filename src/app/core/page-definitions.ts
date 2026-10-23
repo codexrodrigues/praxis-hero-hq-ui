@@ -43,6 +43,12 @@ export const HERO_PAGE_GROUPS: HeroPageGroup[] = [
     domainKey: 'overview',
     items: [
       {
+        label: 'Workspace corporativo', path: '/workspace-corporativo', icon: 'verified_user',
+        description: 'Consulte sua sessão e escolha um contexto confirmado pelo servidor.',
+        page: { kind: 'component', title: 'Praxis Hero HQ | Workspace corporativo',
+          loadComponent: () => import('../pages/corporate-context/corporate-context-page.component').then(m => m.CorporateContextPageComponent) },
+      },
+      {
         label: 'Meu laboratório', path: '/laboratorio', icon: 'science',
         description: 'Crie páginas e menus privados neste navegador, sem login.',
         badge: 'LOCAL', badgeTone: 'info',
