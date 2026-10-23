@@ -205,3 +205,7 @@ um inventário independente dos destinos e recursos esperados.
 ### Adoção corporativa — P3-C em incrementos
 
 Em [/workspace-corporativo](http://127.0.0.1:4302/workspace-corporativo), consulte a sessão e selecione um contexto permitido pelo servidor. Personas do Hero não autenticam essa sessão. O laboratório local continua disponível sem login. A seleção real depende da integração SESSION/CSRF/CORS do backend; este recorte de UI tem teste de navegador com APIs interceptadas e não encerra a prova HTTP/Neon. Veja [escopo, provas reutilizadas e próximos incrementos](docs/engineering/p3c-host-adoption.md).
+
+### Jornada de páginas da plataforma — candidato
+
+O laboratório agora consome as ações reutilizáveis Copy/SaveAs do Page Builder, com adapter local de persistência. Esta branch requer os pacotes candidatos da plataforma e permanece dependente da adoção pública do SDK antes de integração. [Contrato de adoção, reprodução e provas](docs/engineering/reusable-page-journey.md).
