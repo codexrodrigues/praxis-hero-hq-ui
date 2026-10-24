@@ -92,7 +92,10 @@
     "canonicalRepo": "codexrodrigues/praxis-codex-skills",
     "branch": "codex/hero-session-transport-guidance",
     "skill": "praxis-angular-host-project",
-    "validation": "41 helper tests;168 Praxis/19 Ergon preflight clean; reviewed; publication/sync pending"
+    "validation": "41 helper tests;168 Praxis/19 Ergon preflight clean; independently reviewed and integrated",
+    "pullRequest": "https://github.com/codexrodrigues/praxis-codex-skills/pull/845",
+    "merge": "abb91d7842d8b62bf0bd3f0822885acb3020a427",
+    "localSync": "one selected skill OK via official helper and filtered manifest; backup; baseline30a checked;793 unrelated installed files byte-preserved; no family force"
   },
   "artifactsSha256": {
     "unit.log": "df023559f523e27f478008a8862751be3caa06c91baa16b6010e16d58d93847e",
@@ -104,6 +107,11 @@
     "login-desktop.png": "9c784ab477ff84529f803ab2f853e4dd13a51a8d189ddd051618a9105caf0662",
     "login-narrow.png": "f236e3a57296de2f79c1bb3428aa5f05a98eba1ed0bc8a0e04459751b1a8b3cc",
     "context-desktop.png": "a249f623be772a0fe4f1f610d4d836a340c6391b15209d22fdd754d3efd51cf2",
-    "context-narrow.png": "7cefe6311974ebfa44fe6c20e92344b81877eee2abcf4f86a9ad492964bc6d37"
-  }
+    "context-narrow.png": "7cefe6311974ebfa44fe6c20e92344b81877eee2abcf4f86a9ad492964bc6d37",
+    "skill-sync-receipt.json": "ffa6b6b055f75fd998f8d052a0ef35c05a78ee2c04bf862697b9e17d6e852cf3",
+    "skill-preflight.log": "93371cda741da5bb6545db046915cff19b05a5b97fcffa0f03cf54735c88000d"
+  },
+  "implementationCommit": "804ad81052f23919823651c6af30b24ad5b89de6",
+  "pullRequest": "https://github.com/codexrodrigues/praxis-hero-hq-ui/pull/16",
+  "pullRequestBase": "codex/visitor-lab-delivery; not main; no deployment"
 }
