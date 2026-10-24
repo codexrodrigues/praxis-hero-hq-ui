@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { combineLatest } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -10,6 +10,7 @@ import { EnterpriseRuntimeContextService, UiLayoutLifecycleService, UiLayoutLife
   type WidgetPageDefinition, type PageIdentity, type PageAuthoringDocument, type UiLayoutDraftWorkspaceReceipt, type UiLayoutReleaseReviewReceipt,
   type UiLayoutReleaseHeadReceipt, type UiLayoutLifecycleHttpReceipt } from '@praxisui/core';
 import { materializeDynamicFormPageRuntimeInputs, validateDynamicFormPageWidget } from '@praxisui/dynamic-form';
+import { CorporateFormEditorComponent } from './corporate-form-editor.component';
 import { CorporateNavigationService } from '../../core/corporate-navigation.service';
 import { CORPORATE_GROUPS_TARGET, corporateGroupsDocument, firstCorporateGroup, bindCorporatePage, type CorporateGroupsDocument } from '../../core/corporate-navigation.model';
 import { CorporateSessionService } from '../../core/corporate-session.service';
@@ -20,11 +21,14 @@ type Receipt<T> = UiLayoutLifecycleHttpReceipt<T>;
 
 @Component({
   selector: 'app-corporate-pages',
-  imports: [FormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule, DynamicWidgetPageComponent],
+  imports: [FormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule, DynamicWidgetPageComponent, CorporateFormEditorComponent],
   templateUrl: './corporate-pages.html', styleUrl: './corporate-pages.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CorporatePagesComponent {
+  @ViewChild(CorporateFormEditorComponent) formEditor?: CorporateFormEditorComponent;
+  readonly copyFrom = signal('');
+  readonly copyOrigin = signal<CorporatePublishedPage | null>(null);
   readonly session = inject(CorporateSessionService);
   private readonly runtime = inject(EnterpriseRuntimeContextService);
   private readonly lifecycle = inject(UiLayoutLifecycleService);
@@ -98,6 +102,7 @@ export class CorporatePagesComponent {
   private invalidate(): void {
     ++this.epoch; this.epochSession = this.session.generation(); this.ready.set(false); this.busy.set(false);
     this.workspace.set(null); this.review.set(null); this.head.set(null); this.headAbsent.set(false);
+    this.copyOrigin.set(null);
     this.published.set(null); this.catalog.set(null); this.document.set(null); this.renderedPage.set(null);
     this.title = ''; this.reason = ''; this.commandKeys.clear();
     this.groupsDocument.set(null); this.groupId = ''; this.bindingId = ''; this.bindingGroupId = ''; this.bindingLabel = ''; this.bindingOrder = 0;
@@ -132,15 +137,16 @@ export class CorporatePagesComponent {
     const params = this.route.snapshot.queryParamMap;
     this.pageId.set(this.groupsMode ? CORPORATE_GROUPS_TARGET.componentId : this.publishedMode ? this.route.snapshot.paramMap.get('pageId') ?? '' : params.get('pageId') ?? '');
     this.draftId.set(params.get('draftId') ?? ''); this.releaseId.set(params.get('releaseId') ?? '');
+    this.copyFrom.set(!this.groupsMode && !this.publishedMode ? params.get('copyFrom') ?? '' : '');
     this.creationKey.set(params.get('creationKey') ?? ''); this.lastQuery = this.queryIdentity();
   }
   private queryIdentity(): string {
-    return JSON.stringify([this.route.snapshot.paramMap.get('pageId'), ...['pageId', 'draftId', 'releaseId', 'creationKey'].map(key => this.route.snapshot.queryParamMap.get(key))]);
+    return JSON.stringify([this.route.snapshot.paramMap.get('pageId'), ...['pageId', 'draftId', 'releaseId', 'creationKey', 'copyFrom'].map(key => this.route.snapshot.queryParamMap.get(key))]);
   }
   private async location(): Promise<void> {
     const queryParams = { pageId: this.pageId() || null, draftId: this.draftId() || null,
-      releaseId: this.releaseId() || null, creationKey: this.creationKey() || null };
-    this.lastQuery = JSON.stringify([this.route.snapshot.paramMap.get('pageId'), queryParams.pageId, queryParams.draftId, queryParams.releaseId, queryParams.creationKey]);
+      releaseId: this.releaseId() || null, creationKey: this.creationKey() || null, copyFrom: this.copyFrom() || null };
+    this.lastQuery = JSON.stringify([this.route.snapshot.paramMap.get('pageId'), queryParams.pageId, queryParams.draftId, queryParams.releaseId, queryParams.creationKey, queryParams.copyFrom]);
     await this.router.navigate([], { relativeTo: this.route, queryParams, replaceUrl: true });
   }
   private target() { return this.groupsMode ? CORPORATE_GROUPS_TARGET : corporatePageTarget(this.pageId()); }
@@ -163,6 +169,7 @@ export class CorporatePagesComponent {
       const status = error instanceof CorporatePageError || error instanceof UiLayoutLifecycleHttpError ? error.status : 0;
       if ([401, 403, 404].includes(status)) {
         this.workspace.set(null); this.review.set(null); this.head.set(null); this.headAbsent.set(false);
+        this.copyOrigin.set(null);
         this.published.set(null); this.catalog.set(null); this.document.set(null); this.renderedPage.set(null); this.groupsDocument.set(null); this.title = '';
       }
       if (write) this.fenced.set(true); // Read/reconcile before any subsequent command; never retry automatically.
@@ -182,7 +189,7 @@ export class CorporatePagesComponent {
   }
 
   async create(): Promise<void> {
-    if (this.creationKey() || this.pageId() || !this.title.trim()) return;
+    if (this.groupsMode || this.copyFrom() || this.creationKey() || this.pageId() || !this.title.trim()) return;
     await this.action(true, async epoch => {
       const title = this.title.trim();
       this.creationKey.set(crypto.randomUUID()); await this.location();
@@ -195,10 +202,27 @@ export class CorporatePagesComponent {
       if (this.current(epoch)) this.message.set('Rascunho criado no servidor. Ele ainda não está publicado.');
     });
   }
+  async copyPublished(): Promise<void> {
+    const origin = this.copyOrigin(), title = this.title.trim();
+    if (!origin || origin.pageId !== this.copyFrom() || !title || this.creationKey()) return;
+    await this.action(true, async epoch => {
+      this.creationKey.set(crypto.randomUUID()); await this.location();
+      if (!this.current(epoch)) return;
+      const receipt = await this.pages.copyPublished(this.creationKey(), title, origin.copySource);
+      if (!this.current(epoch)) return;
+      this.pageId.set(receipt.body.pageId); this.draftId.set(receipt.body.draftId);
+      await this.location(); await this.loadDraft(epoch);
+      if (this.current(epoch)) {
+        if (this.document()?.config.navigation.length) throw new CorporatePageError('CONTRACT');
+        this.message.set('Cópia criada como novo rascunho. Escolha um vínculo de menu e publique pelo fluxo editorial.');
+      }
+    });
+  }
   async reconcile(): Promise<void> {
     await this.action(false, async epoch => {
       const receipt = await this.pages.reconcile(this.creationKey());
       if (!this.current(epoch)) return;
+      if (this.copyFrom() && (receipt.body.source.kind !== 'published-page' || receipt.body.source.pageId !== this.copyFrom())) throw new CorporatePageError('CONTRACT');
       this.pageId.set(receipt.body.pageId); this.draftId.set(receipt.body.draftId);
       await this.location(); await this.loadDraft(epoch);
     });
@@ -229,7 +253,11 @@ export class CorporatePagesComponent {
       if (this.pageId() && this.draftId()) await this.loadDraft(epoch);
       if (this.pageId() && this.releaseId()) await this.loadReview(epoch);
       if (this.groupsMode) await this.loadHead(epoch);
-      else if (!this.pageId()) await this.loadCatalog(epoch);
+      else if (!this.pageId() && this.copyFrom()) {
+        this.copyOrigin.set(null);
+        const value = await this.pages.published(this.copyFrom());
+        if (this.current(epoch)) { this.copyOrigin.set(value.body); this.title = `${value.body.document.config.presentation.title} — cópia`.slice(0, 160); }
+      } else if (!this.pageId()) await this.loadCatalog(epoch);
     });
   }
   private async loadDraft(epoch: number): Promise<void> {
@@ -257,12 +285,11 @@ export class CorporatePagesComponent {
       return;
     }
     const document = corporatePageDocument(body.targets[0].working.document);
-    const definition = document.config.definition, widgets = definition.widgets;
-    const widget = widgets[0]?.definition, inputs = widget?.inputs;
-    const form = inputs?.['config'] as { title?: unknown; fieldMetadata?: unknown } | undefined;
-    if (document.config.presentation.icon !== 'home' || Object.keys(definition).length !== 1 || widgets.length !== 1
-        || !widget || widget.id !== 'praxis-dynamic-form' || Object.keys(widget).length !== 2 || !inputs || Object.keys(inputs).length !== 1
-        || !form || Object.keys(form).length !== 2 || typeof form.title !== 'string' || !Array.isArray(form.fieldMetadata) || form.fieldMetadata.length) throw new CorporatePageError('CONTRACT');
+    const admitted = validatePageAuthoringDocument(document, { 'praxis-dynamic-form': validateDynamicFormPageWidget });
+    const widgets = document.config.definition.widgets;
+    if (!admitted.ok || document.config.presentation.icon !== 'home' || widgets.length !== 1
+        || widgets[0].definition.id !== 'praxis-dynamic-form'
+        || Object.keys(widgets[0].definition.inputs ?? {}).some(key => key !== 'config')) throw new CorporatePageError('CONTRACT');
     this.workspace.set(value); this.document.set(document); this.title = document.config.presentation.title;
     this.selectBinding(document.config.navigation[0]?.id ?? '');
     if (body.frozenReleaseRef) this.releaseId.set(body.frozenReleaseRef);
@@ -270,6 +297,11 @@ export class CorporatePagesComponent {
   async saveRevision(): Promise<void> {
     const workspace = this.workspace(), original = this.groupsMode ? this.groupsDocument() : this.document();
     if (!workspace || !original || !this.title.trim() || !this.reason.trim() || this.groupsMode && !this.headAbsent()) return;
+    let edited: PageAuthoringDocument | null = null;
+    if (!this.groupsMode) {
+      try { edited = this.formEditor?.readDocument() ?? null; if (!edited) throw new Error('Editor not ready'); }
+      catch { this.message.set('Corrija o conteúdo no editor. Bindings, contexto e recursos do Form não podem mudar neste rascunho. Suas alterações continuam no editor.'); return; }
+    }
     await this.action(true, async epoch => {
       let document: CorporateGroupsDocument | PageAuthoringDocument;
       if (this.groupsMode) {
@@ -277,7 +309,7 @@ export class CorporatePagesComponent {
         if (!this.current(epoch) || !this.headAbsent()) return;
         document = firstCorporateGroup(corporateGroupsDocument(original), this.groupId, this.title, this.groupOrder);
       } else {
-        document = corporatePageDocument(structuredClone(original));
+        document = corporatePageDocument(edited);
         document.config.presentation.title = this.title.trim();
         if (this.bindingGroupId) {
           if (!this.menu.ready() || !this.menu.groups().some(group => group.id === this.bindingGroupId)) throw new CorporatePageError('CONTRACT');
@@ -400,7 +432,7 @@ export class CorporatePagesComponent {
   }
   entryParams() {
     return { corporateView: this.groupsMode ? 'groups' : this.publishedMode ? 'published' : 'editor', corporatePageId: this.pageId() || null,
-      corporateDraftId: this.draftId() || null, corporateReleaseId: this.releaseId() || null, corporateCreationKey: this.creationKey() || null };
+      corporateDraftId: this.draftId() || null, corporateReleaseId: this.releaseId() || null, corporateCreationKey: this.creationKey() || null, corporateCopyFrom: this.copyFrom() || null };
   }
   readonly editorPath = this.groupsMode ? '/workspace-corporativo/grupos' : '/workspace-corporativo/paginas';
   selectBinding(id: string): void {

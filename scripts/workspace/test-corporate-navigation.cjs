@@ -24,7 +24,7 @@ const page = { kind: 'praxis.dynamic-page.editor', version: 1, config: { definit
 let tests = 0;
 async function test(name, body) { await body(); tests++; console.log('PASS', name); }
 function signal(initial) { let value = initial; const read = () => value; read.set = next => value = next; read.update = update => value = update(value); return read; }
-function angular(tokens) { return { Injectable: () => value => value, Component: () => value => value, DestroyRef: 'destroy', ChangeDetectionStrategy: {},
+function angular(tokens) { return { Injectable: () => value => value, Component: () => value => value, ViewChild: () => () => {}, DestroyRef: 'destroy', ChangeDetectionStrategy: {},
   inject: token => { assert.ok(tokens.has(token), `Unexpected injected token ${String(token)}`); return tokens.get(token); }, signal, computed: fn => fn, effect: fn => fn(), untracked: fn => fn() }; }
 function observable() { const observers = []; return { subscribe(fn) { observers.push(fn); return { unsubscribe() {} }; }, emit(value) { observers.forEach(fn => fn(value)); } }; }
 const deferred = () => { let resolve, reject; const promise = new Promise((a,b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; };
@@ -50,8 +50,9 @@ function editorFixture(mode, query = {}) {
   const changes = observable(), requests = [], navigate = [], session = { generation: signal(1), authenticated: signal(true), busy: signal(true) };
   const runtime = { contextChanges$: changes, snapshot: { state: 'ready' }, effectiveContext: { contextVersion: 'c1', activeTenant: { tenantId: 'lab-a' }, activeOrganizationId: 'org-1', capabilities: ['ui.authoring.configure', 'ui.layout.publish'] } };
   const route = { snapshot: { data: { corporateGroups: mode === 'groups', corporatePublished: mode === 'published' }, queryParamMap: { get: key => query[key] ?? null }, paramMap: { get: () => mode === 'published' ? id(50) : null } }, paramMap: {}, queryParamMap: {} };
+  const pages = { synchronizeSession() {} };
   const lifecycle = {}, menu = { ready: signal(true), busy: signal(false), groups: signal([group(10), group(20)]), async refresh() { requests.push('menu'); } };
-  const tokens = new Map([['runtime', runtime], ['session', session], ['pages', { synchronizeSession() {} }], ['lifecycle', lifecycle], ['route', route], ['router', { async navigate(_, options) { navigate.push(options); } }], ['menu', menu], ['destroy', { onDestroy() {} }]]);
+  const tokens = new Map([['runtime', runtime], ['session', session], ['pages', pages], ['lifecycle', lifecycle], ['route', route], ['router', { async navigate(_, options) { navigate.push(options); } }], ['menu', menu], ['destroy', { onDestroy() {} }]]);
   const core = { EnterpriseRuntimeContextService: 'runtime', UiLayoutLifecycleService: 'lifecycle', UiLayoutLifecycleHttpError: HttpError, UiLayoutLifecycleContractError: ContractError,
     readStrongResourceEtag: value => /^"[^"]+"$/.test(value) ? value : null };
   const { CorporatePagesComponent } = load('src/app/pages/corporate-pages/corporate-pages.component.ts', {
@@ -63,7 +64,7 @@ function editorFixture(mode, query = {}) {
       corporatePageId: value => typeof value === 'string' && /^[0-9a-f-]{36}$/.test(value), corporatePageTarget: pageId => ({ componentType: 'praxis-dynamic-page', componentId: pageId }), corporatePageDocument: value => structuredClone(value) },
   });
   const editor = new CorporatePagesComponent(); editor.ready.set(true);
-  return { editor, lifecycle, menu, requests, navigate, changes, session };
+  return { editor, lifecycle, pages, menu, requests, navigate, changes, session };
 }
 (async () => {
   await test('closed group document and first aggregate never replace another group', () => {
@@ -156,6 +157,30 @@ function editorFixture(mode, query = {}) {
     await f.editor.publish(); assert.deepEqual(f.requests[0].condition, { kind: 'first-publish' });
     assert.equal(f.editor.fenced(), true); assert.equal(f.editor.head(), null); assert.equal(f.requests.length, 1);
     await f.editor.publish(); assert.equal(f.requests.length, 1, 'No automatic or manual replay while uncertain');
+  });
+  await test('copy intent uses confirmed source, independent target and explicit menu rebinding', async () => {
+    const f = editorFixture('editor', { copyFrom: id(50) });
+    const source = { kind: 'published-page', pageId: id(50), releaseId: id(51), revisionId: id(52) };
+    f.editor.copyOrigin.set({ pageId: id(50), copySource: source }); f.editor.title = 'Cópia';
+    f.pages.createNative = () => { throw new Error('Must not replace copy intent with native source'); };
+    f.pages.copyPublished = async (key, title, origin) => { f.requests.push({ key, title, origin }); return { body: { pageId: id(60), draftId: id(61), source } }; };
+    f.editor.loadDraft = async () => f.editor.document.set({ ...structuredClone(page), config: { ...structuredClone(page.config), navigation: [] } });
+    await f.editor.create(); assert.equal(f.requests.length, 0);
+    await f.editor.copyPublished(); assert.deepEqual(f.requests[0].origin, source);
+    assert.equal(f.editor.pageId(), id(60)); assert.equal(f.editor.document().config.navigation.length, 0);
+    assert.equal(f.editor.entryParams().corporateCopyFrom, id(50));
+    assert.equal(f.navigate.at(-1).queryParams.pageId, id(60)); assert.equal(f.navigate.at(-1).queryParams.copyFrom, id(50));
+  });
+  await test('uncertain copy keeps creation key for GET reconciliation and prevents another POST', async () => {
+    const f = editorFixture('editor', { copyFrom: id(50) });
+    const source = { kind: 'published-page', pageId: id(50), releaseId: id(51), revisionId: id(52) };
+    f.editor.copyOrigin.set({ pageId: id(50), copySource: source }); f.editor.title = 'Cópia';
+    f.pages.copyPublished = async key => { f.requests.push({ method: 'POST', key }); throw new PageError('UNCERTAIN'); };
+    await f.editor.copyPublished(); const key = f.editor.creationKey(); assert.ok(key); assert.equal(f.editor.fenced(), true);
+    await f.editor.copyPublished(); assert.equal(f.requests.length, 1);
+    f.pages.reconcile = async receivedKey => { f.requests.push({ method: 'GET', key: receivedKey }); return { body: { pageId: id(60), draftId: id(61), source } }; };
+    f.editor.loadDraft = async () => {}; await f.editor.reconcile();
+    assert.deepEqual(f.requests.map(request => request.method), ['POST', 'GET']); assert.equal(f.requests[1].key, key);
   });
   console.log(`PASS ${tests} offline corporate navigation checks; browser/real HTTP remain separate.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

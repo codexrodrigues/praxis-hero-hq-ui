@@ -16,7 +16,7 @@
     @if (message()) { <p data-testid="corporate-page-message">{{ message() }}</p> }
   </div>
   @if (ready()) {
-    <p class="scope-note">{{ groupsMode ? 'Publique o primeiro grupo para organizar páginas. Se já houver um agregado publicado, reutilize seus grupos; este piloto não edita esse agregado.' : 'Piloto: um formulário vazio, sem API de domínio, com ícone home. Título e vínculos de menu são publicados pelo fluxo governado; cópia publicada continua fora deste corte.' }}</p>
+    <p class="scope-note">{{ groupsMode ? 'Publique o primeiro grupo para organizar páginas. Se já houver um agregado publicado, reutilize seus grupos; este piloto não edita esse agregado.' : 'Piloto: um Form com campos locais e ícone home, sem API de domínio. Conteúdo, título e vínculos de menu seguem o fluxo governado. Copiar inicia outro rascunho; não publica nem herda vínculos.' }}</p>
     @if (!publishedMode) {
       @if (groupsMode && !draftId() && !releaseId()) {
         <section aria-labelledby="groups-create-title">
@@ -30,9 +30,14 @@
       }
       @if (!groupsMode && !pageId()) {
         <section aria-labelledby="create-title">
-          <h2 id="create-title">1. Criar a partir do modelo admitido</h2>
+          <h2 id="create-title">{{ copyFrom() ? '1. Copiar publicação em novo rascunho' : '1. Criar a partir do modelo admitido' }}</h2>
+          @if (copyFrom()) { <p>A origem é uma publicação confirmada pelo servidor. A cópia terá identidade e rota próprias, sem vínculos de menu.</p> }
           <mat-form-field appearance="outline"><mat-label>Título da nova página</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!creationKey()" /></mat-form-field>
-          <button mat-flat-button (click)="create()" [disabled]="busy() || fenced() || !canAuthor() || !!creationKey() || !title.trim()">Criar rascunho</button>
+          @if (copyFrom()) {
+            <button mat-flat-button (click)="copyPublished()" [disabled]="busy() || fenced() || !canAuthor() || !!creationKey() || !title.trim() || !copyOrigin()">Criar cópia como rascunho</button>
+          } @else {
+            <button mat-flat-button (click)="create()" [disabled]="busy() || fenced() || !canAuthor() || !!creationKey() || !title.trim()">Criar rascunho</button>
+          }
           @if (creationKey()) {
             <p>A referência desta tentativa está no endereço. Consultar não repete a criação.</p>
             <button mat-stroked-button (click)="reconcile()" [disabled]="busy()">Consultar criação</button>
@@ -52,7 +57,14 @@
             <mat-form-field appearance="outline"><mat-label>Ordem do grupo</mat-label><input matInput type="number" [(ngModel)]="groupOrder" min="0" max="2147483647" [disabled]="busy() || !!draft.body.frozenReleaseRef || !headAbsent()" /></mat-form-field>
             <p>Ícone home. Esta revisão conserva a identidade do primeiro grupo.</p>
           } @else {
-            <p>Formulário admitido sem campos. O restante do documento é preservado ao salvar.</p>
+            @if (!draft.body.frozenReleaseRef) {
+              @for (value of [document()]; track pageId() + ':' + workspace()?.etag) { @if (value) {
+                <fieldset [disabled]="busy() || fenced() || !canAuthor()" data-testid="corporate-form-content">
+                  <legend>Conteúdo do formulário</legend>
+                  <app-corporate-form-editor [document]="value" />
+                </fieldset>
+              } }
+            } @else { <p>Conteúdo congelado nesta release. Uma cópia inicia um novo rascunho editável.</p> }
             <fieldset [disabled]="busy() || !!draft.body.frozenReleaseRef">
               <legend>Vínculo de menu</legend>
               <label for="binding-selection">Vínculo a editar</label>
@@ -101,13 +113,14 @@
     @if (published(); as value) {
       <section aria-labelledby="published-title" data-testid="published-page">
         <h2 id="published-title">{{ value.document.config.presentation.title }}</h2>
-        <p>Publicação confirmada pelo servidor. Formulário vazio do piloto.</p>
+        <p>Conteúdo publicado confirmado pelo servidor. Valores preenchidos são temporários e não alteram a publicação.</p>
         @if (renderedPage(); as runtimePage) {
         <praxis-dynamic-page [page]="runtimePage" [pageIdentity]="publishedIdentity()"
           [autoPersist]="false" [enableCustomization]="false" [strictValidation]="true"
           [showPageSettingsButton]="false" [showWidgetAssistantButton]="false" />
         }
         <p class="reference">Release ativa: {{ value.head.activeReleaseRef }}</p>
+        @if (canAuthor()) { <a mat-stroked-button routerLink="/workspace-corporativo/paginas" [queryParams]="{copyFrom: value.pageId}" data-testid="copy-published-page">Copiar conteúdo para nova página</a> }
         <a mat-flat-button [routerLink]="value.route" data-testid="published-route">Abrir página publicada</a>
       </section>
     }

@@ -33,7 +33,7 @@ export class CorporateContextPageComponent {
       ? '/workspace-corporativo/grupos' : '/workspace-corporativo/paginas';
   readonly pagesQuery = this.pagesPath.startsWith('/pages/') ? {} : {
     pageId: this.resumeId('corporatePageId'), draftId: this.resumeId('corporateDraftId'),
-    releaseId: this.resumeId('corporateReleaseId'), creationKey: this.resumeId('corporateCreationKey'),
+    releaseId: this.resumeId('corporateReleaseId'), creationKey: this.resumeId('corporateCreationKey'), copyFrom: this.resumeId('corporateCopyFrom'),
   };
   username = '';
   password = '';

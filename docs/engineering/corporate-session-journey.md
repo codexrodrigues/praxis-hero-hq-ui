@@ -198,3 +198,61 @@ A revisão identificou um acompanhamento de UX preexistente e não bloqueante: o
 Publicar pode continuar habilitado quando o release consultado já está ativo. O head
 publicado continua sendo a confirmação canônica, separado do estado de aprovação da
 review; este corte não altera esse comportamento nem usa o botão como prova de estado.
+
+
+## Plano: conteúdo Form e cópia publicada — 24/10/2026
+
+Classificação transversal de adoção; baseline Hero `a5542ec039f7f61449c2784fa04f1d23220f1add`,
+SDK público rc.38, Config rc.174. Aderência: edição nativa e cópia já suportadas,
+mas não materializadas no Hero; política do piloto Quickstart parcialmente suportada
+pois restringe o Form a campos vazios. Não criar contrato local substituto.
+
+O Hero consumirá o editor nativo e `decodeDynamicFormPageInputs` /
+`projectDynamicFormPageEditorChanges`, preservando bytes authorados e aplicando somente
+mudanças explícitas, com validação Core + dono Form. O perfil inicial admite um único
+Form, ícone home, campos locais de texto/textarea/número/checkbox e layout de campos;
+sem recurso de domínio, URL, hooks, opções remotas ou ações. O responsável Quickstart
+amplia sua política fechada no mesmo ciclo. Erros locais de documento/envelope ficam
+disponíveis para reparo no editor, sem stripping silencioso. O editor nativo oferece
+recursos mais amplos que o perfil; não há capability pública para limitar suas abas.
+A UI explica o recorte antes da edição. Uma negação HTTP 403 limpa o conteúdo e mantém
+o fence de autorização: reler o rascunho pode perder edições não salvas. O host não
+duplica a política de admissão nem apresenta essa negação como erro local reparável.
+Valores digitados no runtime não
+integram o documento publicado. A reprodução Config mantém envelopes/bindings fixos.
+
+A cópia usa `copySource` recebido no GET published, correlacionado com pageId/head,
+e POST pages com creationKey/source/title. Config aloca pageId/draft/widget keys e
+limpa navigation; o host não envia JSON arbitrário nem fabrica revisão de origem.
+A recuperação consulta by-creation-key e conserva o discriminador da origem.
+Novo vínculo de menu é explícito, passando pelo mesmo lifecycle e CAS de publicação.
+
+Impacto autorizado: Hero serviço privado de páginas, editor/componentes/rotas existentes,
+testes e este registro; Quickstart policy tem escritor separado. Sem mudança de SDK,
+Config, corpus ou landing. Testes focais cobrirão round-trip real do dono, ausência de
+defaults, falhas de envelope/perfil, origem/head inválidos, cópia/recuperação e respostas
+obsoletas; build do host e revisão independente antes de integração. Nenhuma chamada
+remota de escrita ou Neon nesta implementação. Branch `feat/corporate-page-content-copy`;
+`incidentes.config.ts` continua fora do escopo. Skills de host, round-trip Form e runtime
+orientam o corte; impacto no guidance será fechado com a política final revisada.
+
+
+Implementação candidata: o editor nativo é montado com `SETTINGS_PANEL_DATA` isolado;
+o snapshot de comparação vem de `getSettingsValue()` após renderizar. O salvamento
+usa somente a projeção do dono e o lifecycle HTTP existente; não chama `onSave()` nem
+instala persistência de preferências. O recibo de nova revisão reinicia o editor por
+pageId + ETag. Editar um draft aberto é suportado; uma release congelada continua
+imutável, e copiar sua publicação inicia outro draft e outra página.
+
+Validação focal: `test-corporate-content-copy.mjs` passou 8 checks com codecs/serializer/
+layout reais do SDK rc.38, incluindo no-op sem materializar defaults do documento,
+campos/layout com recarga, negação de envelope, origem/head divergente e recuperação
+após SESSION obsoleta. `test-corporate-navigation.cjs` passou 12 checks, incluindo dois
+novos casos de intenção de cópia/query e incerteza sem replay. Esses testes usam doubles
+para montagem Angular/HTTP; não provam DOM nem persistência remota. TypeScript e build
+Angular de produção passaram; a montagem real e a operação contra o host com policy
+ampliada pertencem à validação CUA do coordenador. Nenhuma operação remota foi executada
+pelo autor. O gerador `scripts/workspace/corporate-form-owner-fixture.mjs` reproduz a
+fixture de quatro campos do SDK que também orienta a policy Quickstart. Arrays novas
+conservam a saída do serializer, incluindo validators vazio e span responsivo; o host
+não faz stripping desses valores nem aceita regras por esse motivo.
