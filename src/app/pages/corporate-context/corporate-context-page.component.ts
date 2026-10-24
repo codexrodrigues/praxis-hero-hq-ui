@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal, untracked } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {
-  EnterpriseRuntimeContextService, PRAXIS_ENTERPRISE_RUNTIME_CONTEXT_OPTIONS,
+  EnterpriseRuntimeContextService,
   type EnterpriseRuntimeContext, type EnterpriseRuntimeContextChoice,
 } from '@praxisui/core';
 import { CorporateSessionService } from '../../core/corporate-session.service';
@@ -15,10 +15,6 @@ import { CorporateSessionService } from '../../core/corporate-session.service';
 @Component({
   selector: 'app-corporate-context-page',
   imports: [RouterLink, FormsModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule],
-  providers: [EnterpriseRuntimeContextService, {
-    provide: PRAXIS_ENTERPRISE_RUNTIME_CONTEXT_OPTIONS,
-    useValue: { includeGlobalFetchHeaders: false, errorPolicy: 'fail' },
-  }],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './corporate-context-page.html',
   styleUrl: './corporate-context-page.scss',
@@ -26,6 +22,18 @@ import { CorporateSessionService } from '../../core/corporate-session.service';
 export class CorporateContextPageComponent {
   private readonly runtime = inject(EnterpriseRuntimeContextService);
   readonly session = inject(CorporateSessionService);
+  private readonly returnRefs = inject(ActivatedRoute).snapshot.queryParamMap;
+  private resumeId(key: string): string | null {
+    const value = this.returnRefs.get(key);
+    return value && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value) ? value : null;
+  }
+  // These refs select a server read only. Never accept a caller-provided URL or grants.
+  readonly pagesPath = this.returnRefs.get('corporateView') === 'published' && this.resumeId('corporatePageId')
+    ? `/pages/${this.resumeId('corporatePageId')}` : '/workspace-corporativo/paginas';
+  readonly pagesQuery = this.pagesPath.startsWith('/pages/') ? {} : {
+    pageId: this.resumeId('corporatePageId'), draftId: this.resumeId('corporateDraftId'),
+    releaseId: this.resumeId('corporateReleaseId'), creationKey: this.resumeId('corporateCreationKey'),
+  };
   username = '';
   password = '';
   private destroyed = false;

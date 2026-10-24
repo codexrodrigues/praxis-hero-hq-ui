@@ -86,3 +86,35 @@ precisam ser compostas antes da operação corporativa; respostas interceptadas 
 provam cookies/CORS. Nenhum segredo foi usado ou persistido. Nenhum deploy foi feito.
 O build passou com aviso16,60MB, sem alterar budgets. O servidor oficial4302 fica
 ativo para validação visual; a página não concede sessão artificial para demonstração.
+
+
+## Próximo incremento autorizado — CORS e workflow corporativo
+
+Classificação transversal de adoção, sem alteração de contrato público neste corte.
+Inventário: Quickstart já tem propriedades aditivas CORS/origin; Core rc.38 oferece
+lifecycle completo e contexto/navegação; Config tem pages create/by-key/catalog/published.
+Hero ainda não materializa essas operações. Aderência: já suportado só UX para
+lifecycle; parcialmente suportado para cliente pages e ativação operacional. Não usar
+SaveAs como sucesso de publicação antecipado. Fonte piloto admite apenas Form vazio,
+título e ícone home; edição arbitrária e submissão de domínio não estão admitidas.
+
+Plano: serviço privado de consumo HTTP pages e UI de criar/reler/salvar/enviar/revisar/
+publicar; providers corporativos compartilhados por entrada/editor/reader; GET publicado
+para rota persistente. Teste de consumidor controlado, conflitos/negações/recarga e
+revisão independente. Não repetir Neon. Cópia após reload depende da referência exata
+de revisão da fonte; published/catalog/head/review atuais não a projetam. Inventariar
+fonte existente antes de propor evolução canônica. Grupos/menu exigem ciclo editorial
+próprio e navegação autorizada; não simular esses resultados com storage de visitante.
+
+Impacto: Hero core/rotas/contexto/UI/teste/docs. Sem novo SDK/pacote/lock neste corte.
+Quickstart guarda ajuste de duas listas de origem, preservando CSRF/TLS/cookies e
+origens anteriores. Runtime Render é antigo7229471/15-10, autodeploy desligado, e env
+mais recente teve deployments falhos. Salvar configuração não significa ativá-la;
+reativação exige custódia do build/composição/migrador. Não acionar latest/deploy_only
+sem saber qual artefato e quais pré-requisitos serão ativados. Nenhum novo backend ou
+banco é criado. Alteração alheia incidentes.config.ts continua fora do commit.
+
+Recursos: root único npm4302/build/validações/CORS/docs/rotas/provider; p3c_page_providers
+escritor pages/service/test; p3c_security_review revisor independente, backend_delivery
+inventário somente leitura das dependências canônicas. Followups herdam modelo/esforço,
+sem override disponível. Não há escrita concorrente por arquivo nem uso de Neon.

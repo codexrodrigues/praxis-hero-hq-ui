@@ -1,0 +1,92 @@
+<section class="corporate-pages" data-testid="corporate-pages" [attr.aria-busy]="busy()">
+  <header>
+    <p class="eyebrow">PÁGINAS CORPORATIVAS</p>
+    <h1>{{ publishedMode ? 'Página publicada' : 'Criar e publicar uma página' }}</h1>
+    <p>O servidor conserva o rascunho, a revisão e a publicação. Cada etapa exige uma confirmação separada.</p>
+  </header>
+  <nav aria-label="Workspace corporativo">
+    <a mat-button routerLink="/workspace-corporativo" [queryParams]="entryParams()">Sessão e contexto</a>
+    <a mat-button routerLink="/workspace-corporativo/paginas">Páginas corporativas</a>
+  </nav>
+  @if (!ready()) {
+    <p>Confirme sua sessão e selecione o contexto na entrada corporativa. Depois retome este endereço.</p>
+    <button mat-stroked-button (click)="resume()" [disabled]="session.busy()">Confirmar sessão e contexto</button>
+  }
+  <div role="status" aria-live="polite">
+    @if (busy()) { <p>Consultando o servidor…</p> }
+    @if (message()) { <p data-testid="corporate-page-message">{{ message() }}</p> }
+  </div>
+  @if (ready()) {
+    <p class="scope-note">Piloto: um formulário vazio, sem API de domínio, com ícone home. Este corte permite editar o título; não publica conteúdo arbitrário do laboratório. Menu e cópia publicada ainda não estão disponíveis.</p>
+    @if (!publishedMode) {
+      @if (!pageId()) {
+        <section aria-labelledby="create-title">
+          <h2 id="create-title">1. Criar a partir do modelo admitido</h2>
+          <mat-form-field appearance="outline"><mat-label>Título da nova página</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!creationKey()" /></mat-form-field>
+          <button mat-flat-button (click)="create()" [disabled]="busy() || fenced() || !canAuthor() || !!creationKey() || !title.trim()">Criar rascunho</button>
+          @if (creationKey()) {
+            <p>A referência desta tentativa está no endereço. Consultar não repete a criação.</p>
+            <button mat-stroked-button (click)="reconcile()" [disabled]="busy()">Consultar criação</button>
+          }
+        </section>
+      }
+      @if (pageId()) {
+        <p class="reference">Página: {{ pageId() }}</p>
+        <button mat-stroked-button (click)="reload()" [disabled]="busy()">Reler estado do servidor</button>
+      }
+      @if (workspace(); as draft) {
+        <section aria-labelledby="draft-title">
+          <h2 id="draft-title">2. Rascunho e abrangência</h2>
+          <p>Estado do rascunho: <strong data-testid="draft-state">{{ draft.body.draft.state }}</strong></p>
+          <mat-form-field appearance="outline"><mat-label>Título da página</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!draft.body.frozenReleaseRef" /></mat-form-field>
+          <p>Formulário admitido sem campos. O restante do documento é preservado ao salvar.</p>
+          <div class="actions">
+            <button mat-flat-button (click)="saveRevision()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim()">Salvar revisão</button>
+            <button mat-stroked-button (click)="assign()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedRevision">Aplicar à organização atual</button>
+            <button mat-stroked-button (click)="freeze()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedAssignment">Congelar release</button>
+          </div>
+        </section>
+      }
+      @if (pageId()) {
+        <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
+      }
+      @if (review(); as value) {
+        <section aria-labelledby="review-title">
+          <h2 id="review-title">3. Revisão e publicação</h2>
+          <p class="reference">Release: {{ value.body.releaseRef }}</p>
+          <p>Estado da revisão: <strong data-testid="review-state">{{ value.body.state }}</strong></p>
+          <p>Este recibo confirma o estado da release identificada. Ele não contém uma prévia imutável do conteúdo para revisão.</p>
+          <a mat-button routerLink="/workspace-corporativo/paginas" [queryParams]="reviewParams()" data-testid="review-link">Abrir link de revisão para outro ator</a>
+          <div class="actions">
+            <button mat-stroked-button (click)="submit()" [disabled]="busy() || fenced() || !canAuthor() || value.body.state !== 'DRAFT'">Enviar para revisão</button>
+            <button mat-stroked-button (click)="approve()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'SUBMITTED' || !reason.trim()">Aprovar release identificada</button>
+            <button mat-flat-button (click)="publish()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'APPROVED' || (!head() && !headAbsent()) || !reason.trim()">Publicar release aprovada</button>
+          </div>
+        </section>
+      }
+    }
+    @if (published(); as value) {
+      <section aria-labelledby="published-title" data-testid="published-page">
+        <h2 id="published-title">{{ value.document.config.presentation.title }}</h2>
+        <p>Publicação confirmada pelo servidor. Formulário vazio do piloto.</p>
+        @if (renderedPage(); as runtimePage) {
+        <praxis-dynamic-page [page]="runtimePage" [pageIdentity]="publishedIdentity()"
+          [autoPersist]="false" [enableCustomization]="false" [strictValidation]="true"
+          [showPageSettingsButton]="false" [showWidgetAssistantButton]="false" />
+        }
+        <p class="reference">Release ativa: {{ value.head.activeReleaseRef }}</p>
+        <a mat-flat-button [routerLink]="value.route" data-testid="published-route">Abrir página publicada</a>
+      </section>
+    }
+    @if (!publishedMode) {
+      <section aria-labelledby="catalog-title">
+        <h2 id="catalog-title">Páginas publicadas neste contexto</h2>
+        <button mat-stroked-button (click)="refreshCatalog()" [disabled]="busy()">Atualizar catálogo</button>
+        @if (catalog(); as value) {
+          <ul>@for (item of value.items; track item.pageId) { <li><a [routerLink]="item.route">{{ item.title }}</a></li> } @empty { <li>Nenhuma página publicada visível neste contexto.</li> }</ul>
+          @if (value.nextCursor) { <button mat-button (click)="more()" [disabled]="busy()">Carregar mais páginas</button> }
+        }
+      </section>
+    }
+  }
+</section>
