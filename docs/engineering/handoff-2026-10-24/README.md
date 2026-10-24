@@ -4,6 +4,48 @@ Atualizado em 24/10/2026. Entrega documental para outro agente em outra máquina
 O trabalho funcional está **incompleto**. Este registro distingue fonte publicada,
 integração, deploy e prova operacional; não transforma aprovação técnica em sucesso funcional.
 
+## Retomada independente da máquina anterior
+
+Foi feita uma segunda revisão usando **quatro clones HTTPS novos do GitHub**, sem
+objetos Git, worktrees, arquivos ignorados ou referências dos checkouts de trabalho.
+O [recibo da auditoria remota](remote-only-verification.json) fixa os commits
+efetivamente recuperados. Foram encontrados os 20 arquivos essenciais conferidos,
+os links do roteiro/prompt, os quatro relatórios gzip íntegros e a governança canônica.
+O lock do Hero aponta os 22 pacotes rc.38 para o npm público. Um revisor independente
+conferiu os clones e não encontrou dependência obrigatória de processo ou arquivo
+da máquina anterior. Não houve instalação de dependências, build ou login nessa auditoria.
+
+| Etapa | O que a outra máquina precisa | Depende desta máquina? |
+| --- | --- | --- |
+| Ler contexto, revisar código e relatórios | Git e acesso aos repositórios GitHub indicados | Não |
+| Desenvolver e validar unidades sem banco | Node 22/npm, JDK 21/Maven e acesso aos registros públicos; instalar dependências próprias | Não; não copiar node_modules, Maven local ou caches antigos |
+| Abrir o Hero local | Executar seu próprio `npm start`; `angular.json` usa `proxy.conf.js` e porta 4302 | Não; localhost sempre pertence à máquina que o abre |
+| Login e prova funcional no backend | Acesso próprio autorizado às identidades autor/publicador existentes no Render e ao backend ativo | Não usa credencial local antiga, mas exige acesso externo que Git não fornece |
+| Release/deploy ou diagnóstico protegido | Acesso próprio autorizado às contas/serviços de publicação, GitHub e Render pertinentes | Não usa tokens desta máquina; essas permissões não foram comprovadas para o sucessor |
+
+Portanto, **os repositórios bastam para retomar análise e desenvolvimento; não bastam,
+sozinhos, para autenticar ou implantar**. A ausência de segredos no pacote é intencional.
+O agente deve conferir seu acesso aos serviços pelo fluxo oficial. Se esse acesso
+faltar, continuar o trabalho independente e registrar o gate operacional pendente;
+não criar usuários/grants de contorno, pedir senhas no chat ou copiar sessões antigas.
+Dados publicados e a tentativa antiga estão no backend remoto, não dentro do Git;
+consultá-los exige uma nova sessão autorizada e sua existência atual deve ser relida.
+
+Em uma pasta de trabalho escolhida na outra máquina, os pontos de partida são:
+
+```sh
+git clone --single-branch --branch feat/corporate-page-content-copy https://github.com/codexrodrigues/praxis-hero-hq-ui.git
+git clone --single-branch --branch fix/published-copy-capture-admission https://github.com/codexrodrigues/praxis-config-starter.git
+git clone --single-branch --branch main https://github.com/codexrodrigues/praxis-api-quickstart.git
+git clone --single-branch --branch main https://github.com/codexrodrigues/praxis-codex-skills.git
+```
+
+Essas são referências de retomada, não uma instrução para sobrescrever clones já
+existentes. Conferir os HEADs contra os recibos e o GitHub; depois instalar somente
+as dependências necessárias. Se precisar inspecionar o fonte do SDK, obter também
+`codexrodrigues/praxis-ui-angular` na tag `praxis-ui-v10.0.0-rc.38` indicada abaixo.
+Não usar o `main` mais recente da biblioteca como se fosse o pacote consumido.
+
 ## Objetivo e critério de conclusão
 
 O Hero é o laboratório/vitrine de uma jornada reutilizável da plataforma Praxis:
@@ -291,6 +333,10 @@ canônicas atuais em `praxis-codex-skills/docs/platform-governance/`. A raiz wor
 anterior não é um repositório Git; os snapshots portáteis são deliberados, não uma
 nova fonte canônica dessas regras. Na outra máquina eles não serão carregados
 automaticamente como AGENTS: o agente deve lê-los explicitamente.
+Os snapshots preservam o texto original, inclusive links relativos do workspace
+antigo. Não interpretar esses links como caminhos de instalação na outra máquina:
+para a fonte atual, abrir `docs/platform-governance/WORKSPACE-AGENTS.md` e
+`docs/platform-governance/agentes-e-modelos.md` no clone de `praxis-codex-skills`.
 
 1. Obter os repositórios e branches remotos indicados, confirmar HEADs e PRs e ler
    provas/limites. Nenhum trabalhador da sessão anterior deve ser presumido ativo.
@@ -330,3 +376,10 @@ relatórios gzip e distinção entre resultados reais, simulados e pendentes. O
 coordenador verificou JSON, descompactação, hashes, links locais, padrões comuns de
 credenciais e `git diff --check`. Nenhum segredo foi encontrado. Não houve novo
 build, teste funcional, deploy ou acesso a banco para produzir esta documentação.
+
+A revisão posterior de portabilidade também recebeu APTO independente. Ela usou
+somente os clones novos descritos no recibo, sem executar instalação/build/login.
+O acesso do sucessor a contas externas e a disponibilidade futura dos registros
+não foram testados. Hashes de fontes privadas citados nos recibos históricos são
+referências de auditoria, não promessa de que os logs brutos estejam no Git; os
+recibos sanitizados e os relatórios de custo necessários à retomada estão versionados.

@@ -14,6 +14,15 @@ O README contém os commits, PRs, dependências, evidências remotas e limitaç�
 reconfira o GitHub antes de editar. Não dependa de caminhos `/Users/rodrigo`, `/tmp`,
 cookies, credenciais ou processos da máquina anterior.
 
+A pasta inclui `remote-only-verification.json`: o material foi conferido a partir
+de quatro clones novos do GitHub. Os repositórios permitem retomar análise e
+desenvolvimento. Para login, validação real e deploy, confira seu próprio acesso
+autorizado ao Render e às identidades existentes lá; Git não contém nem deve conter
+esses segredos. Não presuma que a autenticação desta sessão foi transferida. Se o
+acesso externo faltar, avance no trabalho independente e registre o gate operacional,
+sem contornar a autorização. Instale suas dependências e inicie seu próprio servidor;
+localhost, node_modules e caches da máquina anterior não são recursos compartilhados.
+
 Objetivo: criar/editar uma página com conteúdo real pelo editor oficial, salvar,
 aprovar/publicar e acessá-la por menu e rota persistentes após reload. Copiar uma
 publicação em nova identidade/rota, editar a cópia e publicar com novo vínculo de
