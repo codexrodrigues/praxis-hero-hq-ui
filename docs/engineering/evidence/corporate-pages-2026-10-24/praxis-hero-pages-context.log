@@ -1,0 +1,1 @@
+PASS: intercepted session/login/logout, raw CSRF, context CAS/reload, error isolation, persona independence, late response fences, uncertain logout and local lab; no real SESSION/cookie/CORS/Neon proof.

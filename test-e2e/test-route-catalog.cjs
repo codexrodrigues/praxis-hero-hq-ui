@@ -6,6 +6,10 @@ const assert = require('node:assert/strict');
 const ts = require('typescript');
 const root = path.resolve(__dirname, '..');
 const cache = new Map();
+const corporateContext = class CorporateContext {};
+const corporateLifecycle = class CorporateLifecycle {};
+const corporatePages = class CorporatePages {};
+const corporateOptions = {};
 let guardCalls = 0;
 const guard = () => { guardCalls++; };
 
@@ -20,6 +24,8 @@ function load(relative) {
   vm.runInNewContext(source, {
     exports,
     require(id) {
+      if (id === '@praxisui/core') return { EnterpriseRuntimeContextService: corporateContext, UiLayoutLifecycleService: corporateLifecycle, PRAXIS_ENTERPRISE_RUNTIME_CONTEXT_OPTIONS: corporateOptions };
+      if (id.endsWith('corporate-page-pilot.service')) return { CorporatePagePilotService: corporatePages };
       if (id.endsWith('tactical-clearance.guard')) return { tacticalClearanceGuard: guard };
       assert.ok(id.startsWith('.'), `Unexpected eager runtime import: ${id}`);
       return load(path.relative(root, path.resolve(path.dirname(file), `${id}.ts`)));
@@ -28,7 +34,16 @@ function load(relative) {
   return exports;
 }
 
-const { routes } = load('src/app/app.routes.ts');
+const { routes: rootRoutes } = load('src/app/app.routes.ts');
+const corporateBoundary = rootRoutes.find(route => route.children);
+assert.ok(corporateBoundary, 'Corporate entry/editor/reader share one provider boundary');
+assert.ok(corporateBoundary.providers.includes(corporateContext));
+assert.ok(corporateBoundary.providers.includes(corporateLifecycle));
+assert.ok(corporateBoundary.providers.includes(corporatePages));
+assert.deepEqual(JSON.parse(JSON.stringify(corporateBoundary.providers.find(x => x.provide === corporateOptions).useValue)), { includeGlobalFetchHeaders: false, errorPolicy: 'fail' });
+assert.deepEqual(JSON.parse(JSON.stringify(corporateBoundary.children.map(x => x.path))), ['workspace-corporativo', 'workspace-corporativo/paginas', 'pages/:pageId']);
+assert.equal(corporateBoundary.children.find(x => x.path === 'pages/:pageId').data.corporatePublished, true);
+const routes = rootRoutes.flatMap(route => route.children ?? [route]);
 const { HERO_NAVIGATION } = load('src/app/core/navigation.model.ts');
 const { HERO_PAGE_GROUPS } = load('src/app/core/page-definitions.ts');
 const items = HERO_NAVIGATION.flatMap(group => group.items);
@@ -55,7 +70,7 @@ const expectedResources = [
 assert.deepEqual(plain(routes.filter(route => route.data?.resource).map(route => route.data.resource)), expectedResources);
 assert.equal(new Set(items.map(item => item.path)).size, items.length, 'Unique menu destinations');
 assert.equal(new Set(routes.map(route => route.path)).size, routes.length, 'Unique routes');
-assert.equal(routes.length, items.length + 2, 'Only wildcard and the visitor page parameter route are outside the static menu');
+assert.equal(routes.length, items.length + 4, 'Wildcard, visitor page, corporate editor and published reader are outside the static menu');
 assert.equal(typeof routes.find(route => route.path === 'laboratorio/paginas/:pageId')?.loadComponent, 'function', 'Saved visitor pages resolve from their persistent local identity');
 assert.deepEqual(plain(routes.at(-1)), { path: '**', redirectTo: '' });
 for (const definition of definitions) {
@@ -147,7 +162,7 @@ cache.set(path.resolve(root, 'src/app/core/page-definitions.ts'), {
     page: { kind: 'component', title: 'Protected component', loadComponent: () => Promise.resolve(null) },
   }] }],
 });
-const protectedRoute = load('src/app/app.routes.ts').routes[0];
+const protectedRoute = load('src/app/app.routes.ts').routes.find(route => route.path === 'protected-component');
 assert.equal(protectedRoute.canActivate[0], guard);
 assert.equal(protectedRoute.data.clearance, 'DEFCON 1');
 clearance = 'DEFCON 2';

@@ -93,3 +93,29 @@ catálogo autorizado compartilhado por URL/menu. Não enviar JSON arbitrário Sa
 como POST/pages, simular publicação ou duplicar as regras de admissão no host.
 Reusar provas válidas, validar apenas a nova costura e manter revisão independente.
 Este incremento não fecha toda a issue P3-C nem autoriza merge/deploy do PR13 em main.
+
+## Corte seguinte: criação e lifecycle de páginas
+
+A rota `/workspace-corporativo/paginas` agora consome criação nativa, reconciliação
+por creationKey, draft, revisão, congelamento, submissão, aprovação por outro ator,
+publicação explícita e leitura publicada. `/pages/:pageId` relê a publicação do
+servidor e renderiza pelo Page Builder/Form público. O primeiro perfil é um Form
+vazio, título editável e ícone home, não um editor irrestrito de JSON. O vínculo
+organizacional usa o contexto persistido, sem autoridade obtida dos parâmetros URL.
+
+Contexto, lifecycle e transporte partilham um único injector ancestral corporativo.
+Troca de SESSION invalida o contexto e descarta respostas tardias de outro ator.
+Referências da URL são relidas no servidor; passwords, cookies e grants não são
+persistidos no browser. Aprovação mecânica deste piloto não oferece preview
+imutável completo do conteúdo: isso permanece uma evolução explícita.
+
+O E2E com API controlada passou: dois atores, resposta perdida/reconciliação sem
+POST duplicado,412/releitura,ETag publicado fraco,recarga,401/403/tenant404,resposta
+tardia após troca de sessão e viewport390px. O gate nativo lê os documentos Java
+reais da revisão2 do Quickstart e valida pelo SDK público rc.38. Build e typecheck
+aprovados; bundle16,63MB mantém alerta15MB e erro18MB. Esses resultados ainda não
+provam operação no Render; o recibo operacional será acrescentado após ativação.
+
+Cópia aguarda publicação do Config com copySource já integrado na fonte; menu
+persistente aguarda a costura de grupos sem sobrescrever uma lista incompleta.
+Não foram criados contratos paralelos. Sem repetição da campanha Neon.
