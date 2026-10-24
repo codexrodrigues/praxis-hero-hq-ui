@@ -1,0 +1,225 @@
+{
+  "observedAt": "2026-10-24T23:04:21.455750+00:00",
+  "method": "gh pr view plus git ls-remote exact branch; no deployment or database connection",
+  "pullRequests": [
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/visitor-lab-delivery",
+      "headRefOid": "b68ea95e722ea5bfd6d4630844e79947cec4011a",
+      "mergeCommit": null,
+      "mergedAt": null,
+      "number": 13,
+      "state": "OPEN",
+      "url": "https://github.com/codexrodrigues/praxis-hero-hq-ui/pull/13",
+      "repo": "praxis-hero-hq-ui",
+      "remoteHeadRef": "b68ea95e722ea5bfd6d4630844e79947cec4011a",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "codex/visitor-lab-delivery",
+      "headRefName": "codex/corporate-session-journey",
+      "headRefOid": "64808f0fbd65fe00bc91b1d7bd17260ce85b3237",
+      "mergeCommit": {
+        "oid": "b68ea95e722ea5bfd6d4630844e79947cec4011a"
+      },
+      "mergedAt": "2026-10-24T22:15:07Z",
+      "number": 16,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-hero-hq-ui/pull/16",
+      "repo": "praxis-hero-hq-ui",
+      "remoteHeadRef": "64808f0fbd65fe00bc91b1d7bd17260ce85b3237",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "codex/corporate-session-journey",
+      "headRefName": "codex/corporate-page-workflow",
+      "headRefOid": "6810fac4926ca30cbae4ad20a2b157043dce309d",
+      "mergeCommit": {
+        "oid": "64808f0fbd65fe00bc91b1d7bd17260ce85b3237"
+      },
+      "mergedAt": "2026-10-24T22:14:46Z",
+      "number": 17,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-hero-hq-ui/pull/17",
+      "repo": "praxis-hero-hq-ui",
+      "remoteHeadRef": "6810fac4926ca30cbae4ad20a2b157043dce309d",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "codex/corporate-page-workflow",
+      "headRefName": "feat/corporate-menu-persistence",
+      "headRefOid": "a5542ec039f7f61449c2784fa04f1d23220f1add",
+      "mergeCommit": {
+        "oid": "6810fac4926ca30cbae4ad20a2b157043dce309d"
+      },
+      "mergedAt": "2026-10-24T22:13:02Z",
+      "number": 18,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-hero-hq-ui/pull/18",
+      "repo": "praxis-hero-hq-ui",
+      "remoteHeadRef": "a5542ec039f7f61449c2784fa04f1d23220f1add",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "codex/visitor-lab-delivery",
+      "headRefName": "feat/corporate-page-content-copy",
+      "headRefOid": "d72442f9a1125e9e0afdc416c5109e146d5c46c9",
+      "mergeCommit": null,
+      "mergedAt": null,
+      "number": 19,
+      "state": "OPEN",
+      "url": "https://github.com/codexrodrigues/praxis-hero-hq-ui/pull/19",
+      "repo": "praxis-hero-hq-ui",
+      "remoteHeadRef": "d72442f9a1125e9e0afdc416c5109e146d5c46c9",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "fix/page-provenance-boundaries",
+      "headRefOid": "5d0258eec79676dcf93126de3b40f9e7e8879ce6",
+      "mergeCommit": {
+        "oid": "6760dc68290cbb13431b57da84639bbae257c989"
+      },
+      "mergedAt": "2026-10-24T20:48:16Z",
+      "number": 532,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-config-starter/pull/532",
+      "repo": "praxis-config-starter",
+      "remoteHeadRef": "5d0258eec79676dcf93126de3b40f9e7e8879ce6",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "fix/published-copy-capture-admission",
+      "headRefOid": "6d6baf7f88cfdf213754d56162d8d42fa81045dc",
+      "mergeCommit": null,
+      "mergedAt": null,
+      "number": 533,
+      "state": "OPEN",
+      "url": "https://github.com/codexrodrigues/praxis-config-starter/pull/533",
+      "repo": "praxis-config-starter",
+      "remoteHeadRef": "6d6baf7f88cfdf213754d56162d8d42fa81045dc",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/p3c-real-pages",
+      "headRefOid": "e9503e4340a25f33fa8d8fc7cb26613f2b3d50ad",
+      "mergeCommit": {
+        "oid": "48c28c0c8f0b25f7c85fdf51cf69b49e69bc40b2"
+      },
+      "mergedAt": "2026-10-24T06:08:50Z",
+      "number": 463,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-api-quickstart/pull/463",
+      "repo": "praxis-api-quickstart",
+      "remoteHeadRef": "e9503e4340a25f33fa8d8fc7cb26613f2b3d50ad",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "fix/page-provenance-boundaries",
+      "headRefOid": "1654547d3d1dfa04d8b011972234244389200e77",
+      "mergeCommit": {
+        "oid": "5417d06609ffb2c61ceb56f655ce2bf3cae35ace"
+      },
+      "mergedAt": "2026-10-24T21:12:31Z",
+      "number": 477,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-api-quickstart/pull/477",
+      "repo": "praxis-api-quickstart",
+      "remoteHeadRef": "1654547d3d1dfa04d8b011972234244389200e77",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "docs/config174-hero-creation-result",
+      "headRefOid": "b68b9cf1d0fab68f7f1d4fb587fe56f60e52474f",
+      "mergeCommit": {
+        "oid": "2e93c1a4a0f3c5b09fa26915442ad3a10cac46c3"
+      },
+      "mergedAt": "2026-10-24T21:24:54Z",
+      "number": 478,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-api-quickstart/pull/478",
+      "repo": "praxis-api-quickstart",
+      "remoteHeadRef": "b68b9cf1d0fab68f7f1d4fb587fe56f60e52474f",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/hero-form-content-policy",
+      "headRefOid": "b6ca1fd98ff5ce01d3df1974c115c1a1398247b3",
+      "mergeCommit": {
+        "oid": "d6c11592ce885d7f5aeb058314268e2ac5cafa17"
+      },
+      "mergedAt": "2026-10-24T22:24:00Z",
+      "number": 479,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-api-quickstart/pull/479",
+      "repo": "praxis-api-quickstart",
+      "remoteHeadRef": "b6ca1fd98ff5ce01d3df1974c115c1a1398247b3",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/page-provenance-boundary-guidance",
+      "headRefOid": "138e4c83f928466f3f74122074365298005026b9",
+      "mergeCommit": {
+        "oid": "3896f06dbd8225c9f2dc548d6ebe56d613a49078"
+      },
+      "mergedAt": "2026-10-24T20:48:19Z",
+      "number": 862,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-codex-skills/pull/862",
+      "repo": "praxis-codex-skills",
+      "remoteHeadRef": "138e4c83f928466f3f74122074365298005026b9",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/hero-groups-navigation-guidance",
+      "headRefOid": "b9745b45ef461d2de563ac97a99dbf282dd7921f",
+      "mergeCommit": {
+        "oid": "d4b04a2c6bca7f7262a12d947f9a4aa5121e0711"
+      },
+      "mergedAt": "2026-10-24T21:48:51Z",
+      "number": 863,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-codex-skills/pull/863",
+      "repo": "praxis-codex-skills",
+      "remoteHeadRef": "b9745b45ef461d2de563ac97a99dbf282dd7921f",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/hero-form-policy-guidance",
+      "headRefOid": "ecd00283afcaf76b80ca9aefb4a3a9b752d48872",
+      "mergeCommit": {
+        "oid": "89c925e3277fc06ae327924ab5c374aaea85746e"
+      },
+      "mergedAt": "2026-10-24T22:24:03Z",
+      "number": 864,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-codex-skills/pull/864",
+      "repo": "praxis-codex-skills",
+      "remoteHeadRef": "ecd00283afcaf76b80ca9aefb4a3a9b752d48872",
+      "headMatchesRemote": true
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/hero-published-copy-guidance",
+      "headRefOid": "7e04f079e4fe6f8d127772d61ca7d78d5519211b",
+      "mergeCommit": {
+        "oid": "9298573bddcfa848512b3f37e87af71c247197c3"
+      },
+      "mergedAt": "2026-10-24T22:31:41Z",
+      "number": 865,
+      "state": "MERGED",
+      "url": "https://github.com/codexrodrigues/praxis-codex-skills/pull/865",
+      "repo": "praxis-codex-skills",
+      "remoteHeadRef": "7e04f079e4fe6f8d127772d61ca7d78d5519211b",
+      "headMatchesRemote": true
+    }
+  ]
+}
