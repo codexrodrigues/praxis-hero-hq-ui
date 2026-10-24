@@ -17,3 +17,6 @@ dd { margin: 4px 0 0; overflow-wrap: anywhere; }
 .context-choice { display: flex; width: 100%; min-height: 52px; height: auto; justify-content: flex-start; text-align: left; margin: 12px 0; padding: 12px; overflow-wrap: anywhere; }
 .next-step { border-top: 1px solid var(--mat-sys-outline-variant); margin-top: 32px; padding-top: 16px; }
 @media(max-width: 600px) { .actions { display: grid; } .scope-note, .confirmed { padding: 16px; } }
+.session-form { display: grid; gap: 12px; max-width: 440px; margin: 24px 0; }
+.session-form mat-form-field { min-width: 0; width: 100%; }
+.session-form button { justify-self: start; }

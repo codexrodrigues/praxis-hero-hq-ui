@@ -1,29 +1,9 @@
 const target = process.env.PAX_PROXY_TARGET || 'https://praxis-api-quickstart.onrender.com';
-const origin = process.env.PAX_PROXY_ORIGIN || 'http://localhost:4003';
 
-module.exports = {
-  '/api': {
-    target,
-    changeOrigin: true,
-    secure: false,
-    headers: {
-      Origin: origin,
-    },
-    onProxyReq: (proxyReq) => {
-      proxyReq.setHeader('Origin', origin);
-      proxyReq.setHeader('origin', origin);
-    },
-  },
-  '/schemas': {
-    target,
-    changeOrigin: true,
-    secure: false,
-    headers: {
-      Origin: origin,
-    },
-    onProxyReq: (proxyReq) => {
-      proxyReq.setHeader('Origin', origin);
-      proxyReq.setHeader('origin', origin);
-    },
-  },
-};
+// Preserve the browser's Origin/Referer and cookies. The API must admit the actual
+// official Hero origin; a development proxy never substitutes an allowed identity.
+module.exports = Object.fromEntries(['/api', '/schemas', '/auth'].map(path => [path, {
+  target,
+  changeOrigin: true,
+  secure: true,
+}]));

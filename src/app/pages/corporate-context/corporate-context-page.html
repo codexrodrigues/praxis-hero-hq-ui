@@ -1,12 +1,30 @@
-<section class="context-entry" data-testid="corporate-context" [attr.aria-busy]="busy()">
+<section class="context-entry" data-testid="corporate-context" [attr.aria-busy]="busy() || session.busy()">
   <header>
     <p class="eyebrow">WORKSPACE CORPORATIVO</p>
     <h1>Seu contexto de trabalho</h1>
-    <p>Selecione onde trabalhar usando as opções permitidas pela sua sessão no servidor.</p>
+    <p>Entre com sua conta do servidor e escolha onde trabalhar.</p>
   </header>
   <div class="scope-note"><mat-icon aria-hidden="true">verified_user</mat-icon><p>A persona do Hero organiza a demonstração. O acesso corporativo depende da sessão e das permissões confirmadas pelo servidor.</p></div>
+  <div aria-live="polite" role="status" data-testid="session-status">
+    @if (session.busy()) { <p>Confirmando sessão…</p> }
+    @if (session.message()) { <p class="feedback">{{ session.message() }}</p> }
+    @if (session.authenticated()) { <p><strong>Sessão confirmada pelo servidor.</strong></p> }
+  </div>
+  @if (!session.authenticated() && session.state() !== 'logout-uncertain') {
+    <form class="session-form" (ngSubmit)="login()" aria-label="Entrar no workspace corporativo">
+      <mat-form-field appearance="outline"><mat-label>Usuário</mat-label><input matInput name="username" autocomplete="username" required [(ngModel)]="username" [disabled]="session.busy()" /></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Senha</mat-label><input matInput name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" [disabled]="session.busy()" /></mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="session.busy() || !username.trim() || !password">Entrar</button>
+    </form>
+  }
   <div class="actions">
-    <button mat-flat-button (click)="refresh()" [disabled]="busy()"><mat-icon>refresh</mat-icon>Atualizar contextos</button>
+    @if (session.authenticated()) {
+      <button mat-flat-button (click)="refresh()" [disabled]="busy() || session.busy()"><mat-icon>refresh</mat-icon>Atualizar contextos</button>
+      <button mat-stroked-button (click)="logout()" [disabled]="session.busy()">Sair</button>
+    } @else {
+      <button mat-stroked-button (click)="resume()" [disabled]="session.busy()">Verificar sessão</button>
+      @if (session.state() === 'logout-uncertain') { <button mat-stroked-button (click)="logout()" [disabled]="session.busy()">Tentar sair novamente</button> }
+    }
     <a mat-button routerLink="/laboratorio">Continuar no laboratório local</a>
   </div>
   <div aria-live="polite" role="status">
@@ -27,11 +45,11 @@
     <section aria-label="Contextos disponíveis">
       <h2>Contextos disponíveis</h2>
       @for (choice of choices(); track choice.choiceRef) {
-        <button class="context-choice" mat-stroked-button [disabled]="busy()" (click)="select(choice)"><mat-icon>domain</mat-icon>{{ choice.label }}</button>
+        <button class="context-choice" mat-stroked-button [disabled]="busy() || session.busy()" (click)="select(choice)"><mat-icon>domain</mat-icon>{{ choice.label }}</button>
       } @empty {
         @if (!busy()) { <p>Nenhum contexto disponível para esta sessão.</p> }
       }
-      @if (nextCursor()) { <button mat-button (click)="more()" [disabled]="busy()">Carregar mais contextos</button> }
+      @if (nextCursor()) { <button mat-button [disabled]="busy() || session.busy()" (click)="more()">Carregar mais contextos</button> }
     </section>
   }
   <p class="next-step">A publicação de páginas neste workspace será habilitada em uma próxima entrega. Suas páginas do laboratório continuam salvas neste navegador.</p>
