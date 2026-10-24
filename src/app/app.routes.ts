@@ -1,9 +1,20 @@
 import type { Routes } from '@angular/router';
 import { HERO_PAGE_GROUPS } from './core/page-definitions';
 import { tacticalClearanceGuard } from './core/tactical-clearance.guard';
+import { CORPORATE_RUNTIME_PROVIDERS } from './core/corporate-runtime.providers';
 
 export const routes: Routes = [
-  ...HERO_PAGE_GROUPS.flatMap((group) => group.items).map((item) => {
+  {
+    path: '', providers: CORPORATE_RUNTIME_PROVIDERS,
+    loadComponent: () => import('./pages/corporate-layout/corporate-layout.component').then(m => m.CorporateLayoutComponent),
+    children: [
+      { path: 'workspace-corporativo', canActivate: [], loadComponent: () => import('./pages/corporate-context/corporate-context-page.component').then(m => m.CorporateContextPageComponent), title: 'Praxis Hero HQ | Workspace corporativo' },
+      { path: 'workspace-corporativo/paginas', loadComponent: () => import('./pages/corporate-pages/corporate-pages.component').then(m => m.CorporatePagesComponent), title: 'Praxis Hero HQ | Páginas corporativas' },
+      { path: 'workspace-corporativo/grupos', loadComponent: () => import('./pages/corporate-pages/corporate-pages.component').then(m => m.CorporatePagesComponent), data: { corporateGroups: true }, title: 'Praxis Hero HQ | Grupos corporativos' },
+      { path: 'pages/:pageId', loadComponent: () => import('./pages/corporate-pages/corporate-pages.component').then(m => m.CorporatePagesComponent), data: { corporatePublished: true }, title: 'Praxis Hero HQ | Página corporativa' },
+    ],
+  },
+  ...HERO_PAGE_GROUPS.flatMap((group) => group.items).filter(item => item.path !== '/workspace-corporativo').map((item) => {
     const page = item.page;
     const routePath = item.path.replace(/^\//, '');
     const access = {

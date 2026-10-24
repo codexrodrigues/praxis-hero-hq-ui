@@ -10,6 +10,8 @@ import {
 } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import {
+  FetchBackend,
+  HttpBackend,
   HttpErrorResponse,
   HttpEvent,
   HttpHeaders,
@@ -93,6 +95,9 @@ import { HERO_TACTICAL_RADAR_METADATA } from './pages/dashboard/hero-tactical-ra
 import { reconcilePersistedDashboardPage } from './pages/dashboard/dashboard-page.definition';
 import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
+import { corporateSessionInterceptor } from './core/corporate-session.interceptor';
+import { CorporateSessionBackend } from './core/corporate-session.backend';
+import { corporateRequestPath, demoApiRequest } from './core/corporate-session-target';
 
 const API_URL_VALUE: ApiUrlConfig = {
   default: {
@@ -195,6 +200,7 @@ const praxisStatsDedupeInterceptor: HttpInterceptorFn = (req, next) => {
 
 const praxisDashboardSnapshotReconcileInterceptor: HttpInterceptorFn = (req, next) => {
   if (
+    !demoApiRequest(req.url) || corporateRequestPath(req.url) !== null ||
     req.method !== 'GET' ||
     !req.url.includes('/praxis/config/ui') ||
     !req.urlWithParams.includes('dynamic-page:')
@@ -264,7 +270,7 @@ const praxisApiLoadingBridgeInterceptor: HttpInterceptorFn = (req, next) => {
 };
 
 const praxisSimulatedSessionConfigFallbackInterceptor: HttpInterceptorFn = (req, next) => {
-  if (!req.url.includes('/praxis/config/ui') || typeof localStorage === 'undefined') {
+  if (!demoApiRequest(req.url) || corporateRequestPath(req.url) !== null || !req.url.includes('/praxis/config/ui') || typeof localStorage === 'undefined') {
     return next(req);
   }
 
@@ -390,12 +396,11 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withPraxisHttpLoading(),
       withInterceptors([
+        corporateSessionInterceptor,
         (req, next) => {
           // Corporate runtime identity belongs to the server session, never to
           // the demo persona or its synthetic bearer token. Core owns context headers.
-          if (req.url.startsWith(`${PRAXIS_API_BASE_URL}/praxis/runtime/`)) {
-            return next(req.clone({ withCredentials: true }));
-          }
+          if (corporateRequestPath(req.url) !== null || !demoApiRequest(req.url)) return next(req);
           const tenant =
             typeof localStorage !== 'undefined'
               ? localStorage.getItem('pax.api.tenant') || 'shield-hq'
@@ -429,6 +434,8 @@ export const appConfig: ApplicationConfig = {
         praxisApiLoadingBridgeInterceptor,
       ]),
     ),
+    FetchBackend,
+    { provide: HttpBackend, useClass: CorporateSessionBackend },
     ...providePraxisDynamicFieldsCore(),
     providePraxisCrudMetadata(),
     providePraxisTableMetadata(),

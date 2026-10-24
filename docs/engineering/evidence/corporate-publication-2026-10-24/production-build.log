@@ -1,0 +1,53 @@
+
+> praxis-hero-hq-ui@1.0.0 build
+> ng build
+
+❯ Building...
+✔ Building...
+Initial chunk files   | Names                                                                   |  Raw size | Estimated transfer size
+chunk-77736CM4.js     | -                                                                       |   3.08 MB |               472.93 kB
+main-NIBPYJ32.js      | main                                                                    |   2.76 MB |               530.32 kB
+chunk-7OV4FBYO.js     | -                                                                       |   2.73 MB |               365.19 kB
+chunk-C6NAY5JR.js     | -                                                                       |   2.61 MB |               394.99 kB
+chunk-7WFBGRWX.js     | -                                                                       |   2.41 MB |               470.92 kB
+chunk-R2DPLIOT.js     | -                                                                       |   1.24 MB |               215.38 kB
+chunk-OHONCYOZ.js     | -                                                                       | 562.63 kB |               100.67 kB
+chunk-43EEX3S4.js     | -                                                                       | 529.66 kB |                75.00 kB
+chunk-VBBFZUJQ.js     | -                                                                       | 270.76 kB |                55.95 kB
+chunk-23NZH7VO.js     | -                                                                       | 118.31 kB |                21.62 kB
+chunk-G6KJTAKO.js     | -                                                                       | 105.99 kB |                16.34 kB
+styles-IN6NSP7R.css   | styles                                                                  |  96.60 kB |                12.42 kB
+chunk-A4WZAD3C.js     | -                                                                       |  57.51 kB |                10.46 kB
+polyfills-LVNOU2XZ.js | polyfills                                                               |  35.88 kB |                11.64 kB
+chunk-2V2CRZTR.js     | -                                                                       |  14.33 kB |                 4.29 kB
+chunk-UDEYLKDW.js     | -                                                                       |   9.72 kB |                 3.13 kB
+chunk-2MU4SBVL.js     | -                                                                       |   6.82 kB |                 2.34 kB
+chunk-SRN7TGNP.js     | -                                                                       |   1.30 kB |               588 bytes
+chunk-322SHX2F.js     | -                                                                       |   0 bytes |                 0 bytes
+
+                      | Initial total                                                           |  16.63 MB |                 2.76 MB
+
+Lazy chunk files      | Names                                                                   |  Raw size | Estimated transfer size
+chunk-5SHIZWVG.js     | praxisui-table-table-agentic-authoring-turn-flow-a_Au4ZVa               | 270.98 kB |                50.98 kB
+chunk-EBHOHR5J.js     | praxisui-table-table-ai-adapter-DGZMgfsM                                | 105.36 kB |                24.29 kB
+chunk-M76QBNTC.js     | praxisui-cron-builder                                                   |  57.66 kB |                13.57 kB
+chunk-WZDK5MWR.js     | corporate-pages-component                                               |  32.12 kB |                 8.00 kB
+chunk-JF3UPHN5.js     | visitor-lab-page-component                                              |  13.56 kB |                 4.14 kB
+chunk-UEMBWAOD.js     | corporate-context-page-component                                        |  13.24 kB |                 3.83 kB
+chunk-KMR2ZLNO.js     | praxisui-dynamic-form-dynamic-form-agentic-authoring-turn-flow-w9V0aQ9B |  11.60 kB |                 3.33 kB
+chunk-YUCDFDD4.js     | -                                                                       |   7.55 kB |                 2.60 kB
+chunk-PSQA4OV2.js     | missoes-config                                                          |   7.35 kB |                 2.31 kB
+chunk-WG5Z3YTG.js     | praxisui-table-filter-form-dialog-host-component-DlGomgO3               |   6.83 kB |                 2.25 kB
+chunk-ODM7YH4G.js     | ameacas-config                                                          |   5.92 kB |                 2.07 kB
+chunk-6SNCA2AB.js     | incidentes-config                                                       |   5.89 kB |                 2.08 kB
+chunk-KUJCC6BI.js     | missao-participantes-config                                             |   4.56 kB |                 1.33 kB
+chunk-OXZJNX2L.js     | bases-config                                                            |   4.00 kB |                 1.26 kB
+chunk-E47GHNJV.js     | indicadores-config                                                      |   3.84 kB |                 1.33 kB
+...and 87 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [6.442 seconds] - 2026-10-24T21:55:26.886Z
+
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 15.00 MB was not met by 1.63 MB with a total of 16.63 MB.
+
+
+Output location: <hero-workspace>/dist/praxis-hero-hq-ui

@@ -1,0 +1,25 @@
+{
+  "scope": "controlled API/browser and no-DB SDK validation; live Render pending",
+  "files": {
+    "src/app/app.routes.ts": "b0e428ee508db44d7269a5cb84634aa6c85c2d3c93936bc97c7ca0230e0e0583",
+    "src/app/core/corporate-page-pilot.service.ts": "e75661659081ac3438715081dd55270f7217ce4d5a30c966914d37f0d9901b70",
+    "src/app/core/corporate-runtime.providers.ts": "0eb6748fecf63e1e5250c0d9ea08fabf2a3831213fb276aa62551eca75d1cea2",
+    "src/app/pages/corporate-context/corporate-context-page.component.ts": "0f62ec42b670fc8fa52b1300c9a850bc913c51fd908b42bf9442e4fcf0c11178",
+    "src/app/pages/corporate-context/corporate-context-page.html": "2bfbb9c8ecfdeef5d9dca05d4aa8db690a519146f604a5252c0be6d69d651e4d",
+    "test-e2e/test-route-catalog.cjs": "539a2ac7c26823f2bbd5ea9c9f44da86a6716558e290b5d60c2049863bb57395",
+    "test-e2e/test-corporate-pages.cjs": "f27fba5acb5c31bbab8dca7c898b0a5da4a12b0f3680abfe4a88ba788c225914",
+    "test-e2e/test-corporate-native-source.cjs": "34b4eed613f04a8f4f5cc57e81a5066ada8f243cd6cb7936de6f5aaae4700e8d",
+    "package-lock.json": "42d612bdeb0b083699ad3e36b9de60730c5b21e182b8887141ec450af8d7d3a6",
+    "src/app/pages/corporate-pages/corporate-pages.component.ts": "44478e509ca5755efbe2cedb9df9eb7aa18c80a2ddb7b4db137ad3d317cb8e79",
+    "src/app/pages/corporate-pages/corporate-pages.scss": "ea22623500f012379ce27934d7addaa3f8b24dbde3a36b988b4e623389c5c94a",
+    "src/app/pages/corporate-pages/corporate-pages.html": "268b119fc5533899a69f0a2411911561e7884e68cf8668d31b8271230c7a0444"
+  },
+  "unrelatedExcluded": {
+    "src/app/pages/operacoes/incidentes.config.ts": "1c54953040fb0c72d00cbe517499aa804bbed0404ac28c1c1542b200ec17e506"
+  },
+  "reviewers": [
+    "p3c_security_review",
+    "root for delegated production"
+  ],
+  "neonCampaignRepeated": false
+}

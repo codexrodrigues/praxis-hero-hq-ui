@@ -1,53 +1,121 @@
 # P3-C — adoção em incrementos
 
-Fonte e controle: [Quickstart #461](https://github.com/codexrodrigues/praxis-api-quickstart/issues/461). Este documento registra o primeiro incremento no Hero, não o aceite de toda a fase.
+Controle: [Quickstart #461](https://github.com/codexrodrigues/praxis-api-quickstart/issues/461).
+Este documento descreve o estado atual; evidências anteriores permanecem históricas.
 
-## P3-C.1 — entrada de contexto no Hero
+## Entregue no Hero
 
-Em `/workspace-corporativo`, o usuário consulta a sessão, carrega opções paginadas, escolhe uma opção admitida e recebe o contexto relido do servidor. A seleção envia somente `choiceRef` e `expectedSelectionVersion` retornados pelo servidor. Tenant e organização são conceitos distintos. A UI não oferece criação/publicação corporativa enquanto a adoção correspondente não existir.
+O laboratório `/laboratorio`, sem login, permite criar/copiar pelo Page Builder,
+salvar página com menu, ícone e nova rota e reabri-la após recarregar. Usa os
+componentes públicos do SDK rc.38; os dados ficam neste navegador e na persona
+escolhida. Isso não equivale a publicação corporativa no servidor.
 
-O laboratório local continua em `/laboratorio`, sem login. O seletor de personas não autentica o usuário corporativo nem concede permissões. Uma sessão ausente apresenta orientação explícita e mantém o laboratório acessível. Não há credencial artificial ou fallback local para um contexto corporativo.
+Em `/workspace-corporativo`, o novo incremento permite entrar, verificar/restaurar
+SESSION, consultar escolhas paginadas, selecionar contexto por CAS e sair. O Core
+rc.38 continua dono do cliente de contexto: o Hero envia somente choiceRef e
+expectedSelectionVersion admitidos e exibe o snapshot relido. Tenant e organização
+são distintos. Persona de demonstração não autentica nem altera a identidade corporativa.
 
-O interceptor do host deixa de acrescentar headers de persona e seu bearer sintético a `/api/praxis/runtime/**`. O SDK oficial mantém os headers do snapshot confirmado. O host inclui credenciais de sessão explicitamente para a origem de API configurada. Um serviço Core limitado à rota usa `includeGlobalFetchHeaders=false` e `errorPolicy=fail`, evitando que a experiência corporativa transforme o contexto das telas legadas da demonstração. Destruição e mudança de persona invalidam gerações/callbacks; uma resposta antiga não pode restaurar opções descartadas.
+Login, bootstrap raw-CSRF e logout são responsabilidade do host. Senha não é
+persistida e o token fica somente em memória. Respostas de gerações anteriores não
+restauram sessão ou escolhas após sair; auth é serializada inclusive quando uma
+resposta tardia invalida o estado. Logout incerto exige verificação, sem fingir que
+um cookie HttpOnly foi removido. Erros403/503 do contexto não encerram a sessão.
 
-**Limite operacional:** em produção, a API Render está em outra origem. Cookies dependem dos atributos adequados e do CORS oficial com credenciais; `withCredentials` sozinho não completa autenticação. O Quickstart produtivo também protege mutações por CSRF. O transporte oficial do token CSRF entre essas origens e a sessão autenticada ainda precisam ser provados antes de aceitar seleção real por HTTP. Não desabilitar CSRF ou conceder grants por headers para fazer a demonstração passar. O teste deste incremento intercepta APIs e não prova esses pontos.
+O transporte corporativo usa correspondência exata de origem/path, credenciais
+explícitas e bloqueio efetivo de redirects pelo FetchBackend. Demais chamadas usam
+o XHR anterior, preservando upload/progress. Headers de persona e bearer sintético
+não entram em runtime/pages/ui-layouts; headers confirmados pelo Core, ETags e
+precondições permanecem. O proxy preserva Origin, Referer, TLS e cookies reais.
+O serviço de contexto continua limitado à tela, includeGlobalFetchHeaders=false e
+errorPolicy=fail, sem transformar o contexto global das telas legadas.
 
-## Inventário e impacto antes do código
+## Fontes e aderência
 
-Classificação: `transversal` na adoção do host; nenhum contrato público novo. Plano: materializar contexto existente, preservar a identidade server-side, testar a costura do SDK no navegador e submeter a revisão independente antes de integrar. Sem publicação/deploy.
+Classificação: transversal de adoção, sem novo contrato público.
 
-| Necessidade | Aderência / fonte | Ação |
+| Necessidade | Aderência / dono | Estado |
 | --- | --- | --- |
-| Consultar contexto, choices opacos e seleção CAS | `ja-suportado-so-ux`, Core rc.37 e Config | UI de entrada usa `EnterpriseRuntimeContextService`; sem endpoint ou DTO paralelo |
-| Headers do contexto confirmado | `ja-suportado-mal-nomeado-ou-mal-materializado`, Core + interceptor Hero | Não sobrescrever snapshot com persona; não enviar bearer fictício |
-| Sessão cross-origin / CSRF | `suportado-parcialmente` na adoção | Credenciais explícitas; prova operacional e transporte CSRF permanecem gate |
-| Navegação paginada P3-B | `suportado-parcialmente`, Core integrado PR640 | disponível no Core rc.38 adotado pelo Hero; materialização de navegação corporativa ainda depende dos providers e da prova operacional, sem duplicar o cliente |
-| Criação/publicação/URL governada | `suportado-parcialmente`, Config integrado PR519 | Quickstart ainda precisa registrar os SPIs de fonte, admissão, audience e navegação; defaults falham fechados |
+| Contexto, choices e CAS | ja-suportado-so-ux / Core + Config | Materializados no Hero |
+| Headers confirmados e SESSION/CSRF | ja-suportado-mal-nomeado-ou-mal-materializado / Core + Quickstart + transporte host | Costura implementada; consumidor validado com HTTP interceptado |
+| Providers de criação/admissão/audience/navegação | suportado-parcialmente na adoção / Config e Quickstart | Quickstart463 integrado com Config público0.1.0-rc.169 |
+| Criação/publicação corporativa, catálogo e URL/menu | suportado-parcialmente na adoção / Config + Core | Provas canônicas existentes; próximo corte de UI no Hero |
 
-Consumidor alterado: Hero (rota, menu, interceptor, componente e teste). Donos canônicos preservados: Config para contexto/publicação; Core para o cliente; Quickstart para identidade, grants e providers; Hero para shell e materialização visual. README e catálogo de rotas atualizados. Nenhuma alteração de biblioteca, `public-api`, pacote/lock, manifest, corpus HTTP ou documentação pública da plataforma. Nenhum artefato derivado dessas superfícies precisa sincronização neste recorte. O build incluiu uma alteração preexistente em `incidentes.config.ts`, identificada por hash na evidência e preservada fora do commit. Risco: interceptor de runtime passa a usar a sessão real; fluxos que dependiam de identidade simulada nesses endpoints deixam de recebê-la deliberadamente. Requests de negócio e preferências permanecem no fluxo anterior.
+Não foram criados endpoints, grants, DTOs de autenticação no SDK ou caches de
+permissão. Nenhum pacote/lock foi alterado. Landing, corpus HTTP e public-api não
+precisam de atualização neste recorte. O guidance reutilizável de transporte foi
+atualizado na fonte canônica de praxis-angular-host-project, sem fachada entre libs.
 
-## Próximos incrementos, com aceite próprio
+## Aceite e limitação operacional
 
-1. Quickstart: adotar o artefato candidato em repositório Maven isolado e aplicar a migração explícita da fixture lifecycle 23→24 quando a versão adotada mudar. Não sobrescrever rc.166 público com bytes privados. Reusar a prova de compilação e sete testes de autoridade de PR462 enquanto fonte/dependências relevantes forem idênticas.
-2. Fixar namespace, fonte/template nativos e política real de grants do piloto. Registrar `PageCreationHost`, admissão/estrutura/audience e delegate `PageRuntimeReadService.navigation` pelos SPIs existentes. O piloto PurchaseOrder de Table/Form não é um root universal de páginas nem uma política de leitura corporativa.
-3. Provar uma jornada HTTP pequena e completa numa branch Neon exclusiva: sessão/contexto admitido → criação/cópia → publicação → URL/menu; incluir negativa de outro ator/tenant e retirada. Reusar as provas canônicas P3-A/P3-B de concorrência/rollback que permaneçam válidas; só executar novamente a costura alterada.
-4. Adotar o transporte publicado/empacotado oficial no Hero e materializar página/menu/rota (P4). Não antecipar endpoints, caches ou grants no frontend. Cada entrega passa por revisão independente antes de integração.
+[Quickstart463](https://github.com/codexrodrigues/praxis-api-quickstart/pull/463)
+foi integrado em48c28c0c8f0b25f7c85fdf51cf69b49e69bc40b2 por aceite técnico revisto.
+A prova privada completa e as provas canônicas válidas foram reutilizadas. O último
+ensaio público encerrou criação com503 em40,579s; publicação e rollback não foram
+alcançados nesse ensaio. Isso não foi convertido em PASS. Mantidos orçamento de40s,
+autorização e rollback; não há declaração de SLA nem prontidão de produção. Por
+decisão expressa do usuário, nenhum novo ensaio Neon é exigido neste ciclo.
 
-## Validação e revisão
+O consumidor Hero foi validado com APIs interceptadas. Isso não prova cookies,
+CORS, SESSION ou publicação contra o backend real. Uma consulta anônima e somente
+leitura a `/auth/session` do Render com Origin http://127.0.0.1:4302 retornou403,
+`Invalid CORS request`. Antes do uso corporativo real, a implantação deve admitir
+a origem real nas configurações canônicas app.cors.allowed-origins e
+app.security.config-origin-restriction.allowed-origins, conferir cookies/session/CSRF e
+provisionar identidades/grants pelo processo oficial. Não falsificar origem4003,
+reescrever cookies ou enfraquecer TLS/CSRF. Não houve login nem mutação remota.
 
-Com servidor oficial `npm start` em `http://127.0.0.1:4302`:
+## Validação deste incremento
 
-```sh
-node test-e2e/test-route-catalog.cjs
-node test-e2e/test-corporate-context.cjs
-node test-e2e/test-visitor-lab.cjs
-npm run build
-```
+[Evidência, hashes e escopo](evidence/corporate-session-2026-10-24/validation.json):
+16 testes unitários focais, TypeScript, build, E2E de sessão/contexto, catálogo de
+rotas e regressão completa do laboratório aprovados. A prova de navegador cobre
+CAS/recarga,401/403/409/503, respostas tardias, logout incerto, isolamento de persona,
+307 sem envio de senha/CSRF a outro destino e ausência de persistência de segredos.
+Desktop e390px conferidos, com drawer recolhido, bounds internos e foco por teclado
+entre Usuário/Senha. Não é uma auditoria completa de acessibilidade.
 
-O ensaio original de contexto usou o SDK npm rc.37 real e interceptou HTTP. A regressão na adoção rc.38 está registrada na [evidência pública](evidence/sdk-rc38-2026-10-23/validation.json), mantendo a mesma fronteira de APIs interceptadas. Cobre paginação, seleção CAS, contexto relido e recarga, headers server-side, credenciais explícitas no transporte, 401/403/409/503, remoção de estado antigo, descarte de callback A→B→A e retorno ao laboratório. Não expõe detalhes crus de erros. A viewport estreita cobre o estado de erro, com navegação recolhida e limites de textos/ações conferidos; seleção mobile e teclado não são declarados provados. O shell faz navegação transitória ao alternar personas; o teste aguarda a conclusão e exige uma única instância, sem mascarar duplicidade com `first()`.
+Build10,940s aprovado com aviso de bundle16,60MB (alerta15MB/erro18MB), sem ampliar
+orçamento. Não repetir suites válidas: somente o E2E alterado para QA móvel foi
+reexecutado. A alteração preexistente em incidentes.config.ts permaneceu intacta e
+fora do commit; seu hash está na evidência, e o build local a incluiu.
 
-Não houve conexão a banco nem mutação do Quickstart público. HTTP/Neon operacional não foi executado neste incremento. A issue P3-C permanece aberta. Resultados finais: navegador de contexto, regressão completa do laboratório e catálogo de rotas aprovados; build de produção aprovado em 6,253 s, com aviso de bundle inicial16,44MB (alerta15MB/erro18MB). [Logs, screenshots e hashes](evidence/p3c-context-2026-10-23/validation.json) vinculam a árvore/dependências relevantes. A bateria ampla `npm test` não foi repetida: a divergência histórica do dashboard340/380px está registrada na evidência anterior, sem mudança nesta área.
+Revisão independente: p3c_security_review confrontou produção, concorrência,
+segurança, contrato, transporte efetivo, teste móvel e guidance. A revisão identificou
+que XHR ignora redirect:error e a captura móvel precisava aguardar o drawer; ambos
+corrigidos e provados. Escrita do código/testes: p3c_page_providers. Coordenador:
+docs, validações e integração. Sem banco ou implantação.
 
-Revisão independente: `p3c_host_inventory` (Sol/high, pela fronteira de identidade e concorrência), com escrita somente pelo coordenador. A revisão detectou ausência de credenciais explícitas e rótulo Tenant confundido com organização; ambos corrigidos. Os limites CSRF/CORS foram mantidos como gates operacionais, sem alegação de adoção completa.
+## Próximo corte
 
-Skills: `existente-adequada` para este recorte; inspecionadas `praxis-angular-host-project`, `praxis-core-runtime-contracts`, `praxis-java-config-boundary-integration` e matriz canônica de integração. Contratos/decisões ensinados não mudaram. O procedimento definitivo de transporte SESSION/CSRF e providers deverá ser confrontado novamente no incremento operacional; não se ensina aqui um workaround incompleto como referência de produção.
+Materializar criação/cópia e workflow editorial pelos serviços canônicos, depois
+catálogo autorizado compartilhado por URL/menu. Não enviar JSON arbitrário SaveAs
+como POST/pages, simular publicação ou duplicar as regras de admissão no host.
+Reusar provas válidas, validar apenas a nova costura e manter revisão independente.
+Este incremento não fecha toda a issue P3-C nem autoriza merge/deploy do PR13 em main.
+
+## Corte seguinte: criação e lifecycle de páginas
+
+A rota `/workspace-corporativo/paginas` agora consome criação nativa, reconciliação
+por creationKey, draft, revisão, congelamento, submissão, aprovação por outro ator,
+publicação explícita e leitura publicada. `/pages/:pageId` relê a publicação do
+servidor e renderiza pelo Page Builder/Form público. O primeiro perfil é um Form
+vazio, título editável e ícone home, não um editor irrestrito de JSON. O vínculo
+organizacional usa o contexto persistido, sem autoridade obtida dos parâmetros URL.
+
+Contexto, lifecycle e transporte partilham um único injector ancestral corporativo.
+Troca de SESSION invalida o contexto e descarta respostas tardias de outro ator.
+Referências da URL são relidas no servidor; passwords, cookies e grants não são
+persistidos no browser. Aprovação mecânica deste piloto não oferece preview
+imutável completo do conteúdo: isso permanece uma evolução explícita.
+
+O E2E com API controlada passou: dois atores, resposta perdida/reconciliação sem
+POST duplicado,412/releitura,ETag publicado fraco,recarga,401/403/tenant404,resposta
+tardia após troca de sessão e viewport390px. O gate nativo lê os documentos Java
+reais da revisão2 do Quickstart e valida pelo SDK público rc.38. Build e typecheck
+aprovados; bundle16,63MB mantém alerta15MB e erro18MB. Esses resultados ainda não
+provam operação no Render; o recibo operacional será acrescentado após ativação.
+
+Cópia aguarda publicação do Config com copySource já integrado na fonte; menu
+persistente aguarda a costura de grupos sem sobrescrever uma lista incompleta.
+Não foram criados contratos paralelos. Sem repetição da campanha Neon.
