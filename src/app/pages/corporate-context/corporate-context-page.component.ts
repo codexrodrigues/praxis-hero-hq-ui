@@ -29,7 +29,8 @@ export class CorporateContextPageComponent {
   }
   // These refs select a server read only. Never accept a caller-provided URL or grants.
   readonly pagesPath = this.returnRefs.get('corporateView') === 'published' && this.resumeId('corporatePageId')
-    ? `/pages/${this.resumeId('corporatePageId')}` : '/workspace-corporativo/paginas';
+    ? `/pages/${this.resumeId('corporatePageId')}` : this.returnRefs.get('corporateView') === 'groups'
+      ? '/workspace-corporativo/grupos' : '/workspace-corporativo/paginas';
   readonly pagesQuery = this.pagesPath.startsWith('/pages/') ? {} : {
     pageId: this.resumeId('corporatePageId'), draftId: this.resumeId('corporateDraftId'),
     releaseId: this.resumeId('corporateReleaseId'), creationKey: this.resumeId('corporateCreationKey'),

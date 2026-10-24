@@ -1,12 +1,11 @@
 <section class="corporate-pages" data-testid="corporate-pages" [attr.aria-busy]="busy()">
   <header>
     <p class="eyebrow">PÁGINAS CORPORATIVAS</p>
-    <h1>{{ publishedMode ? 'Página publicada' : 'Criar e publicar uma página' }}</h1>
+    <h1>{{ groupsMode ? 'Primeiro grupo do menu' : publishedMode ? 'Página publicada' : 'Criar e publicar uma página' }}</h1>
     <p>O servidor conserva o rascunho, a revisão e a publicação. Cada etapa exige uma confirmação separada.</p>
   </header>
   <nav aria-label="Workspace corporativo">
     <a mat-button routerLink="/workspace-corporativo" [queryParams]="entryParams()">Sessão e contexto</a>
-    <a mat-button routerLink="/workspace-corporativo/paginas">Páginas corporativas</a>
   </nav>
   @if (!ready()) {
     <p>Confirme sua sessão e selecione o contexto na entrada corporativa. Depois retome este endereço.</p>
@@ -17,9 +16,19 @@
     @if (message()) { <p data-testid="corporate-page-message">{{ message() }}</p> }
   </div>
   @if (ready()) {
-    <p class="scope-note">Piloto: um formulário vazio, sem API de domínio, com ícone home. Este corte permite editar o título; não publica conteúdo arbitrário do laboratório. Menu e cópia publicada ainda não estão disponíveis.</p>
+    <p class="scope-note">{{ groupsMode ? 'Publique o primeiro grupo para organizar páginas. Se já houver um agregado publicado, reutilize seus grupos; este piloto não edita esse agregado.' : 'Piloto: um formulário vazio, sem API de domínio, com ícone home. Título e vínculos de menu são publicados pelo fluxo governado; cópia publicada continua fora deste corte.' }}</p>
     @if (!publishedMode) {
-      @if (!pageId()) {
+      @if (groupsMode && !draftId() && !releaseId()) {
+        <section aria-labelledby="groups-create-title">
+          <h2 id="groups-create-title">1. Iniciar o primeiro agregado</h2>
+          <button mat-flat-button (click)="createGroups()" [disabled]="busy() || fenced() || !canAuthor() || !headAbsent() || !!creationKey()">Criar rascunho de grupos</button>
+          @if (creationKey()) {
+            <button mat-stroked-button (click)="reconcileGroups()" [disabled]="busy()">Consultar criação de grupos</button>
+          }
+          @if (!headAbsent() && !head()) { <p>Releia o estado do servidor para confirmar se esta é a primeira publicação.</p> }
+        </section>
+      }
+      @if (!groupsMode && !pageId()) {
         <section aria-labelledby="create-title">
           <h2 id="create-title">1. Criar a partir do modelo admitido</h2>
           <mat-form-field appearance="outline"><mat-label>Título da nova página</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!creationKey()" /></mat-form-field>
@@ -31,19 +40,43 @@
         </section>
       }
       @if (pageId()) {
-        <p class="reference">Página: {{ pageId() }}</p>
+        <p class="reference">{{ groupsMode ? 'Agregado' : 'Página' }}: {{ pageId() }}</p>
         <button mat-stroked-button (click)="reload()" [disabled]="busy()">Reler estado do servidor</button>
       }
       @if (workspace(); as draft) {
         <section aria-labelledby="draft-title">
           <h2 id="draft-title">2. Rascunho e abrangência</h2>
           <p>Estado do rascunho: <strong data-testid="draft-state">{{ draft.body.draft.state }}</strong></p>
-          <mat-form-field appearance="outline"><mat-label>Título da página</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!draft.body.frozenReleaseRef" /></mat-form-field>
-          <p>Formulário admitido sem campos. O restante do documento é preservado ao salvar.</p>
+          <mat-form-field appearance="outline"><mat-label>{{ groupsMode ? 'Nome do grupo' : 'Título da página' }}</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!draft.body.frozenReleaseRef" /></mat-form-field>
+          @if (groupsMode) {
+            <mat-form-field appearance="outline"><mat-label>Ordem do grupo</mat-label><input matInput type="number" [(ngModel)]="groupOrder" min="0" max="2147483647" [disabled]="busy() || !!draft.body.frozenReleaseRef || !headAbsent()" /></mat-form-field>
+            <p>Ícone home. Esta revisão conserva a identidade do primeiro grupo.</p>
+          } @else {
+            <p>Formulário admitido sem campos. O restante do documento é preservado ao salvar.</p>
+            <fieldset [disabled]="busy() || !!draft.body.frozenReleaseRef">
+              <legend>Vínculo de menu</legend>
+              <label for="binding-selection">Vínculo a editar</label>
+              <select id="binding-selection" [ngModel]="bindingId" (ngModelChange)="selectBinding($event)">
+                <option value="">Adicionar vínculo</option>
+                @for (binding of document()?.config?.navigation || []; track binding.id) { <option [value]="binding.id">{{ binding.label }}</option> }
+              </select>
+              <label for="binding-group">Grupo publicado</label>
+              <select id="binding-group" [(ngModel)]="bindingGroupId" [disabled]="!menu.ready() || menu.busy()">
+                <option value="">Não alterar vínculos</option>
+                @for (group of menu.groups(); track group.id) { <option [value]="group.id">{{ group.label }}</option> }
+              </select>
+              @if (bindingGroupId) {
+                <mat-form-field appearance="outline"><mat-label>Nome no menu</mat-label><input matInput [(ngModel)]="bindingLabel" maxlength="160" /></mat-form-field>
+                <mat-form-field appearance="outline"><mat-label>Ordem no grupo</mat-label><input matInput type="number" [(ngModel)]="bindingOrder" min="0" max="2147483647" /></mat-form-field>
+              }
+              <p>Os outros vínculos são preservados. A publicação da página confirma o acesso ao grupo no servidor.</p>
+              <a mat-button routerLink="/workspace-corporativo/grupos">Gerenciar primeiro grupo</a>
+            </fieldset>
+          }
           <div class="actions">
-            <button mat-flat-button (click)="saveRevision()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim()">Salvar revisão</button>
-            <button mat-stroked-button (click)="assign()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedRevision">Aplicar à organização atual</button>
-            <button mat-stroked-button (click)="freeze()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedAssignment">Congelar release</button>
+            <button mat-flat-button (click)="saveRevision()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim() || (groupsMode && !headAbsent()) || (!!bindingGroupId && (!bindingLabel.trim() || !menu.ready() || menu.busy()))">Salvar revisão</button>
+            <button mat-stroked-button (click)="assign()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedRevision || (groupsMode && !headAbsent())">Aplicar à organização atual</button>
+            <button mat-stroked-button (click)="freeze()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedAssignment || (groupsMode && !headAbsent())">Congelar release</button>
           </div>
         </section>
       }
@@ -56,11 +89,11 @@
           <p class="reference">Release: {{ value.body.releaseRef }}</p>
           <p>Estado da revisão: <strong data-testid="review-state">{{ value.body.state }}</strong></p>
           <p>Este recibo confirma o estado da release identificada. Ele não contém uma prévia imutável do conteúdo para revisão.</p>
-          <a mat-button routerLink="/workspace-corporativo/paginas" [queryParams]="reviewParams()" data-testid="review-link">Abrir link de revisão para outro ator</a>
+          <a mat-button [routerLink]="editorPath" [queryParams]="reviewParams()" data-testid="review-link">Abrir link de revisão para outro ator</a>
           <div class="actions">
             <button mat-stroked-button (click)="submit()" [disabled]="busy() || fenced() || !canAuthor() || value.body.state !== 'DRAFT'">Enviar para revisão</button>
             <button mat-stroked-button (click)="approve()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'SUBMITTED' || !reason.trim()">Aprovar release identificada</button>
-            <button mat-flat-button (click)="publish()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'APPROVED' || (!head() && !headAbsent()) || !reason.trim()">Publicar release aprovada</button>
+            <button mat-flat-button (click)="publish()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'APPROVED' || (!head() && !headAbsent()) || !reason.trim() || (groupsMode && !headAbsent())">Publicar release aprovada</button>
           </div>
         </section>
       }
@@ -78,7 +111,7 @@
         <a mat-flat-button [routerLink]="value.route" data-testid="published-route">Abrir página publicada</a>
       </section>
     }
-    @if (!publishedMode) {
+    @if (!publishedMode && !groupsMode) {
       <section aria-labelledby="catalog-title">
         <h2 id="catalog-title">Páginas publicadas neste contexto</h2>
         <button mat-stroked-button (click)="refreshCatalog()" [disabled]="busy()">Atualizar catálogo</button>

@@ -10,6 +10,8 @@ import { EnterpriseRuntimeContextService, UiLayoutLifecycleService, UiLayoutLife
   type WidgetPageDefinition, type PageIdentity, type PageAuthoringDocument, type UiLayoutDraftWorkspaceReceipt, type UiLayoutReleaseReviewReceipt,
   type UiLayoutReleaseHeadReceipt, type UiLayoutLifecycleHttpReceipt } from '@praxisui/core';
 import { materializeDynamicFormPageRuntimeInputs, validateDynamicFormPageWidget } from '@praxisui/dynamic-form';
+import { CorporateNavigationService } from '../../core/corporate-navigation.service';
+import { CORPORATE_GROUPS_TARGET, corporateGroupsDocument, firstCorporateGroup, bindCorporatePage, type CorporateGroupsDocument } from '../../core/corporate-navigation.model';
 import { CorporateSessionService } from '../../core/corporate-session.service';
 import { CorporatePagePilotService, CorporatePageError, corporatePageId, corporatePageTarget,
   corporatePageDocument, type CorporatePageCatalog, type CorporatePublishedPage } from '../../core/corporate-page-pilot.service';
@@ -29,6 +31,15 @@ export class CorporatePagesComponent {
   private readonly pages = inject(CorporatePagePilotService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  readonly menu = inject(CorporateNavigationService);
+  readonly groupsMode = this.route.snapshot.data['corporateGroups'] === true;
+  readonly groupsDocument = signal<CorporateGroupsDocument | null>(null);
+  groupId = '';
+  bindingId = '';
+  bindingGroupId = '';
+  bindingLabel = '';
+  bindingOrder = 0;
+  groupOrder = 0;
   readonly publishedMode = this.route.snapshot.data['corporatePublished'] === true;
   readonly ready = signal(false);
   readonly busy = signal(false);
@@ -89,6 +100,7 @@ export class CorporatePagesComponent {
     this.workspace.set(null); this.review.set(null); this.head.set(null); this.headAbsent.set(false);
     this.published.set(null); this.catalog.set(null); this.document.set(null); this.renderedPage.set(null);
     this.title = ''; this.reason = ''; this.commandKeys.clear();
+    this.groupsDocument.set(null); this.groupId = ''; this.bindingId = ''; this.bindingGroupId = ''; this.bindingLabel = ''; this.bindingOrder = 0;
   }
   private current(epoch: number): boolean { return !this.destroyed && epoch === this.epoch && this.epochSession === this.session.generation() && this.session.authenticated(); }
 
@@ -118,7 +130,7 @@ export class CorporatePagesComponent {
   }
   private readLocation(): void {
     const params = this.route.snapshot.queryParamMap;
-    this.pageId.set(this.publishedMode ? this.route.snapshot.paramMap.get('pageId') ?? '' : params.get('pageId') ?? '');
+    this.pageId.set(this.groupsMode ? CORPORATE_GROUPS_TARGET.componentId : this.publishedMode ? this.route.snapshot.paramMap.get('pageId') ?? '' : params.get('pageId') ?? '');
     this.draftId.set(params.get('draftId') ?? ''); this.releaseId.set(params.get('releaseId') ?? '');
     this.creationKey.set(params.get('creationKey') ?? ''); this.lastQuery = this.queryIdentity();
   }
@@ -131,7 +143,7 @@ export class CorporatePagesComponent {
     this.lastQuery = JSON.stringify([this.route.snapshot.paramMap.get('pageId'), queryParams.pageId, queryParams.draftId, queryParams.releaseId, queryParams.creationKey]);
     await this.router.navigate([], { relativeTo: this.route, queryParams, replaceUrl: true });
   }
-  private target() { return corporatePageTarget(this.pageId()); }
+  private target() { return this.groupsMode ? CORPORATE_GROUPS_TARGET : corporatePageTarget(this.pageId()); }
   private key(operation: string, payload: unknown): string {
     const fingerprint = JSON.stringify([operation, this.pageId(), this.draftId(), payload]);
     let key = this.commandKeys.get(fingerprint);
@@ -151,7 +163,7 @@ export class CorporatePagesComponent {
       const status = error instanceof CorporatePageError || error instanceof UiLayoutLifecycleHttpError ? error.status : 0;
       if ([401, 403, 404].includes(status)) {
         this.workspace.set(null); this.review.set(null); this.head.set(null); this.headAbsent.set(false);
-        this.published.set(null); this.catalog.set(null); this.document.set(null); this.renderedPage.set(null); this.title = '';
+        this.published.set(null); this.catalog.set(null); this.document.set(null); this.renderedPage.set(null); this.groupsDocument.set(null); this.title = '';
       }
       if (write) this.fenced.set(true); // Read/reconcile before any subsequent command; never retry automatically.
       this.message.set(this.errorMessage(error));
@@ -191,12 +203,33 @@ export class CorporatePagesComponent {
       await this.location(); await this.loadDraft(epoch);
     });
   }
+  async createGroups(): Promise<void> {
+    if (!this.groupsMode || this.draftId() || this.releaseId()) return;
+    await this.action(true, async epoch => {
+      await this.loadHead(epoch);
+      if (!this.current(epoch) || !this.headAbsent()) return;
+      if (!this.creationKey()) { this.creationKey.set(crypto.randomUUID()); await this.location(); }
+      const value = await this.lifecycle.createDraft(this.target(), this.creationKey());
+      if (!this.current(epoch)) return;
+      this.draftId.set(value.body.draft.draftRef); this.acceptDraft(value); await this.location();
+      this.message.set('Rascunho do primeiro grupo criado. Salve a revisão antes de definir sua abrangência.');
+    });
+  }
+  async reconcileGroups(): Promise<void> {
+    await this.action(false, async epoch => {
+      const value = await this.lifecycle.readDraftByCreationKey(this.target(), this.creationKey());
+      if (!this.current(epoch)) return;
+      if (value.body.rootTarget.componentType !== this.target().componentType || value.body.rootTarget.componentId !== this.target().componentId) throw new CorporatePageError('CONTRACT');
+      this.draftId.set(value.body.draftRef); await this.location(); await this.loadDraft(epoch); await this.loadHead(epoch);
+    });
+  }
   async reload(): Promise<void> {
     await this.action(false, async epoch => {
       if (this.publishedMode) { await this.loadPublished(epoch); return; }
       if (this.pageId() && this.draftId()) await this.loadDraft(epoch);
       if (this.pageId() && this.releaseId()) await this.loadReview(epoch);
-      if (!this.pageId()) await this.loadCatalog(epoch);
+      if (this.groupsMode) await this.loadHead(epoch);
+      else if (!this.pageId()) await this.loadCatalog(epoch);
     });
   }
   private async loadDraft(epoch: number): Promise<void> {
@@ -213,6 +246,16 @@ export class CorporatePagesComponent {
         || body.draft.rootTarget.componentType !== target.componentType || body.targets?.length !== 1
         || body.targets[0].target.componentId !== target.componentId || body.targets[0].target.componentType !== target.componentType
         || !readStrongResourceEtag(value.etag)) throw new CorporatePageError('CONTRACT');
+    if (this.groupsMode) {
+      const document = corporateGroupsDocument(body.targets[0].working.document);
+      if (document.config.groups.length > 1) throw new CorporatePageError('CONTRACT');
+      this.groupsDocument.set(document); this.workspace.set(value);
+      const group = document.config.groups[0];
+      this.groupId = group?.id ?? (this.groupId || crypto.randomUUID());
+      this.title = group?.label ?? ''; this.groupOrder = group?.order ?? 0;
+      if (body.frozenReleaseRef) this.releaseId.set(body.frozenReleaseRef);
+      return;
+    }
     const document = corporatePageDocument(body.targets[0].working.document);
     const definition = document.config.definition, widgets = definition.widgets;
     const widget = widgets[0]?.definition, inputs = widget?.inputs;
@@ -221,14 +264,27 @@ export class CorporatePagesComponent {
         || !widget || widget.id !== 'praxis-dynamic-form' || Object.keys(widget).length !== 2 || !inputs || Object.keys(inputs).length !== 1
         || !form || Object.keys(form).length !== 2 || typeof form.title !== 'string' || !Array.isArray(form.fieldMetadata) || form.fieldMetadata.length) throw new CorporatePageError('CONTRACT');
     this.workspace.set(value); this.document.set(document); this.title = document.config.presentation.title;
+    this.selectBinding(document.config.navigation[0]?.id ?? '');
     if (body.frozenReleaseRef) this.releaseId.set(body.frozenReleaseRef);
   }
   async saveRevision(): Promise<void> {
-    const workspace = this.workspace(), original = this.document();
-    if (!workspace || !original || !this.title.trim() || !this.reason.trim()) return;
+    const workspace = this.workspace(), original = this.groupsMode ? this.groupsDocument() : this.document();
+    if (!workspace || !original || !this.title.trim() || !this.reason.trim() || this.groupsMode && !this.headAbsent()) return;
     await this.action(true, async epoch => {
-      const document = corporatePageDocument(structuredClone(original));
-      document.config.presentation.title = this.title.trim();
+      let document: CorporateGroupsDocument | PageAuthoringDocument;
+      if (this.groupsMode) {
+        await this.loadHead(epoch);
+        if (!this.current(epoch) || !this.headAbsent()) return;
+        document = firstCorporateGroup(corporateGroupsDocument(original), this.groupId, this.title, this.groupOrder);
+      } else {
+        document = corporatePageDocument(structuredClone(original));
+        document.config.presentation.title = this.title.trim();
+        if (this.bindingGroupId) {
+          if (!this.menu.ready() || !this.menu.groups().some(group => group.id === this.bindingGroupId)) throw new CorporatePageError('CONTRACT');
+          this.bindingId ||= crypto.randomUUID();
+          document = bindCorporatePage(document, this.bindingId, this.bindingGroupId, this.bindingLabel, this.bindingOrder);
+        }
+      }
       const command = { target: this.target(), authoringDocument: document as unknown as Record<string, unknown>, reason: this.reason.trim() };
       const value = await this.lifecycle.createRevision(this.target(), this.draftId(), workspace.etag,
         { ...command, commandRef: this.key('revision', [workspace.etag, command]) });
@@ -239,7 +295,7 @@ export class CorporatePagesComponent {
   }
   async assign(): Promise<void> {
     const workspace = this.workspace(), context = this.runtime.effectiveContext;
-    if (!workspace || !context?.activeOrganizationId) return;
+    if (!workspace || !context?.activeOrganizationId || this.groupsMode && !this.headAbsent()) return;
     await this.action(true, async epoch => {
       const command = { target: this.target(), layerClass: 'ORGANIZATION' as const,
         selector: { tenant: context.activeTenant.tenantId, organization: context.activeOrganizationId },
@@ -250,7 +306,7 @@ export class CorporatePagesComponent {
     });
   }
   async freeze(): Promise<void> {
-    const workspace = this.workspace(); if (!workspace) return;
+    const workspace = this.workspace(); if (!workspace || this.groupsMode && !this.headAbsent()) return;
     await this.action(true, async epoch => {
       const value = await this.lifecycle.freezeRelease(this.target(), this.draftId(), workspace.etag,
         { commandRef: this.key('freeze', workspace.etag) });
@@ -264,16 +320,20 @@ export class CorporatePagesComponent {
     if (!corporatePageId(this.releaseId())) throw new CorporatePageError('CONTRACT');
     const value = await this.lifecycle.readReview(this.target(), this.releaseId());
     if (!this.current(epoch)) return;
-    if ('status' in value || value.body.releaseRef !== this.releaseId() || value.body.rootTarget.componentId !== this.pageId()
-        || value.body.rootTarget.componentType !== 'praxis-dynamic-page' || `"${value.body.reviewEtag}"` !== value.etag) throw new CorporatePageError('CONTRACT');
+    if ('status' in value || value.body.releaseRef !== this.releaseId() || value.body.rootTarget.componentId !== this.target().componentId
+        || value.body.rootTarget.componentType !== this.target().componentType || `"${value.body.reviewEtag}"` !== value.etag) throw new CorporatePageError('CONTRACT');
     this.review.set(value); this.fenced.set(false);
+    await this.loadHead(epoch);
+  }
+  private async loadHead(epoch: number): Promise<void> {
     this.head.set(null); this.headAbsent.set(false);
     try {
       const head = await this.lifecycle.readHead(this.target());
       if (!this.current(epoch)) return;
-      if ('status' in head || head.body.rootTarget.componentId !== this.pageId() || head.body.rootTarget.componentType !== 'praxis-dynamic-page'
+      if ('status' in head || head.body.rootTarget.componentId !== this.target().componentId || head.body.rootTarget.componentType !== this.target().componentType
           || `"${head.body.headEtag}"` !== head.etag) throw new CorporatePageError('CONTRACT');
       this.head.set(head);
+      if (this.groupsMode) this.message.set('Já existe um agregado publicado. Reutilize um grupo visível no menu; este piloto não substitui o agregado por uma lista parcial.');
     } catch (error) {
       if (this.current(epoch) && error instanceof UiLayoutLifecycleHttpError && error.status === 404) this.headAbsent.set(true);
       else throw error;
@@ -294,15 +354,20 @@ export class CorporatePagesComponent {
     });
   }
   async publish(): Promise<void> {
-    const head = this.head(); if ((!head && !this.headAbsent()) || !this.reason.trim()) return;
+    const head = this.head(); if ((!head && !this.headAbsent()) || !this.reason.trim() || this.groupsMode && !this.headAbsent()) return;
     await this.action(true, async epoch => {
       const value = await this.lifecycle.publish(this.target(), head
         ? { kind: 'match', etag: head.etag } : { kind: 'first-publish' }, { releaseId: this.releaseId(), reason: this.reason.trim() });
       if (!this.current(epoch)) return;
       if (value.body.activeReleaseRef !== this.releaseId()) throw new CorporatePageError('CONTRACT');
       this.head.set(value);
-      await this.loadPublished(epoch);
-      if (this.current(epoch)) this.message.set('Publicação e leitura confirmadas pelo servidor.');
+      if (this.groupsMode) {
+        await this.loadHead(epoch); await this.menu.refresh();
+        if (this.current(epoch)) this.message.set('Primeiro agregado publicado. Atualize o menu e vincule sua página a um grupo visível.');
+      } else {
+        await this.loadPublished(epoch); await this.menu.refresh();
+        if (this.current(epoch)) this.message.set('Publicação e leitura confirmadas pelo servidor.');
+      }
     });
   }
   private async loadPublished(epoch: number): Promise<void> {
@@ -334,8 +399,14 @@ export class CorporatePagesComponent {
     const value = await this.pages.catalog(); if (this.current(epoch)) this.catalog.set(value.body);
   }
   entryParams() {
-    return { corporateView: this.publishedMode ? 'published' : 'editor', corporatePageId: this.pageId() || null,
+    return { corporateView: this.groupsMode ? 'groups' : this.publishedMode ? 'published' : 'editor', corporatePageId: this.pageId() || null,
       corporateDraftId: this.draftId() || null, corporateReleaseId: this.releaseId() || null, corporateCreationKey: this.creationKey() || null };
+  }
+  readonly editorPath = this.groupsMode ? '/workspace-corporativo/grupos' : '/workspace-corporativo/paginas';
+  selectBinding(id: string): void {
+    this.bindingId = id;
+    const binding = this.document()?.config.navigation.find(item => item.id === id);
+    this.bindingGroupId = binding?.groupId ?? ''; this.bindingLabel = binding?.label ?? ''; this.bindingOrder = binding?.order ?? 0;
   }
   reviewParams() { return { pageId: this.pageId(), releaseId: this.releaseId() }; }
   canAuthor(): boolean { return this.runtime.effectiveContext?.capabilities.includes('ui.authoring.configure') ?? false; }
