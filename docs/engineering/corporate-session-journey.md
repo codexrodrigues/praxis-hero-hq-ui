@@ -256,3 +256,49 @@ pelo autor. O gerador `scripts/workspace/corporate-form-owner-fixture.mjs` repro
 fixture de quatro campos do SDK que também orienta a policy Quickstart. Arrays novas
 conservam a saída do serializer, incluindo validators vazio e span responsivo; o host
 não faz stripping desses valores nem aceita regras por esse motivo.
+
+
+## Conteúdo real publicado e recuperação por tentativa — 24/10/2026
+
+O coordenador observou via CUA a criação de outro rascunho Native, edição visual no
+editor Form do SDK rc.38 e inclusão de um campo local, com label “Nome do
+solicitante” e placeholder “Informe o nome” configurados visualmente. A UI confirmou
+revisão salva, abrangência organizacional, congelamento, envio para revisão, aprovação pelo publisher e publicação.
+Após recarregar a rota publicada, a árvore de acessibilidade confirmou o label,
+a UI manteve a identidade da release e o menu mostrou “Solicitação corporativa”.
+O placeholder não foi relido diretamente após reload, e o nome canônico do campo
+não foi inspecionado. Não foram capturados status HTTP de sucesso nem comparado o
+head ETag neste corte.
+
+O [recibo sanitizado](evidence/corporate-content-2026-10-24/receipt.json) separa essas
+observações da [captura após recarga](evidence/corporate-content-2026-10-24/page-menu-reloaded.png).
+A captura mostra o título publicado e o menu; o campo está abaixo do viewport e sua
+confirmação veio da árvore de acessibilidade observada pelo coordenador. O conteúdo
+foi editado visualmente, sem JSON. Valores preenchidos no Form publicado continuam
+transitórios e não integram sua persistência editorial.
+
+A tentativa anterior de cópia publicada **não funcionou**: POST pages retornou 503
+em 40.973 ms e a consulta por chave retornou 404 em 1.361 ms, conforme diagnóstico
+privado cujo hash consta do recibo. Não houve repetição do POST. A causa e o rollback
+não estão comprovados; o sucesso de conteúdo Native não resolve nem prova cópia.
+
+Essa falha revelou um bloqueio visual global na mesma instância do componente: sair
+da tentativa incerta para uma URL limpa mantinha Criar desabilitado. O fence agora
+pertence à identidade da tentativa, priorizando creationKey e depois alvo/draft/release.
+Navegar seleciona outra identidade sem apagar a incerteza anterior; retornar à chave
+falha continua bloqueado. Mudança de sessão/contexto mantém os fences e exige resolver
+novamente o runtime. Respostas tardias marcam a tentativa capturada, sem repintar a
+rota atual. Somente recibos válidos e atuais de draft/review liberam a identidade
+correspondente; catálogo e 404 não liberam. O conjunto dura a instância do componente;
+a chave no endereço e a leitura canônica permanecem necessárias após uma recarga.
+
+O teste focal de navegação/controlador passou 17 checks, incluindo troca de query
+na mesma instância, resposta tardia, 404, mudança de contexto e liberação somente da
+tentativa lida. TypeScript passou. São doubles de Angular/HTTP; não substituem a prova
+operacional. A evidência real acima precede essa correção de fence. O
+[build final de produção](evidence/corporate-content-2026-10-24/production-build.log)
+passou às 22:49:16 UTC, com aviso de bundle de 16,63 MB acima do budget inalterado de
+15 MB. O recibo identifica os hashes da fonte e a alteração local preexistente excluída
+do commit. Permanecem os limites do
+piloto Form/home, sem API de domínio, campanha Neon adicional, prova de CORS frontend
+em produção ou implantação Firebase.

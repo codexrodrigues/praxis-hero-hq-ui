@@ -48,11 +48,12 @@ export class CorporatePagesComponent {
   readonly ready = signal(false);
   readonly busy = signal(false);
   readonly message = signal('');
-  readonly fenced = signal(false);
   readonly pageId = signal('');
   readonly draftId = signal('');
   readonly releaseId = signal('');
   readonly creationKey = signal('');
+  private readonly fencedAttempts = signal<ReadonlySet<string>>(new Set());
+  readonly fenced = computed(() => this.fencedAttempts().has(this.attemptIdentity()));
   readonly workspace = signal<Receipt<UiLayoutDraftWorkspaceReceipt> | null>(null);
   readonly review = signal<Receipt<UiLayoutReleaseReviewReceipt> | null>(null);
   readonly head = signal<Receipt<UiLayoutReleaseHeadReceipt> | null>(null);
@@ -156,15 +157,33 @@ export class CorporatePagesComponent {
     if (!key) { key = crypto.randomUUID(); this.commandKeys.set(fingerprint, key); }
     return key;
   }
-  private async action(write: boolean, operation: (epoch: number) => Promise<void>): Promise<void> {
+  private attemptIdentity(): string {
+    const scope = this.groupsMode ? 'groups' : 'page';
+    if (this.creationKey()) return JSON.stringify([scope, 'creation', this.creationKey()]);
+    if (this.draftId()) return JSON.stringify([scope, this.pageId(), 'draft', this.draftId()]);
+    if (this.releaseId()) return JSON.stringify([scope, this.pageId(), 'release', this.releaseId()]);
+    return JSON.stringify([scope, this.pageId(), 'new', this.copyFrom()]);
+  }
+  private fenceAttempt(identity: string): void {
+    this.fencedAttempts.update(previous => new Set([...previous, identity]));
+  }
+  private clearCurrentFence(): void {
+    const identity = this.attemptIdentity();
+    this.fencedAttempts.update(previous => { const next = new Set(previous); next.delete(identity); return next; });
+  }
+  private async action(write: boolean, operation: (epoch: number, bindAttempt: () => void) => Promise<void>): Promise<void> {
     if (this.busy() || !this.ready() || !this.session.authenticated() || write && this.fenced()) return;
     this.pages.synchronizeSession();
     if (!this.ready()) return;
     const epoch = this.epoch;
+    let attempt = this.attemptIdentity();
+    const bindAttempt = () => { attempt = this.attemptIdentity(); };
     this.epochSession = this.session.generation();
     this.busy.set(true); this.message.set('');
-    try { await operation(epoch); }
+    try { await operation(epoch, bindAttempt); }
     catch (error) {
+      // Keep uncertainty attached to the command even after its route/session became stale.
+      if (write) this.fenceAttempt(attempt);
       if (!this.current(epoch)) return;
       const status = error instanceof CorporatePageError || error instanceof UiLayoutLifecycleHttpError ? error.status : 0;
       if ([401, 403, 404].includes(status)) {
@@ -172,9 +191,11 @@ export class CorporatePagesComponent {
         this.copyOrigin.set(null);
         this.published.set(null); this.catalog.set(null); this.document.set(null); this.renderedPage.set(null); this.groupsDocument.set(null); this.title = '';
       }
-      if (write) this.fenced.set(true); // Read/reconcile before any subsequent command; never retry automatically.
       this.message.set(this.errorMessage(error));
-    } finally { if (epoch === this.epoch) this.busy.set(false); }
+    } finally {
+      if (write && !this.current(epoch)) this.fenceAttempt(attempt);
+      if (epoch === this.epoch) this.busy.set(false);
+    }
   }
   private errorMessage(error: unknown): string {
     const code = error instanceof CorporatePageError || error instanceof UiLayoutLifecycleContractError ? error.code : '';
@@ -190,9 +211,9 @@ export class CorporatePagesComponent {
 
   async create(): Promise<void> {
     if (this.groupsMode || this.copyFrom() || this.creationKey() || this.pageId() || !this.title.trim()) return;
-    await this.action(true, async epoch => {
+    await this.action(true, async (epoch, bindAttempt) => {
       const title = this.title.trim();
-      this.creationKey.set(crypto.randomUUID()); await this.location();
+      this.creationKey.set(crypto.randomUUID()); bindAttempt(); await this.location();
       if (!this.current(epoch)) return;
       const receipt = await this.pages.createNative(this.creationKey(), title);
       if (!this.current(epoch)) return;
@@ -205,8 +226,8 @@ export class CorporatePagesComponent {
   async copyPublished(): Promise<void> {
     const origin = this.copyOrigin(), title = this.title.trim();
     if (!origin || origin.pageId !== this.copyFrom() || !title || this.creationKey()) return;
-    await this.action(true, async epoch => {
-      this.creationKey.set(crypto.randomUUID()); await this.location();
+    await this.action(true, async (epoch, bindAttempt) => {
+      this.creationKey.set(crypto.randomUUID()); bindAttempt(); await this.location();
       if (!this.current(epoch)) return;
       const receipt = await this.pages.copyPublished(this.creationKey(), title, origin.copySource);
       if (!this.current(epoch)) return;
@@ -229,10 +250,11 @@ export class CorporatePagesComponent {
   }
   async createGroups(): Promise<void> {
     if (!this.groupsMode || this.draftId() || this.releaseId()) return;
-    await this.action(true, async epoch => {
+    await this.action(true, async (epoch, bindAttempt) => {
       await this.loadHead(epoch);
       if (!this.current(epoch) || !this.headAbsent()) return;
-      if (!this.creationKey()) { this.creationKey.set(crypto.randomUUID()); await this.location(); }
+      if (!this.creationKey()) { this.creationKey.set(crypto.randomUUID()); bindAttempt(); await this.location(); }
+      if (!this.current(epoch)) return;
       const value = await this.lifecycle.createDraft(this.target(), this.creationKey());
       if (!this.current(epoch)) return;
       this.draftId.set(value.body.draft.draftRef); this.acceptDraft(value); await this.location();
@@ -266,7 +288,7 @@ export class CorporatePagesComponent {
     if (!this.current(epoch)) return;
     if ('status' in value) throw new CorporatePageError('CONTRACT');
     this.acceptDraft(value);
-    this.fenced.set(false);
+    this.clearCurrentFence();
   }
   private acceptDraft(value: Receipt<UiLayoutDraftWorkspaceReceipt>): void {
     const body = value.body, target = this.target();
@@ -354,7 +376,7 @@ export class CorporatePagesComponent {
     if (!this.current(epoch)) return;
     if ('status' in value || value.body.releaseRef !== this.releaseId() || value.body.rootTarget.componentId !== this.target().componentId
         || value.body.rootTarget.componentType !== this.target().componentType || `"${value.body.reviewEtag}"` !== value.etag) throw new CorporatePageError('CONTRACT');
-    this.review.set(value); this.fenced.set(false);
+    this.review.set(value); this.clearCurrentFence();
     await this.loadHead(epoch);
   }
   private async loadHead(epoch: number): Promise<void> {

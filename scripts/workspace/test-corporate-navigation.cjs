@@ -47,24 +47,27 @@ class HttpError extends Error { constructor(status) { super('sanitized'); this.s
 class ContractError extends Error { constructor(code) { super(code); this.code = code; } }
 class PageError extends ContractError { constructor(code, status = 0) { super(code); this.status = status; } }
 function editorFixture(mode, query = {}) {
+  const queries = observable();
   const changes = observable(), requests = [], navigate = [], session = { generation: signal(1), authenticated: signal(true), busy: signal(true) };
   const runtime = { contextChanges$: changes, snapshot: { state: 'ready' }, effectiveContext: { contextVersion: 'c1', activeTenant: { tenantId: 'lab-a' }, activeOrganizationId: 'org-1', capabilities: ['ui.authoring.configure', 'ui.layout.publish'] } };
   const route = { snapshot: { data: { corporateGroups: mode === 'groups', corporatePublished: mode === 'published' }, queryParamMap: { get: key => query[key] ?? null }, paramMap: { get: () => mode === 'published' ? id(50) : null } }, paramMap: {}, queryParamMap: {} };
   const pages = { synchronizeSession() {} };
   const lifecycle = {}, menu = { ready: signal(true), busy: signal(false), groups: signal([group(10), group(20)]), async refresh() { requests.push('menu'); } };
-  const tokens = new Map([['runtime', runtime], ['session', session], ['pages', pages], ['lifecycle', lifecycle], ['route', route], ['router', { async navigate(_, options) { navigate.push(options); } }], ['menu', menu], ['destroy', { onDestroy() {} }]]);
+  const router = { async navigate(_, options) { navigate.push(options); } };
+  const tokens = new Map([['runtime', runtime], ['session', session], ['pages', pages], ['lifecycle', lifecycle], ['route', route], ['router', router], ['menu', menu], ['destroy', { onDestroy() {} }]]);
   const core = { EnterpriseRuntimeContextService: 'runtime', UiLayoutLifecycleService: 'lifecycle', UiLayoutLifecycleHttpError: HttpError, UiLayoutLifecycleContractError: ContractError,
     readStrongResourceEtag: value => /^"[^"]+"$/.test(value) ? value : null };
   const { CorporatePagesComponent } = load('src/app/pages/corporate-pages/corporate-pages.component.ts', {
     '@angular/core': angular(tokens), '@angular/router': { ActivatedRoute: 'route', Router: 'router' }, '@praxisui/core': core,
-    'rxjs': { combineLatest: () => ({ subscribe: () => ({ unsubscribe() {} }) }) },
+    'rxjs': { combineLatest: () => queries },
     '../../core/corporate-session.service': { CorporateSessionService: 'session' }, '../../core/corporate-navigation.service': { CorporateNavigationService: 'menu' },
     '../../core/corporate-navigation.model': model,
     '../../core/corporate-page-pilot.service': { CorporatePagePilotService: 'pages', CorporatePageError: PageError,
       corporatePageId: value => typeof value === 'string' && /^[0-9a-f-]{36}$/.test(value), corporatePageTarget: pageId => ({ componentType: 'praxis-dynamic-page', componentId: pageId }), corporatePageDocument: value => structuredClone(value) },
   });
   const editor = new CorporatePagesComponent(); editor.ready.set(true);
-  return { editor, lifecycle, pages, menu, requests, navigate, changes, session };
+  const setQuery = next => { for (const key of Object.keys(query)) delete query[key]; Object.assign(query, next); queries.emit(null); };
+  return { editor, lifecycle, pages, menu, requests, navigate, changes, session, setQuery, router };
 }
 (async () => {
   await test('closed group document and first aggregate never replace another group', () => {
@@ -181,6 +184,78 @@ function editorFixture(mode, query = {}) {
     f.pages.reconcile = async receivedKey => { f.requests.push({ method: 'GET', key: receivedKey }); return { body: { pageId: id(60), draftId: id(61), source } }; };
     f.editor.loadDraft = async () => {}; await f.editor.reconcile();
     assert.deepEqual(f.requests.map(request => request.method), ['POST', 'GET']); assert.equal(f.requests[1].key, key);
+  });
+  await test('query reuse scopes uncertainty to its creation key and context changes never clear it', async () => {
+    const f = editorFixture('editor', { copyFrom: id(50) });
+    f.editor.copyOrigin.set({ pageId: id(50), copySource: { kind: 'published-page', pageId: id(50), releaseId: id(51), revisionId: id(52) } });
+    f.editor.title = 'Cópia';
+    f.pages.copyPublished = async () => { f.requests.push('POST copy'); throw new PageError('HTTP', 503); };
+    await f.editor.copyPublished(); const key = f.editor.creationKey(); assert.equal(f.editor.fenced(), true);
+    f.setQuery({}); assert.equal(f.editor.creationKey(), ''); assert.equal(f.editor.fenced(), false);
+    assert.equal(f.editor.ready(), false, 'A new query still needs fresh runtime resolution');
+    f.editor.ready.set(true); f.editor.title = 'Independente';
+    f.pages.createNative = async () => { f.requests.push('POST native'); throw new PageError('HTTP', 503); };
+    await f.editor.create(); assert.notEqual(f.editor.creationKey(), key);
+    f.setQuery({ copyFrom: id(50), creationKey: key }); assert.equal(f.editor.fenced(), true);
+    f.changes.emit(null); assert.equal(f.editor.fenced(), true); assert.equal(f.editor.ready(), false);
+    f.editor.ready.set(true); await f.editor.copyPublished();
+    assert.deepEqual(f.requests, ['POST copy', 'POST native']);
+    f.pages.reconcile = async () => { throw new PageError('HTTP', 404); };
+    await f.editor.reconcile(); assert.equal(f.editor.fenced(), true, '404 is not reconciliation success');
+  });
+  await test('late command error after query/context replacement fences the captured attempt only', async () => {
+    for (const cause of ['query', 'context']) {
+      const f = editorFixture('editor'); f.editor.title = 'Nova'; const pending = deferred();
+      f.pages.createNative = async () => { f.requests.push('POST'); return pending.promise; };
+      const operation = f.editor.create(); await Promise.resolve(); await Promise.resolve();
+      const key = f.editor.creationKey(); assert.ok(key); assert.equal(f.requests.length, 1);
+      if (cause === 'query') f.setQuery({}); else f.changes.emit(null);
+      pending.reject(new PageError('HTTP', 503)); await operation;
+      if (cause === 'query') { assert.equal(f.editor.fenced(), false); f.setQuery({ creationKey: key }); }
+      assert.equal(f.editor.fenced(), true); assert.equal(f.editor.ready(), false);
+      assert.equal(f.editor.message(), '', 'Stale failure must not repaint another scope');
+    }
+  });
+  await test('failure after receiving a new page keeps the creation identity and malformed reads do not clear it', async () => {
+    const f = editorFixture('editor'); f.editor.title = 'Nova';
+    f.pages.createNative = async () => ({ body: { pageId: id(60), draftId: id(61) } });
+    f.lifecycle.readDraft = async () => { throw new HttpError(503); };
+    await f.editor.create(); const key = f.editor.creationKey(); assert.equal(f.editor.fenced(), true);
+    f.setQuery({}); assert.equal(f.editor.fenced(), false);
+    f.setQuery({ creationKey: key, pageId: id(60), draftId: id(61) }); f.editor.ready.set(true);
+    f.lifecycle.readDraft = async () => ({ etag: '"current"', body: {} });
+    await f.editor.reload(); assert.equal(f.editor.fenced(), true, 'Malformed receipt cannot release uncertainty');
+  });
+  await test('validated current draft releases only its own creation attempt', async () => {
+    const f = editorFixture('groups');
+    f.lifecycle.readHead = async () => { throw new HttpError(404); };
+    f.lifecycle.createDraft = async () => { throw new HttpError(503); };
+    await f.editor.createGroups(); const oldKey = f.editor.creationKey(); assert.equal(f.editor.fenced(), true);
+    f.setQuery({}); f.editor.ready.set(true); await f.editor.createGroups();
+    const key = f.editor.creationKey(); assert.notEqual(key, oldKey); assert.equal(f.editor.fenced(), true);
+    f.setQuery({ creationKey: key, draftId: id(61) }); f.editor.ready.set(true);
+    f.lifecycle.readDraft = async () => ({ etag: '"current"', body: {
+      draft: { draftRef: id(61), rootTarget: model.CORPORATE_GROUPS_TARGET },
+      targets: [{ target: model.CORPORATE_GROUPS_TARGET, working: { document: {
+        kind: 'praxis.navigation-groups.editor', version: 1, config: { groups: [] },
+      } } }],
+    } });
+    await f.editor.reload(); assert.equal(f.editor.fenced(), false); assert.ok(f.editor.workspace());
+    f.setQuery({ creationKey: oldKey }); assert.equal(f.editor.fenced(), true);
+    assert.equal(f.editor.workspace(), null, 'An alias must reread canonical state before any write');
+  });
+  await test('groups creation never dispatches after route/context changed during location update', async () => {
+    for (const cause of ['query', 'context']) {
+      const f = editorFixture('groups'), navigation = deferred();
+      f.lifecycle.readHead = async () => { throw new HttpError(404); };
+      f.lifecycle.createDraft = async () => { f.requests.push('POST'); throw new Error('Must not dispatch'); };
+      f.router.navigate = async () => navigation.promise;
+      const operation = f.editor.createGroups();
+      await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+      const key = f.editor.creationKey(); assert.ok(key);
+      if (cause === 'query') f.setQuery({}); else f.changes.emit(null);
+      navigation.resolve(true); await operation; assert.deepEqual(f.requests, []);
+    }
   });
   console.log(`PASS ${tests} offline corporate navigation checks; browser/real HTTP remain separate.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });
