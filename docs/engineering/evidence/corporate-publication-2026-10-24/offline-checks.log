@@ -1,0 +1,11 @@
+PASS closed group document and first aggregate never replace another group
+PASS binding update preserves all other bindings and content
+PASS menu rejects external routes, wrong identity and eager/private children
+PASS SDK root pagination and lazy children use parentRef with fresh reads on reopen
+PASS late success/error after context invalidation or SESSION replacement cannot restore menu
+PASS malformed response, duplicate page and cursor cycle clear the whole projection
+PASS bounded projection explains its limit and never presents a truncated menu
+PASS editor, groups and published routes share one corporate provider scope with distinct route configs
+PASS groups mode preserves review/login route and never creates over an existing head
+PASS groups publication uses first-publish and fences a concurrent head conflict
+PASS 10 offline corporate navigation checks; browser/real HTTP remain separate.

@@ -38,6 +38,7 @@
         <div><h2>Contexto confirmado</h2><p>{{ confirmed.user.displayName || confirmed.user.userId }}</p>
           <dl><div><dt>Tenant</dt><dd>{{ effective.activeTenant.label || effective.activeTenant.tenantId }}</dd></div><div><dt>Ambiente</dt><dd>{{ effective.environment }}</dd></div></dl>
         </div>
+        <a mat-flat-button [routerLink]="pagesPath" [queryParams]="pagesQuery" data-testid="open-corporate-pages">Gerenciar páginas</a>
       </section>
     } @else {
       <p>Escolha um contexto para continuar. Uma seleção anterior pode precisar de nova confirmação.</p>
@@ -52,5 +53,5 @@
       @if (nextCursor()) { <button mat-button [disabled]="busy() || session.busy()" (click)="more()">Carregar mais contextos</button> }
     </section>
   }
-  <p class="next-step">A publicação de páginas neste workspace será habilitada em uma próxima entrega. Suas páginas do laboratório continuam salvas neste navegador.</p>
+  <p class="next-step">Gerencie rascunhos e publicações pelo servidor após confirmar o contexto. A disponibilidade depende da composição corporativa do backend. Suas páginas do laboratório continuam salvas neste navegador.</p>
 </section>
