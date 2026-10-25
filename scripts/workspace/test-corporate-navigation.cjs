@@ -287,9 +287,9 @@ function editorFixture(mode, query = {}) {
     f.editor.title = 'Operações';
     f.editor.reason = 'Fluxo orquestrado';
     f.lifecycle.readHead = async () => { throw new HttpError(404); };
-    f.lifecycle.createRevision = async () => { f.requests.push('revision'); return { etag: `"${id(70)}"`, body: { nextDraft: makeWorkspace(true, false, false).body } }; };
-    f.lifecycle.createAssignment = async () => { f.requests.push('assignment'); return { etag: `"${id(70)}"`, body: { nextDraft: makeWorkspace(true, true, false).body } }; };
-    f.lifecycle.freezeRelease = async () => { f.requests.push('freeze'); return { etag: `"${id(70)}"`, body: { release: { releaseRef: id(73) }, nextDraft: makeWorkspace(true, true, true).body } }; };
+    f.lifecycle.createRevision = async () => { f.requests.push('revision'); return { etag: `"${id(71)}"`, body: { nextDraft: makeWorkspace(true, false, false).body } }; };
+    f.lifecycle.createAssignment = async () => { f.requests.push('assignment'); return { etag: `"${id(72)}"`, body: { nextDraft: makeWorkspace(true, true, false).body } }; };
+    f.lifecycle.freezeRelease = async () => { f.requests.push('freeze'); return { etag: `"${id(73)}"`, body: { release: { releaseRef: id(73) }, nextDraft: makeWorkspace(true, true, true).body } }; };
     f.lifecycle.readReview = async () => ({ etag: `"${id(74)}"`, body: { releaseRef: id(73), rootTarget: model.CORPORATE_GROUPS_TARGET, reviewEtag: id(74), state: 'DRAFT' } });
     f.lifecycle.submit = async () => { f.requests.push('submit'); return { etag: `"${id(75)}"`, body: { releaseRef: id(73), rootTarget: model.CORPORATE_GROUPS_TARGET, reviewEtag: id(75), state: 'SUBMITTED' } }; };
     await f.editor.saveAndSubmitForReview();
@@ -301,6 +301,33 @@ function editorFixture(mode, query = {}) {
     f.lifecycle.readHead = async () => ({ etag: `"${id(77)}"`, body: { rootTarget: model.CORPORATE_GROUPS_TARGET, headEtag: id(77), activeReleaseRef: id(73) } });
     await f.editor.approveAndPublish();
     assert.deepEqual(f.requests, ['revision', 'assignment', 'freeze', 'submit', 'approve', 'publish', 'menu']);
+    assert.equal(f.editor.isReleaseAlreadyActive(), true);
+    await f.editor.approveAndPublish();
+    await f.editor.publish();
+    assert.deepEqual(f.requests, ['revision', 'assignment', 'freeze', 'submit', 'approve', 'publish', 'menu'], 'Already active release must not republish');
+
+    const pageFix = editorFixture('editor', { pageId: id(1), draftId: id(62) });
+    pageFix.editor.workspace.set({
+      etag: `"${id(80)}"`,
+      body: {
+        draft: { draftRef: id(62), rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, state: 'DRAFT' },
+        targets: [{
+          target: { componentType: 'praxis-dynamic-page', componentId: id(1) },
+          working: { document: page },
+          selectedRevision: { revisionRef: id(81) },
+          selectedAssignment: null,
+        }],
+        frozenReleaseRef: null,
+      },
+    });
+    pageFix.editor.document.set(page);
+    pageFix.editor.title = 'Página com revisão prévia';
+    pageFix.editor.reason = 'Tentativa inválida no editor';
+    pageFix.editor.formEditor = { readDocument() { throw new Error('Invalid form edit'); } };
+    pageFix.lifecycle.createAssignment = async () => { pageFix.requests.push('stale-assignment'); throw new Error('Must not assign stale revision'); };
+    await pageFix.editor.saveAndSubmitForReview();
+    assert.deepEqual(pageFix.requests, [], 'Failed local save must never freeze or submit a pre-existing revision');
+    assert.match(pageFix.editor.message(), /Corrija o conteúdo no editor/);
   });
   console.log(`PASS ${tests} offline corporate navigation checks; browser/real HTTP remain separate.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

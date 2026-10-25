@@ -47,6 +47,7 @@ async function client(browser, actor) {
     }
     assert.equal(headers.authorization, undefined); assert.equal(headers['x-tenant'], undefined); assert.equal(headers['x-user'], undefined);
     if (url.pathname === '/api/praxis/runtime/context') { contextReads++; return route.fulfill({ json: runtime() }); }
+    if (url.pathname === '/api/praxis/runtime/navigation') return route.fulfill({ json: { schemaVersion: 'praxis-enterprise-runtime-navigation.v1', contextVersion: runtime().effectiveContext.contextVersion, receiptEtag: 'nav-receipt', headReceipts: [], nodes: [], nextCursor: null } });
     if (url.pathname.endsWith('/context/choices')) return route.fulfill({ json: { items: [], nextCursor: null } });
     assert.equal(headers['x-praxis-context-version'], runtime().effectiveContext.contextVersion);
     assert.equal(headers['x-tenant-id'], tenant); assert.equal(headers['x-user-id'], actor);
@@ -70,7 +71,7 @@ async function client(browser, actor) {
       if (state.failure) return route.fulfill({ status: state.failure, json: { detail: 'PRIVATE_DO_NOT_RENDER' } });
       if (!state.published || tenant !== 'lab-a') return route.fulfill({ status: 404 });
       return json({ schemaVersion: 'praxis.published-page/v1', pageId, route: `/pages/${pageId}`, document: state.document,
-        contextVersion: runtime().effectiveContext.contextVersion, receiptEtag: 'published-receipt', head: head() }, 'W/"published-http"');
+        contextVersion: runtime().effectiveContext.contextVersion, receiptEtag: 'published-receipt', head: head(), copySource: { kind: 'published-page', pageId, releaseId, revisionId } }, 'W/"published-http"');
     }
     if (url.pathname === '/api/praxis/config/pages') return json({ schemaVersion: 'praxis.page-catalog/v1',
       contextVersion: runtime().effectiveContext.contextVersion, receiptEtag: 'catalog-receipt', nextCursor: null,

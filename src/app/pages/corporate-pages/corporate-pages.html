@@ -96,6 +96,7 @@
               @for (binding of document()?.config?.navigation || []; track binding.id) { <option [value]="binding.id">{{ binding.label }}</option> }
             </select>
             <label for="binding-group">Grupo publicado</label>
+            @if (!menu.ready() && !menu.busy()) { <p class="scope-note">Use "Atualizar menu" na barra superior para carregar os grupos publicados disponíveis neste contexto.</p> }
             <select id="binding-group" [(ngModel)]="bindingGroupId" [disabled]="!menu.ready() || menu.busy()">
               <option value="">Não alterar vínculos</option>
               @for (group of menu.groups(); track group.id) { <option [value]="group.id">{{ group.label }}</option> }
@@ -128,11 +129,12 @@
           <p>Estado da revisão: <strong data-testid="review-state">{{ value.body.state }}</strong></p>
           <p>Este recibo confirma o estado da release identificada. Ele não contém uma prévia imutável do conteúdo para revisão.</p>
           <a mat-button [routerLink]="editorPath" [queryParams]="reviewParams()" data-testid="review-link">Abrir link de revisão para outro ator</a>
+          @if (isReleaseAlreadyActive()) { <p class="scope-note" data-testid="release-already-active">Esta release já está ativa na publicação atual.</p> }
           <div class="actions">
             <button mat-stroked-button (click)="submit()" [disabled]="busy() || fenced() || !canAuthor() || value.body.state !== 'DRAFT'">Enviar para revisão</button>
             <button mat-stroked-button (click)="approve()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'SUBMITTED' || !reason.trim()">Aprovar release identificada</button>
-            <button mat-flat-button (click)="publish()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'APPROVED' || (!head() && !headAbsent()) || !reason.trim() || (groupsMode && !headAbsent())">Publicar release aprovada</button>
-            <button mat-flat-button (click)="approveAndPublish()" data-testid="approve-and-publish" [disabled]="busy() || fenced() || !canPublish() || (value.body.state !== 'SUBMITTED' && value.body.state !== 'APPROVED') || (!head() && !headAbsent()) || !reason.trim() || (groupsMode && !headAbsent())">Aprovar e publicar</button>
+            <button mat-flat-button (click)="publish()" [disabled]="busy() || fenced() || !canPublish() || isReleaseAlreadyActive() || value.body.state !== 'APPROVED' || (!head() && !headAbsent()) || !reason.trim() || (groupsMode && !headAbsent())">Publicar release aprovada</button>
+            <button mat-flat-button (click)="approveAndPublish()" data-testid="approve-and-publish" [disabled]="busy() || fenced() || !canPublish() || isReleaseAlreadyActive() || (value.body.state !== 'SUBMITTED' && value.body.state !== 'APPROVED') || (!head() && !headAbsent()) || !reason.trim() || (groupsMode && !headAbsent())">Aprovar e publicar</button>
           </div>
         </section>
       }

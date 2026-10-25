@@ -9,7 +9,7 @@ import {
   ElementRef,
   HostListener,
   ViewChild,
-  computed,
+  computed, effect,
   inject,
   signal,
 } from '@angular/core';
@@ -27,10 +27,11 @@ import {
 import { VisitorWorkspaceService } from '../core/visitor-workspace.service';
 import { visitorPagePath } from '../core/visitor-workspace.repository';
 import {
-  readCorporateShellProjection,
+  publishCorporateShellProjection, readCorporateShellProjection,
   subscribeCorporateShellProjection,
   type CorporateShellGroupProjection,
 } from '../core/corporate-navigation.model';
+import { CorporateSessionService } from '../core/corporate-session.service';
 import { HERO_NAVIGATION, type NavItem } from '../core/navigation.model';
 import { PRAXIS_API_BASE_URL } from '../core/platform.config';
 import { ThemeService } from '../core/theme.service';
@@ -315,6 +316,7 @@ export class HeroAppShellComponent {
   protected readonly authService = inject(AuthSimulationService);
   private readonly customizationMode = inject(PraxisCustomizationModeService, { optional: true });
   private readonly runtimeContext = inject(EnterpriseRuntimeContextService, { optional: true });
+  private readonly corporateSession = inject(CorporateSessionService, { optional: true });
   private readonly http = inject(HttpClient, { optional: true });
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -381,6 +383,17 @@ export class HeroAppShellComponent {
       this.corporateShellGroups.set(groups);
     });
     this.destroyRef?.onDestroy(unsubscribe);
+    if (this.corporateSession) {
+      let lastGeneration = this.corporateSession.generation();
+      effect(() => {
+        const generation = this.corporateSession!.generation();
+        const authenticated = this.corporateSession!.authenticated();
+        if (!authenticated || generation !== lastGeneration) {
+          lastGeneration = generation;
+          publishCorporateShellProjection([]);
+        }
+      });
+    }
   }
 
   protected dismissAuthDenied(): void {
@@ -583,6 +596,7 @@ export class HeroAppShellComponent {
   protected selectPersona(personaId: string): void {
     this.customizationMode?.setCustomizing(false);
     this.authService.switchPersona(personaId);
+    publishCorporateShellProjection([]);
     this.runtimeContext?.invalidate();
     this.personaMenuOpen.set(false);
     this.refreshTelemetry();

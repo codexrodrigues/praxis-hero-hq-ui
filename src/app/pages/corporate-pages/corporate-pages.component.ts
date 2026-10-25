@@ -434,7 +434,7 @@ export class CorporatePagesComponent {
     });
   }
   async publish(): Promise<void> {
-    const head = this.head(); if ((!head && !this.headAbsent()) || !this.reason.trim() || this.groupsMode && !this.headAbsent()) return;
+    const head = this.head(); if (this.isReleaseAlreadyActive() || (!head && !this.headAbsent()) || !this.reason.trim() || this.groupsMode && !this.headAbsent()) return;
     await this.action(true, async epoch => {
       const value = await this.lifecycle.publish(this.target(), head
         ? { kind: 'match', etag: head.etag } : { kind: 'first-publish' }, { releaseId: this.releaseId(), reason: this.reason.trim() });
@@ -452,16 +452,18 @@ export class CorporatePagesComponent {
   }
   /** Orchestrated author action: saves revision, binds organization scope, freezes release, and submits for review. */
   async saveAndSubmitForReview(): Promise<void> {
-    if (this.busy() || this.fenced() || !this.canAuthor() || !this.title.trim() || !this.reason.trim()) return;
+    if (this.busy() || this.fenced() || !this.canAuthor() || !this.title.trim() || !this.reason.trim() || (this.groupsMode && !this.headAbsent()) || (!!this.bindingGroupId && (!this.bindingLabel.trim() || !this.menu.ready() || this.menu.busy()))) return;
     if (!this.workspace()?.body.frozenReleaseRef) {
+      const etagBeforeSave = this.workspace()?.etag;
       await this.saveRevision();
-      if (this.fenced() || !this.workspace()?.body.targets[0]?.selectedRevision) return;
+      if (this.fenced() || !this.workspace() || this.workspace()?.etag === etagBeforeSave || !this.workspace()?.body.targets[0]?.selectedRevision) return;
       if (!this.workspace()?.body.targets[0]?.selectedAssignment) {
+        const etagBeforeAssign = this.workspace()?.etag;
         await this.assign();
-        if (this.fenced() || !this.workspace()?.body.targets[0]?.selectedAssignment) return;
+        if (this.fenced() || !this.workspace() || this.workspace()?.etag === etagBeforeAssign || !this.workspace()?.body.targets[0]?.selectedAssignment) return;
       }
       await this.freeze();
-      if (this.fenced() || !this.releaseId()) return;
+      if (this.fenced() || !this.workspace()?.body.frozenReleaseRef || !this.releaseId()) return;
     }
     if (this.review()?.body.state === 'DRAFT') {
       await this.submit();
@@ -469,7 +471,7 @@ export class CorporatePagesComponent {
   }
   /** Orchestrated publisher action: approves submitted release and immediately publishes to head. */
   async approveAndPublish(): Promise<void> {
-    if (this.busy() || this.fenced() || !this.canPublish() || !this.reason.trim()) return;
+    if (this.busy() || this.fenced() || !this.canPublish() || !this.reason.trim() || this.isReleaseAlreadyActive()) return;
     if (this.review()?.body.state === 'SUBMITTED') {
       await this.approve();
       if (this.fenced() || this.review()?.body.state !== 'APPROVED') return;
@@ -534,4 +536,5 @@ export class CorporatePagesComponent {
   reviewParams() { return { pageId: this.pageId(), releaseId: this.releaseId() }; }
   canAuthor(): boolean { return this.runtime.effectiveContext?.capabilities.includes('ui.authoring.configure') ?? false; }
   canPublish(): boolean { return this.runtime.effectiveContext?.capabilities.includes('ui.layout.publish') ?? false; }
+  isReleaseAlreadyActive(): boolean { return !!this.releaseId() && this.head()?.body.activeReleaseRef === this.releaseId(); }
 }
