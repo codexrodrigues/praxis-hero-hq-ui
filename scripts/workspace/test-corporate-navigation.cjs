@@ -56,7 +56,7 @@ function editorFixture(mode, query = {}) {
   const router = { async navigate(_, options) { navigate.push(options); } };
   const tokens = new Map([['runtime', runtime], ['session', session], ['pages', pages], ['lifecycle', lifecycle], ['route', route], ['router', router], ['menu', menu], ['destroy', { onDestroy() {} }]]);
   const core = { EnterpriseRuntimeContextService: 'runtime', UiLayoutLifecycleService: 'lifecycle', UiLayoutLifecycleHttpError: HttpError, UiLayoutLifecycleContractError: ContractError,
-    readStrongResourceEtag: value => /^"[^"]+"$/.test(value) ? value : null };
+    readStrongResourceEtag: value => /^"[^"]+"$/.test(value) ? value : null, validatePageAuthoringDocument: () => ({ ok: true }) };
   const { CorporatePagesComponent } = load('src/app/pages/corporate-pages/corporate-pages.component.ts', {
     '@angular/core': angular(tokens), '@angular/router': { ActivatedRoute: 'route', Router: 'router' }, '@praxisui/core': core,
     'rxjs': { combineLatest: () => queries },
@@ -328,6 +328,60 @@ function editorFixture(mode, query = {}) {
     await pageFix.editor.saveAndSubmitForReview();
     assert.deepEqual(pageFix.requests, [], 'Failed local save must never freeze or submit a pre-existing revision');
     assert.match(pageFix.editor.message(), /Corrija o conteúdo no editor/);
+    const multiGroupFix = editorFixture('groups', { draftId: id(63) });
+    multiGroupFix.editor.headAbsent.set(true);
+    multiGroupFix.editor.groupId = id(20);
+    multiGroupFix.lifecycle.readDraft = async () => ({
+      etag: `"${id(90)}"`,
+      body: {
+        draft: { draftRef: id(63), rootTarget: model.CORPORATE_GROUPS_TARGET, state: 'DRAFT' },
+        targets: [{
+          target: model.CORPORATE_GROUPS_TARGET,
+          working: { document: { kind: 'praxis.navigation-groups.editor', version: 1, config: { groups: [
+            { id: id(10), label: 'Primeiro', icon: 'home', order: 0 },
+            { id: id(20), label: 'Segundo', icon: 'folder', order: 1 },
+          ] } } },
+        }],
+      },
+    });
+    await multiGroupFix.editor.reload();
+    assert.equal(multiGroupFix.editor.groupId, id(20));
+    assert.equal(multiGroupFix.editor.title, 'Segundo');
+    assert.equal(multiGroupFix.editor.groupIcon, 'folder');
+
+    const bindingFix = editorFixture('editor', { pageId: id(1), draftId: id(64) });
+    bindingFix.menu.ready.set(false);
+    bindingFix.editor.bindingId = id(2);
+    const pageWithWidget = {
+      ...structuredClone(page),
+      config: { ...structuredClone(page.config), definition: { widgets: [{ key: id(7), definition: { id: 'praxis-dynamic-form', inputs: { config: {} } } }] } },
+    };
+    bindingFix.lifecycle.readDraft = async () => ({
+      etag: `"${id(91)}"`,
+      body: {
+        draft: { draftRef: id(64), rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, state: 'DRAFT' },
+        targets: [{ target: { componentType: 'praxis-dynamic-page', componentId: id(1) }, working: { document: pageWithWidget } }],
+      },
+    });
+    await bindingFix.editor.reload();
+    assert.equal(bindingFix.editor.bindingId, id(2));
+    assert.equal(bindingFix.editor.hasPendingBindingChange(), false);
+    assert.equal(bindingFix.editor.isBindingInvalid(), false);
+    bindingFix.editor.title = 'Título atualizado sem recarregar menu';
+    bindingFix.editor.reason = 'Apenas título';
+    bindingFix.lifecycle.createRevision = async (_target, _draft, _etag, cmd) => {
+      bindingFix.requests.push(cmd.authoringDocument.config.presentation.title);
+      return { etag: `"${id(92)}"`, body: { nextDraft: {
+        draft: { draftRef: id(64), rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, state: 'DRAFT' },
+        targets: [{ target: { componentType: 'praxis-dynamic-page', componentId: id(1) }, working: { document: cmd.authoringDocument } }],
+      } } };
+    };
+    await bindingFix.editor.saveRevision();
+    assert.deepEqual(bindingFix.requests, ['Título atualizado sem recarregar menu']);
+    assert.equal(bindingFix.editor.bindingId, id(2));
+    bindingFix.editor.bindingLabel = 'Dois editado sem menu pronto';
+    assert.equal(bindingFix.editor.hasPendingBindingChange(), true);
+    assert.equal(bindingFix.editor.isBindingInvalid(), true);
   });
   console.log(`PASS ${tests} offline corporate navigation checks; browser/real HTTP remain separate.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

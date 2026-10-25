@@ -314,7 +314,7 @@ export class CorporatePagesComponent {
     if (this.groupsMode) {
       const document = corporateGroupsDocument(body.targets[0].working.document);
       this.groupsDocument.set(document); this.workspace.set(value);
-      const group = document.config.groups[0];
+      const group = document.config.groups.find(item => item.id === this.groupId) ?? document.config.groups[0];
       this.groupId = group?.id ?? (this.groupId || crypto.randomUUID());
       this.title = group?.label ?? ''; this.groupOrder = group?.order ?? 0;
       this.groupIcon = group?.icon ?? 'home';
@@ -329,7 +329,8 @@ export class CorporatePagesComponent {
         || Object.keys(widgets[0].definition.inputs ?? {}).some(key => key !== 'config')) throw new CorporatePageError('CONTRACT');
     this.workspace.set(value); this.document.set(document); this.title = document.config.presentation.title;
     this.pageIcon = document.config.presentation.icon;
-    this.selectBinding(document.config.navigation[0]?.id ?? '');
+    const activeBindingId = document.config.navigation.some(item => item.id === this.bindingId) ? this.bindingId : (document.config.navigation[0]?.id ?? '');
+    this.selectBinding(activeBindingId);
     if (body.frozenReleaseRef) this.releaseId.set(body.frozenReleaseRef);
   }
   async saveRevision(): Promise<void> {
@@ -359,8 +360,8 @@ export class CorporatePagesComponent {
         document = corporatePageDocument(edited);
         document.config.presentation.title = this.title.trim();
         document.config.presentation.icon = this.pageIcon;
-        if (this.bindingGroupId) {
-          if (!this.menu.ready() || !this.menu.groups().some(group => group.id === this.bindingGroupId)) throw new CorporatePageError('CONTRACT');
+        if (this.hasPendingBindingChange()) {
+          if (this.isBindingInvalid()) throw new CorporatePageError('CONTRACT');
           this.bindingId ||= crypto.randomUUID();
           document = bindCorporatePage(document, this.bindingId, this.bindingGroupId, this.bindingLabel, this.bindingOrder, this.bindingIcon);
         }
@@ -452,7 +453,7 @@ export class CorporatePagesComponent {
   }
   /** Orchestrated author action: saves revision, binds organization scope, freezes release, and submits for review. */
   async saveAndSubmitForReview(): Promise<void> {
-    if (this.busy() || this.fenced() || !this.canAuthor() || !this.title.trim() || !this.reason.trim() || (this.groupsMode && !this.headAbsent()) || (!!this.bindingGroupId && (!this.bindingLabel.trim() || !this.menu.ready() || this.menu.busy()))) return;
+    if (this.busy() || this.fenced() || !this.canAuthor() || !this.title.trim() || !this.reason.trim() || (this.groupsMode && !this.headAbsent()) || (!this.groupsMode && this.isBindingInvalid())) return;
     if (!this.workspace()?.body.frozenReleaseRef) {
       const etagBeforeSave = this.workspace()?.etag;
       await this.saveRevision();
@@ -537,4 +538,14 @@ export class CorporatePagesComponent {
   canAuthor(): boolean { return this.runtime.effectiveContext?.capabilities.includes('ui.authoring.configure') ?? false; }
   canPublish(): boolean { return this.runtime.effectiveContext?.capabilities.includes('ui.layout.publish') ?? false; }
   isReleaseAlreadyActive(): boolean { return !!this.releaseId() && this.head()?.body.activeReleaseRef === this.releaseId(); }
+  hasBindingGroupInMenu(): boolean { return this.menu.groups().some(group => group.id === this.bindingGroupId); }
+  hasPendingBindingChange(): boolean {
+    if (!this.bindingGroupId) return false;
+    const existing = this.document()?.config.navigation.find(item => item.id === this.bindingId);
+    if (!existing) return true;
+    return existing.groupId !== this.bindingGroupId || existing.label !== this.bindingLabel.trim() || existing.order !== this.bindingOrder || existing.icon !== this.bindingIcon;
+  }
+  isBindingInvalid(): boolean {
+    return this.hasPendingBindingChange() && (!this.bindingLabel.trim() || !this.menu.ready() || this.menu.busy() || !this.hasBindingGroupInMenu());
+  }
 }
