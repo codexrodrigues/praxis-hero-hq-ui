@@ -221,7 +221,7 @@ const upgradedWidgets = reconcilePersistedDashboardPage(staleWidgetsSnapshot);
 const byKey = new Map(upgradedWidgets.widgets.map((w) => [w.key, w]));
 assert.ok(byKey.get('kpiFolha').definition.inputs.document.nodes[0].className.includes('kpi-tone-rh'));
 assert.equal(byKey.get('incidentsSeverityDonut').definition.inputs.config.sizing.height, 340);
-assert.equal(byKey.get('distressSignalsList').definition.inputs.config.layout.virtualScroll.viewportHeight, '340px');
+assert.equal(byKey.get('distressSignalsList').definition.inputs.config.layout.virtualScroll.viewportHeight, '380px');
 assert.ok(byKey.get('distressSignalsList').definition.inputs.config.expansion.sections[0].itemsExpr.includes('#${item.id}'));
 assert.equal(byKey.get('recentIncidents').definition.inputs.config.toolbar.appearance.variant, 'integrated');
 assert.equal(byKey.get('missionsTimeline').definition.inputs.document.nodes[0].markerVariant, 'icon');
