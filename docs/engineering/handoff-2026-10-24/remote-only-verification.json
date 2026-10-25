@@ -1,0 +1,100 @@
+{
+  "observedAt": "2026-10-24T23:16:20.969590+00:00",
+  "method": "Four fresh HTTPS clones of GitHub branches into a new temporary directory, without local Git references/objects or working checkout contents. Temporary directory path intentionally omitted.",
+  "repositories": [
+    {
+      "repo": "praxis-hero-hq-ui",
+      "branch": "feat/corporate-page-content-copy",
+      "head": "cfff4855ab40ee3bcd1075b098e0b1cbcb314950",
+      "clean": true,
+      "source": "fresh HTTPS clone from GitHub, no local object/reference checkout"
+    },
+    {
+      "repo": "praxis-config-starter",
+      "branch": "fix/published-copy-capture-admission",
+      "head": "6d6baf7f88cfdf213754d56162d8d42fa81045dc",
+      "clean": true,
+      "source": "fresh HTTPS clone from GitHub, no local object/reference checkout"
+    },
+    {
+      "repo": "praxis-api-quickstart",
+      "branch": "main",
+      "head": "d6c11592ce885d7f5aeb058314268e2ac5cafa17",
+      "clean": true,
+      "source": "fresh HTTPS clone from GitHub, no local object/reference checkout"
+    },
+    {
+      "repo": "praxis-codex-skills",
+      "branch": "main",
+      "head": "9298573bddcfa848512b3f37e87af71c247197c3",
+      "clean": true,
+      "source": "fresh HTTPS clone from GitHub, no local object/reference checkout"
+    }
+  ],
+  "essentialFilesChecked": 20,
+  "missingEssentialFiles": [],
+  "relativeReadmePromptLinks": "PASS; targets present in freshly cloned Hero",
+  "canonicalGovernancePaths": "PASS; both docs/platform-governance files present in freshly cloned skills",
+  "costReports": [
+    {
+      "name": "native-before-rc174",
+      "authorityUnits": 110,
+      "hashesMatch": true
+    },
+    {
+      "name": "published-before-rc174",
+      "authorityUnits": 132,
+      "hashesMatch": true
+    },
+    {
+      "name": "native-after-pr533",
+      "authorityUnits": 109,
+      "hashesMatch": true
+    },
+    {
+      "name": "published-after-pr533",
+      "authorityUnits": 131,
+      "hashesMatch": true
+    }
+  ],
+  "heroPublicSdkLock": {
+    "packageCount": 22,
+    "version": "10.0.0-rc.38",
+    "allResolvedUrlsPublicNpm": true
+  },
+  "buildFileReview": "No systemPath, SNAPSHOT, local repository or local parent dependency found in reviewed Config/Quickstart POMs by independent reviewer.",
+  "localServerConfiguration": {
+    "start": "npm start",
+    "host": "127.0.0.1",
+    "port": 4302,
+    "proxyConfig": "proxy.conf.js",
+    "requiresPreviousServer": false
+  },
+  "independentReview": {
+    "reviewer": "creation_boundary_review",
+    "result": "APTO for remote source/documentation resumption",
+    "basis": "Only the four new HTTPS clones, not earlier working checkouts"
+  },
+  "externalAccess": {
+    "sourceReading": "Own GitHub access where required",
+    "operationalProof": "Own authorized access to existing Render-managed author/publisher identities and deployed backend",
+    "deployment": "Own authorized publishing/service accounts",
+    "successorPermissionsVerified": false,
+    "credentialsTransferred": false
+  },
+  "notExecuted": [
+    "dependency installation",
+    "build",
+    "runtime tests",
+    "login",
+    "deploy",
+    "Neon access"
+  ],
+  "limits": [
+    "Source availability was verified; future package registry availability was not installed/tested.",
+    "Existing authorized GitHub access enabled these clones; this does not prove successor account permissions.",
+    "Operational state persists in remote backend, not Git.",
+    "Historical private-source hashes do not imply raw private logs are available in Git.",
+    "Audit Hero HEAD is before the subsequent documentation-only portability commit."
+  ]
+}

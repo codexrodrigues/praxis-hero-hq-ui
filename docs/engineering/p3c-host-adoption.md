@@ -1,5 +1,11 @@
 # P3-C — adoção em incrementos
 
+> Continuidade em outra máquina: leia a
+> [passagem de 24/10/2026](handoff-2026-10-24/README.md) e o
+> [registro atualizado da jornada](corporate-session-journey.md).
+> As seções abaixo preservam o histórico dos primeiros cortes; não representam
+> sozinhas o estado final. Conteúdo Native foi publicado; cópia real segue pendente.
+
 Controle: [Quickstart #461](https://github.com/codexrodrigues/praxis-api-quickstart/issues/461).
 Este documento descreve o estado atual; evidências anteriores permanecem históricas.
 

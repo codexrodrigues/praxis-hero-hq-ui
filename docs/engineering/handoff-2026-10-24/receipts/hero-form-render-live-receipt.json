@@ -1,0 +1,46 @@
+{
+  "deployId": "dep-dbej0hom7kps73e23keg",
+  "commit": "d6c11592ce885d7f5aeb058314268e2ac5cafa17",
+  "status": "live",
+  "liveAt": "2026-10-24T22:33:13.290797Z",
+  "recovery": "RESTORED",
+  "recoveryAt": "2026-10-24T22:32:49.607Z",
+  "observedAt": "2026-10-24T22:33:39.763271+00:00",
+  "publicationCommands": 0,
+  "neonRehearsal": false,
+  "initialTransportChecks": [
+    {
+      "path": "/actuator/health",
+      "error": "URLError"
+    },
+    {
+      "path": "/actuator/health/readiness",
+      "error": "URLError"
+    },
+    {
+      "path": "/actuator/health/liveness",
+      "error": "URLError"
+    }
+  ],
+  "checks": [
+    {
+      "path": "/actuator/health",
+      "http": 200,
+      "status": "UP",
+      "transport": "curl verified TLS"
+    },
+    {
+      "path": "/actuator/health/readiness",
+      "http": 200,
+      "status": "UP",
+      "transport": "curl verified TLS"
+    },
+    {
+      "path": "/actuator/health/liveness",
+      "http": 200,
+      "status": "UP",
+      "transport": "curl verified TLS"
+    }
+  ],
+  "verifiedAt": "2026-10-24T22:34:12.321230+00:00"
+}

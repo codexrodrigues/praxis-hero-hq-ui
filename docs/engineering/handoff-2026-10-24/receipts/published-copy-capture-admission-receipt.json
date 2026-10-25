@@ -1,0 +1,35 @@
+{
+  "baseline": "49ba906536e9acec7f667842228e5ff25d40c621",
+  "files": {
+    "docs/ai/contracts/page-publication-p0/P3C-VALIDATION-BUDGET-521.md": "06521c9a8a513b99f2826d12d027a95b4f7be4d3a2067e05a886be3ce2423e51",
+    "src/main/java/org/praxisplatform/config/service/PageCatalogLifecycleBridge.java": "62fb09829382ea2bd34494ec4b262c1e84e3e07e1e4baf24ca9c8edd72f256b1",
+    "src/main/java/org/praxisplatform/config/service/PageCreationService.java": "41e725f8e98e7656ac29e9ca4729e7ca9de9c754583b0cebb1b0ea9b9db8503f",
+    "src/test/java/org/praxisplatform/config/service/PageCatalogLifecycleBridgeTest.java": "9196bd398b5752b504a2e37fc754974123aa246490fc9e6a2864e3b9cd3bac8a",
+    "src/test/java/org/praxisplatform/config/service/PageCreationAdmissionCheckpointTest.java": "d570333abac0049baf1f328a63965de7a1f888235bcee1308810e1d1d22ce5de",
+    "src/test/java/org/praxisplatform/config/service/PageCreationFullPathCostTest.java": "f5a0f042e6a288cdf54d4d7775d769cbfd630336d8e2a28adf1ac02894a991e6"
+  },
+  "counts": {
+    "native": {
+      "before": 110,
+      "after": 109,
+      "beforeObservationsModel": 220,
+      "afterObservationsModel": 218
+    },
+    "published": {
+      "before": 132,
+      "after": 131,
+      "beforeObservationsModel": 264,
+      "afterObservationsModel": 262
+    }
+  },
+  "tests": {
+    "FullPath": 5,
+    "Checkpoint": 3,
+    "Bridge": 29,
+    "result": "PASS",
+    "database": false,
+    "http": false
+  },
+  "limitation": "Synthetic SQL/repository transports. Frozen released source is fixture, not actual publication. Counts do not certify 40-second latency or cause of observed503.",
+  "editorialRefinement": "Corrected static report baseline label to rc174/capture; regenerated only report metadata; no execution change or repeated suite."
+}

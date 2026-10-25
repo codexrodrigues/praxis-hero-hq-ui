@@ -7,14 +7,16 @@ import { CorporateSessionService } from './corporate-session.service';
 import { PRAXIS_API_BASE_URL } from './platform.config';
 
 // Private host projections of existing Config HTTP DTOs, not a new SDK or persistence contract.
+export type CorporatePageSource = { kind: 'registered-native'; sourceId: string; revision: string } | CorporatePublishedSource;
+export interface CorporatePublishedSource { kind: 'published-page'; pageId: string; releaseId: string; revisionId: string; }
 export interface CorporatePageCreation {
   creationKey: string; pageId: string; target: UiLayoutTarget; routePath: string;
   draftId: string; draftEtag: string;
-  source: { kind: 'registered-native'; sourceId: string; revision: string };
+  source: CorporatePageSource;
 }
 export interface CorporatePublishedPage {
   schemaVersion: string; pageId: string; route: string; document: PageAuthoringDocument;
-  contextVersion: string; receiptEtag: string; head: UiLayoutReleaseHeadReceipt;
+  contextVersion: string; receiptEtag: string; head: UiLayoutReleaseHeadReceipt; copySource: CorporatePublishedSource;
 }
 export interface CorporatePageCatalog {
   schemaVersion: string; contextVersion: string; receiptEtag: string; nextCursor: string | null;
@@ -35,6 +37,24 @@ export function corporatePageDocument(value: unknown): PageAuthoringDocument {
   const decoded = decodePageAuthoringDocument(value);
   if (!decoded.ok) throw new CorporatePageError('CONTRACT');
   return decoded.value;
+}
+
+/** Closed projection of Config's source selector. It selects an origin; it grants no authority. */
+export function corporatePageSource(value: unknown): CorporatePageSource {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new CorporatePageError('CONTRACT');
+  const source = value as Record<string, unknown>;
+  const keys = Object.keys(source).sort().join('|');
+  if (source['kind'] === 'registered-native' && keys === 'kind|revision|sourceId'
+      && source['sourceId'] === 'quickstart:corporate-page' && source['revision'] === '2') return structuredClone(value) as CorporatePageSource;
+  if (source['kind'] === 'published-page' && keys === 'kind|pageId|releaseId|revisionId'
+      && ['pageId', 'releaseId', 'revisionId'].every(key => corporatePageId(source[key]))) return structuredClone(value) as CorporatePublishedSource;
+  throw new CorporatePageError('CONTRACT');
+}
+function sameSource(left: CorporatePageSource, right: CorporatePageSource): boolean {
+  return left.kind === right.kind && (left.kind === 'registered-native' && right.kind === 'registered-native'
+    ? left.sourceId === right.sourceId && left.revision === right.revision
+    : left.kind === 'published-page' && right.kind === 'published-page'
+      && left.pageId === right.pageId && left.releaseId === right.releaseId && left.revisionId === right.revisionId);
 }
 
 /** Provide beside the corporate context and SDK lifecycle client, never in the demo root. */
@@ -69,7 +89,14 @@ export class CorporatePagePilotService {
     this.uuid(creationKey);
     if (!title.trim() || title.length > 160) throw new CorporatePageError('CONTRACT');
     return this.creation('POST', { creationKey, title: title.trim(),
-      source: { kind: 'registered-native', sourceId: 'quickstart:corporate-page', revision: '2' } }, creationKey);
+      source: { kind: 'registered-native', sourceId: 'quickstart:corporate-page', revision: '2' } }, creationKey,
+      { kind: 'registered-native', sourceId: 'quickstart:corporate-page', revision: '2' });
+  }
+  copyPublished(creationKey: string, title: string, origin: CorporatePublishedSource): Promise<CorporatePageReceipt<CorporatePageCreation>> {
+    this.uuid(creationKey);
+    const source = corporatePageSource(origin);
+    if (source.kind !== 'published-page' || !title.trim() || title.length > 160) throw new CorporatePageError('CONTRACT');
+    return this.creation('POST', { creationKey, title: title.trim(), source }, creationKey, source);
   }
   reconcile(creationKey: string): Promise<CorporatePageReceipt<CorporatePageCreation>> {
     this.uuid(creationKey);
@@ -95,16 +122,20 @@ export class CorporatePagePilotService {
     const value = result.body;
     if (value?.schemaVersion !== 'praxis.published-page/v1' || value.pageId !== pageId || typeof value.receiptEtag !== 'string') throw new CorporatePageError('CONTRACT');
     this.context(value.contextVersion); this.route(pageId, value.route); this.head(pageId, value.head);
+    const source = corporatePageSource(value.copySource);
+    if (source.kind !== 'published-page' || source.pageId !== pageId || source.releaseId !== value.head.activeReleaseRef) throw new CorporatePageError('CONTRACT');
+    value.copySource = source;
     value.document = corporatePageDocument(value.document);
     return result;
   }
-  private async creation(method: 'GET' | 'POST', body: unknown, creationKey: string): Promise<CorporatePageReceipt<CorporatePageCreation>> {
+  private async creation(method: 'GET' | 'POST', body: unknown, creationKey: string, expected?: CorporatePageSource): Promise<CorporatePageReceipt<CorporatePageCreation>> {
     const result = await this.request<CorporatePageCreation>(method, method === 'GET' ? `${this.root}/by-creation-key` : this.root,
       body, method === 'GET' ? new HttpParams().set('creationKey', creationKey) : undefined);
     const value = result.body;
     if (!value || value.creationKey !== creationKey || value.draftEtag !== result.etag) throw new CorporatePageError('CONTRACT');
     this.uuid(value.pageId); this.uuid(value.draftId); this.target(value.pageId, value.target); this.route(value.pageId, value.routePath);
-    if (value.source?.kind !== 'registered-native' || value.source.sourceId !== 'quickstart:corporate-page' || value.source.revision !== '2') throw new CorporatePageError('CONTRACT');
+    value.source = corporatePageSource(value.source);
+    if (expected && !sameSource(value.source, expected) || value.source.kind === 'published-page' && value.source.pageId === value.pageId) throw new CorporatePageError('CONTRACT');
     return result;
   }
   private async request<T>(method: 'GET' | 'POST', url: string, body?: unknown, params?: HttpParams): Promise<CorporatePageReceipt<T>> {

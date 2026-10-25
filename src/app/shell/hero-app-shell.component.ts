@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   ViewChild,
@@ -25,6 +26,11 @@ import {
 } from '@praxisui/core';
 import { VisitorWorkspaceService } from '../core/visitor-workspace.service';
 import { visitorPagePath } from '../core/visitor-workspace.repository';
+import {
+  readCorporateShellProjection,
+  subscribeCorporateShellProjection,
+  type CorporateShellGroupProjection,
+} from '../core/corporate-navigation.model';
 import { HERO_NAVIGATION, type NavItem } from '../core/navigation.model';
 import { PRAXIS_API_BASE_URL } from '../core/platform.config';
 import { ThemeService } from '../core/theme.service';
@@ -312,6 +318,7 @@ export class HeroAppShellComponent {
   private readonly http = inject(HttpClient, { optional: true });
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef, { optional: true });
 
   protected readonly activeHeroes = signal<number>(53);
   protected readonly totalHeroes = signal<number>(101);
@@ -364,8 +371,16 @@ export class HeroAppShellComponent {
     { initialValue: null },
   );
 
+  private readonly corporateShellGroups = signal<ReadonlyArray<CorporateShellGroupProjection>>(
+    readCorporateShellProjection(),
+  );
+
   constructor() {
     this.refreshTelemetry();
+    const unsubscribe = subscribeCorporateShellProjection((groups) => {
+      this.corporateShellGroups.set(groups);
+    });
+    this.destroyRef?.onDestroy(unsubscribe);
   }
 
   protected dismissAuthDenied(): void {
@@ -390,6 +405,24 @@ export class HeroAppShellComponent {
   private readonly visitorWorkspace = inject(VisitorWorkspaceService);
   protected readonly navigation = computed<{ label: string; items: NavItem[] }[]>(() => [
     ...HERO_NAVIGATION,
+    ...this.corporateShellGroups().map((group) => ({
+      label: group.label,
+      items: group.items.length
+        ? group.items.map((item) => ({
+            path: item.path,
+            label: item.label,
+            icon: item.icon,
+            description: 'Página corporativa publicada',
+          }))
+        : [
+            {
+              path: '/workspace-corporativo/paginas',
+              label: `${group.label} · abrir no workspace`,
+              icon: group.icon,
+              description: 'Grupo corporativo publicado',
+            },
+          ],
+    })),
     ...this.visitorWorkspace.workspace().menus.filter((group) => group.items.length).map((group) => ({
       label: group.label,
       items: group.items.map((item) => ({ path: visitorPagePath(item.pageId), label: item.label, icon: item.icon ?? 'web', description: 'Página salva neste navegador' })),
@@ -637,5 +670,3 @@ export class HeroAppShellComponent {
       });
   }
 }
-
-
