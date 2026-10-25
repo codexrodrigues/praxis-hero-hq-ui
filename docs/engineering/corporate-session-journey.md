@@ -302,3 +302,14 @@ passou às 22:49:16 UTC, com aviso de bundle de 16,63 MB acima do budget inalter
 do commit. Permanecem os limites do
 piloto Form/home, sem API de domínio, campanha Neon adicional, prova de CORS frontend
 em produção ou implantação Firebase.
+
+## Consolidação arquitetural: redução de custo de admissão, ícones governados e orquestração corporativa — 25/10/2026
+
+1. **Causa raiz do 503 em cópia publicada resolvida (`praxis-config-starter:0.1.0-rc.175`, PR #533)**:
+   - A investigação forense comprovou que uma única requisição `POST /api/praxis/config/pages` para cópia publicada disparava **131 unidades de autoridade** (`54` chamadas `HOST_REQUIRE_NATIVE_PROVENANCE`, `38` `HOST_RESOLVE`, `8` leituras SQL do evento publicado e `21` `PAGE_LIFECYCLE_CREATE_DRAFT`), pois `PageCatalogLifecycleBridge` criava uma nova instância `Chain` a cada chamada sem compartilhar linhagem já verificada na mesma fase da tentativa.
+   - Com o escopo por fase (`beforeCommit = false` vs `beforeCommit = true`) em `UiLayoutValidationAttempt` e `PageCatalogLifecycleBridge`, o custo caiu de **131 para 28 unidades (-78,6%)** em cópia publicada e de **109 para 29 unidades (-73,4%)** em criação nativa, preservando 100% da revalidação pré-commit antes do `COMMIT`.
+2. **Catálogo governado de ícones (`praxis-api-quickstart`, PR #480 e PR #481)**:
+   - `QuickstartPageConfiguration.ALLOWED_ICONS` e `CORPORATE_ALLOWED_ICONS` no Hero passaram a admitir um conjunto curado de **35 ícones Material** para grupos, páginas e vínculos de menu.
+3. **Projeção de navegação na Shell, ações orquestradas e guarda de release ativa (`praxis-hero-hq-ui`, PR #19 e endurecimento pós-revisão)**:
+   - Grupos e páginas corporativas autorizados em `CorporateNavigationService` são projetados reativamente na sidebar principal do `HeroAppShellComponent` e no Command Palette (`Ctrl+K`), permanecendo disponíveis ao navegar para outras rotas enquanto a sessão corporativa estiver autenticada e sendo limpos imediatamente ao encerrar sessão, trocar geração/contexto ou alternar persona.
+   - Adicionadas as ações orquestradas **Preparar e enviar para revisão** (`saveAndSubmitForReview`) e **Aprovar e publicar** (`approveAndPublish`), com verificação estrita de avanço de ETag entre etapas (impedindo congelar/submeter revisão antiga se o salvamento local falhar) e bloqueio explícito (`isReleaseAlreadyActive()`) quando a release consultada já é o `activeReleaseRef` do head publicado.

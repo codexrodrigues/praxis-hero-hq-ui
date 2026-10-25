@@ -34,12 +34,12 @@ export class CorporateNavigationService {
       this.session.generation(); const authenticated = this.session.authenticated();
       untracked(() => { this.pages.synchronizeSession(); if (!authenticated) this.clear(); });
     });
-    inject(DestroyRef).onDestroy(() => { this.destroyed = true; this.clear(); subscription.unsubscribe(); });
+    inject(DestroyRef).onDestroy(() => { this.destroyed = true; this.clear(!this.session.authenticated()); subscription.unsubscribe(); });
   }
-  private clear(): void {
+  private clear(clearShellProjection = true): void {
     ++this.epoch; this.cursorHistory.clear(); this.groups.set([]); this.children.set({}); this.cursors.set({});
     this.rootCursor.set(null); this.expanded.set(null); this.ready.set(false); this.busy.set(false); this.message.set('');
-    publishCorporateShellProjection([]);
+    if (clearShellProjection) publishCorporateShellProjection([]);
   }
   private syncShellProjection(): void {
     if (!this.ready() || !this.session.authenticated()) {
