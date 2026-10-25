@@ -1,0 +1,117 @@
+{
+  "date": "2026-10-24",
+  "scope": "Hero corporate SESSION/context consumer increment; not full corporate publication",
+  "baseline": "7d6c82b8ce655e01a2fada47ed04bcb6de9b76b9",
+  "branch": "codex/corporate-session-journey",
+  "quickstartMerge": "48c28c0c8f0b25f7c85fdf51cf69b49e69bc40b2",
+  "configPublic": "0.1.0-rc.169",
+  "sdk": "22 public packages rc.38; unchanged package/lock",
+  "sourceSha256": {
+    "proxy.conf.js": "abb21379ab5a64c3dc5c8c7b861b8afcffaea3014b6970361c6943a0f0d2a48b",
+    "src/app/app.config.ts": "17f71c58f8e5b6ee4d7bc8b93970a77e5814aed70cbe85f3a201e004bba6b0a6",
+    "src/app/pages/corporate-context/corporate-context-page.component.ts": "9d04cc78064811a5188636252d2529efc9e01a4dc34cad3b4fa8cff72f28a7ed",
+    "src/app/pages/corporate-context/corporate-context-page.html": "bcbb72e7e0919f7398246c04117e41d27841e1848c00f6b03234237d17f59c16",
+    "src/app/pages/corporate-context/corporate-context-page.scss": "7f621d125d820baf41fcdaaaa4389a16cb8aa23558444bc72592b35c03426e83",
+    "src/app/core/corporate-session-target.ts": "ef0ac5bbd7776867da777c91b40bd24484ad3cd04c19c198af2ee996bec0b39f",
+    "src/app/core/corporate-session.backend.ts": "9dfad988b6c6e268523ce253028d4c2e644d110d84a177483ffd620610998d58",
+    "src/app/core/corporate-session.interceptor.ts": "03c5fbc819c2876d46bf417fca9c313ba76d48e39682d0755e1695aea4890c5f",
+    "src/app/core/corporate-session.service.ts": "b6953e7dc185a9784595a9734b83a56608237a0307c1f3ea5c782a0c353f465b",
+    "test-e2e/test-corporate-context.cjs": "b888febca6bc5b563990fa89c6d755309266dd2205ce48aacd9b180f560812bd",
+    "test-e2e/test-session-seams.cjs": "5980a83f306d1ddfd2a499e0eede47204b5912a39b5d063b2438ebdddea4fac6",
+    "docs/engineering/corporate-session-journey.md": "d1fc9789f2964c31ccdac14efba8140c15e663e3f3133b1531a0405f90e6f3dd",
+    "docs/engineering/p3c-host-adoption.md": "100a464bd3067974383eede016cf7ff0a659d9f235f8908b92686c75456f6e4c"
+  },
+  "dependencySha256": {
+    "package.json": "5f9d25c9fa5bcab87a52c6f143be89707899e51b4976279b8c69f8a01da694e5",
+    "package-lock.json": "42d612bdeb0b083699ad3e36b9de60730c5b21e182b8887141ec450af8d7d3a6"
+  },
+  "commands": [
+    {
+      "command": "node --test test-e2e/test-session-seams.cjs",
+      "result": "PASS 16/16"
+    },
+    {
+      "command": "./node_modules/.bin/tsc -p tsconfig.spec.json --noEmit",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run build",
+      "result": "PASS; 10.940s; initial 16.60MB warning (15MB warning/18MB error), budgets unchanged"
+    },
+    {
+      "command": "node test-e2e/test-corporate-context.cjs",
+      "result": "PASS; only test rerun after mobile QA patch"
+    },
+    {
+      "command": "node test-e2e/test-route-catalog.cjs",
+      "result": "PASS"
+    },
+    {
+      "command": "node test-e2e/test-visitor-lab.cjs",
+      "result": "PASS; create/copy/save/menu/icon/route/reload; zero remote config writes"
+    }
+  ],
+  "browserScope": [
+    "Intercepted HTTP contracts only; actual installed Angular/Core runtime",
+    "Login/bootstrap/logout raw-CSRF; CAS/reload; 401/403/409/503; late generations; uncertain logout; persona independence",
+    "307 foreign redirect rejection: no destination request for password or CSRF",
+    "No secret persistence; desktop/390px internal bounds and keyboard username/password focus; not complete accessibility audit"
+  ],
+  "realBackendObservation": {
+    "request": "anonymous GET https://praxis-api-quickstart.onrender.com/auth/session",
+    "origin": "http://127.0.0.1:4302",
+    "status": 403,
+    "response": "Invalid CORS request",
+    "effect": "read-only; no login, cookie, credentials, DB proof or remote mutation",
+    "required": "Authoritative deployment CORS/origin admission and real SESSION/cookie/CSRF composition before corporate operation"
+  },
+  "limitations": [
+    "No new Neon run, environment or budget increase, per explicit user decision",
+    "Quickstart technical acceptance does not claim public end-to-end PASS, SLA or production readiness",
+    "Corporate page creation/publication/navigation UI remains next increment",
+    "No deploy or Hero main merge",
+    "Build included preexisting unrelated incidentes.config.ts; excluded from commit"
+  ],
+  "unrelatedFile": {
+    "path": "src/app/pages/operacoes/incidentes.config.ts",
+    "sha256": "1c54953040fb0c72d00cbe517499aa804bbed0404ac28c1c1542b200ec17e506",
+    "expected": "1c54953040fb0c72d00cbe517499aa804bbed0404ac28c1c1542b200ec17e506"
+  },
+  "resources": {
+    "server": "npm start official127.0.0.1:4302; kept for user; PID70260/session96014",
+    "database": "none"
+  },
+  "review": {
+    "author": "p3c_page_providers",
+    "reviewer": "p3c_security_review",
+    "state": "approved: production, tests, transport, skill, mobile QA and final docs/receipt; zero hash mismatches",
+    "executorAndDocs": "root"
+  },
+  "skill": {
+    "classification": "atualizar-existente",
+    "canonicalRepo": "codexrodrigues/praxis-codex-skills",
+    "branch": "codex/hero-session-transport-guidance",
+    "skill": "praxis-angular-host-project",
+    "validation": "41 helper tests;168 Praxis/19 Ergon preflight clean; independently reviewed and integrated",
+    "pullRequest": "https://github.com/codexrodrigues/praxis-codex-skills/pull/845",
+    "merge": "abb91d7842d8b62bf0bd3f0822885acb3020a427",
+    "localSync": "one selected skill OK via official helper and filtered manifest; backup; baseline30a checked;793 unrelated installed files byte-preserved; no family force"
+  },
+  "artifactsSha256": {
+    "unit.log": "df023559f523e27f478008a8862751be3caa06c91baa16b6010e16d58d93847e",
+    "typecheck.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.log": "b6729074e7cd9cce0a1942a47a7321b5c6d6978ddac4fd90d4b9d9293507d404",
+    "browser.log": "b47cf7f492b92b7a583468d74e289efe458fa1433baad083c8ffe0354f5f976f",
+    "routes.log": "68b2ae4d381ae291ec3eff74d47418b2aa233b171cd2a55c8372c581d99c6a7b",
+    "visitor.log": "2c621a90fc0e1ca0d7a49d4a78946ffd28f8e009812f3f04215c2f6e640216ca",
+    "login-desktop.png": "9c784ab477ff84529f803ab2f853e4dd13a51a8d189ddd051618a9105caf0662",
+    "login-narrow.png": "f236e3a57296de2f79c1bb3428aa5f05a98eba1ed0bc8a0e04459751b1a8b3cc",
+    "context-desktop.png": "a249f623be772a0fe4f1f610d4d836a340c6391b15209d22fdd754d3efd51cf2",
+    "context-narrow.png": "7cefe6311974ebfa44fe6c20e92344b81877eee2abcf4f86a9ad492964bc6d37",
+    "skill-sync-receipt.json": "ffa6b6b055f75fd998f8d052a0ef35c05a78ee2c04bf862697b9e17d6e852cf3",
+    "skill-preflight.log": "93371cda741da5bb6545db046915cff19b05a5b97fcffa0f03cf54735c88000d"
+  },
+  "implementationCommit": "804ad81052f23919823651c6af30b24ad5b89de6",
+  "pullRequest": "https://github.com/codexrodrigues/praxis-hero-hq-ui/pull/16",
+  "pullRequestBase": "codex/visitor-lab-delivery; not main; no deployment"
+}

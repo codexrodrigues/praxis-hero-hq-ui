@@ -1,0 +1,13 @@
+{
+  "canonicalMerge": "abb91d7842d8b62bf0bd3f0822885acb3020a427",
+  "pr": 845,
+  "selectedSkills": [
+    "praxis-angular-host-project"
+  ],
+  "baselineChecked": "30a1f448046bfbfcd66669068012a5ed8e6c5f27; official .codex-skill-install.json metadata excluded from source comparison",
+  "status": "1 selected OK;0drift/0missing/0sourceInvalid",
+  "auditExit": "1 due only to167 other canonical sources intentionally absent from filtered manifest; full canonical inventory already preflightPASS168+19",
+  "unrelatedFilesPreserved": 793,
+  "familyForceUsed": false,
+  "backup": "/tmp/praxis-hero-session-skill-sync/backup"
+}

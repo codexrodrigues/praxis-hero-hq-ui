@@ -293,7 +293,7 @@ const distressItemsExpr = String(distressCfg?.expansion?.sections?.[0]?.itemsExp
 assert(
   donutConfig?.sizing?.height === 340 &&
     defconConfig?.sizing?.height === 340 &&
-    distressCfg?.layout?.virtualScroll?.viewportHeight === '340px' &&
+    distressCfg?.layout?.virtualScroll?.viewportHeight === '380px' &&
     distressItemsExpr.includes('#${item.id}') &&
     distressItemsExpr.includes('${item.origem}') &&
     distressItemsExpr.includes('${item.local}'),

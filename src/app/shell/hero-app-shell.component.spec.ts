@@ -116,7 +116,7 @@ describe('HeroAppShellComponent', () => {
     httpMock.match(() => true).forEach((req) => req.flush({ data: { buckets: [] } }));
 
     const payrollItem = (component as any)
-      .allCommandItems
+      .allCommandItems()
       .find((item: any) => item.path === '/rh/folha-pagamento');
     expect(payrollItem).toBeDefined();
 

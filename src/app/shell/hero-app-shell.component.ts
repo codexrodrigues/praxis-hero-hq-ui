@@ -5,10 +5,11 @@ import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   ViewChild,
-  computed,
+  computed, effect,
   inject,
   signal,
 } from '@angular/core';
@@ -21,9 +22,16 @@ import {
   PraxisAppShellComponent,
   PraxisCustomizationModeService,
   type PraxisBrandConfig,
-  type PraxisNavGroup,
   type PraxisShellFooterStatus,
 } from '@praxisui/core';
+import { VisitorWorkspaceService } from '../core/visitor-workspace.service';
+import { visitorPagePath } from '../core/visitor-workspace.repository';
+import {
+  publishCorporateShellProjection, readCorporateShellProjection,
+  subscribeCorporateShellProjection,
+  type CorporateShellGroupProjection,
+} from '../core/corporate-navigation.model';
+import { CorporateSessionService } from '../core/corporate-session.service';
 import { HERO_NAVIGATION, type NavItem } from '../core/navigation.model';
 import { PRAXIS_API_BASE_URL } from '../core/platform.config';
 import { ThemeService } from '../core/theme.service';
@@ -57,7 +65,7 @@ interface ShellStatsEnvelope {
   template: `
     <praxis-app-shell
       [brand]="brand"
-      [navigation]="navigation"
+      [navigation]="navigation()"
       [user]="null"
       [footerStatus]="footerStatus()"
       [isDarkTheme]="isDark()"
@@ -308,9 +316,11 @@ export class HeroAppShellComponent {
   protected readonly authService = inject(AuthSimulationService);
   private readonly customizationMode = inject(PraxisCustomizationModeService, { optional: true });
   private readonly runtimeContext = inject(EnterpriseRuntimeContextService, { optional: true });
+  private readonly corporateSession = inject(CorporateSessionService, { optional: true });
   private readonly http = inject(HttpClient, { optional: true });
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef, { optional: true });
 
   protected readonly activeHeroes = signal<number>(53);
   protected readonly totalHeroes = signal<number>(101);
@@ -363,8 +373,27 @@ export class HeroAppShellComponent {
     { initialValue: null },
   );
 
+  private readonly corporateShellGroups = signal<ReadonlyArray<CorporateShellGroupProjection>>(
+    readCorporateShellProjection(),
+  );
+
   constructor() {
     this.refreshTelemetry();
+    const unsubscribe = subscribeCorporateShellProjection((groups) => {
+      this.corporateShellGroups.set(groups);
+    });
+    this.destroyRef?.onDestroy(unsubscribe);
+    if (this.corporateSession) {
+      let lastGeneration = this.corporateSession.generation();
+      effect(() => {
+        const generation = this.corporateSession!.generation();
+        const authenticated = this.corporateSession!.authenticated();
+        if (!authenticated || generation !== lastGeneration) {
+          lastGeneration = generation;
+          publishCorporateShellProjection([]);
+        }
+      });
+    }
   }
 
   protected dismissAuthDenied(): void {
@@ -386,13 +415,39 @@ export class HeroAppShellComponent {
     href: '/',
   };
 
-  protected readonly navigation: PraxisNavGroup[] = HERO_NAVIGATION;
-  protected readonly allCommandItems: readonly CommandPaletteItem[] = HERO_NAVIGATION.flatMap((group) =>
+  private readonly visitorWorkspace = inject(VisitorWorkspaceService);
+  protected readonly navigation = computed<{ label: string; items: NavItem[] }[]>(() => [
+    ...HERO_NAVIGATION,
+    ...this.corporateShellGroups().map((group) => ({
+      label: group.label,
+      items: group.items.length
+        ? group.items.map((item) => ({
+            path: item.path,
+            label: item.label,
+            icon: item.icon,
+            description: 'Página corporativa publicada',
+          }))
+        : [
+            {
+              path: '/workspace-corporativo/paginas',
+              label: `${group.label} · abrir no workspace`,
+              icon: group.icon,
+              description: 'Grupo corporativo publicado',
+            },
+          ],
+    })),
+    ...this.visitorWorkspace.workspace().menus.filter((group) => group.items.length).map((group) => ({
+      label: group.label,
+      items: group.items.map((item) => ({ path: visitorPagePath(item.pageId), label: item.label, icon: item.icon ?? 'web', description: 'Página salva neste navegador' })),
+    })),
+  ]);
+  protected readonly allCommandItems = computed<readonly CommandPaletteItem[]>(() => this.navigation().flatMap((group) =>
     group.items.map((item) => ({
       ...item,
       groupLabel: group.label,
+      description: item.description || 'Página salva neste navegador',
     })),
-  );
+  ));
 
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
   @ViewChild('linksList') private linksListRef?: ElementRef<HTMLElement>;
@@ -406,11 +461,11 @@ export class HeroAppShellComponent {
   protected readonly filteredLinks = computed<readonly CommandPaletteItem[]>(() => {
     const rawQuery = this.searchQuery().trim();
     if (!rawQuery) {
-      return this.allCommandItems;
+      return this.allCommandItems();
     }
     const normalizedQuery = HeroAppShellComponent.normalizeSearchText(rawQuery);
     const terms = normalizedQuery.split(/\s+/).filter(Boolean);
-    return this.allCommandItems.filter((item) => {
+    return this.allCommandItems().filter((item) => {
       const haystack = HeroAppShellComponent.normalizeSearchText(
         `${item.label} ${item.groupLabel} ${item.description} ${item.path} ${item.badge ?? ''}`,
       );
@@ -541,6 +596,7 @@ export class HeroAppShellComponent {
   protected selectPersona(personaId: string): void {
     this.customizationMode?.setCustomizing(false);
     this.authService.switchPersona(personaId);
+    publishCorporateShellProjection([]);
     this.runtimeContext?.invalidate();
     this.personaMenuOpen.set(false);
     this.refreshTelemetry();
@@ -628,5 +684,3 @@ export class HeroAppShellComponent {
       });
   }
 }
-
-

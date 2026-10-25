@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-24",
+  "heroImplementationCommit": "283ba87f6288b65ca8b583362a3d4d257d18a712",
+  "quickstartCommit": "d6c11592ce885d7f5aeb058314268e2ac5cafa17",
+  "observationOwner": "coordinator CUA browser and accessibility observations",
+  "nativeContent": {
+    "result": "observed in UI after publication and reload",
+    "editingSurface": "native SDK rc.38 visual Form editor; no JSON editing",
+    "field": {
+      "labelObservedAfterReload": "Nome do solicitante",
+      "placeholderConfiguredBeforeSave": "Informe o nome",
+      "placeholderReadAfterReload": false,
+      "canonicalNameInspected": false
+    },
+    "observedSteps": [
+      "draft created",
+      "local field edited visually",
+      "revision saved",
+      "organization scope applied",
+      "release frozen",
+      "submitted for review",
+      "publisher approved",
+      "published page opened",
+      "published route reloaded",
+      "menu item present after reload"
+    ],
+    "menuLabel": "Solicitação corporativa",
+    "releaseIdentitySameAfterReload": true,
+    "headEtagCompared": false,
+    "httpSuccessStatusesCaptured": false,
+    "fieldEvidence": "coordinator accessibility tree; field below screenshot viewport"
+  },
+  "publishedCopy": {
+    "result": "not completed",
+    "requests": [
+      {
+        "method": "POST",
+        "surface": "pages",
+        "status": 503,
+        "durationMs": 40973
+      },
+      {
+        "method": "GET",
+        "surface": "by-creation-key",
+        "status": 404,
+        "durationMs": 1361
+      }
+    ],
+    "postRetried": false,
+    "causeEstablished": false,
+    "rollbackProven": false,
+    "privateDiagnosticSha256": "b5d153906cd7ddb6b04841610a9fc4017640c07c4ec6774d14f99601ec359c55"
+  },
+  "screenshot": {
+    "path": "page-menu-reloaded.png",
+    "sha256": "15511dc0fa8aeb663714626f863161d9cca5aad990dc893de472ded1d30e2e9e",
+    "scope": "published heading and menu after reload; does not show field below viewport"
+  },
+  "limits": [
+    "individual native Form pilot, home icon and local transient field",
+    "no successful published-copy claim",
+    "no captured HTTP success status or timing for native content",
+    "no comparison of head ETag",
+    "no domain API or persistent runtime field values",
+    "official local proxy to Render does not prove production frontend CORS",
+    "no additional Neon campaign or Firebase deployment"
+  ],
+  "fenceValidation": {
+    "offlineControllerChecks": 17,
+    "typescript": "PASS",
+    "sourceSha256": {
+      "src/app/pages/corporate-pages/corporate-pages.component.ts": "4a4053f2563ae30033ae7389e0844613726ec9b5bfc0c418e3b711dd9bcf2d45",
+      "scripts/workspace/test-corporate-navigation.cjs": "90e90e801c3e085bbde935ac0c9aa41d5c4d219264baf0acbea7e6003f306728"
+    },
+    "controllerLogSha256": "33bd2ef448e1afe6e834e91b856a3ddcd06da6e4fdc48f47813bbb689c0b499f",
+    "productionBuild": {
+      "status": "PASS",
+      "owner": "coordinator",
+      "completedAt": "2026-10-24T22:49:16.814Z",
+      "durationSeconds": 6.27,
+      "path": "production-build.log",
+      "sha256": "e462f79bf6b83e9568e07b829e0a5e6274dda3c864e313647f74280626856449",
+      "rawLogSha256": "db3dff62c4949456fd358712c2afea4bfea19dbadae9f867c707da9e97ac25d5",
+      "sanitization": "absolute local workspace path replaced with <hero-workspace>; trailing blank lines removed",
+      "warning": "initial bundle 16.63 MB exceeds unchanged 15 MB budget",
+      "preexistingUncommittedExcludedFile": {
+        "path": "src/app/pages/operacoes/incidentes.config.ts",
+        "sha256": "1c54953040fb0c72d00cbe517499aa804bbed0404ac28c1c1542b200ec17e506"
+      }
+    },
+    "browserValidation": "native content observation predates fence correction"
+  }
+}

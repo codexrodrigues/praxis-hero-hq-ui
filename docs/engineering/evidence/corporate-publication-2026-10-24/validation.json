@@ -1,0 +1,51 @@
+{
+  "heroBaseline": "5584558d4e04365ae58ae21636eca3b211147a00",
+  "quickstartCommit": "5417d06609ffb2c61ceb56f655ce2bf3cae35ace",
+  "config": "0.1.0-rc.174",
+  "sdk": "10.0.0-rc.38",
+  "surface": "Hero local official proxy 4302 against deployed Quickstart Render",
+  "groupsPublication": {
+    "status": 200,
+    "responseSeconds": 15.926999
+  },
+  "pagePublication": {
+    "status": 200,
+    "responseSeconds": 31.250833
+  },
+  "persistence": {
+    "reloadPublishedStatus": 200,
+    "reloadNavigationChildStatus": 200,
+    "sameHeadAfterReload": true,
+    "menuPageMatchesPublishedPage": true,
+    "menuBindingMatchesPublishedBinding": true,
+    "navigationReceiptMatchesPublishedHead": true
+  },
+  "navigationObservedStatuses": {
+    "200": 16,
+    "401": 3,
+    "503": 1
+  },
+  "navigationStatusNote": "The full interaction also observed 401/503 navigation responses. Final reload succeeded; this is not an assertion that every intermediate request succeeded.",
+  "logoutFinal": {
+    "logoutStatus": 204,
+    "sessionAfterLogoutStatus": 401,
+    "observedBy": "coordinator CUA",
+    "credentialBindingCleared": true,
+    "networkCollectorDisabled": true
+  },
+  "limits": [
+    "One operational journey, not an SLA or campaign",
+    "Empty Form, home icon, first groups aggregate",
+    "Published copy and arbitrary domain editing outside this proof",
+    "Local proxy does not prove production browser CORS",
+    "No new Neon campaign",
+    "Offline checks use Angular/transport doubles"
+  ],
+  "privateSourceHashes": {
+    "persistence-proof.json": "394bf5df3392debacbfcc6ac98ab3677adf346b305048961e99627d3e9a3d692",
+    "network.json": "377c8ec8a77ed9ea0d05757f491afb681d7d8eabcadaf7f3bc572f09d765cf99",
+    "page-menu-reloaded.png": "754f165f6b6b486aa345b10bcde72e0d16cb37ed56c49186c68c4a006a5f2ceb",
+    "production-build-final.log": "8e64a3543f7444abca37adfcecb5d3d5efd2537e1d45e6e1ee55ea0abcad450a"
+  },
+  "redaction": "No session, user, tenant, CSRF, authentication headers, request bodies or operational UUIDs are included in this receipt."
+}

@@ -171,7 +171,7 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
         cfg?.templating?.chipColorMap?.['ABERTO'] === 'danger' &&
         trailingCol?.width === '216px' &&
         Array.isArray(cfg?.layout?.rowLayout?.columns) &&
-        cfg?.layout?.virtualScroll?.viewportHeight === '340px' &&
+        cfg?.layout?.virtualScroll?.viewportHeight === '380px' &&
         cfg?.templating?.identity?.type === 'compose' &&
         cfg?.templating?.risk?.type === 'metric' &&
         cfg?.templating?.risk?.props?.metric?.align === 'center' &&

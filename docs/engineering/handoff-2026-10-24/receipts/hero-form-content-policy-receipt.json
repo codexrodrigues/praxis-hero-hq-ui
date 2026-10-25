@@ -1,0 +1,18 @@
+{
+  "baseline": "2e93c1a4a0f3c5b09fa26915442ad3a10cac46c3",
+  "config": "0.1.0-rc.174",
+  "command": "JAVA_HOME=/Users/rodrigo/.jdks/jdk-21.0.10+7/Contents/Home mvn -o -q -Dtest=QuickstartPageStructureTest,QuickstartPageFormContentPolicyTest,QuickstartPageHostTest test",
+  "result": "40 PASS; 0 failures/errors/skipped",
+  "database": false,
+  "http": false,
+  "files": {
+    "src/main/java/com/example/praxis/apiquickstart/config/QuickstartPageConfiguration.java": "ff0668f5dcf870af666fa5dc4f3b68cacb7d0226694f65436ddc09e8020c5a66",
+    "src/main/java/com/example/praxis/apiquickstart/config/QuickstartPageFormContentPolicy.java": "9af9ab5d8cc4fc8cfff1505abadb30abb327febd98a932b17990bcb4b1364533",
+    "src/test/java/com/example/praxis/apiquickstart/config/QuickstartPageStructureTest.java": "e98f6611607f046a2430a6c724a0b531914ebe9fb4f51b24c5f9c29e12e53321",
+    "src/test/java/com/example/praxis/apiquickstart/config/QuickstartPageFormContentPolicyTest.java": "b811475e3c14ce2a2579795c5b3e7fed2408c0c98129118ebbc532d2c01e66a8",
+    "src/test/resources/corporate-pages/sdk-rc38-local-form.json": "560ff95e36aa8255a2d6997fc89a4380660d79ea38de5951bde74efe1844bcae"
+  },
+  "finalRefinement": "validators empty-object only; final serializer/projectedEditor fixture",
+  "finalCommand": "mvn -o -q -Dtest=QuickstartPageStructureTest,QuickstartPageFormContentPolicyTest test",
+  "finalResult": "9 PASS; previous 31 Host PASS reused (authorization unchanged)"
+}

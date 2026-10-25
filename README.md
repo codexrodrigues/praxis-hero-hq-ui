@@ -20,7 +20,7 @@ Esses registros não representam uma verificação atual do serviço.
 
 ## 🎯 Princípios Fundamentais
 
-1. **Zero Formulários Manuais:** Nenhum campo ou validação é codificado em templates HTML. Todos os fluxos de criação e edição são governados por `<praxis-dynamic-form>` e `/schemas/filtered`.
+1. **Formulários de negócio por metadados:** Os recursos usam `<praxis-dynamic-form>` e `/schemas/filtered`. Controles do shell e do laboratório (nome de página/menu) pertencem ao host; formulários authorados no laboratório usam os editores canônicos Praxis.
 2. **Listagens orientadas a recursos:** As páginas de recursos usam `PraxisResourcePage` e o runtime de CRUD/tabela. Widgets do dashboard também podem usar dados locais e projeções de agregações.
 3. **Superfícies Dinâmicas:** As visões de detalhe (Dossiê 360) projetam contratos `@UiSurface` do backend ([`FuncionarioController`](https://github.com/codexrodrigues/praxis-api-quickstart/blob/main/src/main/java/com/example/praxis/apiquickstart/hr/controller/FuncionarioController.java)).
 4. **Governança de Workflow:** Ações de ciclo de vida utilizam `@WorkflowAction` com controle de concorrência por ETag (`If-Match`).
@@ -52,9 +52,23 @@ npm run build
 
 ---
 
+## Laboratório do visitante
+
+Em **Meu laboratório** (`/laboratorio`), crie páginas e formulários pelo Page Builder,
+salve uma nova rota e acrescente seus próprios menus. Páginas, menus e preferências
+deste editor ficam neste navegador, sem login, separados por persona simulada.
+A rota continua disponível após recarregar; o link não compartilha o documento com
+outro dispositivo. Dados e envio dos widgets seguem as APIs de demonstração.
+
+Consulte [uso, limites e validações do laboratório](docs/engineering/visitor-lab.md).
+
+Nos Studios `/comando-studio` e `/workspace-studio`, use **Salvar cópia em nova rota**
+para levar o documento editado ao laboratório. Escolha nome, menu e ícone, salve e
+abra a nova URL. O original é preservado; a página salva e seu ícone sobrevivem à recarga.
+
 ## 🛡️ Customização Avançada & Persistência Multi-Usuário
 
-A aplicação implementa um case corporativo de governança com persistência remota no `praxis-config-starter` (`https://praxis-api-quickstart.onrender.com/api/praxis/config/ui`):
+As páginas existentes de dashboard e recursos implementam um case corporativo de governança com persistência remota no `praxis-config-starter` (`https://praxis-api-quickstart.onrender.com/api/praxis/config/ui`):
 
 1. **Dashboard Executivo (Page Builder):**
    - Gráficos customizados com dados reais de agregação: **Área Volumétrica** (`type: 'area'`) e **Barras Horizontais** (`type: 'horizontal-bar'`).
@@ -187,3 +201,11 @@ exibição da credencial, e vale para páginas de recurso e de componente. Badge
 informativos, como STUDIO, não anunciam autorização. O teste de catálogo mantém
 um inventário independente dos destinos e recursos esperados.
 
+
+### Adoção corporativa — P3-C em incrementos
+
+Em [/workspace-corporativo](http://127.0.0.1:4302/workspace-corporativo), consulte a sessão e selecione um contexto permitido pelo servidor. Personas do Hero não autenticam essa sessão. O laboratório local continua disponível sem login. A seleção real depende da integração SESSION/CSRF/CORS do backend; este recorte de UI tem teste de navegador com APIs interceptadas e não encerra a prova HTTP/Neon. Veja [escopo, provas reutilizadas e próximos incrementos](docs/engineering/p3c-host-adoption.md).
+
+### Jornada de páginas da plataforma — SDK público rc.38
+
+O laboratório agora consome as ações reutilizáveis Copy/SaveAs do Page Builder, com adapter local de persistência. O host adota os22 pacotes públicos `@praxisui/*` em `10.0.0-rc.38`, com lock reproduzível por `npm ci`. [Contrato de adoção, reprodução e provas](docs/engineering/reusable-page-journey.md).

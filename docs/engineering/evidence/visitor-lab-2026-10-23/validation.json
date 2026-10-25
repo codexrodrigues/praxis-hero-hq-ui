@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-23",
+  "origin": "http://127.0.0.1:4302",
+  "scope": "Browser-only laboratory; APIs intercepted in E2E. No corporate backend proof.",
+  "results": {
+    "productionBuild": {
+      "exitCode": 0,
+      "seconds": 6.29,
+      "warning": "initial bundle16.44MB exceeds15MB warning budget"
+    },
+    "repository": 12,
+    "localStorage": 4,
+    "context": 1,
+    "pageValidation": 10,
+    "routes": "pass",
+    "browser": "pass; Studio form -> copy -> menu/icon -> saved route -> reload, plus failure recovery/persona/mobile scenarios"
+  },
+  "verification": "Results captured from completed execution sessions; this JSON is a result receipt, not raw stdout. Existing 22 October logs remain separately attributed.",
+  "review": "Independent final review by hero_inventory; no blockers. Workspace Studio inspected, not separately exercised in browser.",
+  "sourceSha256": {
+    "src/app/pages/visitor-lab/visitor-lab.scss": "6201586cd82863a5452a500fb1c17f651b7773bfe082c792191fcc1fe1eb0f5c",
+    "src/app/pages/visitor-lab/visitor-lab-copy-action.component.ts": "aa070973c43adf8a0f4f24aa84f669c2f667b940279916adbb1a90b70929305b",
+    "src/app/pages/visitor-lab/visitor-lab.i18n.ts": "4c1f2ac6e7d09ed6fc1771ea5304d84b2228f50854fb22b17ee1033a62acf61f",
+    "src/app/pages/visitor-lab/visitor-lab-editor.html": "373513242fc889dde415b565cd4f48c491aa6fcfff6df462b75c6ebb4f79febd",
+    "src/app/pages/visitor-lab/visitor-lab-page.component.ts": "9bc8564abc4fe2b03f1d6f1b614f326a2eeb3be9dafea3cb6b0fc0b48cd398af",
+    "src/app/pages/visitor-lab/visitor-local-config-storage.ts": "e0678407649226ce7da9090f57142fd4932fe365e2c81e15b52941c7f0d49aae",
+    "src/app/pages/dashboard-studio/dashboard-studio-page.component.ts": "c6bd8757ef7d07cf8af2e5e24de6101be0c8d2cded8adc3cea4e0cf76ccab26f",
+    "src/app/pages/workspace-studio/workspace-studio-page.component.ts": "ce0a28e1dafdab7643604f1bebcc3f1e39054aac68be2f3f030f6c80ac5cf00f",
+    "src/app/core/visitor-workspace.repository.ts": "53e982ae1b480ad91852ea000d23f1a2c579abc1fc388457877366f50ed260a8",
+    "src/app/core/visitor-workspace.service.ts": "edd96fa16a40d55fb2881b6c129368502a382ad70fd13ecae91d5f542e17b2cb",
+    "src/app/shell/hero-app-shell.component.ts": "433b5033402e319609553a2a04a031427e0ec36f621ffdfb3b5edb2a750903d9",
+    "test-e2e/test-visitor-lab.cjs": "0a6d7f1b36cdbd284d6a186aaf0c23bd3e94c0a59207c7eea9aee33a33ce1f4e",
+    "package-lock.json": "a3f34f7381161560cc2e3a0907ad21ab87b7ef1d0db1d9aab57dc8a4cd4fc7a2"
+  },
+  "screenshots": {
+    "editor-narrow.png": "0c553f17331da4fb654c28dd00b86d11551b1def01146cef5c5d467a37ee27f0",
+    "desktop.png": "86e4e5811020b161070a734d9bc16f5a3c52e2a6bed5c7779e4fb659588b37d4",
+    "narrow.png": "7f8c448bdbdc85205acf91ef92f6e55fbcddc4e01fea561549559e337b2b9a1c"
+  }
+}

@@ -1,0 +1,28 @@
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 -m unittest discover -s tests
+.........................................
+----------------------------------------------------------------------
+Ran 41 tests in 0.033s
+
+OK
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 -m py_compile scripts/codex_skills_common.py scripts/audit-praxis-skills.py scripts/create-skill-review-issues.py scripts/generate-skill-review-issue-drafts.py scripts/sync-praxis-skills.py scripts/validate-issue-drafts.py scripts/validate-praxis-skills.py scripts/preflight-python-fallbacks.py tests/test_python_skill_scripts.py
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/validate-praxis-skills.py --family praxis --family ergon-migration
+Codex skill structure validation passed: praxis, ergon-migration
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/generate-skill-review-issue-drafts.py --check
+Skill review issue drafts are up to date.
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/validate-issue-drafts.py
+Skill review issue draft validation passed: ergon-migration, praxis
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/sync-praxis-skills.py --family praxis --skills-root /var/folders/qh/xyddpmm144v3g3jx8gc0dk2c0000gn/T/tmp81a5rqwj --force --delete-extraneous-within-manifest
+Codex skills synced.
+Family: praxis
+Manifest: /Users/rodrigo/Dev/pessoal/praxis-plataform/.worktrees/p3c-real-host-guidance/codex-skills/praxis-skills.manifest.json
+Destination: /private/var/folders/qh/xyddpmm144v3g3jx8gc0dk2c0000gn/T/tmp81a5rqwj
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/sync-praxis-skills.py --family ergon-migration --skills-root /var/folders/qh/xyddpmm144v3g3jx8gc0dk2c0000gn/T/tmp81a5rqwj --force --delete-extraneous-within-manifest
+Codex skills synced.
+Family: ergon-migration
+Manifest: /Users/rodrigo/Dev/pessoal/praxis-plataform/.worktrees/p3c-real-host-guidance/codex-skills/ergon-migration-skills.manifest.json
+Destination: /private/var/folders/qh/xyddpmm144v3g3jx8gc0dk2c0000gn/T/tmp81a5rqwj
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/audit-praxis-skills.py --family praxis --skills-root /var/folders/qh/xyddpmm144v3g3jx8gc0dk2c0000gn/T/tmp81a5rqwj --json
+Audit summary praxis: OK=168 DRIFT=0 MISSING=0 SOURCE_INVALID=0 SOURCE_NOT_IN_MANIFEST=0 SOURCE_IN_OTHER_FAMILY_MANIFEST=19
+$ /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/audit-praxis-skills.py --family ergon-migration --skills-root /var/folders/qh/xyddpmm144v3g3jx8gc0dk2c0000gn/T/tmp81a5rqwj --json
+Audit summary ergon-migration: OK=19 DRIFT=0 MISSING=0 SOURCE_INVALID=0 SOURCE_NOT_IN_MANIFEST=0 SOURCE_IN_OTHER_FAMILY_MANIFEST=168
+Python fallback preflight passed.

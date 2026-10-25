@@ -1,0 +1,51 @@
+<section class="lab" data-testid="visitor-lab">
+  <header class="lab-header">
+    <div><p class="eyebrow">{{ text('eyebrow') }}</p><h1>{{ text('title') }}</h1><p>{{ text('intro') }}</p></div>
+    <span class="scope">{{ text('scope') }}</span>
+  </header>
+  <p class="notice">{{ text('notice') }}</p>
+  @if (store.error()) {
+    <div role="alert">{{ text(store.error()) }} <button mat-button (click)="store.reload()">{{ text('retry') }}</button></div>
+  }
+  @if (error()) { <p class="error" role="alert">{{ text(error()) }}</p> }
+  @if (missing()) {
+    <p role="status">{{ text('missing') }}</p><a mat-flat-button routerLink="/laboratorio">{{ text('back') }}</a>
+  } @else {
+    @if (pageId()) { <p class="notice">{{ text('copyNotice') }}</p> }
+    <praxis-page-save-as #saveJourney [adapter]="saveAdapter" [contextKey]="saveContext()"
+      [initialTitle]="title()" [initialMenuLabel]="menu()" [initialIcon]="menuIcon()" [titleMaxLength]="80" [menuMaxLength]="60"
+      [canSave]="!busy() && (builder()?.canSaveCurrentPage() ?? false)"
+      (saveRequested)="builder()?.saveCurrentPage()" (saveFailed)="error.set(store.errorCode($event))" />
+    <div class="seed-actions">
+      <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="start('blank')">{{ text('blank') }}</button>
+      <button mat-button type="button" data-testid="lab-dashboard-seed" [disabled]="busy() || saveAs()?.busy()" (click)="start('dashboard')">{{ text('dashboard') }}</button>
+    </div>
+    <praxis-dynamic-page-builder [page]="page()" [pageIdentity]="identity()" [autoPersist]="false"
+      [enableCustomization]="true" [enableAgenticAuthoring]="false" [authoringCapabilities]="capabilities"
+      [showGovernanceToolbar]="false" [showPageLifecycleActions]="false" [strictValidation]="true"
+      (pageSaveRequested)="error.set(''); saveJourney.save($event)" />
+  }
+
+  <section class="library" [attr.aria-label]="text('library')">
+    <h2>{{ text('library') }}</h2>
+    @if (!store.workspace().pages.length) { <p>{{ text('empty') }}</p> }
+    @for (saved of store.workspace().pages; track saved.id) {
+      <div class="library-row" data-testid="lab-library-page">
+        <div><strong>{{ saved.title }}</strong><code>{{ pagePath(saved.id) }}</code></div>
+        <a mat-button [routerLink]="pagePath(saved.id)">{{ text('editCopy') }}</a>
+        <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="addToMenu(saved.id)">{{ text('addToMenu') }}</button>
+        <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="removePage(saved.id)">{{ text('removePage') }}</button>
+      </div>
+    }
+    @if (store.workspace().menus.length) {
+      <h2>{{ text('menus') }}</h2>
+      @for (group of store.workspace().menus; track group.id) {
+        <div class="menu-row">
+          <mat-form-field appearance="outline"><mat-label>{{ text('menu') }}</mat-label><input matInput #menuLabel [value]="group.label" maxlength="60" /></mat-form-field>
+          <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="renameMenu(group.id, menuLabel.value)">{{ text('rename') }}</button>
+          <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="removeMenu(group.id)">{{ text('removeMenu') }}</button>
+        </div>
+      }
+    }
+  </section>
+</section>

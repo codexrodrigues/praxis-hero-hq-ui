@@ -1,0 +1,16 @@
+TAP version 13
+# Subtest: queued browser saves reject a switched context including A/B/A and preserve current state
+ok 1 - queued browser saves reject a switched context including A/B/A and preserve current state
+  ---
+  duration_ms: 496.037417
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 499.653167

@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: credential scope requires the exact configured origin and canonical path
+ok 1 - credential scope requires the exact configured origin and canonical path
+  ---
+  duration_ms: 11.353042
+  type: 'test'
+  ...
+# Subtest: login confirms returned cookie with GET session and accepts only its raw token
+ok 2 - login confirms returned cookie with GET session and accepts only its raw token
+  ---
+  duration_ms: 67.473833
+  type: 'test'
+  ...
+# Subtest: missing token and foreign redirected verification fail closed with safe feedback
+ok 3 - missing token and foreign redirected verification fail closed with safe feedback
+  ---
+  duration_ms: 19.592083
+  type: 'test'
+  ...
+# Subtest: 401 and 403 login failures stay sanitized and do not automatically retry
+ok 4 - 401 and 403 login failures stay sanitized and do not automatically retry
+  ---
+  duration_ms: 28.495166
+  type: 'test'
+  ...
+# Subtest: logout sends current CSRF, invalidates immediately and confirms GET session401
+ok 5 - logout sends current CSRF, invalidates immediately and confirms GET session401
+  ---
+  duration_ms: 6.809208
+  type: 'test'
+  ...
+# Subtest: logout204 without subsequent401 and failed logout are explicitly uncertain, without retries
+ok 6 - logout204 without subsequent401 and failed logout are explicitly uncertain, without retries
+  ---
+  duration_ms: 15.744667
+  type: 'test'
+  ...
+# Subtest: late session completion cannot resurrect a generation invalidated by401
+ok 7 - late session completion cannot resurrect a generation invalidated by401
+  ---
+  duration_ms: 5.319833
+  type: 'test'
+  ...
+# Subtest: interceptor preserves confirmed scope/preconditions while stripping demo authority
+ok 8 - interceptor preserves confirmed scope/preconditions while stripping demo authority
+  ---
+  duration_ms: 6.69475
+  type: 'test'
+  ...
+# Subtest: bootstrap strips unstamped IDs and no token or credentials are attached outside exact scope
+ok 9 - bootstrap strips unstamped IDs and no token or credentials are attached outside exact scope
+  ---
+  duration_ms: 5.543417
+  type: 'test'
+  ...
+# Subtest: old401 cannot invalidate new session and403/503 do not revoke a verified session
+ok 10 - old401 cannot invalidate new session and403/503 do not revoke a verified session
+  ---
+  duration_ms: 7.551167
+  type: 'test'
+  ...
+# Subtest: mutation without verified CSRF fails before dispatch; proxy preserves origin and validates TLS
+ok 11 - mutation without verified CSRF fails before dispatch; proxy preserves origin and validates TLS
+  ---
+  duration_ms: 6.343792
+  type: 'test'
+  ...
+# Subtest: auth writes stay serialized even when401 invalidates a pending authentication response
+ok 12 - auth writes stay serialized even when401 invalidates a pending authentication response
+  ---
+  duration_ms: 5.627375
+  type: 'test'
+  ...
+# Subtest: uncertain logout blocks new login until an explicit session verification resolves it
+ok 13 - uncertain logout blocks new login until an explicit session verification resolves it
+  ---
+  duration_ms: 4.738291
+  type: 'test'
+  ...
+# Subtest: 401 while logout is pending keeps the uncertain state and login fenced after completion
+ok 14 - 401 while logout is pending keeps the uncertain state and login fenced after completion
+  ---
+  duration_ms: 4.7475
+  type: 'test'
+  ...
+# Subtest: scoped backend uses Fetch redirect rejection and preserves the exact legacy request/progress stream
+ok 15 - scoped backend uses Fetch redirect rejection and preserves the exact legacy request/progress stream
+  ---
+  duration_ms: 3.528834
+  type: 'test'
+  ...
+# Subtest: the installed Angular FetchBackend forwards redirect:error to native fetch
+ok 16 - the installed Angular FetchBackend forwards redirect:error to native fetch
+  ---
+  duration_ms: 1.621334
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 426.078666

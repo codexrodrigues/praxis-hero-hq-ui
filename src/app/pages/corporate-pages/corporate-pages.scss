@@ -1,0 +1,17 @@
+:host { display: block; min-width: 0; }
+.corporate-pages { max-width: 960px; margin: 0 auto; padding: clamp(16px, 3vw, 32px); box-sizing: border-box; overflow-x: clip; }
+header, section { margin-block-end: 24px; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.2; }
+h2 { font-size: 1.2rem; }
+p { line-height: 1.6; }
+.eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: .08em; }
+.scope-note { padding-block: 16px; border-block: 1px solid var(--mat-sys-outline-variant, #d7dce2); }
+.actions, nav { display: flex; gap: 12px; flex-wrap: wrap; margin-block: 12px; }
+mat-form-field { display: block; width: 100%; max-width: 640px; }
+.reference { overflow-wrap: anywhere; font-size: .9rem; }
+li { margin-block: 12px; }
+@media (max-width: 600px) { .actions { flex-direction: column; align-items: stretch; } }
+
+fieldset { border: 1px solid var(--mat-sys-outline-variant, #d7dce2); padding: 16px; margin-block: 16px; min-width: 0; max-width: 100%; box-sizing: border-box; overflow-x: clip; }
+fieldset label { display: block; margin-block: 12px 4px; }
+select { display: block; width: 100%; max-width: 640px; min-height: 44px; margin-block-end: 16px; padding: 8px; font: inherit; color: var(--mat-sys-on-surface); background: var(--mat-sys-surface); border: 1px solid var(--mat-sys-outline); border-radius: 4px; box-sizing: border-box; }

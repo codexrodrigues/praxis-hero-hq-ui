@@ -1,0 +1,76 @@
+TAP version 13
+# Subtest: save publishes page and menu reference atomically and survives a new instance
+ok 1 - save publishes page and menu reference atomically and survives a new instance
+  ---
+  duration_ms: 6.862458
+  type: 'test'
+  ...
+# Subtest: stable retries keep the original identity, date and single reference
+ok 2 - stable retries keep the original identity, date and single reference
+  ---
+  duration_ms: 1.192042
+  type: 'test'
+  ...
+# Subtest: retry with a conflicting title or document cannot overwrite its stable ID
+ok 3 - retry with a conflicting title or document cannot overwrite its stable ID
+  ---
+  duration_ms: 5.861208
+  type: 'test'
+  ...
+# Subtest: separate stale tabs read the latest state inside the shared exclusive lock
+ok 4 - separate stale tabs read the latest state inside the shared exclusive lock
+  ---
+  duration_ms: 0.770875
+  type: 'test'
+  ...
+# Subtest: a save snapshots the document before it waits for another tab
+ok 5 - a save snapshots the document before it waits for another tab
+  ---
+  duration_ms: 0.490708
+  type: 'test'
+  ...
+# Subtest: all malformed persisted envelopes fail closed and cannot be overwritten by a mutation
+ok 6 - all malformed persisted envelopes fail closed and cannot be overwritten by a mutation
+  ---
+  duration_ms: 2.67075
+  type: 'test'
+  ...
+# Subtest: storage quota/read/lock failures expose safe errors and retain the last committed state
+ok 7 - storage quota/read/lock failures expose safe errors and retain the last committed state
+  ---
+  duration_ms: 0.488042
+  type: 'test'
+  ...
+# Subtest: menus can be renamed, linked and removed while pages remain recoverable
+ok 8 - menus can be renamed, linked and removed while pages remain recoverable
+  ---
+  duration_ms: 0.392791
+  type: 'test'
+  ...
+# Subtest: owner keys isolate local personas and paths only accept saved UUID4 identities
+ok 9 - owner keys isolate local personas and paths only accept saved UUID4 identities
+  ---
+  duration_ms: 1.773166
+  type: 'test'
+  ...
+# Subtest: input validation and explicit volume/size limits do not leave partial writes
+ok 10 - input validation and explicit volume/size limits do not leave partial writes
+  ---
+  duration_ms: 29.43175
+  type: 'test'
+  ...
+# Subtest: optional undefined object properties are omitted while sparse arrays remain invalid
+ok 11 - optional undefined object properties are omitted while sparse arrays remain invalid
+  ---
+  duration_ms: 0.188416
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 60.600791
