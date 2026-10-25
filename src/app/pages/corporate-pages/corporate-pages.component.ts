@@ -12,7 +12,17 @@ import { EnterpriseRuntimeContextService, UiLayoutLifecycleService, UiLayoutLife
 import { materializeDynamicFormPageRuntimeInputs, validateDynamicFormPageWidget } from '@praxisui/dynamic-form';
 import { CorporateFormEditorComponent } from './corporate-form-editor.component';
 import { CorporateNavigationService } from '../../core/corporate-navigation.service';
-import { CORPORATE_GROUPS_TARGET, corporateGroupsDocument, firstCorporateGroup, bindCorporatePage, type CorporateGroupsDocument } from '../../core/corporate-navigation.model';
+import {
+  CORPORATE_ALLOWED_ICONS,
+  CORPORATE_GROUPS_TARGET,
+  bindCorporatePage,
+  corporateGroupsDocument,
+  firstCorporateGroup,
+  isCorporateIcon,
+  upsertCorporateGroup,
+  type CorporateGroupsDocument,
+  type CorporateIcon,
+} from '../../core/corporate-navigation.model';
 import { CorporateSessionService } from '../../core/corporate-session.service';
 import { CorporatePagePilotService, CorporatePageError, corporatePageId, corporatePageTarget,
   corporatePageDocument, type CorporatePageCatalog, type CorporatePublishedPage } from '../../core/corporate-page-pilot.service';
@@ -27,6 +37,7 @@ type Receipt<T> = UiLayoutLifecycleHttpReceipt<T>;
 })
 export class CorporatePagesComponent {
   @ViewChild(CorporateFormEditorComponent) formEditor?: CorporateFormEditorComponent;
+  readonly allowedIcons = CORPORATE_ALLOWED_ICONS;
   readonly copyFrom = signal('');
   readonly copyOrigin = signal<CorporatePublishedPage | null>(null);
   readonly session = inject(CorporateSessionService);
@@ -39,11 +50,14 @@ export class CorporatePagesComponent {
   readonly groupsMode = this.route.snapshot.data['corporateGroups'] === true;
   readonly groupsDocument = signal<CorporateGroupsDocument | null>(null);
   groupId = '';
+  groupOrder = 0;
+  groupIcon: CorporateIcon = 'home';
+  pageIcon: CorporateIcon = 'home';
   bindingId = '';
   bindingGroupId = '';
   bindingLabel = '';
   bindingOrder = 0;
-  groupOrder = 0;
+  bindingIcon: CorporateIcon = 'home';
   readonly publishedMode = this.route.snapshot.data['corporatePublished'] === true;
   readonly ready = signal(false);
   readonly busy = signal(false);
@@ -106,7 +120,8 @@ export class CorporatePagesComponent {
     this.copyOrigin.set(null);
     this.published.set(null); this.catalog.set(null); this.document.set(null); this.renderedPage.set(null);
     this.title = ''; this.reason = ''; this.commandKeys.clear();
-    this.groupsDocument.set(null); this.groupId = ''; this.bindingId = ''; this.bindingGroupId = ''; this.bindingLabel = ''; this.bindingOrder = 0;
+    this.groupsDocument.set(null); this.groupId = ''; this.groupOrder = 0; this.groupIcon = 'home';
+    this.pageIcon = 'home'; this.bindingId = ''; this.bindingGroupId = ''; this.bindingLabel = ''; this.bindingOrder = 0; this.bindingIcon = 'home';
   }
   private current(epoch: number): boolean { return !this.destroyed && epoch === this.epoch && this.epochSession === this.session.generation() && this.session.authenticated(); }
 
@@ -298,21 +313,22 @@ export class CorporatePagesComponent {
         || !readStrongResourceEtag(value.etag)) throw new CorporatePageError('CONTRACT');
     if (this.groupsMode) {
       const document = corporateGroupsDocument(body.targets[0].working.document);
-      if (document.config.groups.length > 1) throw new CorporatePageError('CONTRACT');
       this.groupsDocument.set(document); this.workspace.set(value);
       const group = document.config.groups[0];
       this.groupId = group?.id ?? (this.groupId || crypto.randomUUID());
       this.title = group?.label ?? ''; this.groupOrder = group?.order ?? 0;
+      this.groupIcon = group?.icon ?? 'home';
       if (body.frozenReleaseRef) this.releaseId.set(body.frozenReleaseRef);
       return;
     }
     const document = corporatePageDocument(body.targets[0].working.document);
     const admitted = validatePageAuthoringDocument(document, { 'praxis-dynamic-form': validateDynamicFormPageWidget });
     const widgets = document.config.definition.widgets;
-    if (!admitted.ok || document.config.presentation.icon !== 'home' || widgets.length !== 1
+    if (!admitted.ok || !isCorporateIcon(document.config.presentation.icon) || widgets.length !== 1
         || widgets[0].definition.id !== 'praxis-dynamic-form'
         || Object.keys(widgets[0].definition.inputs ?? {}).some(key => key !== 'config')) throw new CorporatePageError('CONTRACT');
     this.workspace.set(value); this.document.set(document); this.title = document.config.presentation.title;
+    this.pageIcon = document.config.presentation.icon;
     this.selectBinding(document.config.navigation[0]?.id ?? '');
     if (body.frozenReleaseRef) this.releaseId.set(body.frozenReleaseRef);
   }
@@ -321,22 +337,32 @@ export class CorporatePagesComponent {
     if (!workspace || !original || !this.title.trim() || !this.reason.trim() || this.groupsMode && !this.headAbsent()) return;
     let edited: PageAuthoringDocument | null = null;
     if (!this.groupsMode) {
-      try { edited = this.formEditor?.readDocument() ?? null; if (!edited) throw new Error('Editor not ready'); }
-      catch { this.message.set('Corrija o conteúdo no editor. Bindings, contexto e recursos do Form não podem mudar neste rascunho. Suas alterações continuam no editor.'); return; }
+      try {
+        edited = this.formEditor ? this.formEditor.readDocument() : structuredClone(original as PageAuthoringDocument);
+        if (!edited) throw new Error('Editor not ready');
+      } catch {
+        this.message.set('Corrija o conteúdo no editor. Bindings, contexto e recursos do Form não podem mudar neste rascunho. Suas alterações continuam no editor.');
+        return;
+      }
     }
     await this.action(true, async epoch => {
       let document: CorporateGroupsDocument | PageAuthoringDocument;
       if (this.groupsMode) {
         await this.loadHead(epoch);
         if (!this.current(epoch) || !this.headAbsent()) return;
-        document = firstCorporateGroup(corporateGroupsDocument(original), this.groupId, this.title, this.groupOrder);
+        const currentGroups = corporateGroupsDocument(original);
+        this.groupId ||= crypto.randomUUID();
+        document = currentGroups.config.groups.length === 0 || (currentGroups.config.groups.length === 1 && currentGroups.config.groups[0].id === this.groupId)
+          ? firstCorporateGroup(currentGroups, this.groupId, this.title, this.groupOrder, this.groupIcon)
+          : upsertCorporateGroup(currentGroups, this.groupId, this.title, this.groupOrder, this.groupIcon);
       } else {
         document = corporatePageDocument(edited);
         document.config.presentation.title = this.title.trim();
+        document.config.presentation.icon = this.pageIcon;
         if (this.bindingGroupId) {
           if (!this.menu.ready() || !this.menu.groups().some(group => group.id === this.bindingGroupId)) throw new CorporatePageError('CONTRACT');
           this.bindingId ||= crypto.randomUUID();
-          document = bindCorporatePage(document, this.bindingId, this.bindingGroupId, this.bindingLabel, this.bindingOrder);
+          document = bindCorporatePage(document, this.bindingId, this.bindingGroupId, this.bindingLabel, this.bindingOrder, this.bindingIcon);
         }
       }
       const command = { target: this.target(), authoringDocument: document as unknown as Record<string, unknown>, reason: this.reason.trim() };
@@ -424,6 +450,34 @@ export class CorporatePagesComponent {
       }
     });
   }
+  /** Orchestrated author action: saves revision, binds organization scope, freezes release, and submits for review. */
+  async saveAndSubmitForReview(): Promise<void> {
+    if (this.busy() || this.fenced() || !this.canAuthor() || !this.title.trim() || !this.reason.trim()) return;
+    if (!this.workspace()?.body.frozenReleaseRef) {
+      await this.saveRevision();
+      if (this.fenced() || !this.workspace()?.body.targets[0]?.selectedRevision) return;
+      if (!this.workspace()?.body.targets[0]?.selectedAssignment) {
+        await this.assign();
+        if (this.fenced() || !this.workspace()?.body.targets[0]?.selectedAssignment) return;
+      }
+      await this.freeze();
+      if (this.fenced() || !this.releaseId()) return;
+    }
+    if (this.review()?.body.state === 'DRAFT') {
+      await this.submit();
+    }
+  }
+  /** Orchestrated publisher action: approves submitted release and immediately publishes to head. */
+  async approveAndPublish(): Promise<void> {
+    if (this.busy() || this.fenced() || !this.canPublish() || !this.reason.trim()) return;
+    if (this.review()?.body.state === 'SUBMITTED') {
+      await this.approve();
+      if (this.fenced() || this.review()?.body.state !== 'APPROVED') return;
+    }
+    if (this.review()?.body.state === 'APPROVED') {
+      await this.publish();
+    }
+  }
   private async loadPublished(epoch: number): Promise<void> {
     this.published.set(null); this.document.set(null); this.renderedPage.set(null);
     const value = await this.pages.published(this.pageId());
@@ -457,10 +511,25 @@ export class CorporatePagesComponent {
       corporateDraftId: this.draftId() || null, corporateReleaseId: this.releaseId() || null, corporateCreationKey: this.creationKey() || null, corporateCopyFrom: this.copyFrom() || null };
   }
   readonly editorPath = this.groupsMode ? '/workspace-corporativo/grupos' : '/workspace-corporativo/paginas';
+  selectGroup(id: string): void {
+    if (!id) {
+      this.groupId = crypto.randomUUID();
+      this.title = '';
+      this.groupOrder = (this.groupsDocument()?.config.groups.length ?? 0);
+      this.groupIcon = 'home';
+      return;
+    }
+    this.groupId = id;
+    const group = this.groupsDocument()?.config.groups.find(item => item.id === id);
+    this.title = group?.label ?? '';
+    this.groupOrder = group?.order ?? 0;
+    this.groupIcon = group?.icon ?? 'home';
+  }
   selectBinding(id: string): void {
     this.bindingId = id;
     const binding = this.document()?.config.navigation.find(item => item.id === id);
     this.bindingGroupId = binding?.groupId ?? ''; this.bindingLabel = binding?.label ?? ''; this.bindingOrder = binding?.order ?? 0;
+    this.bindingIcon = (isCorporateIcon(binding?.icon) ? binding.icon : 'home') as CorporateIcon;
   }
   reviewParams() { return { pageId: this.pageId(), releaseId: this.releaseId() }; }
   canAuthor(): boolean { return this.runtime.effectiveContext?.capabilities.includes('ui.authoring.configure') ?? false; }

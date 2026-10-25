@@ -2,7 +2,12 @@ import { DestroyRef, Injectable, effect, inject, signal, untracked } from '@angu
 import { EnterpriseRuntimeContextService, type EnterpriseRuntimeNavigationNode } from '@praxisui/core';
 import { CorporateSessionService } from './corporate-session.service';
 import { CorporatePagePilotService } from './corporate-page-pilot.service';
-import { corporateMenuNodes } from './corporate-navigation.model';
+import {
+  corporateMenuNodes,
+  isCorporateIcon,
+  publishCorporateShellProjection,
+  type CorporateIcon,
+} from './corporate-navigation.model';
 
 /** Transient SDK navigation projection in the corporate route injector, never a menu registry. */
 @Injectable()
@@ -22,9 +27,8 @@ export class CorporateNavigationService {
   private epoch = 0;
   private destroyed = false;
   constructor() {
-    const subscription = this.runtime.contextChanges$.subscribe(context => {
+    const subscription = this.runtime.contextChanges$.subscribe(() => {
       this.clear();
-      if (context?.state === 'ready' && this.session.authenticated()) void this.refresh();
     });
     effect(() => {
       this.session.generation(); const authenticated = this.session.authenticated();
@@ -35,6 +39,27 @@ export class CorporateNavigationService {
   private clear(): void {
     ++this.epoch; this.cursorHistory.clear(); this.groups.set([]); this.children.set({}); this.cursors.set({});
     this.rootCursor.set(null); this.expanded.set(null); this.ready.set(false); this.busy.set(false); this.message.set('');
+    publishCorporateShellProjection([]);
+  }
+  private syncShellProjection(): void {
+    if (!this.ready() || !this.session.authenticated()) {
+      publishCorporateShellProjection([]);
+      return;
+    }
+    const childrenMap = this.children();
+    publishCorporateShellProjection(
+      this.groups().map(group => ({
+        id: group.id,
+        label: group.label ?? '',
+        icon: (isCorporateIcon(group.icon) ? group.icon : 'home') as CorporateIcon,
+        items: (childrenMap[group.id] ?? []).map(page => ({
+          id: page.id,
+          label: page.label ?? '',
+          icon: (isCorporateIcon(page.icon) ? page.icon : 'home') as CorporateIcon,
+          path: page.route ?? '/workspace-corporativo/paginas',
+        })),
+      })),
+    );
   }
   async refresh(): Promise<void> {
     this.pages.synchronizeSession(); this.clear();
@@ -80,6 +105,7 @@ export class CorporateNavigationService {
         this.cursors.update(value => ({ ...value, [parent]: response.nextCursor }));
       }
       this.ready.set(true);
+      this.syncShellProjection();
     } catch (error) {
       if (current()) {
         this.clear();

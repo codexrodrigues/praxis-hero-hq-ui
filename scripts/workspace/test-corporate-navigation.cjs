@@ -76,6 +76,9 @@ function editorFixture(mode, query = {}) {
     assert.deepEqual(first.config.groups, [{ id: id(10), label: 'Primeira', icon: 'home', order: 2 }]);
     assert.equal(empty.config.groups.length, 0);
     assert.throws(() => model.firstCorporateGroup(first, id(11), 'Outro', 0));
+    const multi = model.upsertCorporateGroup(first, id(11), 'Segunda', 3, 'dashboard');
+    assert.equal(multi.config.groups.length, 2);
+    assert.equal(multi.config.groups[1].icon, 'dashboard');
     for (const corrupt of [{ ...empty, extra: true }, { ...empty, config: { groups: [first.config.groups[0], first.config.groups[0]] } }, { ...empty, config: { groups: [{ ...first.config.groups[0], icon: 'bad' }] } }]) assert.throws(() => model.corporateGroupsDocument(corrupt));
   });
   await test('binding update preserves all other bindings and content', () => {
@@ -83,21 +86,24 @@ function editorFixture(mode, query = {}) {
     assert.deepEqual(changed.config.navigation[1], page.config.navigation[1]);
     assert.deepEqual(changed.config.definition, page.config.definition); assert.equal(page.config.navigation[0].label, 'Um');
     assert.equal(changed.config.navigation[0].label, 'Editado');
-    assert.equal(model.bindCorporatePage(changed, id(3), id(10), 'Novo', 1).config.navigation.length, 3);
+    assert.equal(model.bindCorporatePage(changed, id(3), id(10), 'Novo', 1, 'description').config.navigation.length, 3);
     assert.throws(() => model.bindCorporatePage(page, id(1), 'foreign', 'A', 0));
   });
   await test('menu rejects external routes, wrong identity and eager/private children', () => {
     assert.equal(model.corporateMenuNodes([group(1)], null).length, 1);
+    assert.equal(model.corporateMenuNodes([{ ...group(2), icon: 'folder' }], null).length, 1);
     assert.equal(model.corporateMenuNodes([item(1)], id(10)).length, 1);
     for (const bad of [{ ...group(1), children: [] }, { ...group(1), id: 'x' }, { ...group(1), href: 'https://evil.test' }]) assert.throws(() => model.corporateMenuNodes([bad], null));
     for (const bad of [{ ...item(1), route: 'https://evil.test' }, { ...item(1), route: `/pages/${id(2)}` }, { ...item(1), children: [group(1)] }]) assert.throws(() => model.corporateMenuNodes([bad], id(10)));
   });
-  await test('SDK root pagination and lazy children use parentRef with fresh reads on reopen', async () => {
+  await test('SDK root pagination and lazy children use parentRef with fresh reads on reopen and project to shell', async () => {
     const f = navigationFixture(); let op = f.menu.refresh(); f.requests[0].resolve(f.response([group(1)], 'next')); await op;
     op = f.menu.moreGroups(); assert.equal(f.requests[1].options.cursor, 'next'); f.requests[1].resolve(f.response([group(2)])); await op;
     assert.equal(f.menu.groups().length, 2);
+    assert.equal(model.readCorporateShellProjection().length, 2);
     op = f.menu.open(id(1)); assert.equal(f.requests[2].options.parentRef, id(1)); f.requests[2].resolve(f.response([item(5)])); await op;
     assert.equal(f.menu.children()[id(1)][0].route, `/pages/${id(5)}`);
+    assert.equal(model.readCorporateShellProjection()[0].items[0].path, `/pages/${id(5)}`);
     op = f.menu.open(id(1)); assert.equal(f.menu.children()[id(1)].length, 0); f.requests[3].resolve(f.response([])); await op;
     assert.equal(f.requests.length, 4);
   });
@@ -107,6 +113,7 @@ function editorFixture(mode, query = {}) {
       if (cause === 'session') f.session.generation.set(2); else f.changes.emit(null);
       if (cause === 'error') f.requests[0].reject(new Error('private')); else f.requests[0].resolve(f.response([group(1)]));
       await op; assert.equal(f.menu.groups().length, 0); assert.equal(f.menu.ready(), false); assert.equal(f.menu.message(), '');
+      assert.equal(model.readCorporateShellProjection().length, 0);
     }
   });
   await test('malformed response, duplicate page and cursor cycle clear the whole projection', async () => {
@@ -256,6 +263,44 @@ function editorFixture(mode, query = {}) {
       if (cause === 'query') f.setQuery({}); else f.changes.emit(null);
       navigation.resolve(true); await operation; assert.deepEqual(f.requests, []);
     }
+  });
+  await test('orchestrated saveAndSubmitForReview and approveAndPublish execute sequential lifecycle steps with CAS and fence guards', async () => {
+    const f = editorFixture('groups', { draftId: id(61) });
+    f.editor.headAbsent.set(true);
+    const makeWorkspace = (rev, assign, frozen) => ({
+      etag: `"${id(70)}"`,
+      body: {
+        draft: { draftRef: id(61), rootTarget: model.CORPORATE_GROUPS_TARGET, state: frozen ? 'RELEASED' : 'DRAFT' },
+        targets: [{
+          target: model.CORPORATE_GROUPS_TARGET,
+          working: { document: { kind: 'praxis.navigation-groups.editor', version: 1, config: { groups: [{ id: id(10), label: 'Operações', icon: 'dashboard', order: 1 }] } } },
+          selectedRevision: rev ? { revisionRef: id(71) } : null,
+          selectedAssignment: assign ? { assignmentRevisionRef: id(72) } : null,
+        }],
+        frozenReleaseRef: frozen ? id(73) : null,
+      },
+    });
+    f.editor.workspace.set(makeWorkspace(false, false, false));
+    f.editor.groupsDocument.set(f.editor.workspace().body.targets[0].working.document);
+    f.editor.groupId = id(10);
+    f.editor.groupIcon = 'dashboard';
+    f.editor.title = 'Operações';
+    f.editor.reason = 'Fluxo orquestrado';
+    f.lifecycle.readHead = async () => { throw new HttpError(404); };
+    f.lifecycle.createRevision = async () => { f.requests.push('revision'); return { etag: `"${id(70)}"`, body: { nextDraft: makeWorkspace(true, false, false).body } }; };
+    f.lifecycle.createAssignment = async () => { f.requests.push('assignment'); return { etag: `"${id(70)}"`, body: { nextDraft: makeWorkspace(true, true, false).body } }; };
+    f.lifecycle.freezeRelease = async () => { f.requests.push('freeze'); return { etag: `"${id(70)}"`, body: { release: { releaseRef: id(73) }, nextDraft: makeWorkspace(true, true, true).body } }; };
+    f.lifecycle.readReview = async () => ({ etag: `"${id(74)}"`, body: { releaseRef: id(73), rootTarget: model.CORPORATE_GROUPS_TARGET, reviewEtag: id(74), state: 'DRAFT' } });
+    f.lifecycle.submit = async () => { f.requests.push('submit'); return { etag: `"${id(75)}"`, body: { releaseRef: id(73), rootTarget: model.CORPORATE_GROUPS_TARGET, reviewEtag: id(75), state: 'SUBMITTED' } }; };
+    await f.editor.saveAndSubmitForReview();
+    assert.deepEqual(f.requests, ['revision', 'assignment', 'freeze', 'submit']);
+    assert.equal(f.editor.review().body.state, 'SUBMITTED');
+
+    f.lifecycle.approve = async () => { f.requests.push('approve'); return { etag: `"${id(76)}"`, body: { releaseRef: id(73), rootTarget: model.CORPORATE_GROUPS_TARGET, reviewEtag: id(76), state: 'APPROVED' } }; };
+    f.lifecycle.publish = async () => { f.requests.push('publish'); return { etag: `"${id(77)}"`, body: { rootTarget: model.CORPORATE_GROUPS_TARGET, headEtag: id(77), activeReleaseRef: id(73) } }; };
+    f.lifecycle.readHead = async () => ({ etag: `"${id(77)}"`, body: { rootTarget: model.CORPORATE_GROUPS_TARGET, headEtag: id(77), activeReleaseRef: id(73) } });
+    await f.editor.approveAndPublish();
+    assert.deepEqual(f.requests, ['revision', 'assignment', 'freeze', 'submit', 'approve', 'publish', 'menu']);
   });
   console.log(`PASS ${tests} offline corporate navigation checks; browser/real HTTP remain separate.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });
