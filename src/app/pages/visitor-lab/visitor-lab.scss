@@ -1,18 +1,76 @@
 :host { display: block; min-width: 0; }
-.lab { display: grid; gap: 20px; max-width: 1540px; margin: auto; color: var(--md-sys-color-on-surface); }
-.lab-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
-h1 { margin: 6px 0 12px; font-size: clamp(24px, 3vw, 38px); letter-spacing: -.035em; }
-h2 { font-size: 20px; margin-block: 20px 12px; }
+.lab {
+  display: grid;
+  gap: 20px;
+  max-width: 1480px;
+  margin: auto;
+  padding: clamp(16px, 2.5vw, 28px);
+  color: var(--foreground, var(--md-sys-color-on-surface));
+}
+.lab-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(18px, 2.4vw, 26px);
+  background: var(--surface-gradient, var(--card, var(--md-sys-color-surface-container)));
+  border: 1px solid var(--border, var(--md-sys-color-outline-variant));
+  border-radius: 18px;
+  box-shadow: var(--node-shadow, 0 6px 24px rgba(15, 23, 42, 0.06));
+}
+h1 { margin: 6px 0 8px; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.03em; }
+h2 { font-size: 18px; font-weight: 700; margin-block: 16px 10px; }
 p { margin: 0; max-width: 76ch; line-height: 1.6; }
-.eyebrow { color: var(--md-sys-color-primary); font-size: 11px; font-weight: 700; letter-spacing: .16em; }
-.scope, .notice { color: var(--md-sys-color-on-surface-variant); font-size: 13px; }
-.scope { white-space: nowrap; padding-top: 4px; }
-.seed-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-code { display: block; overflow-wrap: anywhere; font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
-.error, [role=alert] { color: var(--md-sys-color-error); }
-.library { border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 12px; }
-.library-row, .menu-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding-block: 10px; }
+.eyebrow { color: var(--primary, var(--md-sys-color-primary)); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.scope {
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary, var(--md-sys-color-primary));
+  background: color-mix(in oklab, var(--primary, #2563eb) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary, #2563eb) 28%, transparent);
+}
+.notice {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--muted, var(--md-sys-color-surface-container));
+  border: 1px solid var(--border, var(--md-sys-color-outline-variant));
+  color: var(--muted-foreground, var(--md-sys-color-on-surface-variant));
+  font-size: 13px;
+}
+.seed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--card, var(--md-sys-color-surface));
+  border: 1px solid var(--border, var(--md-sys-color-outline-variant));
+}
+code { display: block; overflow-wrap: anywhere; font-size: 12px; font-family: var(--font-mono, monospace); color: var(--muted-foreground, var(--md-sys-color-on-surface-variant)); }
+.error, [role=alert] { color: var(--destructive, var(--md-sys-color-error)); }
+.library {
+  padding: clamp(16px, 2vw, 22px);
+  border-radius: 16px;
+  background: var(--card, var(--md-sys-color-surface));
+  border: 1px solid var(--border, var(--md-sys-color-outline-variant));
+  box-shadow: var(--node-shadow, 0 3px 12px rgba(15, 23, 42, 0.04));
+}
+.library-row, .menu-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-block: 8px;
+  border-radius: 12px;
+  background: var(--muted, var(--md-sys-color-surface-container));
+  border: 1px solid var(--border, var(--md-sys-color-outline-variant));
+}
 .library-row > div { flex: 1; min-width: 180px; }
 .menu-row mat-form-field { flex: 1; min-width: 180px; }
 praxis-dynamic-page-builder { display: block; min-width: 0; }
-@media (max-width: 700px) { .lab-header { display: grid; gap: 8px; } .scope { white-space: normal; } .menu-row { align-items: stretch; } }
+@media (max-width: 700px) { .lab { padding: 12px; } .lab-header { display: grid; gap: 10px; } .scope { white-space: normal; justify-self: start; } .menu-row { align-items: stretch; } }

@@ -1,59 +1,120 @@
 <section class="corporate-pages" data-testid="corporate-pages" [attr.aria-busy]="busy()">
-  <header>
-    <p class="eyebrow">PÁGINAS CORPORATIVAS</p>
-    <h1>{{ groupsMode ? 'Primeiro grupo do menu' : publishedMode ? 'Página publicada' : 'Criar e publicar uma página' }}</h1>
-    <p>O servidor conserva o rascunho, a revisão e a publicação. Cada etapa exige uma confirmação separada.</p>
+  <header class="workspace-hero">
+    <div class="workspace-hero__main">
+      <p class="eyebrow">
+        <mat-icon aria-hidden="true">{{ groupsMode ? 'account_tree' : publishedMode ? 'verified' : 'web' }}</mat-icon>
+        PÁGINAS CORPORATIVAS GOVERNADAS
+      </p>
+      <h1>{{ groupsMode ? 'Primeiro grupo do menu' : publishedMode ? 'Página publicada' : 'Criar e publicar uma página' }}</h1>
+      <p class="workspace-hero__subtitle">O servidor conserva o rascunho, a revisão e a publicação. Cada etapa exige uma confirmação separada.</p>
+    </div>
+    <nav aria-label="Workspace corporativo" class="workspace-hero__nav">
+      <a mat-button routerLink="/workspace-corporativo" [queryParams]="entryParams()">Sessão e contexto</a>
+    </nav>
   </header>
-  <nav aria-label="Workspace corporativo">
-    <a mat-button routerLink="/workspace-corporativo" [queryParams]="entryParams()">Sessão e contexto</a>
-  </nav>
+
+  <div class="pipeline-stepper" aria-hidden="true">
+    <div class="pipeline-step" [class.is-active]="pipelineStage() === 1" [class.is-complete]="pipelineStage() > 1">
+      <span class="pipeline-step__badge">1</span>
+      <div class="pipeline-step__body">
+        <strong>Origem &amp; Identidade</strong>
+        <span>{{ groupsMode ? 'Agregado raiz do shell' : copyFrom() ? 'Cópia de revisão publicada' : 'Modelo corporativo admitido' }}</span>
+      </div>
+    </div>
+    <div class="pipeline-step" [class.is-active]="pipelineStage() === 2" [class.is-complete]="pipelineStage() > 2">
+      <span class="pipeline-step__badge">2</span>
+      <div class="pipeline-step__body">
+        <strong>Rascunho &amp; Vínculos</strong>
+        <span>{{ groupsMode ? 'Grupos, ordem e ícones' : 'Formulário, ícone e menu' }}</span>
+      </div>
+    </div>
+    <div class="pipeline-step" [class.is-active]="pipelineStage() === 3" [class.is-complete]="pipelineStage() > 3">
+      <span class="pipeline-step__badge">3</span>
+      <div class="pipeline-step__body">
+        <strong>Revisão Auditada</strong>
+        <span>Release congelada &amp; SoD</span>
+      </div>
+    </div>
+    <div class="pipeline-step" [class.is-active]="pipelineStage() === 4">
+      <span class="pipeline-step__badge">4</span>
+      <div class="pipeline-step__body">
+        <strong>Publicação Ativa</strong>
+        <span>Head ativo &amp; projeção no menu</span>
+      </div>
+    </div>
+  </div>
+
   @if (!ready()) {
-    <p>Confirme sua sessão e selecione o contexto na entrada corporativa. Depois retome este endereço.</p>
-    <button mat-stroked-button (click)="resume()" [disabled]="session.busy()">Confirmar sessão e contexto</button>
+    <div class="auth-gate-card">
+      <p>Confirme sua sessão e selecione o contexto na entrada corporativa. Depois retome este endereço.</p>
+      <button mat-stroked-button (click)="resume()" [disabled]="session.busy()">Confirmar sessão e contexto</button>
+    </div>
   }
-  <div role="status" aria-live="polite">
-    @if (busy()) { <p>Consultando o servidor…</p> }
-    @if (message()) { <p data-testid="corporate-page-message">{{ message() }}</p> }
+  <div role="status" aria-live="polite" class="status-banner" [class.has-message]="!!message() || busy()">
+    @if (busy()) { <p class="status-banner__busy"><mat-icon aria-hidden="true">sync</mat-icon>Consultando o servidor…</p> }
+    @if (message()) { <p data-testid="corporate-page-message" class="status-banner__message"><mat-icon aria-hidden="true">info</mat-icon>{{ message() }}</p> }
   </div>
   @if (ready()) {
     <p class="scope-note">{{ groupsMode ? 'Publique o primeiro grupo para organizar páginas. Se já houver um agregado publicado, reutilize seus grupos; este piloto não edita esse agregado.' : 'Piloto: um Form com campos locais e ícones governados, sem API de domínio. Conteúdo, título e vínculos de menu seguem o fluxo governado. Copiar inicia outro rascunho; não publica nem herda vínculos.' }}</p>
     @if (!publishedMode) {
       @if (groupsMode && !draftId() && !releaseId()) {
-        <section aria-labelledby="groups-create-title">
-          <h2 id="groups-create-title">1. Iniciar o primeiro agregado</h2>
-          <button mat-flat-button (click)="createGroups()" [disabled]="busy() || fenced() || !canAuthor() || !headAbsent() || !!creationKey()">Criar rascunho de grupos</button>
-          @if (creationKey()) {
-            <button mat-stroked-button (click)="reconcileGroups()" [disabled]="busy()">Consultar criação de grupos</button>
-          }
-          @if (!headAbsent() && !head()) { <p>Releia o estado do servidor para confirmar se esta é a primeira publicação.</p> }
+        <section aria-labelledby="groups-create-title" class="stage-card">
+          <div class="stage-card__header">
+            <span class="stage-pill">Etapa 1</span>
+            <h2 id="groups-create-title">1. Iniciar o primeiro agregado</h2>
+          </div>
+          <p class="stage-card__hint">Inicia um rascunho governado para organizar os grupos de navegação visíveis na barra lateral da aplicação.</p>
+          <div class="actions">
+            <button mat-flat-button (click)="createGroups()" [disabled]="busy() || fenced() || !canAuthor() || !headAbsent() || !!creationKey()">Criar rascunho de grupos</button>
+            @if (creationKey()) {
+              <button mat-stroked-button (click)="reconcileGroups()" [disabled]="busy()">Consultar criação de grupos</button>
+            }
+          </div>
+          @if (!headAbsent() && !head()) { <p class="stage-card__hint">Releia o estado do servidor para confirmar se esta é a primeira publicação.</p> }
         </section>
       }
       @if (!groupsMode && !pageId()) {
-        <section aria-labelledby="create-title">
-          <h2 id="create-title">{{ copyFrom() ? '1. Copiar publicação em novo rascunho' : '1. Criar a partir do modelo admitido' }}</h2>
-          @if (copyFrom()) { <p>A origem é uma publicação confirmada pelo servidor. A cópia terá identidade e rota próprias, sem vínculos de menu.</p> }
-          <mat-form-field appearance="outline"><mat-label>Título da nova página</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!creationKey()" /></mat-form-field>
+        <section aria-labelledby="create-title" class="stage-card">
+          <div class="stage-card__header">
+            <span class="stage-pill">{{ copyFrom() ? 'Cópia Derivada' : 'Etapa 1' }}</span>
+            <h2 id="create-title">{{ copyFrom() ? '1. Copiar publicação em novo rascunho' : '1. Criar a partir do modelo admitido' }}</h2>
+          </div>
           @if (copyFrom()) {
-            <button mat-flat-button (click)="copyPublished()" [disabled]="busy() || fenced() || !canAuthor() || !!creationKey() || !title.trim() || !copyOrigin()">Criar cópia como rascunho</button>
+            <p class="stage-card__hint">A origem é uma publicação confirmada pelo servidor. A cópia terá identidade e rota próprias, sem vínculos de menu.</p>
           } @else {
-            <button mat-flat-button (click)="create()" [disabled]="busy() || fenced() || !canAuthor() || !!creationKey() || !title.trim()">Criar rascunho</button>
+            <p class="stage-card__hint">Aloca uma identidade permanente (<code>pageId</code>) e rota estável (<code>/pages/:pageId</code>) com chave de idempotência segura contra falhas de rede.</p>
           }
+          <mat-form-field appearance="outline"><mat-label>Título da nova página</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!creationKey()" /></mat-form-field>
+          <div class="actions">
+            @if (copyFrom()) {
+              <button mat-flat-button (click)="copyPublished()" [disabled]="busy() || fenced() || !canAuthor() || !!creationKey() || !title.trim() || !copyOrigin()">Criar cópia como rascunho</button>
+            } @else {
+              <button mat-flat-button (click)="create()" [disabled]="busy() || fenced() || !canAuthor() || !!creationKey() || !title.trim()">Criar rascunho</button>
+            }
+          </div>
           @if (creationKey()) {
-            <p>A referência desta tentativa está no endereço. Consultar não repete a criação.</p>
-            <button mat-stroked-button (click)="reconcile()" [disabled]="busy()">Consultar criação</button>
+            <div class="reconcile-box">
+              <p>A referência desta tentativa está no endereço. Consultar não repete a criação.</p>
+              <button mat-stroked-button (click)="reconcile()" [disabled]="busy()">Consultar criação</button>
+            </div>
           }
         </section>
       }
       @if (pageId()) {
-        <p class="reference">{{ groupsMode ? 'Agregado' : 'Página' }}: {{ pageId() }}</p>
-        <button mat-stroked-button (click)="reload()" [disabled]="busy()">Reler estado do servidor</button>
+        <div class="identity-bar">
+          <p class="reference">{{ groupsMode ? 'Agregado' : 'Página' }}: {{ pageId() }}</p>
+          <button mat-stroked-button (click)="reload()" [disabled]="busy()">Reler estado do servidor</button>
+        </div>
       }
       @if (workspace(); as draft) {
-        <section aria-labelledby="draft-title">
-          <h2 id="draft-title">2. Rascunho e abrangência</h2>
-          <p>Estado do rascunho: <strong data-testid="draft-state">{{ draft.body.draft.state }}</strong></p>
+        <section aria-labelledby="draft-title" class="stage-card">
+          <div class="stage-card__header">
+            <span class="stage-pill">Etapa 2 • Autoria</span>
+            <h2 id="draft-title">2. Rascunho e abrangência</h2>
+            <p class="state-chip">Estado do rascunho: <strong data-testid="draft-state">{{ draft.body.draft.state }}</strong></p>
+          </div>
           <mat-form-field appearance="outline"><mat-label>{{ groupsMode ? 'Nome do grupo' : 'Título da página' }}</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!draft.body.frozenReleaseRef" /></mat-form-field>
-          <div class="actions">
+          <div class="actions protocol-actions">
             <button mat-flat-button (click)="saveRevision()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim() || (groupsMode && !headAbsent()) || (!groupsMode && isBindingInvalid())">Salvar revisão</button>
             <button mat-stroked-button (click)="assign()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedRevision || (groupsMode && !headAbsent())">Aplicar à organização atual</button>
             <button mat-stroked-button (click)="freeze()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedAssignment || (groupsMode && !headAbsent())">Congelar release</button>
@@ -61,86 +122,179 @@
         </section>
       }
       @if (pageId()) {
-        <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
+        <div class="reason-card">
+          <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
+        </div>
       }
       @if (workspace(); as draft) {
-        <div class="actions">
-          <button mat-flat-button (click)="saveAndSubmitForReview()" data-testid="save-and-submit" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim() || (groupsMode && !headAbsent()) || (!groupsMode && isBindingInvalid())">Preparar e enviar para revisão</button>
+        <div class="express-callout">
+          <div class="express-callout__info">
+            <span class="express-callout__tag"><mat-icon aria-hidden="true">bolt</mat-icon>Fluxo Guiado Recomendado (1 Clique)</span>
+            <p>Salva a revisão atual, aplica a abrangência organizacional, congela a release e submete para aprovação mantendo todas as guardas de ETag.</p>
+          </div>
+          <div class="actions">
+            <button mat-flat-button (click)="saveAndSubmitForReview()" data-testid="save-and-submit" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim() || (groupsMode && !headAbsent()) || (!groupsMode && isBindingInvalid())">Preparar e enviar para revisão</button>
+          </div>
         </div>
         @if (groupsMode) {
-          <fieldset [disabled]="busy() || !!draft.body.frozenReleaseRef || !headAbsent()">
+          <fieldset [disabled]="busy() || !!draft.body.frozenReleaseRef || !headAbsent()" class="authoring-panel">
             <legend>Configuração do grupo</legend>
-            @if ((groupsDocument()?.config?.groups?.length ?? 0) > 0) {
-              <label for="group-selection">Grupo no rascunho</label>
-              <select id="group-selection" [ngModel]="groupId" (ngModelChange)="selectGroup($event)">
-                <option value="">Adicionar novo grupo</option>
-                @for (group of groupsDocument()?.config?.groups || []; track group.id) { <option [value]="group.id">{{ group.label }} ({{ group.icon }})</option> }
-              </select>
-            }
-            <label for="group-icon">Ícone do grupo</label>
-            <select id="group-icon" [(ngModel)]="groupIcon">
-              @for (icon of allowedIcons; track icon) { <option [value]="icon">{{ icon }}</option> }
-            </select>
-            <mat-form-field appearance="outline"><mat-label>Ordem do grupo</mat-label><input matInput type="number" [(ngModel)]="groupOrder" min="0" max="2147483647" /></mat-form-field>
+            <div class="authoring-grid">
+              <div class="authoring-grid__controls">
+                @if ((groupsDocument()?.config?.groups?.length ?? 0) > 0) {
+                  <label for="group-selection">Grupo no rascunho</label>
+                  <select id="group-selection" [ngModel]="groupId" (ngModelChange)="selectGroup($event)">
+                    <option value="">Adicionar novo grupo</option>
+                    @for (group of groupsDocument()?.config?.groups || []; track group.id) { <option [value]="group.id">{{ group.label }} ({{ group.icon }})</option> }
+                  </select>
+                }
+                <label for="group-icon">Ícone do grupo</label>
+                <select id="group-icon" [(ngModel)]="groupIcon">
+                  @for (icon of allowedIcons; track icon) { <option [value]="icon">{{ icon }} — {{ iconLabel(icon) }}</option> }
+                </select>
+                <div class="icon-palette" aria-hidden="true">
+                  @for (icon of featuredIcons; track icon) {
+                    <span class="icon-chip" [class.is-selected]="groupIcon === icon" (click)="groupIcon = icon">
+                      <mat-icon>{{ icon }}</mat-icon>
+                      <small>{{ iconLabel(icon) }}</small>
+                    </span>
+                  }
+                </div>
+                <mat-form-field appearance="outline"><mat-label>Ordem do grupo</mat-label><input matInput type="number" [(ngModel)]="groupOrder" min="0" max="2147483647" /></mat-form-field>
+              </div>
+              <div class="live-preview-card" aria-hidden="true">
+                <p class="live-preview-card__eyebrow"><mat-icon>visibility</mat-icon>Prévia Viva no Menu Lateral</p>
+                <div class="live-preview-shell">
+                  <div class="live-preview-shell__item is-active">
+                    <mat-icon>{{ groupIcon }}</mat-icon>
+                    <div>
+                      <strong>{{ title || 'Nome do Grupo Corporativo' }}</strong>
+                      <small>{{ iconLabel(groupIcon) }} · Ordem {{ groupOrder }}</small>
+                    </div>
+                  </div>
+                  @for (existing of groupsDocument()?.config?.groups || []; track existing.id) {
+                    @if (existing.id !== groupId) {
+                      <div class="live-preview-shell__item">
+                        <mat-icon>{{ existing.icon }}</mat-icon>
+                        <div>
+                          <strong>{{ existing.label }}</strong>
+                          <small>{{ iconLabel(existing.icon) }} · Ordem {{ existing.order }}</small>
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
           </fieldset>
         } @else {
-          <fieldset [disabled]="busy() || !!draft.body.frozenReleaseRef">
+          <fieldset [disabled]="busy() || !!draft.body.frozenReleaseRef" class="authoring-panel">
             <legend>Apresentação e vínculo de menu</legend>
-            <label for="page-icon">Ícone da página</label>
-            <select id="page-icon" [(ngModel)]="pageIcon">
-              @for (icon of allowedIcons; track icon) { <option [value]="icon">{{ icon }}</option> }
-            </select>
-            <label for="binding-selection">Vínculo a editar</label>
-            <select id="binding-selection" [ngModel]="bindingId" (ngModelChange)="selectBinding($event)">
-              <option value="">Adicionar vínculo</option>
-              @for (binding of document()?.config?.navigation || []; track binding.id) { <option [value]="binding.id">{{ binding.label }}</option> }
-            </select>
-            <label for="binding-group">Grupo publicado</label>
-            @if (!menu.ready() && !menu.busy()) { <p class="scope-note">Use "Atualizar menu" na barra superior para carregar os grupos publicados disponíveis neste contexto.</p> }
-            <select id="binding-group" [(ngModel)]="bindingGroupId" [disabled]="!menu.ready() || menu.busy()">
-              <option value="">Não alterar vínculos</option>
-              @if (bindingGroupId && !hasBindingGroupInMenu()) { <option [value]="bindingGroupId">Grupo vinculado ({{ bindingGroupId }})</option> }
-              @for (group of menu.groups(); track group.id) { <option [value]="group.id">{{ group.label }}</option> }
-            </select>
-            @if (bindingGroupId) {
-              <label for="binding-icon">Ícone no menu</label>
-              <select id="binding-icon" [(ngModel)]="bindingIcon">
-                @for (icon of allowedIcons; track icon) { <option [value]="icon">{{ icon }}</option> }
-              </select>
-              <mat-form-field appearance="outline"><mat-label>Nome no menu</mat-label><input matInput [(ngModel)]="bindingLabel" maxlength="160" /></mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>Ordem no grupo</mat-label><input matInput type="number" [(ngModel)]="bindingOrder" min="0" max="2147483647" /></mat-form-field>
-            }
+            <div class="authoring-grid">
+              <div class="authoring-grid__controls">
+                <label for="page-icon">Ícone da página</label>
+                <select id="page-icon" [(ngModel)]="pageIcon">
+                  @for (icon of allowedIcons; track icon) { <option [value]="icon">{{ icon }} — {{ iconLabel(icon) }}</option> }
+                </select>
+                <div class="icon-palette" aria-hidden="true">
+                  @for (icon of featuredIcons; track icon) {
+                    <span class="icon-chip" [class.is-selected]="pageIcon === icon" (click)="pageIcon = icon">
+                      <mat-icon>{{ icon }}</mat-icon>
+                      <small>{{ iconLabel(icon) }}</small>
+                    </span>
+                  }
+                </div>
+                <label for="binding-selection">Vínculo a editar</label>
+                <select id="binding-selection" [ngModel]="bindingId" (ngModelChange)="selectBinding($event)">
+                  <option value="">Adicionar vínculo</option>
+                  @for (binding of document()?.config?.navigation || []; track binding.id) { <option [value]="binding.id">{{ binding.label }}</option> }
+                </select>
+                <label for="binding-group">Grupo publicado</label>
+                @if (!menu.ready() && !menu.busy()) { <p class="scope-note">Use "Atualizar menu" na barra superior para carregar os grupos publicados disponíveis neste contexto.</p> }
+                <select id="binding-group" [(ngModel)]="bindingGroupId" [disabled]="!menu.ready() || menu.busy()">
+                  <option value="">Não alterar vínculos</option>
+                  @if (bindingGroupId && !hasBindingGroupInMenu()) { <option [value]="bindingGroupId">Grupo vinculado ({{ bindingGroupId }})</option> }
+                  @for (group of menu.groups(); track group.id) { <option [value]="group.id">{{ group.label }}</option> }
+                </select>
+                @if (bindingGroupId) {
+                  <label for="binding-icon">Ícone no menu</label>
+                  <select id="binding-icon" [(ngModel)]="bindingIcon">
+                    @for (icon of allowedIcons; track icon) { <option [value]="icon">{{ icon }} — {{ iconLabel(icon) }}</option> }
+                  </select>
+                  <div class="icon-palette" aria-hidden="true">
+                    @for (icon of featuredIcons; track icon) {
+                      <span class="icon-chip" [class.is-selected]="bindingIcon === icon" (click)="bindingIcon = icon">
+                        <mat-icon>{{ icon }}</mat-icon>
+                        <small>{{ iconLabel(icon) }}</small>
+                      </span>
+                    }
+                  </div>
+                  <mat-form-field appearance="outline"><mat-label>Nome no menu</mat-label><input matInput [(ngModel)]="bindingLabel" maxlength="160" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Ordem no grupo</mat-label><input matInput type="number" [(ngModel)]="bindingOrder" min="0" max="2147483647" /></mat-form-field>
+                }
+              </div>
+              <div class="live-preview-card" aria-hidden="true">
+                <p class="live-preview-card__eyebrow"><mat-icon>visibility</mat-icon>Prévia da Página &amp; Entrada no Menu</p>
+                <div class="live-preview-shell">
+                  <div class="live-preview-shell__item">
+                    <mat-icon>{{ pageIcon }}</mat-icon>
+                    <div>
+                      <strong>{{ title || 'Título da Página Corporativa' }}</strong>
+                      <small>Rota estável: /pages/{{ pageId() }}</small>
+                    </div>
+                  </div>
+                  @if (bindingGroupId) {
+                    <div class="live-preview-shell__item is-active">
+                      <mat-icon>{{ bindingIcon }}</mat-icon>
+                      <div>
+                        <strong>{{ bindingLabel || title || 'Item no Menu' }}</strong>
+                        <small>Grupo: {{ groupLabel(bindingGroupId) }} · Ordem {{ bindingOrder }}</small>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
             @if ((document()?.config?.navigation?.length ?? 0) > 0) {
-              <ul data-testid="corporate-page-bindings">
+              <ul data-testid="corporate-page-bindings" class="bindings-list">
                 @for (entry of document()?.config?.navigation || []; track entry.id) {
-                  <li>{{ entry.label }} ({{ entry.icon }} · grupo {{ entry.groupId }} · ordem {{ entry.order }})</li>
+                  <li class="bindings-list__item" [class.is-selected]="entry.id === bindingId">
+                    <mat-icon aria-hidden="true">{{ entry.icon }}</mat-icon>
+                    <div class="bindings-list__text">
+                      <strong>{{ entry.label }}</strong>
+                      <span>Grupo: {{ groupLabel(entry.groupId) }} ({{ entry.icon }} · grupo {{ entry.groupId }} · ordem {{ entry.order }})</span>
+                    </div>
+                  </li>
                 }
               </ul>
               @if (hasSavedBindingSelected()) {
                 <button mat-stroked-button type="button" (click)="removeBinding()" data-testid="remove-binding" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim()">Remover vínculo selecionado</button>
               }
             }
-            <p>Os outros vínculos são preservados. A publicação da página confirma o acesso ao grupo no servidor.</p>
+            <p class="stage-card__hint">Os outros vínculos são preservados. A publicação da página confirma o acesso ao grupo no servidor.</p>
             <a mat-button routerLink="/workspace-corporativo/grupos">Gerenciar primeiro grupo</a>
           </fieldset>
           @if (!draft.body.frozenReleaseRef) {
             @for (value of [document()]; track pageId() + ':' + workspace()?.etag) { @if (value) {
-              <fieldset [disabled]="busy() || fenced() || !canAuthor()" data-testid="corporate-form-content">
+              <fieldset [disabled]="busy() || fenced() || !canAuthor()" data-testid="corporate-form-content" class="authoring-panel">
                 <legend>Conteúdo do formulário</legend>
                 <app-corporate-form-editor [document]="value" />
               </fieldset>
             } }
-          } @else { <p>Conteúdo congelado nesta release. Uma cópia inicia um novo rascunho editável.</p> }
+          } @else { <p class="frozen-banner"><mat-icon aria-hidden="true">lock</mat-icon>Conteúdo congelado nesta release. Uma cópia inicia um novo rascunho editável.</p> }
         }
       }
       @if (review(); as value) {
-        <section aria-labelledby="review-title">
-          <h2 id="review-title">3. Revisão e publicação</h2>
+        <section aria-labelledby="review-title" class="stage-card review-card">
+          <div class="stage-card__header">
+            <span class="stage-pill">Etapa 3 • Governança &amp; Publicação</span>
+            <h2 id="review-title">3. Revisão e publicação</h2>
+            <p class="state-chip">Estado da revisão: <strong data-testid="review-state">{{ value.body.state }}</strong></p>
+          </div>
           <p class="reference">Release: {{ value.body.releaseRef }}</p>
-          <p>Estado da revisão: <strong data-testid="review-state">{{ value.body.state }}</strong></p>
-          <p>Este recibo confirma o estado da release identificada. Ele não contém uma prévia imutável do conteúdo para revisão.</p>
+          <p class="stage-card__hint">Este recibo confirma o estado da release identificada. Ele não contém uma prévia imutável do conteúdo para revisão.</p>
           <a mat-button [routerLink]="editorPath" [queryParams]="reviewParams()" data-testid="review-link">Abrir link de revisão para outro ator</a>
-          @if (isReleaseAlreadyActive()) { <p class="scope-note" data-testid="release-already-active">Esta release já está ativa na publicação atual.</p> }
+          @if (isReleaseAlreadyActive()) { <p class="scope-note active-release-badge" data-testid="release-already-active"><mat-icon aria-hidden="true">check_circle</mat-icon>Esta release já está ativa na publicação atual.</p> }
           <div class="actions">
             <button mat-stroked-button (click)="submit()" [disabled]="busy() || fenced() || !canAuthor() || value.body.state !== 'DRAFT'">Enviar para revisão</button>
             <button mat-stroked-button (click)="approve()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'SUBMITTED' || !reason.trim()">Aprovar release identificada</button>
@@ -153,27 +307,55 @@
       }
     }
     @if (published(); as value) {
-      <section aria-labelledby="published-title" data-testid="published-page">
-        <h2 id="published-title">{{ value.document.config.presentation.title }}</h2>
-        <p>Conteúdo publicado confirmado pelo servidor. Valores preenchidos são temporários e não alteram a publicação.</p>
+      <section aria-labelledby="published-title" data-testid="published-page" class="stage-card published-showcase">
+        <div class="published-showcase__header">
+          <div class="published-showcase__title-group">
+            <span class="published-showcase__icon"><mat-icon aria-hidden="true">{{ value.document.config.presentation.icon }}</mat-icon></span>
+            <div>
+              <span class="stage-pill is-live">Publicação Ativa no Head</span>
+              <h2 id="published-title">{{ value.document.config.presentation.title }}</h2>
+              <p class="stage-card__hint">Conteúdo publicado confirmado pelo servidor. Valores preenchidos são temporários e não alteram a publicação.</p>
+            </div>
+          </div>
+          <div class="actions">
+            @if (canAuthor()) { <a mat-stroked-button routerLink="/workspace-corporativo/paginas" [queryParams]="{copyFrom: value.pageId}" data-testid="copy-published-page">Copiar conteúdo para nova página</a> }
+            <a mat-flat-button [routerLink]="value.route" data-testid="published-route">Abrir página publicada</a>
+          </div>
+        </div>
         @if (renderedPage(); as runtimePage) {
-        <praxis-dynamic-page [page]="runtimePage" [pageIdentity]="publishedIdentity()"
-          [autoPersist]="false" [enableCustomization]="false" [strictValidation]="true"
-          [showPageSettingsButton]="false" [showWidgetAssistantButton]="false" />
+          <div class="published-showcase__canvas">
+            <praxis-dynamic-page [page]="runtimePage" [pageIdentity]="publishedIdentity()"
+              [autoPersist]="false" [enableCustomization]="false" [strictValidation]="true"
+              [showPageSettingsButton]="false" [showWidgetAssistantButton]="false" />
+          </div>
         }
         <p class="reference">Release ativa: {{ value.head.activeReleaseRef }}</p>
-        @if (canAuthor()) { <a mat-stroked-button routerLink="/workspace-corporativo/paginas" [queryParams]="{copyFrom: value.pageId}" data-testid="copy-published-page">Copiar conteúdo para nova página</a> }
-        <a mat-flat-button [routerLink]="value.route" data-testid="published-route">Abrir página publicada</a>
       </section>
     }
     @if (!publishedMode && !groupsMode) {
-      <section aria-labelledby="catalog-title">
-        <h2 id="catalog-title">Páginas publicadas neste contexto</h2>
-        <button mat-stroked-button (click)="refreshCatalog()" [disabled]="busy()">Atualizar catálogo</button>
-        @if (catalog(); as value) {
-          <ul>@for (item of value.items; track item.pageId) { <li><a [routerLink]="item.route">{{ item.title }}</a></li> } @empty { <li>Nenhuma página publicada visível neste contexto.</li> }</ul>
-          @if (value.nextCursor) { <button mat-button (click)="more()" [disabled]="busy()">Carregar mais páginas</button> }
-        }
+      <section aria-labelledby="catalog-title" class="stage-card catalog-card">
+        <div class="stage-card__header">
+          <span class="stage-pill">Catálogo Governado</span>
+          <h2 id="catalog-title">Páginas publicadas neste contexto</h2>
+          <button mat-button (click)="refreshCatalog()" [disabled]="busy()">Atualizar catálogo</button>
+        </div>
+        @if (catalog()?.items?.length) {
+          <ul class="catalog-grid">
+            @for (item of catalog()!.items; track item.pageId) {
+              <li class="catalog-grid__item">
+                <div class="catalog-grid__title">
+                  <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+                  <a [routerLink]="item.route">{{ item.title }}</a>
+                </div>
+                <div class="catalog-grid__actions">
+                  <a mat-button routerLink="/workspace-corporativo/paginas" [queryParams]="{pageId: item.pageId, releaseId: item.head.activeReleaseRef}">Revisão publicada</a>
+                  @if (canAuthor()) { <a mat-button routerLink="/workspace-corporativo/paginas" [queryParams]="{copyFrom: item.pageId}">Copiar</a> }
+                </div>
+              </li>
+            }
+          </ul>
+          @if (catalog()?.nextCursor) { <button mat-stroked-button (click)="more()" [disabled]="busy()">Carregar mais páginas</button> }
+        } @else { <p class="stage-card__hint">Nenhuma página publicada disponível neste contexto.</p> }
       </section>
     }
   }
