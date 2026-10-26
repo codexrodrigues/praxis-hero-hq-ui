@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { EnterpriseRuntimeContextService, UiLayoutLifecycleService, UiLayoutLifecycleContractError,
   UiLayoutLifecycleHttpError, DynamicWidgetPageComponent, buildPublishedPageIdentity, validatePageAuthoringDocument, readStrongResourceEtag,
   type WidgetPageDefinition, type PageIdentity, type PageAuthoringDocument, type UiLayoutDraftWorkspaceReceipt, type UiLayoutReleaseReviewReceipt,
@@ -33,7 +34,7 @@ type Receipt<T> = UiLayoutLifecycleHttpReceipt<T>;
 
 @Component({
   selector: 'app-corporate-pages',
-  imports: [FormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule, DynamicWidgetPageComponent, CorporateFormEditorComponent],
+  imports: [FormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule, MatIconModule, DynamicWidgetPageComponent, CorporateFormEditorComponent],
   templateUrl: './corporate-pages.html', styleUrl: './corporate-pages.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -616,6 +617,36 @@ export class CorporatePagesComponent {
     const existing = this.document()?.config.navigation.find(item => item.id === this.bindingId);
     if (!existing) return true;
     return existing.groupId !== this.bindingGroupId || existing.label !== this.bindingLabel.trim() || existing.order !== this.bindingOrder || existing.icon !== this.bindingIcon;
+  }
+  readonly featuredIcons: readonly CorporateIcon[] = ['home', 'dashboard', 'verified_user', 'rocket_launch', 'fact_check', 'assignment', 'analytics', 'folder', 'table_chart', 'shield', 'group', 'settings'];
+  iconLabel(icon: string): string {
+    const labels: Record<string, string> = {
+      home: 'Início',
+      dashboard: 'Painel Executivo',
+      verified_user: 'Governança & Conformidade',
+      rocket_launch: 'Operações Táticas',
+      fact_check: 'Auditoria & Checklist',
+      assignment: 'Solicitação / Tarefa',
+      analytics: 'Indicadores & Métricas',
+      folder: 'Diretório / Pasta',
+      table_chart: 'Tabela de Dados',
+      shield: 'Segurança',
+      group: 'Equipes & Unidades',
+      settings: 'Configurações',
+      description: 'Documento',
+      work: 'Operação',
+      assessment: 'Avaliação',
+    };
+    return labels[icon] ?? icon;
+  }
+  groupLabel(groupId: string): string {
+    return this.menu.groups().find(group => group.id === groupId)?.label ?? 'Grupo selecionado';
+  }
+  pipelineStage(): 1 | 2 | 3 | 4 {
+    if (this.published() || (this.groupsMode && this.head() && !this.headAbsent()) || this.isReleaseAlreadyActive()) return 4;
+    if (this.review()) return 3;
+    if (this.workspace()) return 2;
+    return 1;
   }
   isBindingInvalid(): boolean {
     return this.hasPendingBindingChange() && (!this.bindingLabel.trim() || !this.menu.ready() || this.menu.busy() || !this.hasBindingGroupInMenu());
