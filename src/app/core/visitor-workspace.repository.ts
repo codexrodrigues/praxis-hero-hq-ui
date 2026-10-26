@@ -184,6 +184,32 @@ export class VisitorWorkspaceRepository {
     });
   }
 
+  async renamePage(owner: string, pageId: string, name: string): Promise<VisitorWorkspace> {
+    const id = identifier(pageId);
+    const next = label(name, 80);
+    return this.change(owner, workspace => {
+      const page = workspace.pages.find(candidate => candidate.id === id);
+      if (!page) fail('invalid', 'Página salva não encontrada.');
+      const previous = page.title;
+      page.title = next;
+      for (const menu of workspace.menus) {
+        for (const item of menu.items) {
+          if (item.pageId === id && item.label === previous) item.label = next;
+        }
+      }
+    });
+  }
+
+  async migrate(owner: string): Promise<VisitorWorkspace> {
+    return this.change(owner, workspace => {
+      for (const menu of workspace.menus) {
+        for (const item of menu.items) {
+          if (item.icon === undefined) item.icon = 'web';
+        }
+      }
+    });
+  }
+
   async renameMenu(owner: string, menuId: string, name: string): Promise<VisitorWorkspace> {
     const id = identifier(menuId);
     const next = label(name, 60);

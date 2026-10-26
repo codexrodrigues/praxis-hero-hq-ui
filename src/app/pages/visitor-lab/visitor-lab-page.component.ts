@@ -101,6 +101,12 @@ export class VisitorLabEditorComponent {
     if (!destination) return;
     await this.action(() => this.store.save({ id: saved.id, title: saved.title, definition: saved.definition, menuLabel: destination.label, menuIcon: destination.icon }));
   }
+  async renamePage(id: string, label: string): Promise<void> {
+    await this.action(async () => {
+      await this.store.renamePage(id, label);
+      if (this.pageId() === id) this.title.set(label.trim());
+    });
+  }
   async renameMenu(id: string, label: string): Promise<void> {
     await this.action(() => this.store.renameMenu(id, label));
   }

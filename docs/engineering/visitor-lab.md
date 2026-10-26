@@ -78,3 +78,9 @@ Os [logs, screenshots e hashes da evidência focal](evidence/visitor-lab-2026-10
 ### Entrega incremental (23/10/2026)
 
 Studio → documento editado → cópia no laboratório → menu/ícone → nova rota → recarga passou no navegador, incluindo controles de quota, corrupção, personas A/B/A, cópia sem sobrescrita e viewport de 390 px. O teste intercepta APIs e comprova o sandbox local; não é prova HTTP corporativa do Config P3-B. Passaram também 12 testes do repositório, 4 de storage, 1 de contexto, 10 de fronteira e o catálogo de rotas. Build de produção aprovado em 6,29 s; aviso de bundle inicial de 16,44 MB para orçamento de alerta de 15 MB. A revisão independente final não encontrou bloqueadores; o wiring do Workspace Studio foi revisado no código, enquanto o navegador exercitou diretamente o Comando Studio. Os recibos e screenshots deste incremento estão em [evidence/visitor-lab-2026-10-23](evidence/visitor-lab-2026-10-23/validation.json). Nenhuma dependência ou contrato público foi alterado.
+
+### Fechamento de P5-A (`#9`) — migração sob lock e renomeação de página preservando rota (25/10/2026)
+
+- **`migrate(owner)` sob Web Lock exclusivo**: migra o envelope de armazenamento local de forma atômica, preenchendo o ícone `'web'` como padrão canônico quando itens legados de menu não possuem ícone e preservando os bytes brutos originais em caso de corrupção ou falha de quota.
+- **`renamePage(owner, pageId, name)`**: permite renomear uma página salva e atualizar rótulos correspondentes nos menus locais sem alterar `page.id`, a URL `/laboratorio/paginas/<uuid>`, `page.definition` ou `page.createdAt`.
+- **Testes focais**: `node test-e2e/test-visitor-workspace-repository.cjs` ampliado para **13/13 checks** aprovados, além de `test-visitor-local-storage.cjs` (4/4), `test-visitor-context.cjs` (1/1) e `test-visitor-page-validation.cjs` (10/10).

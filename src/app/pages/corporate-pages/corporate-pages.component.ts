@@ -10,6 +10,7 @@ import { EnterpriseRuntimeContextService, UiLayoutLifecycleService, UiLayoutLife
   type WidgetPageDefinition, type PageIdentity, type PageAuthoringDocument, type UiLayoutDraftWorkspaceReceipt, type UiLayoutReleaseReviewReceipt,
   type UiLayoutReleaseHeadReceipt, type UiLayoutLifecycleHttpReceipt } from '@praxisui/core';
 import { materializeDynamicFormPageRuntimeInputs, validateDynamicFormPageWidget } from '@praxisui/dynamic-form';
+import { materializeTablePageRuntimeInputs, validateTablePageWidget } from '@praxisui/table';
 import { CorporateFormEditorComponent } from './corporate-form-editor.component';
 import { CorporateNavigationService } from '../../core/corporate-navigation.service';
 import {
@@ -19,6 +20,7 @@ import {
   corporateGroupsDocument,
   firstCorporateGroup,
   isCorporateIcon,
+  unbindCorporatePage,
   upsertCorporateGroup,
   type CorporateGroupsDocument,
   type CorporateIcon,
@@ -216,10 +218,11 @@ export class CorporatePagesComponent {
     const code = error instanceof CorporatePageError || error instanceof UiLayoutLifecycleContractError ? error.code : '';
     const status = error instanceof CorporatePageError || error instanceof UiLayoutLifecycleHttpError ? error.status : 0;
     if (code === 'UNCERTAIN' || code === 'COMMAND_OUTCOME_UNCERTAIN') return 'Resultado incerto. Consulte o servidor antes de qualquer novo comando; a operação não será repetida automaticamente.';
-    if (status === 409 || status === 412) return 'O estado mudou no servidor. Releia o rascunho ou a revisão antes de continuar.';
+    if (status === 409 || status === 412) return 'O estado mudou no servidor ou há vínculo ativo impedindo a alteração (conflito de versão/ETag ou grupo referenciado). Releia o rascunho ou a revisão antes de continuar.';
     if (status === 401) return 'Sua sessão precisa ser confirmada novamente na entrada corporativa.';
-    if (status === 403) return 'Sua sessão não tem permissão para esta operação.';
-    if (status === 404) return 'Não encontrado neste contexto. Uma criação em andamento pode ainda não estar disponível; não recrie automaticamente.';
+    if (status === 403) return 'Sua sessão não tem permissão para esta operação ou a fonte/estrutura solicitada foi negada pela política corporativa deste host.';
+    if (status === 422) return 'A fonte de origem, o modelo ou o conteúdo do documento foi negado pela política de admissão do servidor.';
+    if (status === 404) return 'Não encontrado ou retirado de publicação neste contexto. Uma criação em andamento pode ainda não estar disponível; não recrie automaticamente.';
     if (status === 503) return 'O serviço está indisponível. Nenhuma publicação foi confirmada.';
     return 'Não foi possível confirmar esta operação. Releia o estado do servidor antes de continuar.';
   }
@@ -322,11 +325,15 @@ export class CorporatePagesComponent {
       return;
     }
     const document = corporatePageDocument(body.targets[0].working.document);
-    const admitted = validatePageAuthoringDocument(document, { 'praxis-dynamic-form': validateDynamicFormPageWidget });
+    const admitted = validatePageAuthoringDocument(document, {
+      'praxis-dynamic-form': validateDynamicFormPageWidget,
+      'praxis-table': validateTablePageWidget,
+    });
     const widgets = document.config.definition.widgets;
-    if (!admitted.ok || !isCorporateIcon(document.config.presentation.icon) || widgets.length !== 1
-        || widgets[0].definition.id !== 'praxis-dynamic-form'
-        || Object.keys(widgets[0].definition.inputs ?? {}).some(key => key !== 'config')) throw new CorporatePageError('CONTRACT');
+    if (!admitted.ok || !isCorporateIcon(document.config.presentation.icon) || widgets.length < 1
+        || widgets.filter(widget => widget.definition.id === 'praxis-dynamic-form').length !== 1
+        || widgets.some(widget => (widget.definition.id !== 'praxis-dynamic-form' && widget.definition.id !== 'praxis-table')
+            || Object.keys(widget.definition.inputs ?? {}).some(key => key !== 'config'))) throw new CorporatePageError('CONTRACT');
     this.workspace.set(value); this.document.set(document); this.title = document.config.presentation.title;
     this.pageIcon = document.config.presentation.icon;
     const activeBindingId = document.config.navigation.some(item => item.id === this.bindingId) ? this.bindingId : (document.config.navigation[0]?.id ?? '');
@@ -348,22 +355,24 @@ export class CorporatePagesComponent {
     }
     await this.action(true, async epoch => {
       let document: CorporateGroupsDocument | PageAuthoringDocument;
+      let nextGroupId = this.groupId;
+      let nextBindingId = this.bindingId;
       if (this.groupsMode) {
         await this.loadHead(epoch);
         if (!this.current(epoch) || !this.headAbsent()) return;
         const currentGroups = corporateGroupsDocument(original);
-        this.groupId ||= crypto.randomUUID();
-        document = currentGroups.config.groups.length === 0 || (currentGroups.config.groups.length === 1 && currentGroups.config.groups[0].id === this.groupId)
-          ? firstCorporateGroup(currentGroups, this.groupId, this.title, this.groupOrder, this.groupIcon)
-          : upsertCorporateGroup(currentGroups, this.groupId, this.title, this.groupOrder, this.groupIcon);
+        nextGroupId = this.groupId || crypto.randomUUID();
+        document = currentGroups.config.groups.length === 0 || (currentGroups.config.groups.length === 1 && currentGroups.config.groups[0].id === nextGroupId)
+          ? firstCorporateGroup(currentGroups, nextGroupId, this.title, this.groupOrder, this.groupIcon)
+          : upsertCorporateGroup(currentGroups, nextGroupId, this.title, this.groupOrder, this.groupIcon);
       } else {
         document = corporatePageDocument(edited);
         document.config.presentation.title = this.title.trim();
         document.config.presentation.icon = this.pageIcon;
         if (this.hasPendingBindingChange()) {
           if (this.isBindingInvalid()) throw new CorporatePageError('CONTRACT');
-          this.bindingId ||= crypto.randomUUID();
-          document = bindCorporatePage(document, this.bindingId, this.bindingGroupId, this.bindingLabel, this.bindingOrder, this.bindingIcon);
+          nextBindingId = this.bindingId || crypto.randomUUID();
+          document = bindCorporatePage(document, nextBindingId, this.bindingGroupId, this.bindingLabel, this.bindingOrder, this.bindingIcon);
         }
       }
       const command = { target: this.target(), authoringDocument: document as unknown as Record<string, unknown>, reason: this.reason.trim() };
@@ -371,6 +380,7 @@ export class CorporatePagesComponent {
         { ...command, commandRef: this.key('revision', [workspace.etag, command]) });
       if (!this.current(epoch)) return;
       this.acceptDraft({ ...value, body: value.body.nextDraft });
+      if (this.groupsMode) this.selectGroup(nextGroupId); else if (nextBindingId) this.selectBinding(nextBindingId);
       this.message.set('Revisão salva no servidor. A publicação continua separada.');
     });
   }
@@ -451,6 +461,61 @@ export class CorporatePagesComponent {
       }
     });
   }
+  async rollback(): Promise<void> {
+    const head = this.head();
+    if (this.groupsMode || !head || !this.hasActivePublication() || !this.releaseId() || (this.review() && this.review()?.body.state !== 'APPROVED') || this.isReleaseAlreadyActive() || !this.reason.trim() || !this.canPublish()) return;
+    await this.action(true, async epoch => {
+      const value = await this.lifecycle.rollback(this.target(), head.etag,
+        { releaseId: this.releaseId(), reason: this.reason.trim() });
+      if (!this.current(epoch)) return;
+      if (value.body.activeReleaseRef !== this.releaseId()) throw new CorporatePageError('CONTRACT');
+      this.head.set(value);
+      if (this.groupsMode) {
+        await this.loadHead(epoch); await this.menu.refresh();
+        if (this.current(epoch)) this.message.set('Rollback de grupos confirmado pelo servidor.');
+      } else {
+        await this.loadPublished(epoch); await this.menu.refresh();
+        if (this.current(epoch)) this.message.set('Rollback confirmado pelo servidor. A release selecionada voltou a ser a publicação ativa.');
+      }
+    });
+  }
+  async withdraw(): Promise<void> {
+    const head = this.head();
+    if (this.groupsMode || !head || !this.hasActivePublication() || !this.reason.trim() || !this.canPublish()) return;
+    await this.action(true, async epoch => {
+      const value = await this.lifecycle.withdraw(this.target(), head.etag, { reason: this.reason.trim() });
+      if (value?.body && 'activeReleaseRef' in value.body && value.body.activeReleaseRef !== null) throw new CorporatePageError('CONTRACT');
+      if (!this.current(epoch)) return;
+      this.published.set(null); this.renderedPage.set(null);
+      await this.loadHead(epoch); await this.menu.refresh();
+      if (this.current(epoch)) this.message.set('Publicação retirada pelo servidor. A rota publicada e os atalhos de menu foram desativados.');
+    });
+  }
+  async removeBinding(): Promise<void> {
+    const workspace = this.workspace(), original = this.document();
+    if (this.groupsMode || !workspace || workspace.body.frozenReleaseRef || !original || !this.hasSavedBindingSelected() || !this.title.trim() || !this.reason.trim() || !this.canAuthor()) return;
+    if (!original.config.navigation.some(item => item.id === this.bindingId)) return;
+    let edited: PageAuthoringDocument | null = null;
+    try {
+      edited = this.formEditor ? this.formEditor.readDocument() : structuredClone(original);
+      if (!edited) throw new Error('Editor not ready');
+    } catch {
+      this.message.set('Corrija o conteúdo no editor. Bindings, contexto e recursos do Form não podem mudar neste rascunho. Suas alterações continuam no editor.');
+      return;
+    }
+    await this.action(true, async epoch => {
+      let document = corporatePageDocument(edited);
+      document.config.presentation.title = (this.title.trim() || document.config.presentation.title);
+      document.config.presentation.icon = this.pageIcon;
+      document = unbindCorporatePage(document, this.bindingId);
+      const command = { target: this.target(), authoringDocument: document as unknown as Record<string, unknown>, reason: this.reason.trim() };
+      const value = await this.lifecycle.createRevision(this.target(), this.draftId(), workspace.etag,
+        { ...command, commandRef: this.key('revision', [workspace.etag, command]) });
+      if (!this.current(epoch)) return;
+      this.acceptDraft({ ...value, body: value.body.nextDraft });
+      this.message.set('Vínculo de menu removido na nova revisão do rascunho.');
+    });
+  }
   /** Orchestrated author action: saves revision, binds organization scope, freezes release, and submits for review. */
   async saveAndSubmitForReview(): Promise<void> {
     if (this.busy() || this.fenced() || !this.canAuthor() || !this.title.trim() || !this.reason.trim() || (this.groupsMode && !this.headAbsent()) || (!this.groupsMode && this.isBindingInvalid())) return;
@@ -486,11 +551,16 @@ export class CorporatePagesComponent {
     const value = await this.pages.published(this.pageId());
     if (!this.current(epoch)) return;
     if (!this.publishedMode && this.releaseId() && value.body.head.activeReleaseRef !== this.releaseId()) throw new CorporatePageError('CONTRACT');
-    const admitted = validatePageAuthoringDocument(value.body.document, { 'praxis-dynamic-form': validateDynamicFormPageWidget });
-    if (!admitted.ok) throw new CorporatePageError('CONTRACT');
+    const admitted = validatePageAuthoringDocument(value.body.document, {
+      'praxis-dynamic-form': validateDynamicFormPageWidget,
+      'praxis-table': validateTablePageWidget,
+    });
+    if (!admitted.ok || admitted.value.config.definition.widgets.filter(widget => widget.definition.id === 'praxis-dynamic-form').length !== 1) throw new CorporatePageError('CONTRACT');
     const projection = structuredClone(admitted.value.config.definition);
     for (const widget of projection.widgets) {
-      const runtime = materializeDynamicFormPageRuntimeInputs(widget.definition.inputs, value.body.pageId, widget.key);
+      const runtime = widget.definition.id === 'praxis-table'
+        ? materializeTablePageRuntimeInputs(widget.definition.inputs, value.body.pageId, widget.key)
+        : materializeDynamicFormPageRuntimeInputs(widget.definition.inputs, value.body.pageId, widget.key);
       if (!runtime.inputs) throw new CorporatePageError('CONTRACT');
       widget.definition.inputs = runtime.inputs;
     }
@@ -538,6 +608,8 @@ export class CorporatePagesComponent {
   canAuthor(): boolean { return this.runtime.effectiveContext?.capabilities.includes('ui.authoring.configure') ?? false; }
   canPublish(): boolean { return this.runtime.effectiveContext?.capabilities.includes('ui.layout.publish') ?? false; }
   isReleaseAlreadyActive(): boolean { return !!this.releaseId() && this.head()?.body.activeReleaseRef === this.releaseId(); }
+  hasActivePublication(): boolean { return !!this.head()?.body.activeReleaseRef; }
+  hasSavedBindingSelected(): boolean { return !!this.bindingId && (this.document()?.config.navigation.some(item => item.id === this.bindingId) ?? false); }
   hasBindingGroupInMenu(): boolean { return this.menu.groups().some(group => group.id === this.bindingGroupId); }
   hasPendingBindingChange(): boolean {
     if (!this.bindingGroupId) return false;
