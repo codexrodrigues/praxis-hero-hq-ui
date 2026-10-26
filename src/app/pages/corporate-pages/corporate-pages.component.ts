@@ -619,6 +619,27 @@ export class CorporatePagesComponent {
     return existing.groupId !== this.bindingGroupId || existing.label !== this.bindingLabel.trim() || existing.order !== this.bindingOrder || existing.icon !== this.bindingIcon;
   }
   readonly featuredIcons: readonly CorporateIcon[] = ['home', 'dashboard', 'verified_user', 'rocket_launch', 'fact_check', 'assignment', 'analytics', 'folder', 'table_chart', 'shield', 'group', 'settings'];
+  pickGroupIcon(icon: CorporateIcon): void {
+    if (this.busy() || this.fenced() || !this.canAuthor() || !!this.workspace()?.body.frozenReleaseRef || !this.headAbsent()) return;
+    this.groupIcon = icon;
+  }
+  pickPageIcon(icon: CorporateIcon): void {
+    if (this.busy() || this.fenced() || !this.canAuthor() || !!this.workspace()?.body.frozenReleaseRef) return;
+    this.pageIcon = icon;
+  }
+  pickBindingIcon(icon: CorporateIcon): void {
+    if (this.busy() || this.fenced() || !this.canAuthor() || !!this.workspace()?.body.frozenReleaseRef) return;
+    this.bindingIcon = icon;
+  }
+  previewGroups(): ReadonlyArray<{ id: string; label: string; icon: CorporateIcon; order: number; active: boolean }> {
+    const currentLabel = this.title.trim() || 'Nome do Grupo Corporativo';
+    const currentOrder = Number.isInteger(this.groupOrder) && this.groupOrder >= 0 ? this.groupOrder : 0;
+    const existing = (this.groupsDocument()?.config?.groups ?? [])
+      .filter(group => group.id !== this.groupId)
+      .map(group => ({ id: group.id, label: group.label, icon: group.icon, order: group.order, active: false }));
+    return [...existing, { id: this.groupId || '__draft__', label: currentLabel, icon: this.groupIcon, order: currentOrder, active: true }]
+      .sort((a, b) => a.order - b.order);
+  }
   iconLabel(icon: string): string {
     const labels: Record<string, string> = {
       home: 'Início',
@@ -643,7 +664,7 @@ export class CorporatePagesComponent {
     return this.menu.groups().find(group => group.id === groupId)?.label ?? 'Grupo selecionado';
   }
   pipelineStage(): 1 | 2 | 3 | 4 {
-    if (this.published() || (this.groupsMode && this.head() && !this.headAbsent()) || this.isReleaseAlreadyActive()) return 4;
+    if (this.published() || (this.groupsMode && this.hasActivePublication()) || this.isReleaseAlreadyActive()) return 4;
     if (this.review()) return 3;
     if (this.workspace()) return 2;
     return 1;

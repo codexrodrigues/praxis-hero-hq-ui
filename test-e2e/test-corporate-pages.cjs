@@ -5,7 +5,7 @@ const { chromium, expect } = require(require.resolve('@playwright/test', { paths
 const BASE = 'http://127.0.0.1:4302';
 const EDITOR = '/workspace-corporativo/paginas';
 const id = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
-const pageId = id(1), draftId = id(2), releaseId = id(3), revisionId = id(4), assignmentId = id(5);
+const pageId = id(1), draftId = id(2), releaseId = id(3), priorReleaseId = id(99), revisionId = id(4), assignmentId = id(5);
 const target = { componentType: 'praxis-dynamic-page', componentId: pageId };
 const seed = { kind: 'praxis.dynamic-page.editor', version: 1, config: { definition: { widgets: [
   { key: id(7), definition: { id: 'praxis-dynamic-form', inputs: { config: { title: 'Corporate page', fieldMetadata: [] } } } },
@@ -100,7 +100,10 @@ async function client(browser, actor) {
       state.frozen = true; state.draftVersion++;
       return json({ release: { releaseRef: releaseId, rootTarget: target, memberCount: 1 }, nextDraft: draft(), review: review() }, quote(state.draftVersion), 201);
     }
-    if (url.pathname.endsWith('/review')) return json(review(), quote(state.reviewVersion));
+    if (url.pathname.endsWith('/review')) {
+      const requestedReleaseRef = url.pathname.includes(priorReleaseId) ? priorReleaseId : releaseId;
+      return json({ ...review(), releaseRef: requestedReleaseRef }, quote(state.reviewVersion));
+    }
     if (url.pathname.endsWith('/release-head')) return state.published ? json(head(), quote(state.headVersion)) : state.withdrawn ? json({ ...head(), activeReleaseRef: null }, quote(state.headVersion)) : route.fulfill({ status: 404 });
     if (url.pathname.endsWith('/submit')) {
       assert.equal(actor, 'author'); assert.equal(headers['if-match'], quote(state.reviewVersion));
@@ -272,12 +275,8 @@ async function client(browser, actor) {
     await expect(publisher.page.getByTestId('published-page')).toHaveCount(0);
     // Verify browser E2E rollback and withdraw on active corporate publication
     publisher.tenant('lab-a'); publisher.actor('publisher');
-    await publisher.page.goto(new URL(reviewUrl, BASE).href);
+    await publisher.page.goto(`${BASE}${EDITOR}?pageId=${pageId}&releaseId=${priorReleaseId}`);
     await expect(publisher.page.getByTestId('review-state')).toHaveText('APPROVED');
-    await publisher.page.evaluate(() => {
-      const component = window.ng.getComponent(document.querySelector('app-corporate-pages'));
-      component.head.set({ etag: '"00000000-0000-4000-8000-000000000030"', body: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: '00000000-0000-4000-8000-000000000001' }, activeReleaseRef: '00000000-0000-4000-8000-000000000099', headEtag: '00000000-0000-4000-8000-000000000030', updatedAt: '2026-10-24T20:00:00Z' } });
-    });
     await publisher.page.getByLabel('Motivo da alteração ou decisão', { exact: true }).fill('Reverter para release aprovada anterior');
     await publisher.page.getByTestId('rollback-release').click();
     await expect(publisher.page.getByTestId('corporate-page-message')).toContainText('Rollback confirmado');
