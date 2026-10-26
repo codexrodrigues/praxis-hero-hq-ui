@@ -6,7 +6,7 @@
 .corporate-pages {
   max-width: 1200px;
   margin: 0 auto;
-  padding: clamp(16px, 2.5vw, 28px);
+  padding: clamp(16px, 2.5vw, 28px) clamp(16px, 2.5vw, 28px) 52px;
   box-sizing: border-box;
   overflow-x: clip;
   color: var(--foreground, var(--mat-sys-on-surface));
@@ -266,6 +266,59 @@ p {
   overflow-wrap: anywhere;
 }
 
+/* Draft Workbench Grid (Preserves DOM Tab Order while pairing Title + Reason visually) */
+.draft-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-areas:
+    'header header'
+    'title reason'
+    'express express'
+    'granular granular';
+  gap: 10px 18px;
+  align-items: start;
+}
+
+.draft-workbench__header {
+  grid-area: header;
+  margin-block-end: 4px;
+}
+
+.draft-workbench__title {
+  grid-area: title;
+  min-width: 0;
+}
+
+.draft-workbench__reason {
+  grid-area: reason;
+  min-width: 0;
+}
+
+.draft-workbench__title mat-form-field,
+.draft-workbench__reason mat-form-field {
+  max-width: 100%;
+}
+
+.draft-workbench__express {
+  grid-area: express;
+  margin-block-end: 4px;
+}
+
+.draft-workbench__granular {
+  grid-area: granular;
+  align-items: center;
+  padding-top: 8px;
+  margin-block: 0;
+  border-top: 1px dashed var(--border, var(--mat-sys-outline-variant));
+}
+
+.protocol-actions__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted-foreground, var(--mat-sys-on-surface-variant));
+  margin-right: 4px;
+}
+
 /* Express Orchestration Callout */
 .express-callout {
   display: flex;
@@ -315,7 +368,7 @@ fieldset.authoring-panel {
   border: 1px solid var(--border, var(--mat-sys-outline-variant));
   border-radius: 16px;
   padding: clamp(16px, 2vw, 22px);
-  margin-block: 16px;
+  margin-block: 22px 16px;
   background: var(--card, var(--mat-sys-surface));
   box-shadow: var(--node-shadow, 0 3px 12px rgba(15, 23, 42, 0.04));
   min-width: 0;
@@ -325,6 +378,7 @@ fieldset.authoring-panel {
 
 fieldset.authoring-panel legend {
   padding: 4px 12px;
+  line-height: 1.4;
   border-radius: 999px;
   font-size: 0.82rem;
   font-weight: 700;
@@ -401,6 +455,12 @@ select {
   background: color-mix(in oklab, var(--primary, #2563eb) 15%, var(--card, #ffffff));
   border-color: var(--primary, var(--mat-sys-primary));
   font-weight: 700;
+}
+
+fieldset:disabled .icon-chip {
+  opacity: 0.52;
+  cursor: default;
+  pointer-events: none;
 }
 
 /* Live Navigation Preview Card */
@@ -630,6 +690,15 @@ li {
 @media (max-width: 900px) {
   .pipeline-stepper {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .draft-workbench {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'header'
+      'title'
+      'reason'
+      'express'
+      'granular';
   }
   .authoring-grid {
     grid-template-columns: 1fr;

@@ -107,35 +107,42 @@
         </div>
       }
       @if (workspace(); as draft) {
-        <section aria-labelledby="draft-title" class="stage-card">
-          <div class="stage-card__header">
+        <section aria-labelledby="draft-title" class="stage-card draft-workbench">
+          <div class="stage-card__header draft-workbench__header">
             <span class="stage-pill">Etapa 2 • Autoria</span>
             <h2 id="draft-title">2. Rascunho e abrangência</h2>
             <p class="state-chip">Estado do rascunho: <strong data-testid="draft-state">{{ draft.body.draft.state }}</strong></p>
           </div>
-          <mat-form-field appearance="outline"><mat-label>{{ groupsMode ? 'Nome do grupo' : 'Título da página' }}</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!draft.body.frozenReleaseRef" /></mat-form-field>
-          <div class="actions protocol-actions">
+          <div class="draft-workbench__title">
+            <mat-form-field appearance="outline"><mat-label>{{ groupsMode ? 'Nome do grupo' : 'Título da página' }}</mat-label><input matInput [(ngModel)]="title" maxlength="160" [disabled]="busy() || !!draft.body.frozenReleaseRef" /></mat-form-field>
+          </div>
+          <div class="actions protocol-actions draft-workbench__granular">
+            <span class="protocol-actions__label">Etapas Granulares do Protocolo HTTP:</span>
             <button mat-flat-button (click)="saveRevision()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim() || (groupsMode && !headAbsent()) || (!groupsMode && isBindingInvalid())">Salvar revisão</button>
             <button mat-stroked-button (click)="assign()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedRevision || (groupsMode && !headAbsent())">Aplicar à organização atual</button>
             <button mat-stroked-button (click)="freeze()" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !draft.body.targets[0].selectedAssignment || (groupsMode && !headAbsent())">Congelar release</button>
           </div>
+          @if (pageId()) {
+            <div class="draft-workbench__reason">
+              <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
+            </div>
+          }
+          <div class="express-callout draft-workbench__express">
+            <div class="express-callout__info">
+              <span class="express-callout__tag"><mat-icon aria-hidden="true">bolt</mat-icon>Fluxo Guiado Recomendado (1 Clique)</span>
+              <p>Salva a revisão atual, aplica a abrangência organizacional, congela a release e submete para aprovação mantendo todas as guardas de ETag.</p>
+            </div>
+            <div class="actions">
+              <button mat-flat-button (click)="saveAndSubmitForReview()" data-testid="save-and-submit" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim() || (groupsMode && !headAbsent()) || (!groupsMode && isBindingInvalid())">Preparar e enviar para revisão</button>
+            </div>
+          </div>
         </section>
-      }
-      @if (pageId()) {
+      } @else if (pageId()) {
         <div class="reason-card">
           <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
         </div>
       }
       @if (workspace(); as draft) {
-        <div class="express-callout">
-          <div class="express-callout__info">
-            <span class="express-callout__tag"><mat-icon aria-hidden="true">bolt</mat-icon>Fluxo Guiado Recomendado (1 Clique)</span>
-            <p>Salva a revisão atual, aplica a abrangência organizacional, congela a release e submete para aprovação mantendo todas as guardas de ETag.</p>
-          </div>
-          <div class="actions">
-            <button mat-flat-button (click)="saveAndSubmitForReview()" data-testid="save-and-submit" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim() || (groupsMode && !headAbsent()) || (!groupsMode && isBindingInvalid())">Preparar e enviar para revisão</button>
-          </div>
-        </div>
         @if (groupsMode) {
           <fieldset [disabled]="busy() || !!draft.body.frozenReleaseRef || !headAbsent()" class="authoring-panel">
             <legend>Configuração do grupo</legend>
@@ -154,7 +161,7 @@
                 </select>
                 <div class="icon-palette" aria-hidden="true">
                   @for (icon of featuredIcons; track icon) {
-                    <span class="icon-chip" [class.is-selected]="groupIcon === icon" (click)="groupIcon = icon">
+                    <span class="icon-chip" [class.is-selected]="groupIcon === icon" (click)="pickGroupIcon(icon)">
                       <mat-icon>{{ icon }}</mat-icon>
                       <small>{{ iconLabel(icon) }}</small>
                     </span>
@@ -165,23 +172,14 @@
               <div class="live-preview-card" aria-hidden="true">
                 <p class="live-preview-card__eyebrow"><mat-icon>visibility</mat-icon>Prévia Viva no Menu Lateral</p>
                 <div class="live-preview-shell">
-                  <div class="live-preview-shell__item is-active">
-                    <mat-icon>{{ groupIcon }}</mat-icon>
-                    <div>
-                      <strong>{{ title || 'Nome do Grupo Corporativo' }}</strong>
-                      <small>{{ iconLabel(groupIcon) }} · Ordem {{ groupOrder }}</small>
-                    </div>
-                  </div>
-                  @for (existing of groupsDocument()?.config?.groups || []; track existing.id) {
-                    @if (existing.id !== groupId) {
-                      <div class="live-preview-shell__item">
-                        <mat-icon>{{ existing.icon }}</mat-icon>
-                        <div>
-                          <strong>{{ existing.label }}</strong>
-                          <small>{{ iconLabel(existing.icon) }} · Ordem {{ existing.order }}</small>
-                        </div>
+                  @for (previewGroup of previewGroups(); track previewGroup.id) {
+                    <div class="live-preview-shell__item" [class.is-active]="previewGroup.active">
+                      <mat-icon>{{ previewGroup.icon }}</mat-icon>
+                      <div>
+                        <strong>{{ previewGroup.label }}</strong>
+                        <small>{{ iconLabel(previewGroup.icon) }} · Ordem {{ previewGroup.order }}</small>
                       </div>
-                    }
+                    </div>
                   }
                 </div>
               </div>
@@ -198,7 +196,7 @@
                 </select>
                 <div class="icon-palette" aria-hidden="true">
                   @for (icon of featuredIcons; track icon) {
-                    <span class="icon-chip" [class.is-selected]="pageIcon === icon" (click)="pageIcon = icon">
+                    <span class="icon-chip" [class.is-selected]="pageIcon === icon" (click)="pickPageIcon(icon)">
                       <mat-icon>{{ icon }}</mat-icon>
                       <small>{{ iconLabel(icon) }}</small>
                     </span>
@@ -223,7 +221,7 @@
                   </select>
                   <div class="icon-palette" aria-hidden="true">
                     @for (icon of featuredIcons; track icon) {
-                      <span class="icon-chip" [class.is-selected]="bindingIcon === icon" (click)="bindingIcon = icon">
+                      <span class="icon-chip" [class.is-selected]="bindingIcon === icon" (click)="pickBindingIcon(icon)">
                         <mat-icon>{{ icon }}</mat-icon>
                         <small>{{ iconLabel(icon) }}</small>
                       </span>
