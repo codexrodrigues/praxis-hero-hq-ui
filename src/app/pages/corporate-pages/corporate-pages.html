@@ -110,6 +110,16 @@
               <mat-form-field appearance="outline"><mat-label>Nome no menu</mat-label><input matInput [(ngModel)]="bindingLabel" maxlength="160" /></mat-form-field>
               <mat-form-field appearance="outline"><mat-label>Ordem no grupo</mat-label><input matInput type="number" [(ngModel)]="bindingOrder" min="0" max="2147483647" /></mat-form-field>
             }
+            @if ((document()?.config?.navigation?.length ?? 0) > 0) {
+              <ul data-testid="corporate-page-bindings">
+                @for (entry of document()?.config?.navigation || []; track entry.id) {
+                  <li>{{ entry.label }} ({{ entry.icon }} · grupo {{ entry.groupId }} · ordem {{ entry.order }})</li>
+                }
+              </ul>
+              @if (hasSavedBindingSelected()) {
+                <button mat-stroked-button type="button" (click)="removeBinding()" data-testid="remove-binding" [disabled]="busy() || fenced() || !canAuthor() || !!draft.body.frozenReleaseRef || !title.trim() || !reason.trim()">Remover vínculo selecionado</button>
+              }
+            }
             <p>Os outros vínculos são preservados. A publicação da página confirma o acesso ao grupo no servidor.</p>
             <a mat-button routerLink="/workspace-corporativo/grupos">Gerenciar primeiro grupo</a>
           </fieldset>
@@ -136,6 +146,8 @@
             <button mat-stroked-button (click)="approve()" [disabled]="busy() || fenced() || !canPublish() || value.body.state !== 'SUBMITTED' || !reason.trim()">Aprovar release identificada</button>
             <button mat-flat-button (click)="publish()" [disabled]="busy() || fenced() || !canPublish() || isReleaseAlreadyActive() || value.body.state !== 'APPROVED' || (!head() && !headAbsent()) || !reason.trim() || (groupsMode && !headAbsent())">Publicar release aprovada</button>
             <button mat-flat-button (click)="approveAndPublish()" data-testid="approve-and-publish" [disabled]="busy() || fenced() || !canPublish() || isReleaseAlreadyActive() || (value.body.state !== 'SUBMITTED' && value.body.state !== 'APPROVED') || (!head() && !headAbsent()) || !reason.trim() || (groupsMode && !headAbsent())">Aprovar e publicar</button>
+            <button mat-stroked-button (click)="rollback()" data-testid="rollback-release" [disabled]="busy() || fenced() || !canPublish() || groupsMode || !hasActivePublication() || !releaseId() || value.body.state !== 'APPROVED' || isReleaseAlreadyActive() || !reason.trim()">Reverter para esta release</button>
+            <button mat-stroked-button (click)="withdraw()" data-testid="withdraw-publication" [disabled]="busy() || fenced() || !canPublish() || groupsMode || !hasActivePublication() || !reason.trim()">Retirar publicação</button>
           </div>
         </section>
       }

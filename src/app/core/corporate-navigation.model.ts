@@ -111,6 +111,16 @@ export function bindCorporatePage(
   return result;
 }
 
+export function unbindCorporatePage(
+  document: PageAuthoringDocument,
+  bindingId: string,
+): PageAuthoringDocument {
+  if (!uuid(bindingId) || !document.config.navigation.some(item => item.id === bindingId)) throw new Error('BINDING_CONTRACT');
+  const result = structuredClone(document);
+  result.config.navigation = result.config.navigation.filter(item => item.id !== bindingId);
+  return result;
+}
+
 /** Only the installed reference host's admitted routes/icons enter this corporate shell. */
 export function corporateMenuNodes(nodes: EnterpriseRuntimeNavigationNode[], parent: string | null): EnterpriseRuntimeNavigationNode[] {
   if (!Array.isArray(nodes)) throw new Error('MENU_CONTRACT');

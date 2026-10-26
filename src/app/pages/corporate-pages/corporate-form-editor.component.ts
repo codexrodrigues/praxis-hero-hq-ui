@@ -3,6 +3,7 @@ import { NgComponentOutlet } from '@angular/common';
 import { type PageAuthoringDocument, validatePageAuthoringDocument } from '@praxisui/core';
 import { PraxisDynamicFormConfigEditor, decodeDynamicFormPageInputs, projectDynamicFormPageEditorChanges,
   validateDynamicFormPageWidget } from '@praxisui/dynamic-form';
+import { validateTablePageWidget } from '@praxisui/table';
 import { SETTINGS_PANEL_DATA } from '@praxisui/settings-panel';
 
 /** Reuses the owner's editor and raw document projection. No preference/save writer is installed. */
@@ -13,6 +14,7 @@ import { SETTINGS_PANEL_DATA } from '@praxisui/settings-panel';
     Erros locais podem ser corrigidos aqui. Se o servidor negar o salvamento, será necessário reler o rascunho e as edições não salvas poderão ser perdidas.
     Valores preenchidos não são publicados.</p>
     <ng-container *ngComponentOutlet="editorType; injector: editorInjector" />`,
+  styles: [`:host{display:block;min-width:0;max-width:100%}:host ::ng-deep *{min-width:0;max-width:100%;box-sizing:border-box}:host ::ng-deep .mat-button-toggle-group{display:flex;flex-wrap:wrap;width:100%}:host ::ng-deep .mat-button-toggle-button,:host ::ng-deep .mat-button-toggle-label-content{white-space:normal;overflow-wrap:anywhere;line-height:1.25}`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CorporateFormEditorComponent {
@@ -26,7 +28,10 @@ export class CorporateFormEditorComponent {
   @Input({ required: true }) set document(value: PageAuthoringDocument) {
     this.original = structuredClone(value); this.baseline = undefined;
     const generation = ++this.generation;
-    const decoded = decodeDynamicFormPageInputs(value.config.definition.widgets[0].definition.inputs);
+    const formWidgets = value.config.definition.widgets.filter(w => w.definition.id === 'praxis-dynamic-form');
+    if (formWidgets.length !== 1) throw new Error('FORM_DOCUMENT_INVALID');
+    const formWidget = formWidgets[0];
+    const decoded = decodeDynamicFormPageInputs(formWidget?.definition.inputs);
     if (!decoded.document) throw new Error('FORM_DOCUMENT_INVALID');
     this.editorInjector = Injector.create({ parent: this.parentInjector, providers: [
       { provide: SETTINGS_PANEL_DATA, useValue: { document: decoded.document } },
@@ -39,12 +44,18 @@ export class CorporateFormEditorComponent {
   readDocument(): PageAuthoringDocument {
     const editor = this.outlet?.componentInstance;
     if (!this.original || !this.baseline || !editor || editor.isBusy$.value || !editor.isValid$.value) throw new Error('FORM_EDITOR_INVALID');
-    const result = projectDynamicFormPageEditorChanges(this.original.config.definition.widgets[0].definition.inputs,
+    const formIndex = this.original.config.definition.widgets.findIndex(w => w.definition.id === 'praxis-dynamic-form');
+    if (formIndex < 0 || this.original.config.definition.widgets.filter(w => w.definition.id === 'praxis-dynamic-form').length !== 1) throw new Error('FORM_DOCUMENT_INVALID');
+    const targetIndex = formIndex;
+    const result = projectDynamicFormPageEditorChanges(this.original.config.definition.widgets[targetIndex].definition.inputs,
       this.baseline, editor.getSettingsValue());
     if (!result.inputs) throw new Error('FORM_ENVELOPE_CHANGED');
     const document = structuredClone(this.original);
-    document.config.definition.widgets[0].definition.inputs = result.inputs;
-    const admitted = validatePageAuthoringDocument(document, { 'praxis-dynamic-form': validateDynamicFormPageWidget });
+    document.config.definition.widgets[targetIndex].definition.inputs = result.inputs;
+    const admitted = validatePageAuthoringDocument(document, {
+      'praxis-dynamic-form': validateDynamicFormPageWidget,
+      'praxis-table': validateTablePageWidget,
+    });
     if (!admitted.ok) throw new Error('FORM_DOCUMENT_INVALID');
     return admitted.value;
   }

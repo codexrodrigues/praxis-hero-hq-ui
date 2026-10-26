@@ -53,6 +53,12 @@ export class VisitorWorkspaceService {
   async save(input: { id: string; title: string; definition: WidgetPageDefinition; menuLabel: string; menuIcon?: string }): Promise<void> {
     await this.mutate((owner) => this.repository.savePage(owner, input));
   }
+  async migrate(): Promise<void> {
+    await this.mutate((owner) => this.repository.migrate(owner));
+  }
+  async renamePage(id: string, title: string): Promise<void> {
+    await this.mutate((owner) => this.repository.renamePage(owner, id, title));
+  }
   async renameMenu(id: string, label: string): Promise<void> {
     await this.mutate((owner) => this.repository.renameMenu(owner, id, label));
   }

@@ -32,6 +32,8 @@
     @for (saved of store.workspace().pages; track saved.id) {
       <div class="library-row" data-testid="lab-library-page">
         <div><strong>{{ saved.title }}</strong><code>{{ pagePath(saved.id) }}</code></div>
+        <mat-form-field appearance="outline"><mat-label>{{ text('name') }}</mat-label><input matInput #pageTitle [value]="saved.title" maxlength="80" /></mat-form-field>
+        <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="renamePage(saved.id, pageTitle.value)">{{ text('renamePage') }}</button>
         <a mat-button [routerLink]="pagePath(saved.id)">{{ text('editCopy') }}</a>
         <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="addToMenu(saved.id)">{{ text('addToMenu') }}</button>
         <button mat-button type="button" [disabled]="busy() || saveAs()?.busy()" (click)="removePage(saved.id)">{{ text('removePage') }}</button>

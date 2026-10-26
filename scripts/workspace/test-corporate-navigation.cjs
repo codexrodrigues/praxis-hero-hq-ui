@@ -56,9 +56,11 @@ function editorFixture(mode, query = {}) {
   const router = { async navigate(_, options) { navigate.push(options); } };
   const tokens = new Map([['runtime', runtime], ['session', session], ['pages', pages], ['lifecycle', lifecycle], ['route', route], ['router', router], ['menu', menu], ['destroy', { onDestroy() {} }]]);
   const core = { EnterpriseRuntimeContextService: 'runtime', UiLayoutLifecycleService: 'lifecycle', UiLayoutLifecycleHttpError: HttpError, UiLayoutLifecycleContractError: ContractError,
-    readStrongResourceEtag: value => /^"[^"]+"$/.test(value) ? value : null, validatePageAuthoringDocument: () => ({ ok: true }) };
+    readStrongResourceEtag: value => /^"[^"]+"$/.test(value) ? value : null, validatePageAuthoringDocument: value => ({ ok: true, value }) };
   const { CorporatePagesComponent } = load('src/app/pages/corporate-pages/corporate-pages.component.ts', {
     '@angular/core': angular(tokens), '@angular/router': { ActivatedRoute: 'route', Router: 'router' }, '@praxisui/core': core,
+    '@praxisui/dynamic-form': { validateDynamicFormPageWidget: () => ({ ok: true }), materializeDynamicFormPageRuntimeInputs: inputs => ({ inputs: { ...inputs, configPersistenceStrategy: 'volatile' }, diagnostics: [] }) },
+    '@praxisui/table': { validateTablePageWidget: () => ({ ok: true }), materializeTablePageRuntimeInputs: inputs => ({ inputs: { ...inputs, configPersistenceStrategy: 'volatile' }, diagnostics: [] }) },
     'rxjs': { combineLatest: () => queries },
     '../../core/corporate-session.service': { CorporateSessionService: 'session' }, '../../core/corporate-navigation.service': { CorporateNavigationService: 'menu' },
     '../../core/corporate-navigation.model': model,
@@ -86,7 +88,12 @@ function editorFixture(mode, query = {}) {
     assert.deepEqual(changed.config.navigation[1], page.config.navigation[1]);
     assert.deepEqual(changed.config.definition, page.config.definition); assert.equal(page.config.navigation[0].label, 'Um');
     assert.equal(changed.config.navigation[0].label, 'Editado');
-    assert.equal(model.bindCorporatePage(changed, id(3), id(10), 'Novo', 1, 'description').config.navigation.length, 3);
+    const three = model.bindCorporatePage(changed, id(3), id(10), 'Novo', 1, 'description');
+    assert.equal(three.config.navigation.length, 3);
+    const unbound = model.unbindCorporatePage(three, id(2));
+    assert.equal(unbound.config.navigation.length, 2);
+    assert.deepEqual(unbound.config.navigation.map(item => item.id), [id(1), id(3)]);
+    assert.throws(() => model.unbindCorporatePage(unbound, id(2)));
     assert.throws(() => model.bindCorporatePage(page, id(1), 'foreign', 'A', 0));
   });
   await test('menu rejects external routes, wrong identity and eager/private children', () => {
@@ -382,6 +389,58 @@ function editorFixture(mode, query = {}) {
     bindingFix.editor.bindingLabel = 'Dois editado sem menu pronto';
     assert.equal(bindingFix.editor.hasPendingBindingChange(), true);
     assert.equal(bindingFix.editor.isBindingInvalid(), true);
+
+    bindingFix.editor.selectBinding(id(2));
+    bindingFix.lifecycle.createRevision = async (_target, _draft, _etag, cmd) => {
+      bindingFix.requests.push(`unbound:${cmd.authoringDocument.config.navigation.length}`);
+      return { etag: `"${id(93)}"`, body: { nextDraft: {
+        draft: { draftRef: id(64), rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, state: 'DRAFT' },
+        targets: [{ target: { componentType: 'praxis-dynamic-page', componentId: id(1) }, working: { document: cmd.authoringDocument } }],
+      } } };
+    };
+    await bindingFix.editor.removeBinding();
+    assert.equal(bindingFix.requests.at(-1), 'unbound:1');
+    assert.equal(bindingFix.editor.document().config.navigation.length, 1);
+
+    const rollbackFix = editorFixture('editor', { pageId: id(1), releaseId: id(94) });
+    rollbackFix.editor.head.set({ etag: `"${id(95)}"`, body: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, headEtag: id(95), activeReleaseRef: id(96) } });
+    rollbackFix.editor.reason = 'Reverter para release anterior íntegra';
+    rollbackFix.lifecycle.rollback = async (_target, etag, cmd) => {
+      rollbackFix.requests.push({ op: 'rollback', etag, releaseId: cmd.releaseId });
+      return { etag: `"${id(97)}"`, body: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, headEtag: id(97), activeReleaseRef: id(94) } };
+    };
+    const dualWidgetPage = {
+      kind: 'praxis.dynamic-page.editor', version: 1,
+      config: {
+        definition: { widgets: [
+          { key: id(7), definition: { id: 'praxis-dynamic-form', inputs: { config: {} } } },
+          { key: id(8), definition: { id: 'praxis-table', inputs: { config: {} } } },
+        ] },
+        presentation: { title: 'Página com Form e Table', icon: 'table_chart' },
+        navigation: [],
+      },
+    };
+    rollbackFix.pages.published = async () => ({ body: {
+      pageId: id(1), route: `/pages/${id(1)}`,
+      head: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, headEtag: id(97), activeReleaseRef: id(94) },
+      document: dualWidgetPage,
+    } });
+    await rollbackFix.editor.rollback();
+    assert.equal(rollbackFix.requests[0].op, 'rollback');
+    assert.equal(rollbackFix.requests[0].etag, `"${id(95)}"`);
+    assert.equal(rollbackFix.editor.renderedPage().widgets.length, 2);
+    assert.match(rollbackFix.editor.message(), /Rollback confirmado/);
+
+    rollbackFix.lifecycle.withdraw = async (_target, etag) => {
+      rollbackFix.requests.push({ op: 'withdraw', etag });
+      return { etag: `"${id(98)}"`, body: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, headEtag: id(98), activeReleaseRef: null } };
+    };
+    rollbackFix.lifecycle.readHead = async () => ({ etag: `"${id(98)}"`, body: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(1) }, headEtag: id(98), activeReleaseRef: null } });
+    await rollbackFix.editor.withdraw();
+    assert.equal(rollbackFix.editor.headAbsent(), false);
+    assert.equal(rollbackFix.editor.hasActivePublication(), false);
+    assert.equal(rollbackFix.editor.published(), null);
+    assert.match(rollbackFix.editor.message(), /Publicação retirada/);
   });
   console.log(`PASS ${tests} offline corporate navigation checks; browser/real HTTP remain separate.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });

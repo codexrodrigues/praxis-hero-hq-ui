@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import ts from 'typescript';
 import * as core from '@praxisui/core';
 import * as form from '@praxisui/dynamic-form';
+import * as table from '@praxisui/table';
 import * as http from '@angular/common/http';
 import { Subject, firstValueFrom } from 'rxjs';
 import { corporateFormOwnerFixture } from './corporate-form-owner-fixture.mjs';
@@ -44,7 +45,7 @@ function editorFixture(document, initialEditorDocument) {
   const exports = load('src/app/pages/corporate-pages/corporate-form-editor.component.ts', {
     '@angular/core': { Component: () => value => value, Input: () => () => {}, ViewChild: () => () => {}, ChangeDetectionStrategy: {}, Injector: { create: options => options },
       inject: () => ({}), afterNextRender: callback => callbacks.push(callback) },
-    '@angular/common': { NgComponentOutlet: class {} }, '@praxisui/core': core, '@praxisui/dynamic-form': form, '@praxisui/settings-panel': { SETTINGS_PANEL_DATA: 'data' },
+    '@angular/common': { NgComponentOutlet: class {} }, '@praxisui/core': core, '@praxisui/dynamic-form': form, '@praxisui/table': table, '@praxisui/settings-panel': { SETTINGS_PANEL_DATA: 'data' },
   });
   let current = structuredClone(initialEditorDocument);
   const editor = new exports.CorporateFormEditorComponent(); editor.document = document;
@@ -71,6 +72,27 @@ await test('editor no-op preserves raw input and explicit local content round-tr
   assert.equal(original.config.definition.widgets[0].definition.inputs.config.fieldMetadata.length, 0);
   const reopened = editorFixture(saved, form.normalizeDynamicFormAuthoringDocument(form.decodeDynamicFormPageInputs(fixture.projectedEditor.inputs).document));
   assert.deepEqual(reopened.editor.readDocument(), saved);
+  const dualPage = {
+    kind: 'praxis.dynamic-page.editor', version: 1,
+    config: {
+      definition: {
+        widgets: [
+          { key: id(40), definition: { id: 'praxis-dynamic-form', inputs: { config: fixture.seed.config } } },
+          { key: id(41), definition: { id: 'praxis-table', inputs: { config: { columns: [], columnProjection: { source: 'schema' } } } } },
+        ],
+      },
+      presentation: { title: 'Página com Form e Table', icon: 'table_chart' },
+      navigation: [],
+    },
+  };
+  const dualEditor = editorFixture(dualPage, baseline);
+  dualEditor.update(changed);
+  const savedDual = dualEditor.editor.readDocument();
+  assert.equal(savedDual.config.definition.widgets.length, 2);
+  assert.deepEqual(savedDual.config.definition.widgets[0].definition.inputs, fixture.projectedEditor.inputs);
+  assert.deepEqual(savedDual.config.definition.widgets[1], dualPage.config.definition.widgets[1]);
+  const tableRuntime = table.materializeTablePageRuntimeInputs(savedDual.config.definition.widgets[1].definition.inputs, id(20), id(41));
+  assert.equal(tableRuntime.inputs.configPersistenceStrategy, 'volatile');
 });
 await test('editor refuses envelope changes without stripping or resetting the repairable draft', () => {
   const fixture = corporateFormOwnerFixture(), f = editorFixture(page({ config: fixture.seed.config }), fixture.seed);

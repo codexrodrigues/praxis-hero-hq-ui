@@ -292,4 +292,26 @@ test('menu icons round-trip, reject markup and preserve older saved pages', asyn
   storage.setItem(visitorWorkspaceKey(OWNER), JSON.stringify(legacy));
   assert.equal(repository.read(OWNER).pages[0].id, request.id);
   assert.equal(repository.read(OWNER).menus[0].items[0].icon, undefined);
+  const migrated = await repository.migrate(OWNER);
+  assert.equal(migrated.menus[0].items[0].icon, 'web');
+  assert.equal(repository.read(OWNER).menus[0].items[0].icon, 'web');
+});
+
+test('renaming a saved page preserves its UUID, URL and definition while allowing duplicate titles across distinct pages', async () => {
+  const { repository } = setup();
+  const first = input({ title: 'Mesmo título', menuLabel: 'Menu A' });
+  const second = input({ title: 'Mesmo título', menuLabel: 'Menu B' });
+  await repository.savePage(OWNER, first);
+  let state = await repository.savePage(OWNER, second);
+  assert.notEqual(state.pages[0].id, state.pages[1].id);
+  assert.equal(visitorPagePath(first.id), `/laboratorio/paginas/${first.id}`);
+  await repository.linkPage(OWNER, first.id, state.menus[1].id, 'Atalho customizado');
+  state = await repository.renamePage(OWNER, first.id, '  Título renomeado  ');
+  const renamed = state.pages.find(page => page.id === first.id);
+  assert.equal(renamed.title, 'Título renomeado');
+  assert.equal(visitorPagePath(renamed.id), `/laboratorio/paginas/${first.id}`);
+  assert.deepEqual(renamed.definition, first.definition);
+  assert.equal(state.menus[0].items.find(item => item.pageId === first.id).label, 'Título renomeado');
+  assert.equal(state.menus[1].items.find(item => item.pageId === first.id).label, 'Atalho customizado');
+  await assert.rejects(repository.renamePage(OWNER, randomUUID(), 'Inexistente'), hasCode('invalid'));
 });
