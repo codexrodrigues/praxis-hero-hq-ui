@@ -101,7 +101,7 @@ async function client(browser, actor) {
       return json({ release: { releaseRef: releaseId, rootTarget: target, memberCount: 1 }, nextDraft: draft(), review: review() }, quote(state.draftVersion), 201);
     }
     if (url.pathname.endsWith('/review')) return json(review(), quote(state.reviewVersion));
-    if (url.pathname.endsWith('/release-head')) return state.published ? json(head(), quote(state.headVersion)) : route.fulfill({ status: 404 });
+    if (url.pathname.endsWith('/release-head')) return state.published ? json(head(), quote(state.headVersion)) : state.withdrawn ? json({ ...head(), activeReleaseRef: null }, quote(state.headVersion)) : route.fulfill({ status: 404 });
     if (url.pathname.endsWith('/submit')) {
       assert.equal(actor, 'author'); assert.equal(headers['if-match'], quote(state.reviewVersion));
       state.review = 'SUBMITTED'; state.reviewVersion++; return json(review(), quote(state.reviewVersion));
@@ -113,7 +113,19 @@ async function client(browser, actor) {
     if (url.pathname.endsWith('/release-head/publish')) {
       assert.equal(actor, 'publisher'); assert.equal(headers['if-none-match'], '*'); assert.equal(headers['if-match'], undefined);
       assert.equal(body.releaseId, releaseId); assert.equal(state.review, 'APPROVED');
-      state.published = true; return json(head(), quote(state.headVersion));
+      state.published = true; state.withdrawn = false; return json(head(), quote(state.headVersion));
+    }
+    if (url.pathname.endsWith('/release-head/rollback')) {
+      assert.equal(actor, 'publisher'); assert.equal(headers['if-match'], quote(state.headVersion));
+      assert.equal(state.review, 'APPROVED'); assert.ok(body.reason);
+      state.headVersion++; state.published = true; state.withdrawn = false;
+      return json({ ...head(), activeReleaseRef: body.releaseId }, quote(state.headVersion));
+    }
+    if (url.pathname.endsWith('/release-head/withdraw')) {
+      assert.equal(actor, 'publisher'); assert.equal(headers['if-match'], quote(state.headVersion));
+      assert.ok(body.reason);
+      state.headVersion++; state.published = false; state.withdrawn = true;
+      return json({ ...head(), activeReleaseRef: null }, quote(state.headVersion));
     }
     throw Error('Unexpected controlled corporate operation');
   });
@@ -258,6 +270,20 @@ async function client(browser, actor) {
     state.failure = 0; publisher.tenant('lab-b');
     await publisher.page.reload(); await expect(publisher.page.getByTestId('corporate-page-message')).toContainText('Não encontrado');
     await expect(publisher.page.getByTestId('published-page')).toHaveCount(0);
+    // Verify browser E2E rollback and withdraw on active corporate publication
+    publisher.tenant('lab-a'); publisher.actor('publisher');
+    await publisher.page.goto(new URL(reviewUrl, BASE).href);
+    await expect(publisher.page.getByTestId('review-state')).toHaveText('APPROVED');
+    await publisher.page.evaluate(() => {
+      const component = window.ng.getComponent(document.querySelector('app-corporate-pages'));
+      component.head.set({ etag: '"00000000-0000-4000-8000-000000000030"', body: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: '00000000-0000-4000-8000-000000000001' }, activeReleaseRef: '00000000-0000-4000-8000-000000000099', headEtag: '00000000-0000-4000-8000-000000000030', updatedAt: '2026-10-24T20:00:00Z' } });
+    });
+    await publisher.page.getByLabel('Motivo da alteração ou decisão', { exact: true }).fill('Reverter para release aprovada anterior');
+    await publisher.page.getByTestId('rollback-release').click();
+    await expect(publisher.page.getByTestId('corporate-page-message')).toContainText('Rollback confirmado');
+    await publisher.page.getByTestId('withdraw-publication').click();
+    await expect(publisher.page.getByTestId('corporate-page-message')).toContainText('Publicação retirada');
+    await expect(publisher.page.getByTestId('withdraw-publication')).toBeDisabled();
     assert.deepEqual(author.errors, []); assert.deepEqual(publisher.errors, []);
     console.log('PASS corporate page controlled journey: uncertain creation, CAS, two actors, explicit publication, reload and denied reads');
   } finally { await Promise.all(contexts.map(context => context.close())); await browser.close(); }

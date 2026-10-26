@@ -442,5 +442,79 @@ function editorFixture(mode, query = {}) {
     assert.equal(rollbackFix.editor.published(), null);
     assert.match(rollbackFix.editor.message(), /Publicação retirada/);
   });
+
+  await test('1,000 synthetic corporate catalog pages paginate on demand and publishing Page A never rewrites Page B', async () => {
+    const totalPages = 1000, pageSize = 50;
+    const catalogSource = Array.from({ length: totalPages }, (_, index) => ({
+      pageId: id(index + 1),
+      rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(index + 1) },
+      route: `/pages/${id(index + 1)}`,
+      title: `Página Sintética Corporativa #${index + 1}`,
+      icon: 'analytics',
+      head: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: id(index + 1) }, headEtag: id(2000 + index), activeReleaseRef: id(3000 + index) },
+    }));
+    const scaleFix = editorFixture('editor', {});
+    let catalogFetches = 0;
+    scaleFix.pages.catalog = async (cursor) => {
+      catalogFetches++;
+      const offset = cursor ? Number.parseInt(cursor.replace('cursor-', ''), 10) : 0;
+      const slice = catalogSource.slice(offset, offset + pageSize);
+      const nextOffset = offset + slice.length;
+      return {
+        body: {
+          schemaVersion: 'praxis.page-catalog/v1',
+          contextVersion: 'ctx-scale',
+          receiptEtag: `cat-${offset}`,
+          items: slice,
+          nextCursor: nextOffset < totalPages ? `cursor-${nextOffset}` : null,
+        },
+      };
+    };
+    const heapBefore = process.memoryUsage().heapUsed;
+    const t0 = performance.now();
+    await scaleFix.editor.refreshCatalog();
+    assert.equal(scaleFix.editor.catalog().items.length, 50);
+    assert.equal(scaleFix.editor.catalog().nextCursor, 'cursor-50');
+    while (scaleFix.editor.catalog().nextCursor) {
+      await scaleFix.editor.more();
+    }
+    const elapsedMs = performance.now() - t0;
+    const heapDeltaMiB = (process.memoryUsage().heapUsed - heapBefore) / (1024 * 1024);
+    assert.equal(catalogFetches, 20);
+    assert.equal(scaleFix.editor.catalog().items.length, 1000);
+    assert.equal(scaleFix.editor.catalog().nextCursor, null);
+    assert.ok(elapsedMs < 500, `Expected 1,000-page on-demand pagination < 500ms, got ${elapsedMs.toFixed(2)}ms`);
+    assert.ok(heapDeltaMiB < 32, `Expected 1,000-page catalog heap delta < 32 MiB, got ${heapDeltaMiB.toFixed(2)} MiB`);
+
+    // Publishing Page A (id(1)) only touches Page A's release head and never rewrites Page B..Page 1000
+    const mutatedTargets = [];
+    const publishAFix = editorFixture('editor', { pageId: id(1), releaseId: id(5001) });
+    publishAFix.editor.head.set({ etag: `"${id(2000)}"`, body: catalogSource[0].head });
+    publishAFix.editor.reason = 'Publicar apenas Página A sem tocar nas outras 999 páginas';
+    publishAFix.lifecycle.publish = async (target, match, cmd) => {
+      mutatedTargets.push({ target, match, releaseId: cmd.releaseId });
+      return { etag: `"${id(5002)}"`, body: { rootTarget: target, headEtag: id(5002), activeReleaseRef: cmd.releaseId } };
+    };
+    publishAFix.pages.published = async (pid) => ({
+      body: {
+        pageId: pid,
+        route: `/pages/${pid}`,
+        head: { rootTarget: { componentType: 'praxis-dynamic-page', componentId: pid }, headEtag: id(5002), activeReleaseRef: id(5001) },
+        document: {
+          kind: 'praxis.dynamic-page.editor', version: 1,
+          config: {
+            definition: { widgets: [{ key: id(7), definition: { id: 'praxis-dynamic-form', inputs: { config: {} } } }] },
+            presentation: { title: 'Página Sintética Corporativa #1 ( v2 )', icon: 'analytics' },
+            navigation: [],
+          },
+        },
+      },
+    });
+    const pageBSnapshotBefore = structuredClone(catalogSource[1]);
+    await publishAFix.editor.publish();
+    assert.equal(mutatedTargets.length, 1);
+    assert.deepEqual(mutatedTargets[0].target, { componentType: 'praxis-dynamic-page', componentId: id(1) });
+    assert.deepEqual(catalogSource[1], pageBSnapshotBefore);
+  });
   console.log(`PASS ${tests} offline corporate navigation checks; browser/real HTTP remain separate.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });
