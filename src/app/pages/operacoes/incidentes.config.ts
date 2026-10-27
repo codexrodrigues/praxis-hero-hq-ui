@@ -63,8 +63,8 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
   table: {
     columnProjection: {
       source: 'schema',
-      include: ['id', 'descricao', 'local', 'severidade', 'danosCivis', 'feridos', 'ocorridoEm'],
-      order: ['id', 'descricao', 'local', 'severidade', 'indiceSinistro', 'danosCivis', 'feridos', 'ocorridoEm'],
+      include: ['id', 'descricao', 'missaoId', 'local', 'severidade', 'danosCivis', 'feridos', 'ocorridoEm'],
+      order: ['id', 'descricao', 'missaoId', 'local', 'severidade', 'indiceSinistro', 'danosCivis', 'feridos', 'ocorridoEm'],
       additions: [
         {
           field: 'indiceSinistro',
@@ -95,7 +95,8 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
       ],
       overrides: {
         id: { width: '90px', align: 'center', header: 'Registro' },
-        descricao: { width: '320px', header: 'Descrição do Sinistro / Impacto' },
+        descricao: { width: '300px', header: 'Descrição do Sinistro / Impacto' },
+        missaoId: { width: '160px', header: 'Missão Associada' },
         local: { width: '200px', header: 'Teatro do Dano' },
         severidade: {
           width: '140px',

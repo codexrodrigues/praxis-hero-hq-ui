@@ -58,8 +58,8 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
   table: {
     columnProjection: {
       source: 'schema',
-      include: ['id', 'funcionarioId', 'mes', 'ano', 'salarioBruto', 'totalDescontos', 'salarioLiquido', 'dataPagamento'],
-      order: ['id', 'funcionarioId', 'mes', 'ano', 'salarioBruto', 'totalDescontos', 'salarioLiquido', 'margemLiquida', 'dataPagamento'],
+      include: ['id', 'funcionarioNome', 'mes', 'ano', 'salarioBruto', 'totalDescontos', 'salarioLiquido', 'dataPagamentoPrevista'],
+      order: ['id', 'funcionarioNome', 'mes', 'ano', 'salarioBruto', 'totalDescontos', 'salarioLiquido', 'margemLiquida', 'dataPagamentoPrevista'],
       additions: [
         {
           field: 'margemLiquida',
@@ -83,13 +83,14 @@ export const FOLHA_PAGAMENTO_CRUD_METADATA: CrudMetadata = {
       ],
       overrides: {
         id: { width: '90px', align: 'center', header: 'Ciclo ID' },
+        funcionarioNome: { width: '220px', header: 'Colaborador / Herói' },
         funcionarioId: { width: '140px', align: 'center', header: 'Colaborador ID' },
         mes: { width: '80px', align: 'center', header: 'Mês' },
         ano: { width: '90px', align: 'center', header: 'Ano' },
         salarioBruto: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Salário Bruto' },
         totalDescontos: { width: '160px', align: 'right', type: 'currency', format: 'BRL', header: 'Retenções Táticas' },
         salarioLiquido: { width: '140px', align: 'right', type: 'currency', format: 'BRL', header: 'Líquido a Pagar' },
-        dataPagamento: { width: '150px', align: 'center', type: 'date', header: 'Data de Pagamento' },
+        dataPagamentoPrevista: { width: '150px', align: 'center', type: 'date', header: 'Data Prevista' },
       },
     },
     toolbar: {

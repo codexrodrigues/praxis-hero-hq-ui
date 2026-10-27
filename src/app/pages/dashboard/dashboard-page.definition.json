@@ -1778,10 +1778,8 @@
                   "statsOperation": "group-by",
                   "statsPath": "human-resources/vw-ranking-reputacao/stats/group-by",
                   "statsRequest": {
-                    "filter": {
-                      "equipe": "%"
-                    },
-                    "field": "equipe",
+                    "filter": {},
+                    "field": "funcionarioId",
                     "metric": {
                       "operation": "AVG",
                       "field": "scorePublico",
@@ -1798,10 +1796,11 @@
                         "field": "scoreGovernamental",
                         "alias": "scoreGovernamental"
                       }
-                    ]
+                    ],
+                    "limit": 6
                   },
                   "dimensions": [
-                    "equipe"
+                    "funcionarioId"
                   ],
                   "metrics": [
                     {
@@ -1819,9 +1818,9 @@
               },
               "axes": {
                 "x": {
-                  "field": "equipe",
+                  "field": "funcionarioId",
                   "type": "category",
-                  "label": "Equipe",
+                  "label": "Herói",
                   "labels": {
                     "rotate": 15
                   }
@@ -1864,6 +1863,18 @@
                   "var(--primary, #06b6d4)",
                   "var(--ready, #10b981)"
                 ]
+              },
+              "interactions": {
+                "quickView": {
+                  "recordOpen": {
+                    "sourceIdentityField": "funcionarioId",
+                    "target": {
+                      "resourceKey": "human-resources.funcionarios",
+                      "surfaceId": "detail"
+                    }
+                  },
+                  "previewSurfaceId": "hero-profile"
+                }
               }
             }
           }
@@ -2155,6 +2166,17 @@
                       },
                       "ABERTO"
                     ]
+                  },
+                  "globalAction": {
+                    "actionId": "navigation.openRoute",
+                    "payload": {
+                      "path": "/operacoes/missoes",
+                      "query": {
+                        "sinalSocorroId": "${item.id}",
+                        "origem": "${item.origem}",
+                        "local": "${item.local}"
+                      }
+                    }
                   }
                 },
                 {
@@ -2163,14 +2185,30 @@
                   "icon": "support_agent",
                   "kind": "menu-item",
                   "placement": "menu",
-                  "hateoasRel": "update"
+                  "hateoasRel": "update",
+                  "action": "surface.open",
+                  "recordOpen": {
+                    "target": {
+                      "resourceKey": "operations.sinais-socorro",
+                      "surfaceId": "edit"
+                    },
+                    "presentation": "dialog"
+                  }
                 },
                 {
                   "id": "ver-detalhes",
                   "label": "Ver Detalhes",
                   "icon": "visibility",
                   "kind": "menu-item",
-                  "placement": "menu"
+                  "placement": "menu",
+                  "action": "surface.open",
+                  "recordOpen": {
+                    "target": {
+                      "resourceKey": "operations.sinais-socorro",
+                      "surfaceId": "detail"
+                    },
+                    "presentation": "drawer"
+                  }
                 }
               ],
               "skin": {
@@ -2303,7 +2341,16 @@
                         {
                           "type": "text",
                           "expr": "${item.origem} · ${item.local}",
-                          "class": "primary"
+                          "class": "primary",
+                          "quickView": {
+                            "recordOpen": {
+                              "sourceIdentityField": "id",
+                              "target": {
+                                "resourceKey": "operations.sinais-socorro",
+                                "surfaceId": "detail"
+                              }
+                            }
+                          }
                         },
                         {
                           "type": "text",
@@ -2348,7 +2395,22 @@
                   "type": "chip",
                   "expr": "${item.status}",
                   "variant": "outlined",
-                  "color": "warning"
+                  "color": "warning",
+                  "quickView": {
+                    "recordOpen": {
+                      "sourceIdentityField": "id",
+                      "target": {
+                        "resourceKey": "operations.sinais-socorro",
+                        "surfaceId": "detail"
+                      }
+                    },
+                    "contentRef": {
+                      "kind": "rich-block",
+                      "namespace": "praxis.operations",
+                      "presetId": "distress-signal-briefing",
+                      "version": "1.0.0"
+                    }
+                  }
                 },
                 "chipColorMap": {
                   "ABERTO": "danger",
@@ -2820,7 +2882,17 @@
                                       "type": "badge",
                                       "labelExpr": "MISSÃO #${row.missaoId | default:N/A}",
                                       "icon": "radar",
-                                      "tone": "neutral"
+                                      "tone": "neutral",
+                                      "quickView": {
+                                        "recordOpen": {
+                                          "sourceIdentityField": "missaoId",
+                                          "target": {
+                                            "resourceKey": "operations.missoes",
+                                            "surfaceId": "detail"
+                                          }
+                                        },
+                                        "previewSurfaceId": "summary"
+                                      }
                                     }
                                   ]
                                 }
@@ -2990,7 +3062,17 @@
                         }
                       },
                       "icon": "radar",
-                      "badgeTone": "danger"
+                      "badgeTone": "danger",
+                      "quickView": {
+                        "recordOpen": {
+                          "sourceIdentityField": "activeMissions.0.missaoId",
+                          "target": {
+                            "resourceKey": "operations.missoes",
+                            "surfaceId": "detail"
+                          }
+                        },
+                        "previewSurfaceId": "summary"
+                      }
                     },
                     {
                       "title": "${activeMissions.1.titulo} · ${activeMissions.1.local} (${kpis.plannedMissions} Planejadas)",
@@ -3009,7 +3091,17 @@
                         }
                       },
                       "icon": "rocket_launch",
-                      "badgeTone": "info"
+                      "badgeTone": "info",
+                      "quickView": {
+                        "recordOpen": {
+                          "sourceIdentityField": "activeMissions.1.missaoId",
+                          "target": {
+                            "resourceKey": "operations.missoes",
+                            "surfaceId": "detail"
+                          }
+                        },
+                        "previewSurfaceId": "summary"
+                      }
                     },
                     {
                       "title": "${activeMissions.2.titulo} · ${activeMissions.2.local} (Prontidão ${kpis.readinessRate}%)",
@@ -3028,7 +3120,17 @@
                         }
                       },
                       "icon": "shield",
-                      "badgeTone": "warning"
+                      "badgeTone": "warning",
+                      "quickView": {
+                        "recordOpen": {
+                          "sourceIdentityField": "activeMissions.2.missaoId",
+                          "target": {
+                            "resourceKey": "operations.missoes",
+                            "surfaceId": "detail"
+                          }
+                        },
+                        "previewSurfaceId": "summary"
+                      }
                     },
                     {
                       "title": "${activeMissions.3.titulo} · ${activeMissions.3.local} (DEFCON ${kpis.defconScore})",
@@ -3047,7 +3149,17 @@
                         }
                       },
                       "icon": "verified",
-                      "badgeTone": "success"
+                      "badgeTone": "success",
+                      "quickView": {
+                        "recordOpen": {
+                          "sourceIdentityField": "activeMissions.3.missaoId",
+                          "target": {
+                            "resourceKey": "operations.missoes",
+                            "surfaceId": "detail"
+                          }
+                        },
+                        "previewSurfaceId": "summary"
+                      }
                     }
                   ]
                 }
@@ -3453,6 +3565,17 @@
             },
             "ABERTO"
           ]
+        },
+        "globalAction": {
+          "actionId": "navigation.openRoute",
+          "payload": {
+            "path": "/operacoes/missoes",
+            "query": {
+              "sinalSocorroId": "${item.id}",
+              "origem": "${item.origem}",
+              "local": "${item.local}"
+            }
+          }
         }
       },
       {
@@ -3461,14 +3584,30 @@
         "icon": "support_agent",
         "kind": "menu-item",
         "placement": "menu",
-        "hateoasRel": "update"
+        "hateoasRel": "update",
+        "action": "surface.open",
+        "recordOpen": {
+          "target": {
+            "resourceKey": "operations.sinais-socorro",
+            "surfaceId": "edit"
+          },
+          "presentation": "dialog"
+        }
       },
       {
         "id": "ver-detalhes",
         "label": "Ver Detalhes",
         "icon": "visibility",
         "kind": "menu-item",
-        "placement": "menu"
+        "placement": "menu",
+        "action": "surface.open",
+        "recordOpen": {
+          "target": {
+            "resourceKey": "operations.sinais-socorro",
+            "surfaceId": "detail"
+          },
+          "presentation": "drawer"
+        }
       }
     ],
     "skin": {
@@ -3601,7 +3740,16 @@
               {
                 "type": "text",
                 "expr": "${item.origem} · ${item.local}",
-                "class": "primary"
+                "class": "primary",
+                "quickView": {
+                  "recordOpen": {
+                    "sourceIdentityField": "id",
+                    "target": {
+                      "resourceKey": "operations.sinais-socorro",
+                      "surfaceId": "detail"
+                    }
+                  }
+                }
               },
               {
                 "type": "text",
@@ -3646,7 +3794,22 @@
         "type": "chip",
         "expr": "${item.status}",
         "variant": "outlined",
-        "color": "warning"
+        "color": "warning",
+        "quickView": {
+          "recordOpen": {
+            "sourceIdentityField": "id",
+            "target": {
+              "resourceKey": "operations.sinais-socorro",
+              "surfaceId": "detail"
+            }
+          },
+          "contentRef": {
+            "kind": "rich-block",
+            "namespace": "praxis.operations",
+            "presetId": "distress-signal-briefing",
+            "version": "1.0.0"
+          }
+        }
       },
       "chipColorMap": {
         "ABERTO": "danger",
@@ -3805,10 +3968,8 @@
         "statsOperation": "group-by",
         "statsPath": "human-resources/vw-ranking-reputacao/stats/group-by",
         "statsRequest": {
-          "filter": {
-            "equipe": "%"
-          },
-          "field": "equipe",
+          "filter": {},
+          "field": "funcionarioId",
           "metric": {
             "operation": "AVG",
             "field": "scorePublico",
@@ -3825,10 +3986,11 @@
               "field": "scoreGovernamental",
               "alias": "scoreGovernamental"
             }
-          ]
+          ],
+          "limit": 6
         },
         "dimensions": [
-          "equipe"
+          "funcionarioId"
         ],
         "metrics": [
           {
@@ -3846,9 +4008,9 @@
     },
     "axes": {
       "x": {
-        "field": "equipe",
+        "field": "funcionarioId",
         "type": "category",
-        "label": "Equipe",
+        "label": "Herói",
         "labels": {
           "rotate": 15
         }
@@ -3891,6 +4053,18 @@
         "var(--primary, #06b6d4)",
         "var(--ready, #10b981)"
       ]
+    },
+    "interactions": {
+      "quickView": {
+        "recordOpen": {
+          "sourceIdentityField": "funcionarioId",
+          "target": {
+            "resourceKey": "human-resources.funcionarios",
+            "surfaceId": "detail"
+          }
+        },
+        "previewSurfaceId": "hero-profile"
+      }
     }
   }
 }

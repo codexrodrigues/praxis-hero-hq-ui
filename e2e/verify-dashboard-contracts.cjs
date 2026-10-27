@@ -317,6 +317,21 @@ assert(
     themeSrcFallback(),
   'distressSignalsList configura métrica de risco centralizada (align="center", label="AMEAÇA", captionPosition="below-progress" semântico) e estilos executivos dedicados em dashboard-theme.scss',
 );
+const distressActions = Array.isArray(distressCfg?.itemActions) ? distressCfg.itemActions : [];
+const dispatchAct = distressActions.find((a) => a?.id === 'despachar-equipe');
+const attendAct = distressActions.find((a) => a?.id === 'atender-chamado');
+const detailsAct = distressActions.find((a) => a?.id === 'ver-detalhes');
+assert(
+  dispatchAct?.globalAction?.actionId === 'navigation.openRoute' &&
+    dispatchAct?.globalAction?.payload?.path === '/operacoes/missoes' &&
+    attendAct?.action === 'surface.open' &&
+    attendAct?.recordOpen?.target?.resourceKey === 'operations.sinais-socorro' &&
+    attendAct?.recordOpen?.target?.surfaceId === 'edit' &&
+    detailsAct?.action === 'surface.open' &&
+    detailsAct?.recordOpen?.target?.resourceKey === 'operations.sinais-socorro' &&
+    detailsAct?.recordOpen?.target?.surfaceId === 'detail',
+  'distressSignalsList conecta despachar-equipe a navigation.openRoute (/operacoes/missoes) e atender-chamado/ver-detalhes a surface.open governado (operations.sinais-socorro)',
+);
 
 function themeSrcFallback() {
   const css = fs.readFileSync(path.join(ROOT, 'src/styles/dashboard-theme.scss'), 'utf8');
@@ -656,6 +671,44 @@ const allDomainEnumsAlignedWithBackend = domainConfigs.every((relPath) => {
 assert(
   allDomainEnumsAlignedWithBackend,
   'Nenhuma das 17 páginas de domínio utiliza valores de Enum inexistentes no backend (como EM_MISSAO, INDISPONIVEL, QUARTEL_GENERAL, COMBATENTE, MIA, MONITORADO ou PENDING)',
+);
+
+const expectedQuickViewColumnsByConfig = {
+  'src/app/pages/rh/funcionarios.config.ts': ['nomeCompleto', 'cargoNome'],
+  'src/app/pages/rh/departamentos.config.ts': ['nome', 'responsavelNome'],
+  'src/app/pages/rh/afastamentos.config.ts': ['id', 'tipo', 'funcionarioId'],
+  'src/app/pages/rh/folha-pagamento.config.ts': ['id', 'funcionarioNome'],
+  'src/app/pages/rh/eventos-folha.config.ts': ['descricao', 'folhaPagamentoNome'],
+  'src/app/pages/rh/reputacao.config.ts': ['codinome', 'nomeCompleto', 'equipe'],
+  'src/app/pages/operacoes/missoes.config.ts': ['titulo', 'ameacaNome'],
+  'src/app/pages/operacoes/missao-participantes.config.ts': ['missaoTitulo', 'funcionarioNome'],
+  'src/app/pages/operacoes/bases.config.ts': ['nome'],
+  'src/app/pages/operacoes/equipes.config.ts': ['nome', 'basePrincipalNome'],
+  'src/app/pages/operacoes/incidentes.config.ts': ['descricao', 'missaoId'],
+  'src/app/pages/ativos/equipamentos.config.ts': ['nome', 'proprietarioNome'],
+  'src/app/pages/ativos/veiculos.config.ts': ['nome', 'proprietarioNome'],
+  'src/app/pages/risco/ameacas.config.ts': ['nome'],
+  'src/app/pages/risco/indicadores.config.ts': ['incidenteId'],
+  'src/app/pages/suprimentos/contratos.config.ts': ['number', 'supplierName'],
+  'src/app/pages/suprimentos/pedidos.config.ts': ['id', 'supplierId', 'productId'],
+};
+const allDomainQuickViewColumnsProjectedZeroBoilerplate = domainConfigs.every((relPath) => {
+  const content = fs.readFileSync(path.join(ROOT, relPath), 'utf8');
+  const expectedCols = expectedQuickViewColumnsByConfig[relPath] || [];
+  const hasAllExpectedCols =
+    expectedCols.length > 0 &&
+    expectedCols.every((col) => content.includes(`'${col}'`));
+  const hasZeroManualQuickViewBoilerplate = !content.includes('quickView:');
+  return hasAllExpectedCols && hasZeroManualQuickViewBoilerplate;
+});
+assert(
+  allDomainQuickViewColumnsProjectedZeroBoilerplate,
+  'Todas as 17 páginas de domínio projetam colunas anotadas com @ResourceReference no backend para Quick View automático (zero boilerplate quickView local)',
+);
+const appConfigText = fs.readFileSync(path.join(ROOT, 'src/app/app.config.ts'), 'utf8');
+assert(
+  appConfigText.includes('providePraxisQuickViewDialogPresenter()'),
+  'app.config.ts registra providePraxisQuickViewDialogPresenter() (@praxisui/dialog) para materializar o overlay de Quick View',
 );
 
 // ---------------------------------------------------------------------------

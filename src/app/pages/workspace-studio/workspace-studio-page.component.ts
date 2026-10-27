@@ -72,7 +72,9 @@ export function createBlankWorkspaceStudioPageDefinition(): WidgetPageDefinition
         [page]="pageDefinition"
         [pageIdentity]="pageIdentity()"
         [autoPersist]="true"
-        [enableCustomization]="true"
+[enableCustomization]="true"
+        [enableAgenticAuthoring]="true"
+        [agenticAuthoringEnableStreaming]="true"
         [showGovernanceToolbar]="false"
       />
     </div>
@@ -84,7 +86,7 @@ export function createBlankWorkspaceStudioPageDefinition(): WidgetPageDefinition
     }
 
     .workspace-studio-page-wrapper {
-      max-width: 1540px;
+      max-width: 100%;
       margin: 0 auto;
       width: 100%;
     }

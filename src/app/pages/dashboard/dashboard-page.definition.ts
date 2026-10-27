@@ -61,6 +61,7 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       const isStaleTimeline =
         widget.key === 'missionsTimeline' &&
         (!serialized.includes('activeMissions.0.titulo') ||
+          !serialized.includes('"quickView"') ||
           !serialized.includes('"markerVariant":"icon"') ||
           !serialized.includes('"itemLayout":"split"') ||
           !serialized.includes('"markerStyle":"soft"') ||
@@ -111,6 +112,7 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
         cfg?.dataSource?.kind === 'local' ||
         inputs?.chartDocument?.source?.kind === 'derived' ||
         (widget.key === 'payrollChart' && cfg?.axes?.x?.type !== 'time') ||
+        (widget.key === 'reputationChart' && !cfg?.interactions?.quickView) ||
         isStaleRow14ChartHeight;
       if (canonical && hasLegacyLocalChart) {
         upgraded = true;
@@ -140,6 +142,7 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
         detailItems.some((item: any) => item?.type === 'cardGrid') &&
         Array.isArray(firstCardContent) &&
         firstCardContent[0]?.type === 'metric' &&
+        JSON.stringify(detailItems).includes('"quickView"') &&
         cfg?.localization?.currency?.code === 'BRL' &&
         ocorridoCol?.format === 'dd/MM/yyyy HH:mm' &&
         cfg?.toolbar?.appearance?.variant === 'integrated' &&
@@ -164,15 +167,25 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
       const trailingCol = Array.isArray(cfg?.layout?.rowLayout?.columns)
         ? cfg.layout.rowLayout.columns.find((c: any) => c?.slot === 'trailing')
         : null;
+      const actionList = Array.isArray(cfg?.actions)
+        ? cfg.actions
+        : Array.isArray(cfg?.itemActions)
+          ? cfg.itemActions
+          : [];
+      const dispatchAction = actionList.find((a: any) => a?.id === 'despachar-equipe');
+      const attendAction = actionList.find((a: any) => a?.id === 'atender-chamado');
+      const detailsAction = actionList.find((a: any) => a?.id === 'ver-detalhes');
       const hasUpgradedFeed =
         cfg?.selection?.showControl === false &&
         cfg?.templating?.leading?.expr === 'crisis_alert' &&
         cfg?.templating?.iconColorMap?.['ABERTO'] === 'danger' &&
         cfg?.templating?.chipColorMap?.['ABERTO'] === 'danger' &&
-        trailingCol?.width === '216px' &&
+trailingCol?.width === '216px' &&
         Array.isArray(cfg?.layout?.rowLayout?.columns) &&
         cfg?.layout?.virtualScroll?.viewportHeight === '380px' &&
         cfg?.templating?.identity?.type === 'compose' &&
+        Boolean(cfg?.templating?.identity?.props?.compose?.items?.[0]?.quickView) &&
+        Boolean(cfg?.templating?.trailing?.quickView?.contentRef) &&
         cfg?.templating?.risk?.type === 'metric' &&
         cfg?.templating?.risk?.props?.metric?.align === 'center' &&
         cfg?.templating?.risk?.props?.metric?.captionPosition === 'below-progress' &&
@@ -181,8 +194,9 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
         Array.isArray(cfg?.expansion?.sections) &&
         cfg.expansion.sections.length > 0 &&
         firstSectionItemsExpr.includes('${item.id}') &&
-        Array.isArray(cfg?.itemActions) &&
-        cfg.itemActions.some((a: any) => a?.id === 'despachar-equipe');
+        dispatchAction?.globalAction?.actionId === 'navigation.openRoute' &&
+        attendAction?.action === 'surface.open' &&
+        detailsAction?.action === 'surface.open';
       if (canonical && !hasUpgradedFeed) {
         upgraded = true;
         return {
@@ -281,6 +295,3 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
     widgets: nextWidgets,
   };
 }
-
-
-

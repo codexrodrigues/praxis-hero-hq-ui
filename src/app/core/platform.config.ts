@@ -106,7 +106,7 @@ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
         },
       },
       expansion: {
-        enabled: true,
+        enabled: false,
         source: 'schema',
       },
     },

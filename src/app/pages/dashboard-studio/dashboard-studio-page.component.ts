@@ -72,7 +72,9 @@ export function createBlankStudioPageDefinition(): WidgetPageDefinition {
         [page]="pageDefinition"
         [pageIdentity]="pageIdentity()"
         [autoPersist]="true"
-        [enableCustomization]="true"
+[enableCustomization]="true"
+        [enableAgenticAuthoring]="true"
+        [agenticAuthoringEnableStreaming]="true"
         [showGovernanceToolbar]="false"
       />
     </div>
@@ -84,7 +86,7 @@ export function createBlankStudioPageDefinition(): WidgetPageDefinition {
     }
 
     .dashboard-page-wrapper {
-      max-width: 1540px;
+      max-width: 100%;
       margin: 0 auto;
       width: 100%;
     }

@@ -71,6 +71,7 @@ import { providePraxisCrudMetadata } from '@praxisui/crud';
 import {
   providePraxisDialogMetadata,
   providePraxisDialogGlobalActions,
+  providePraxisQuickViewDialogPresenter,
   providePraxisSurfaceGlobalActions,
 } from '@praxisui/dialog';
 import {
@@ -80,8 +81,17 @@ import {
 import { providePraxisExpansionMetadata } from '@praxisui/expansion';
 import { providePraxisFilesUploadMetadata } from '@praxisui/files-upload';
 import { providePraxisMetadataEditorMetadata } from '@praxisui/metadata-editor';
-import { providePraxisPageBuilderMetadata } from '@praxisui/page-builder';
-import { providePraxisRichContentMetadata } from '@praxisui/rich-content';
+import { AI_BACKEND_STORAGE_OPTIONS } from '@praxisui/ai';
+import {
+  PAGE_BUILDER_AGENTIC_AUTHORING_OPTIONS,
+  providePraxisPageBuilderMetadata,
+} from '@praxisui/page-builder';
+import {
+  PRAXIS_RICH_BLOCK_PRESETS,
+  providePraxisQuickViewRichContentRenderer,
+  providePraxisRichContentMetadata,
+  type RichBlockPresetDefinition,
+} from '@praxisui/rich-content';
 import {
   providePraxisSettingsPanelBridge,
   providePraxisSurfaceDrawerBridge,
@@ -445,6 +455,50 @@ export const appConfig: ApplicationConfig = {
     providePraxisDynamicFormMetadata(),
     providePraxisFilterFormMetadata(),
     providePraxisRichContentMetadata(),
+    providePraxisQuickViewRichContentRenderer(),
+    {
+      provide: PRAXIS_RICH_BLOCK_PRESETS,
+      useValue: [
+        {
+          ref: {
+            kind: 'rich-block',
+            namespace: 'praxis.operations',
+            presetId: 'distress-signal-briefing',
+            version: '1.0.0',
+          },
+          label: 'Dossiê Tático de Sinal de Socorro',
+          description: 'Resumo executivo somente-leitura para triagem rápida de sinais de socorro.',
+          document: {
+            kind: 'praxis.rich-content',
+            version: '1.0.0',
+            nodes: [
+              {
+                type: 'callout',
+                tone: 'warning',
+                icon: 'crisis_alert',
+                titleExpr: 'Protocolo #${row.id} · Nível de Ameaça ${row.nivelAmeaca}',
+                messageExpr:
+                  'Sinal emitido por ${row.origem} no teatro operacional ${row.local}. Status atual: ${row.status}.',
+              },
+              {
+                type: 'keyValueList',
+                layout: 'stacked',
+                items: [
+                  { label: 'Origem do Sinal', valueExpr: '${row.origem}', icon: 'podcasts' },
+                  { label: 'Setor / Localização', valueExpr: '${row.local}', icon: 'location_on' },
+                  {
+                    label: 'Status Operacional',
+                    valueExpr: '${row.status}',
+                    badgeExpr: 'Nível ${row.nivelAmeaca}',
+                    icon: 'shield',
+                  },
+                ],
+              },
+            ],
+          },
+        } satisfies RichBlockPresetDefinition,
+      ],
+    },
     providePraxisTabsMetadata(),
     providePraxisExpansionMetadata(),
     providePraxisStepperMetadata(),
@@ -459,6 +513,7 @@ export const appConfig: ApplicationConfig = {
     providePraxisMetadataEditorMetadata(),
     providePraxisDialogMetadata(),
     providePraxisDialogGlobalActions(),
+    providePraxisQuickViewDialogPresenter(),
     providePraxisSurfaceGlobalActions(),
     providePraxisPageBuilderMetadata(),
     ...providePraxisCharts(),
@@ -483,11 +538,12 @@ export const appConfig: ApplicationConfig = {
       useValue: {
         baseUrl: `${PRAXIS_API_BASE_URL}/praxis/config/ui`,
         errorPolicy: 'fail',
-        headersFactory: () => {
+      headersFactory: () => {
           if (typeof localStorage === 'undefined') {
             return {
               'X-User-ID': 'nick.fury',
               'X-Tenant-ID': 'shield-hq',
+              'X-Tenant': 'shield-hq',
               'X-Env': 'local',
             };
           }
@@ -501,10 +557,68 @@ export const appConfig: ApplicationConfig = {
           return {
             'X-User-ID': user,
             'X-Tenant-ID': tenant,
+            'X-Tenant': tenant,
             'X-Env': 'local',
           };
         },
       } as ApiConfigStorageOptions,
+    },
+    {
+      provide: AI_BACKEND_STORAGE_OPTIONS,
+      useValue: {
+        headersFactory: () => {
+          if (typeof localStorage === 'undefined') {
+            return {
+              'X-User-ID': 'nick.fury',
+              'X-Tenant-ID': 'shield-hq',
+              'X-Tenant': 'shield-hq',
+              'X-Env': 'local',
+            };
+          }
+          const user =
+            localStorage.getItem('praxis.demoUserId') ||
+            localStorage.getItem('pax.api.user') ||
+            'nick.fury';
+          const tenant =
+            localStorage.getItem('pax.api.tenant') ||
+            'shield-hq';
+          return {
+            'X-User-ID': user,
+            'X-Tenant-ID': tenant,
+            'X-Tenant': tenant,
+            'X-Env': 'local',
+          };
+        },
+      },
+    },
+    {
+      provide: PAGE_BUILDER_AGENTIC_AUTHORING_OPTIONS,
+      useValue: {
+        baseUrl: `${PRAXIS_API_BASE_URL}/praxis/config/ai/authoring`,
+        headersFactory: () => {
+          if (typeof localStorage === 'undefined') {
+            return {
+              'X-User-ID': 'nick.fury',
+              'X-Tenant-ID': 'shield-hq',
+              'X-Tenant': 'shield-hq',
+              'X-Env': 'local',
+            };
+          }
+          const user =
+            localStorage.getItem('praxis.demoUserId') ||
+            localStorage.getItem('pax.api.user') ||
+            'nick.fury';
+          const tenant =
+            localStorage.getItem('pax.api.tenant') ||
+            'shield-hq';
+          return {
+            'X-User-ID': user,
+            'X-Tenant-ID': tenant,
+            'X-Tenant': tenant,
+            'X-Env': 'local',
+          };
+        },
+      },
     },
     DatePipe,
     DecimalPipe,
