@@ -75,6 +75,7 @@ import {
   providePraxisSurfaceGlobalActions,
 } from '@praxisui/dialog';
 import {
+  PraxisDynamicForm,
   providePraxisDynamicFormMetadata,
   providePraxisFilterFormMetadata,
 } from '@praxisui/dynamic-form';
@@ -93,6 +94,7 @@ import {
   type RichBlockPresetDefinition,
 } from '@praxisui/rich-content';
 import {
+  GLOBAL_CONFIG_DYNAMIC_FORM_COMPONENT,
   providePraxisSettingsPanelBridge,
   providePraxisSurfaceDrawerBridge,
 } from '@praxisui/settings-panel';
@@ -519,6 +521,10 @@ export const appConfig: ApplicationConfig = {
     ...providePraxisCharts(),
     ...providePraxisChartsI18n({ locale: 'pt-BR', fallbackLocale: 'pt-BR' }),
     ...providePraxisSettingsPanelBridge(),
+    {
+      provide: GLOBAL_CONFIG_DYNAMIC_FORM_COMPONENT,
+      useValue: PraxisDynamicForm,
+    },
     ...providePraxisSurfaceDrawerBridge(),
     ...providePraxisLoadingDefaults(),
     importProvidersFrom(MatDialogModule),

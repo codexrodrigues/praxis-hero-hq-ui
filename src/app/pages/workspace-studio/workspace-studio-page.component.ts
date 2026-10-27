@@ -1,5 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, viewChild } from '@angular/core';
-import { type PageIdentity, type WidgetPageDefinition } from '@praxisui/core';
+import {
+  GlobalConfigService,
+  type GlobalDynamicPagesDefaultsConfig,
+  type PageIdentity,
+  type WidgetPageDefinition,
+} from '@praxisui/core';
 import { DynamicPageBuilderComponent } from '@praxisui/page-builder';
 import { AuthSimulationService } from '../../core/auth-simulation.service';
 import { VisitorLabCopyActionComponent } from '../visitor-lab/visitor-lab-copy-action.component';
@@ -56,8 +61,36 @@ export const BLANK_WORKSPACE_STUDIO_PAGE_DEFINITION: WidgetPageDefinition = {
   widgets: [],
 };
 
-export function createBlankWorkspaceStudioPageDefinition(): WidgetPageDefinition {
-  return structuredClone(BLANK_WORKSPACE_STUDIO_PAGE_DEFINITION);
+export function createBlankWorkspaceStudioPageDefinition(
+  defaults?: GlobalDynamicPagesDefaultsConfig,
+): WidgetPageDefinition {
+  const base = structuredClone(BLANK_WORKSPACE_STUDIO_PAGE_DEFINITION);
+  if (!defaults) {
+    return base;
+  }
+  const columns =
+    typeof defaults.columns === 'number' && Number.isFinite(defaults.columns)
+      ? Math.max(1, Math.min(12, Math.round(defaults.columns)))
+      : undefined;
+  const gap = defaults.gap?.trim() || undefined;
+  const autoRows = defaults.autoRows;
+
+  return {
+    ...base,
+    layout: {
+      ...base.layout,
+      ...(columns ? { columns } : {}),
+      ...(gap ? { gap } : {}),
+    },
+    canvas: base.canvas
+      ? {
+          ...base.canvas,
+          ...(columns ? { columns } : {}),
+          ...(gap ? { gap } : {}),
+          ...(autoRows ? { autoRows } : {}),
+        }
+      : undefined,
+  };
 }
 
 @Component({
@@ -95,8 +128,11 @@ export function createBlankWorkspaceStudioPageDefinition(): WidgetPageDefinition
 export class WorkspaceStudioPageComponent {
   protected readonly builder = viewChild(DynamicPageBuilderComponent);
   private readonly authService = inject(AuthSimulationService);
+  private readonly globalConfig = inject(GlobalConfigService, { optional: true });
 
-  protected readonly pageDefinition = createBlankWorkspaceStudioPageDefinition();
+  protected readonly pageDefinition = createBlankWorkspaceStudioPageDefinition(
+    this.globalConfig?.getPages()?.defaults,
+  );
   protected readonly pageIdentity = computed<PageIdentity>(() => {
     const persona = this.authService.currentPersona();
     return {

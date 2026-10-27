@@ -6,7 +6,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import {
-  PraxisI18nService, type PageIdentity, type WidgetPageDefinition,
+  GlobalConfigService,
+  type GlobalDynamicPagesDefaultsConfig,
+  PraxisI18nService,
+  type PageIdentity,
+  type WidgetPageDefinition,
 } from '@praxisui/core';
 import { DynamicPageBuilderComponent, PraxisPageSaveAsComponent, type PageSaveAsAdapter } from '@praxisui/page-builder';
 import { map } from 'rxjs';
@@ -18,8 +22,10 @@ import { visitorLocalStorageProviders } from './visitor-local-config-storage';
 import { provideVisitorLabI18n } from './visitor-lab.i18n';
 import type { VisitorLabDraft } from './visitor-lab-copy-action.component';
 
-function createVisitorLabPageDefinition(): WidgetPageDefinition {
-  const page = createBlankWorkspaceStudioPageDefinition();
+function createVisitorLabPageDefinition(
+  defaults?: GlobalDynamicPagesDefaultsConfig,
+): WidgetPageDefinition {
+  const page = createBlankWorkspaceStudioPageDefinition(defaults);
   return { ...page, context: { pageId: 'visitor-lab', title: 'Meu laboratório', purpose: 'workspace' } };
 }
 
@@ -36,9 +42,12 @@ export class VisitorLabEditorComponent {
   readonly initialDraft = input<VisitorLabDraft>();
   readonly store = inject(VisitorWorkspaceService);
   private readonly i18n = inject(PraxisI18nService);
+  private readonly globalConfig = inject(GlobalConfigService, { optional: true });
   readonly builder = viewChild(DynamicPageBuilderComponent);
   readonly saveAs = viewChild(PraxisPageSaveAsComponent);
-  readonly page = signal<WidgetPageDefinition>(createVisitorLabPageDefinition());
+  readonly page = signal<WidgetPageDefinition>(
+    createVisitorLabPageDefinition(this.globalConfig?.getPages()?.defaults),
+  );
   readonly busy = signal(false);
   readonly error = signal('');
   readonly missing = signal(false);
@@ -91,7 +100,11 @@ export class VisitorLabEditorComponent {
   start(kind: 'blank' | 'dashboard'): void {
     if (this.busy() || this.saveAs()?.busy()) return;
     if (this.builder()?.currentPage().widgets.length && !window.confirm(this.text('confirmRestart'))) return;
-    this.page.set(kind === 'dashboard' ? structuredClone(DASHBOARD_PAGE_DEFINITION) : createVisitorLabPageDefinition());
+    this.page.set(
+      kind === 'dashboard'
+        ? structuredClone(DASHBOARD_PAGE_DEFINITION)
+        : createVisitorLabPageDefinition(this.globalConfig?.getPages()?.defaults),
+    );
     this.seedRevision.update(revision => revision + 1);
   }
   async addToMenu(id: string): Promise<void> {

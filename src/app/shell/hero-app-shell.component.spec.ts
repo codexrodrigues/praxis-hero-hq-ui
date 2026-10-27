@@ -87,7 +87,7 @@ describe('HeroAppShellComponent', () => {
 
     (component as any).openSearchModal();
     expect((component as any).searchOpen()).toBeTrue();
-    expect((component as any).filteredLinks().length).toBe(16);
+    expect((component as any).filteredLinks().length).toBe(20);
 
     // Filter accent-insensitively for "missao"
     (component as any).onSearchQueryChange('missao');
@@ -168,6 +168,45 @@ describe('HeroAppShellComponent', () => {
     expect(stepperMeta).toBeDefined();
     expect(filesUploadMeta).toBeDefined();
     expect(filterFormMeta).toBeDefined();
+  });
+
+  it('exposes topbar triggers for Global Platform Settings and Quick Page Creation across scopes', () => {
+    httpMock.match(() => true).forEach((req) => req.flush({ data: { buckets: [] } }));
+    const navigateSpy = spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
+    const settingsBtn = fixture.nativeElement.querySelector('[data-testid="shell-global-settings-trigger"]');
+    const createPageBtn = fixture.nativeElement.querySelector('[data-testid="shell-create-page-trigger"]');
+    expect(settingsBtn).not.toBeNull();
+    expect(createPageBtn).not.toBeNull();
+
+    (component as any).startPageCreation('corporate');
+    const corporateCallArgs = navigateSpy.calls.mostRecent().args;
+    expect(corporateCallArgs[0]).toEqual(['/workspace-corporativo/paginas']);
+    expect((corporateCallArgs[1] as any)?.queryParams).toEqual({});
+
+    (component as any).startPageCreation('studio');
+    expect(navigateSpy).toHaveBeenCalledWith(['/workspace-studio']);
+
+    (component as any).startPageCreation('laboratory');
+    expect(navigateSpy).toHaveBeenCalledWith(['/laboratorio']);
+
+    // Command Palette quick actions under 'Plataforma & Autoria'
+    const globalSettingsActionSpy = spyOn(component as any, 'openGlobalSettings');
+    const createPageActionSpy = spyOn(component as any, 'startPageCreation');
+
+    (component as any).openSearchModal();
+    (component as any).onSearchQueryChange('configuracoes globais');
+    const globalSettingsItem = (component as any).filteredLinks()[0];
+    expect(globalSettingsItem).toBeDefined();
+    expect(globalSettingsItem.groupLabel).toBe('Plataforma & Autoria');
+    (component as any).navigateToCommandItem(globalSettingsItem);
+    expect(globalSettingsActionSpy).toHaveBeenCalled();
+
+    (component as any).openSearchModal();
+    (component as any).onSearchQueryChange('nova pagina corporativa');
+    const createCorpItem = (component as any).filteredLinks()[0];
+    expect(createCorpItem).toBeDefined();
+    (component as any).navigateToCommandItem(createCorpItem);
+    expect(createPageActionSpy).toHaveBeenCalledWith('corporate');
   });
 });
 

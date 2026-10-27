@@ -16,6 +16,16 @@ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
       openMode: 'modal',
     },
   },
+  pages: {
+    defaults: {
+      themePreset: 'workspace-balanced',
+      shellPreset: 'integrated-card',
+      columns: 12,
+      gap: '16px',
+      paddingInline: '0px',
+      autoRows: 'content',
+    },
+  },
   dynamicFields: {
     asyncSelect: { loadOn: 'open' },
     cascade: { enable: true, loadOnChange: 'respectLoadOn', debounceMs: 250 },

@@ -19,11 +19,13 @@ import { of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
   EnterpriseRuntimeContextService,
+  GlobalConfigService,
   PraxisAppShellComponent,
   PraxisCustomizationModeService,
   type PraxisBrandConfig,
   type PraxisShellFooterStatus,
 } from '@praxisui/core';
+import { SettingsPanelService, openGlobalConfigEditor } from '@praxisui/settings-panel';
 import { VisitorWorkspaceService } from '../core/visitor-workspace.service';
 import { visitorPagePath } from '../core/visitor-workspace.repository';
 import {
@@ -40,6 +42,7 @@ import { canAccessTacticalPage } from '../core/tactical-access';
 
 export interface CommandPaletteItem extends NavItem {
   readonly groupLabel: string;
+  readonly action?: () => void;
 }
 
 interface ShellStatsBucket {
@@ -79,6 +82,71 @@ interface ShellStatsEnvelope {
     >
       <!-- Header Actions projected into PraxisAppShell canonical slot -->
       <div shell-header-actions class="hud-extra-actions">
+        <!-- Quick Page Creation Trigger -->
+        <button
+          type="button"
+          class="hud-btn create-page-btn"
+          data-testid="shell-create-page-trigger"
+          [matMenuTriggerFor]="createPageMenu"
+          aria-label="Criar nova página na plataforma"
+          title="Criar nova página ou compor visão de negócio"
+        >
+          <span class="material-symbols-outlined">add_box</span>
+          <span class="create-page-label">Nova Página</span>
+        </button>
+        <mat-menu #createPageMenu="matMenu" class="create-page-menu-panel">
+          <button
+            mat-menu-item
+            data-testid="shell-create-page-corporate"
+            (click)="startPageCreation('corporate')"
+          >
+            <span class="create-page-menu-item">
+              <span class="material-symbols-outlined menu-lead-icon" aria-hidden="true">domain_add</span>
+              <span class="create-page-menu-copy">
+                <strong>Página Corporativa Governada</strong>
+                <small>Menu oficial · Revisão e publicação auditada</small>
+              </span>
+            </span>
+          </button>
+          <button
+            mat-menu-item
+            data-testid="shell-create-page-studio"
+            (click)="startPageCreation('studio')"
+          >
+            <span class="create-page-menu-item">
+              <span class="material-symbols-outlined menu-lead-icon" aria-hidden="true">auto_awesome_mosaic</span>
+              <span class="create-page-menu-copy">
+                <strong>Compor Página de Recurso</strong>
+                <small>Workspace Studio · Orquestrar APIs existentes</small>
+              </span>
+            </span>
+          </button>
+          <button
+            mat-menu-item
+            data-testid="shell-create-page-laboratory"
+            (click)="startPageCreation('laboratory')"
+          >
+            <span class="create-page-menu-item">
+              <span class="material-symbols-outlined menu-lead-icon" aria-hidden="true">science</span>
+              <span class="create-page-menu-copy">
+                <strong>Meu Laboratório Local</strong>
+                <small>Neste navegador · Experimentação rápida</small>
+              </span>
+            </span>
+          </button>
+        </mat-menu>
+
+        <!-- Global Platform Settings Trigger -->
+        <button
+          mat-icon-button
+          type="button"
+          data-testid="shell-global-settings-trigger"
+          aria-label="Configurações globais da plataforma Praxis"
+          title="Configurações globais da plataforma Praxis (CRUD, Tabelas, Diálogos, IA e Páginas Dinâmicas)"
+          (click)="openGlobalSettings()"
+        >
+          <span class="material-symbols-outlined">tune</span>
+        </button>
         <button mat-icon-button [matMenuTriggerFor]="appearanceMenu"
           [attr.aria-label]="'Aparência: ' + themeService.current().name" title="Aparência do workspace">
           <span class="material-symbols-outlined">palette</span>
@@ -262,7 +330,7 @@ interface ShellStatsEnvelope {
                 @for (item of filteredLinks(); track item.path; let i = $index) {
                   <a
                     [id]="'command-palette-opt-' + i"
-                    [routerLink]="item.path"
+                    [routerLink]="item.action ? null : item.path" [attr.href]="item.action ? '#' : null"
                     role="option"
                     [attr.aria-selected]="i === selectedSearchIndex()"
                     [class.active]="i === selectedSearchIndex()"
@@ -315,6 +383,8 @@ export class HeroAppShellComponent {
   protected readonly themeService = inject(ThemeService);
   protected readonly authService = inject(AuthSimulationService);
   private readonly customizationMode = inject(PraxisCustomizationModeService, { optional: true });
+  private readonly settingsPanel = inject(SettingsPanelService, { optional: true });
+  private readonly globalConfig = inject(GlobalConfigService, { optional: true });
   private readonly runtimeContext = inject(EnterpriseRuntimeContextService, { optional: true });
   private readonly corporateSession = inject(CorporateSessionService, { optional: true });
   private readonly http = inject(HttpClient, { optional: true });
@@ -441,13 +511,47 @@ export class HeroAppShellComponent {
       items: group.items.map((item) => ({ path: visitorPagePath(item.pageId), label: item.label, icon: item.icon ?? 'web', description: 'Página salva neste navegador' })),
     })),
   ]);
-  protected readonly allCommandItems = computed<readonly CommandPaletteItem[]>(() => this.navigation().flatMap((group) =>
-    group.items.map((item) => ({
-      ...item,
-      groupLabel: group.label,
-      description: item.description || 'Página salva neste navegador',
-    })),
-  ));
+  protected readonly allCommandItems = computed<readonly CommandPaletteItem[]>(() => [
+    ...this.navigation().flatMap((group) =>
+      group.items.map((item) => ({
+        ...item,
+        groupLabel: group.label,
+        description: item.description || 'Página salva neste navegador',
+      })),
+    ),
+    {
+      path: '#action:global-settings',
+      label: 'Configurações Globais da Plataforma Praxis',
+      icon: 'tune',
+      groupLabel: 'Plataforma & Autoria',
+      description: 'Tokens globais, tema e defaults de páginas da plataforma',
+      action: () => this.openGlobalSettings(),
+    },
+    {
+      path: '#action:create-corporate-page',
+      label: 'Nova Página Corporativa Governada',
+      icon: 'domain_add',
+      groupLabel: 'Plataforma & Autoria',
+      description: 'Criar e publicar página oficial no menu corporativo',
+      action: () => this.startPageCreation('corporate'),
+    },
+    {
+      path: '#action:create-studio-page',
+      label: 'Nova Página no Workspace Studio',
+      icon: 'dashboard_customize',
+      groupLabel: 'Plataforma & Autoria',
+      description: 'Abrir o Page Builder para composição visual imediata',
+      action: () => this.startPageCreation('studio'),
+    },
+    {
+      path: '#action:create-laboratory-page',
+      label: 'Nova Página no Meu Laboratório',
+      icon: 'science',
+      groupLabel: 'Plataforma & Autoria',
+      description: 'Criar página experimental salva neste navegador',
+      action: () => this.startPageCreation('laboratory'),
+    },
+  ]);
 
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>;
   @ViewChild('linksList') private linksListRef?: ElementRef<HTMLElement>;
@@ -590,12 +694,42 @@ export class HeroAppShellComponent {
   protected navigateToCommandItem(item: CommandPaletteItem, event?: Event): void {
     event?.preventDefault();
     this.closeSearchModal();
+    if (item.action) {
+      item.action();
+      return;
+    }
     void this.router.navigateByUrl(item.path);
+  }
+
+  protected openGlobalSettings(): void {
+    if (!this.settingsPanel) {
+      return;
+    }
+    openGlobalConfigEditor(this.settingsPanel, {
+      title: 'Configurações Globais da Plataforma Praxis',
+      owner: this.destroyRef ?? undefined,
+    });
+  }
+
+  protected startPageCreation(scope: 'corporate' | 'studio' | 'laboratory'): void {
+    if (scope === 'corporate') {
+      void this.router.navigate(['/workspace-corporativo/paginas'], {
+        queryParams: {},
+      });
+      return;
+    }
+    if (scope === 'studio') {
+      void this.router.navigate(['/workspace-studio']);
+      return;
+    }
+    void this.router.navigate(['/laboratorio']);
   }
 
   protected selectPersona(personaId: string): void {
     this.customizationMode?.setCustomizing(false);
+    this.settingsPanel?.close();
     this.authService.switchPersona(personaId);
+    void this.globalConfig?.setTenant(this.authService.currentPersona().tenant);
     publishCorporateShellProjection([]);
     this.runtimeContext?.invalidate();
     this.personaMenuOpen.set(false);
