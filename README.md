@@ -209,3 +209,11 @@ Em [/workspace-corporativo](http://127.0.0.1:4302/workspace-corporativo), consul
 ### Jornada de páginas da plataforma — SDK público rc.38
 
 O laboratório agora consome as ações reutilizáveis Copy/SaveAs do Page Builder, com adapter local de persistência. O host adota os22 pacotes públicos `@praxisui/*` em `10.0.0-rc.38`, com lock reproduzível por `npm ci`. [Contrato de adoção, reprodução e provas](docs/engineering/reusable-page-journey.md).
+
+### Ditado no copiloto
+
+A aplicação configura `PRAXIS_ASSISTANT_VOICE_INPUT_MODE` como `governed-transcription`. A adoção exige uma versão de `@praxisui/page-builder` e `@praxisui/table` que herde esse token, além do endpoint Config `GET /api/praxis/config/ai/transcriptions/capabilities`. O lock atual rc.41 ainda precisa ser atualizado após publicação dos pacotes corrigidos; adicionar o provider sozinho não modifica o comportamento dessa versão. O áudio é transcrito pelo backend, permanece como rascunho editável e só é enviado como prompt por ação explícita.
+
+O transporte corporativo inclui somente as rotas exatas de transcrição e capabilities na origem configurada. Ele remove autorização de demonstração, preserva o contexto confirmado e envia credenciais de sessão e o token CSRF nas mutações. A configuração de CSRF do servidor continua sendo a autoridade sobre exigência do token; o quickstart atualmente isenta rotas Config. Sessão, shell e páginas compartilham `EnterpriseRuntimeContextService` no injector raiz, com headers globais de demonstração desabilitados nessa autoridade. Mudança de geração da sessão invalida o contexto imediatamente; serviços de navegação e lifecycle continuam no injector da rota.
+
+A correção do transporte passou em 19 testes locais de sessão/DI. Na base remota a005b9a, o build completo falha por APIs de Core ainda ausentes no lock rc.41; a mesma falha foi reproduzida sem o patch de voz. Esse lock também não prova a adoção das correções de captura da biblioteca. O rollout requer pacotes coerentes, contexto corporativo confirmado e validação autenticada do novo GET/POST.

@@ -1,3 +1,4 @@
+import { PRAXIS_ASSISTANT_VOICE_INPUT_MODE } from '@praxisui/ai';
 import {
   ApplicationConfig,
   DEFAULT_CURRENCY_CODE,
@@ -109,6 +110,7 @@ import { routes } from './app.routes';
 import { GLOBAL_CONFIG_SEED, PRAXIS_API_BASE_URL } from './core/platform.config';
 import { corporateSessionInterceptor } from './core/corporate-session.interceptor';
 import { CorporateSessionBackend } from './core/corporate-session.backend';
+import { CORPORATE_RUNTIME_AUTHORITY_PROVIDERS } from './core/corporate-runtime.providers';
 import { corporateRequestPath, demoApiRequest } from './core/corporate-session-target';
 
 const API_URL_VALUE: ApiUrlConfig = {
@@ -401,6 +403,8 @@ const praxisSimulatedSessionConfigFallbackInterceptor: HttpInterceptorFn = (req,
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    ...CORPORATE_RUNTIME_AUTHORITY_PROVIDERS,
+    { provide: PRAXIS_ASSISTANT_VOICE_INPUT_MODE, useValue: 'governed-transcription' },
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),

@@ -2,10 +2,14 @@ import { EnterpriseRuntimeContextService, PRAXIS_ENTERPRISE_RUNTIME_CONTEXT_OPTI
 import { CorporateNavigationService } from './corporate-navigation.service';
 import { CorporatePagePilotService } from './corporate-page-pilot.service';
 
-/** One context instance for SESSION entry, editorial lifecycle and published URL reads. */
-export const CORPORATE_RUNTIME_PROVIDERS = [
+/** Root authority shared by session transport, voice and corporate route consumers. */
+export const CORPORATE_RUNTIME_AUTHORITY_PROVIDERS = [
   EnterpriseRuntimeContextService,
   { provide: PRAXIS_ENTERPRISE_RUNTIME_CONTEXT_OPTIONS, useValue: { includeGlobalFetchHeaders: false, errorPolicy: 'fail' } },
+];
+
+/** Editorial/navigation services keep their route lifecycle, using the root authority. */
+export const CORPORATE_RUNTIME_PROVIDERS = [
   UiLayoutLifecycleService,
   CorporatePagePilotService,
   CorporateNavigationService,

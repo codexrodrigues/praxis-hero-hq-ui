@@ -1,6 +1,7 @@
 import { HttpBackend, HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { EnterpriseRuntimeContextService } from '@praxisui/core';
 import { PRAXIS_API_ORIGIN } from './platform.config';
 import { corporateRequestPath } from './corporate-session-target';
 
@@ -13,6 +14,7 @@ class SessionTransportNotReady extends Error {}
 export class CorporateSessionService {
   // Auth requests deliberately bypass interceptors: the interceptor consumes this service.
   private readonly http = new HttpClient(inject(HttpBackend));
+  private readonly runtime = inject(EnterpriseRuntimeContextService);
   private readonly stateValue = signal<CorporateSessionState>('unknown');
   private readonly generationValue = signal(0);
   private readonly busyValue = signal(false);
@@ -90,6 +92,8 @@ export class CorporateSessionService {
   unauthorized(generation: number): void {
     if (generation !== this.generation()) return;
     this.generationValue.update(value => value + 1);
+    // Invalidate all consumers synchronously, including active voice capture outside context pages.
+    this.runtime.invalidate();
     this.csrf = null;
     this.stateValue.set(this.unresolvedLogout ? 'logout-uncertain' : 'anonymous');
     this.messageValue.set(this.unresolvedLogout
@@ -99,6 +103,8 @@ export class CorporateSessionService {
 
   private begin(): number {
     this.generationValue.update(value => value + 1);
+    // Invalidate all consumers synchronously, including active voice capture outside context pages.
+    this.runtime.invalidate();
     this.csrf = null;
     this.stateValue.set('unknown');
     this.messageValue.set('');
