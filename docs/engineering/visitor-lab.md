@@ -18,7 +18,7 @@ Ao reabrir, o campo de menu usa o primeiro grupo que contém a página. A biblio
 - A persona é uma organização da demonstração, sem isolamento de segurança: qualquer pessoa com acesso ao mesmo perfil de navegador pode ler seus dados locais ou alternar a persona. Não inserir dados confidenciais.
 - O link não publica um recurso no servidor nem compartilha a página com outro navegador/dispositivo. Limpar os dados do site ou usar outra origem/perfil perde o acesso à cópia. O rascunho ainda não salvo não sobrevive à recarga.
 - **Dados, ações e envio dos widgets continuam usando as APIs de demonstração.** A persistência local da composição não transforma a aplicação inteira em um ambiente desconectado.
-- O laboratório não ativa autoria agentic de página nem o ciclo remoto de páginas. Seus componentes continuam sujeitos às capacidades nativas dos respectivos runtimes.
+- O laboratório ativa a autoria agentic de página em modo de aplicação local (`agenticAuthoringLocalApplyOnly=true`), sem acionar `page-apply` remoto nem o ciclo remoto de páginas (`/praxis/config/ui/**`). Seus componentes continuam sujeitos às capacidades nativas dos respectivos runtimes.
 - Limites do envelope por persona: 30 páginas, 20 menus e 2 MiB estimados em UTF-16. A quota efetiva do navegador pode ser menor. Exige contexto seguro e Web Locks (HTTPS ou localhost em navegador compatível); não há fallback concorrente inseguro.
 - As definições usam a versão de `@praxisui/*` fixada no lockfile. Não há migração automática entre versões incompatíveis. Documento ilegível é preservado e sua carga falha explicitamente, sem sobrescrita silenciosa.
 

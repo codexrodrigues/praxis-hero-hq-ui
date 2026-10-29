@@ -21,7 +21,8 @@
       <button mat-button type="button" data-testid="lab-dashboard-seed" [disabled]="busy() || saveAs()?.busy()" (click)="start('dashboard')">{{ text('dashboard') }}</button>
     </div>
     <praxis-dynamic-page-builder [page]="page()" [pageIdentity]="identity()" [autoPersist]="false"
-      [enableCustomization]="true" [enableAgenticAuthoring]="false" [authoringCapabilities]="capabilities"
+      [enableCustomization]="true" [enableAgenticAuthoring]="true" [agenticAuthoringEnableStreaming]="true"
+      [agenticAuthoringLocalApplyOnly]="true" [authoringCapabilities]="capabilities"
       [showGovernanceToolbar]="false" [showPageLifecycleActions]="false" [strictValidation]="true"
       (pageSaveRequested)="error.set(''); saveJourney.save($event)" />
   }

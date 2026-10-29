@@ -55,7 +55,7 @@ export class VisitorLabEditorComponent {
   readonly menu = signal(this.text('defaultMenu'));
   readonly menuIcon = signal('web');
   readonly pagePath = visitorPagePath;
-  readonly capabilities = { agentic: false, pageLifecycle: false };
+  readonly capabilities = { agentic: true, pageLifecycle: false };
   readonly saveAdapter: PageSaveAsAdapter = { save: async request => {
     await this.store.save({ id: request.creationKey, title: request.presentation.title,
       menuLabel: request.menuLabel, menuIcon: request.presentation.icon, definition: request.definition });
