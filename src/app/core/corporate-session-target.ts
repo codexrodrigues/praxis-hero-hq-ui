@@ -23,7 +23,9 @@ function configuredRequestPath(
 export function corporateRequestPath(url: string, apiOrigin = PRAXIS_API_ORIGIN, browserOrigin = typeof window === 'undefined' ? '' : window.location.origin): string | null {
   const path = configuredRequestPath(url, apiOrigin, browserOrigin);
   if (path === null) return null;
-  if (['/auth/login', '/auth/session', '/auth/logout'].includes(path)) return path;
+  if (['/auth/login', '/auth/session', '/auth/logout',
+    '/api/praxis/config/ai/transcriptions',
+    '/api/praxis/config/ai/transcriptions/capabilities'].includes(path)) return path;
   return ['/api/praxis/runtime', '/api/praxis/config/pages', '/api/praxis/config/ui-layouts']
     .some(root => path === root || path.startsWith(`${root}/`)) ? path : null;
 }

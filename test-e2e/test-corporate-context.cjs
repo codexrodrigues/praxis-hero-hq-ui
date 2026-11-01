@@ -71,6 +71,14 @@ const BASE = 'http://127.0.0.1:4302';
        if (conflict) return route.fulfill({ status: 409 });
        selected = true; return route.fulfill({ json: context() });
      }
+     if (url.pathname === '/api/praxis/runtime/navigation' && req.method() === 'GET') {
+       assert.equal(selected, true, 'Navigation requires an effective context');
+       assert.equal(req.headers()['x-tenant-id'], 'server-tenant');
+       assert.equal(req.headers()['x-user-id'], 'server.alice');
+       assert.equal(req.headers()['x-praxis-context-version'], 'context-2');
+       return route.fulfill({ json: { schemaVersion: 'praxis-enterprise-runtime-navigation.v1',
+         contextVersion: 'context-2', receiptEtag: 'context-menu-fixture', headReceipts: [], nodes: [], nextCursor: null } });
+     }
      if (url.pathname.endsWith('/context/choices')) {
        if (holdChoices) { holdChoices = false; pendingChoices = route; return; }
        if (selected) {
@@ -183,8 +191,10 @@ const BASE = 'http://127.0.0.1:4302';
    assert.ok(credentials.length > 0 && credentials.every(value => value === 'include'));
    const persisted = await page.evaluate(() => [...Object.values(localStorage), ...Object.values(sessionStorage)].join('|'));
    assert.equal(/fixture-input-only|fixture-session-token/.test(persisted), false);
+   const runtimeCountBeforeLab = runtimeRequests.length;
    await page.getByRole('link', { name: 'Continuar no laboratório local' }).click(); await expect(page).toHaveURL(`${BASE}/laboratorio`);
-   assert.equal(runtimeRequests.some(r => /navigation|pages/.test(r.path)), false);
+   assert.equal(runtimeRequests.some(r => /pages/.test(r.path)), false);
+   assert.equal(runtimeRequests.length, runtimeCountBeforeLab, 'Local lab does not issue corporate runtime requests');
    assert.deepEqual(pageErrors, []);
    console.log('PASS: intercepted session/login/logout, raw CSRF, context CAS/reload, error isolation, persona independence, late response fences, uncertain logout and local lab; no real SESSION/cookie/CORS/Neon proof.');
  } finally { await browser.close(); }

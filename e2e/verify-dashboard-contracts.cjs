@@ -294,10 +294,39 @@ assert(
   donutConfig?.sizing?.height === 340 &&
     defconConfig?.sizing?.height === 340 &&
     distressCfg?.layout?.virtualScroll?.viewportHeight === '340px' &&
+    rawBundle.distressSignalsListConfig?.layout?.virtualScroll?.viewportHeight === '340px' &&
     distressItemsExpr.includes('#${item.id}') &&
     distressItemsExpr.includes('${item.origem}') &&
     distressItemsExpr.includes('${item.local}'),
-  'Row 14 harmoniza altura em 340px (incidentsSeverityDonut, defconGaugeChart, distressSignalsList) e preserva interpolação viva em itemsExpr do Dossiê de Sinais de Socorro',
+  'Row 14 declara altura de 340px nos gráficos e nas duas configurações da lista e preserva interpolação viva em itemsExpr do Dossiê de Sinais de Socorro',
+);
+// Run the real reconciler: the canonical list must not trigger replacement on
+// every load, including after upgrading a stale persisted list.
+const ts = require('typescript');
+const vm = require('node:vm');
+const dashboardModule = { exports: {} };
+const dashboardSource = fs.readFileSync(path.join(ROOT, 'src/app/pages/dashboard/dashboard-page.definition.ts'), 'utf8');
+vm.runInNewContext(ts.transpileModule(dashboardSource, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
+}).outputText, {
+  exports: dashboardModule.exports,
+  structuredClone,
+  require(id) {
+    if (id === './dashboard-page.definition.json') return rawBundle;
+    throw new Error(`Unexpected dashboard dependency: ${id}`);
+  },
+});
+const reconcile = dashboardModule.exports.reconcilePersistedDashboardPage;
+const staleDashboard = structuredClone(pageDef);
+staleDashboard.widgets.find((widget) => widget.key === 'distressSignalsList')
+  .definition.inputs.config.layout.virtualScroll.viewportHeight = '380px';
+const reconciledDashboard = reconcile(staleDashboard);
+assert(
+  reconciledDashboard !== staleDashboard &&
+    reconciledDashboard.widgets.find((widget) => widget.key === 'distressSignalsList')
+      ?.definition?.inputs?.config?.layout?.virtualScroll?.viewportHeight === '340px' &&
+    reconcile(reconciledDashboard) === reconciledDashboard,
+  'Reconciliação atualiza lista persistida desatualizada e é idempotente após aplicar o snapshot canônico',
 );
 assert(
   timelineNode?.markerVariant === 'icon' &&

@@ -33,17 +33,20 @@ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
         shadowColor: 'transparent',
       },
       spacing: {
-        cellPadding: '10px 16px',
+        cellPadding: '8px 16px',
+        headerHeight: 44,
         headerPadding: '12px 16px',
       },
       typography: {
         fontSize: '14px',
-        headerFontSize: '12px',
+        headerFontSize: '13px',
       },
     },
     toolbar: {
       visible: true,
       position: 'top',
+      appearance: { tokens: { borderWidth: '0px', radius: '0px', shadow: 'none' } },
+      layout: { showSeparator: true },
       filters: {
         enabled: true,
         showAdvancedButton: true,

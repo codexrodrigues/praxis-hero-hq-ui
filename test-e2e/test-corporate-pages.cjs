@@ -47,6 +47,12 @@ async function client(browser, actor) {
     }
     assert.equal(headers.authorization, undefined); assert.equal(headers['x-tenant'], undefined); assert.equal(headers['x-user'], undefined);
     if (url.pathname === '/api/praxis/runtime/context') { contextReads++; return route.fulfill({ json: runtime() }); }
+    if (url.pathname === '/api/praxis/runtime/navigation') {
+      assert.equal(headers['x-praxis-context-version'], runtime().effectiveContext.contextVersion);
+      return route.fulfill({ json: { schemaVersion: 'praxis-enterprise-runtime-navigation.v1',
+        contextVersion: runtime().effectiveContext.contextVersion, receiptEtag: 'menu-fixture', headReceipts: [], nextCursor: null,
+        nodes: url.searchParams.has('parentRef') ? [] : [{ id: id(99), type: 'group', label: 'Operações corporativas', icon: 'home', children: null }] } });
+    }
     if (url.pathname.endsWith('/context/choices')) return route.fulfill({ json: { items: [], nextCursor: null } });
     assert.equal(headers['x-praxis-context-version'], runtime().effectiveContext.contextVersion);
     assert.equal(headers['x-tenant-id'], tenant); assert.equal(headers['x-user-id'], actor);
@@ -70,7 +76,7 @@ async function client(browser, actor) {
       if (state.failure) return route.fulfill({ status: state.failure, json: { detail: 'PRIVATE_DO_NOT_RENDER' } });
       if (!state.published || tenant !== 'lab-a') return route.fulfill({ status: 404 });
       return json({ schemaVersion: 'praxis.published-page/v1', pageId, route: `/pages/${pageId}`, document: state.document,
-        contextVersion: runtime().effectiveContext.contextVersion, receiptEtag: 'published-receipt', head: head() }, 'W/"published-http"');
+        contextVersion: runtime().effectiveContext.contextVersion, receiptEtag: 'published-receipt', head: head(), copySource: { kind: 'published-page', pageId, releaseId, revisionId } }, 'W/"published-http"');
     }
     if (url.pathname === '/api/praxis/config/pages') return json({ schemaVersion: 'praxis.page-catalog/v1',
       contextVersion: runtime().effectiveContext.contextVersion, receiptEtag: 'catalog-receipt', nextCursor: null,
@@ -82,7 +88,14 @@ async function client(browser, actor) {
       assert.equal(actor, 'author'); assert.equal(headers['if-match'], quote(state.draftVersion));
       assert.match(body.commandRef, /^[0-9a-f-]{36}$/); assert.deepEqual(body.target, target);
       assert.deepEqual(body.authoringDocument.config.definition, seed.config.definition);
-      assert.deepEqual(body.authoringDocument.config.navigation, []);
+      if (state.requests.filter(r => r.path.endsWith('/revisions')).length <= 2) {
+        assert.deepEqual(body.authoringDocument.config.navigation, []);
+      } else {
+        const [binding] = body.authoringDocument.config.navigation;
+        assert.equal(body.authoringDocument.config.navigation.length, 1);
+        assert.match(binding.id, /^[0-9a-f-]{36}$/);
+        assert.deepEqual(binding, { id: binding.id, groupId: id(99), label: 'Página de operações', icon: 'home', order: 7 });
+      }
       if (state.conflict) { state.conflict = false; return route.fulfill({ status: 412 }); }
       if (holdRevision) { holdRevision = false; heldRevision = route; return; }
       state.document = body.authoringDocument; state.draftVersion++; state.selectedRevision = { revisionRef: revisionId };
@@ -158,6 +171,14 @@ async function client(browser, actor) {
     assert.equal(new URL(page.url()).searchParams.get('creationKey'), state.creationKey);
     await page.getByRole('button', { name: 'Consultar criação', exact: true }).click();
     await expect(page.getByTestId('draft-state')).toHaveText('DRAFT'); assert.equal(createCount(), 1);
+    // Real Material selectors use the same model events as the former native
+    // controls, and remain operable without mutating the authoring document.
+    await page.getByRole('combobox', { name: 'Vínculo a editar' }).click();
+    await expect(page.getByRole('option', { name: 'Adicionar vínculo' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await page.getByRole('combobox', { name: 'Grupo publicado' }).click();
+    await expect(page.getByRole('option', { name: 'Operações corporativas' })).toBeVisible();
+    await page.getByRole('option', { name: 'Não alterar vínculos' }).click();
     await page.getByLabel('Título da página', { exact: true }).fill('Título publicado');
     await page.getByLabel('Motivo da alteração ou decisão', { exact: true }).fill('Revisão explícita da fixture');
     await page.getByRole('button', { name: 'Salvar revisão', exact: true }).click();
@@ -171,6 +192,25 @@ async function client(browser, actor) {
     await expect(page.getByTestId('corporate-page-message')).toContainText('Revisão salva');
     const revisions = state.requests.filter(r => r.path.endsWith('/revisions'));
     assert.equal(revisions.length, 2); assert.equal(revisions[0].body.commandRef, revisions[1].body.commandRef, 'Same exact attempt retains command identity');
+    // Exercise a non-empty selection, model update and persisted authoring payload.
+    await page.getByRole('combobox', { name: 'Grupo publicado' }).click();
+    await page.getByRole('option', { name: 'Operações corporativas', exact: true }).click();
+    await page.getByLabel('Nome no menu', { exact: true }).fill('Página de operações');
+    await page.getByLabel('Ordem no grupo', { exact: true }).fill('7');
+    await page.getByRole('button', { name: 'Salvar revisão', exact: true }).click();
+    await expect.poll(() => state.document.config.navigation.length).toBe(1);
+    await expect(page.getByRole('button', { name: 'Salvar revisão', exact: true })).toBeEnabled();
+    const savedBinding = structuredClone(state.document.config.navigation[0]);
+    await page.getByRole('combobox', { name: 'Vínculo a editar' }).click();
+    await page.getByRole('option', { name: 'Adicionar vínculo', exact: true }).click();
+    await expect(page.getByLabel('Nome no menu', { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('combobox', { name: 'Grupo publicado' })).toContainText('Não alterar vínculos');
+    await page.getByRole('combobox', { name: 'Vínculo a editar' }).click();
+    await page.getByRole('option', { name: 'Página de operações', exact: true }).click();
+    await expect(page.getByRole('combobox', { name: 'Grupo publicado' })).toContainText('Operações corporativas');
+    await expect(page.getByLabel('Nome no menu', { exact: true })).toHaveValue('Página de operações');
+    await expect(page.getByLabel('Ordem no grupo', { exact: true })).toHaveValue('7');
+    assert.deepEqual(state.document.config.navigation, [savedBinding]);
     // Invoke the real SESSION readback while a lifecycle response is pending; never assign grants or JS state.
     author.holdRevision();
     await page.getByLabel('Título da página', { exact: true }).fill('Resposta antiga');
@@ -199,7 +239,7 @@ async function client(browser, actor) {
     });
     await page.getByRole('button', { name: 'Confirmar sessão e contexto', exact: true }).click();
     await expect(page.getByTestId('draft-state')).toHaveText('DRAFT');
-    assert.equal(state.requests.filter(r => r.path.endsWith('/revisions')).length, 3, 'No replay after SESSION replacement');
+    assert.equal(state.requests.filter(r => r.path.endsWith('/revisions')).length, 4, 'No replay after SESSION replacement');
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.getByRole('button', { name: 'Fechar navegação', exact: true })).not.toBeInViewport();
     await expect.poll(() => page.getByTestId('corporate-pages').evaluate(el =>
@@ -207,8 +247,17 @@ async function client(browser, actor) {
         .filter(child => child.getClientRects().length)
         .every(child => { const box = child.getBoundingClientRect(); return box.left >= 0 && box.right <= innerWidth; })
     )).toBe(true);
+    await page.getByRole('combobox', { name: 'Grupo publicado' }).click();
+    await expect(page.getByRole('option', { name: 'Operações corporativas' })).toBeVisible();
+    const selectPanel=await page.locator('.mat-mdc-select-panel').boundingBox();
+    assert.ok(selectPanel.x>=0 && selectPanel.x+selectPanel.width<=390);
+    await page.screenshot({path:path.resolve(__dirname,'../docs/design/evidence/brasa-2026-11-01/corporate-select-390.png'),animations:'disabled'});
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('combobox', { name: 'Grupo publicado' })).toBeFocused();
     await page.getByLabel('Título da página', { exact: true }).focus(); await page.keyboard.press('Tab');
-    await expect(page.getByRole('button', { name: 'Aplicar à organização atual', exact: true })).toBeFocused();
+    await expect(page.getByTestId('dynamic-form-config-editor-mobile-tabs')).toBeFocused();
+    const reason=page.getByLabel('Motivo da alteração ou decisão', {exact:true});
+    assert.equal(await reason.evaluate(el=>getComputedStyle(el).resize),'none');
     await page.getByLabel('Motivo da alteração ou decisão', { exact: true }).focus();
     await page.keyboard.type('Revisão retomada'); await page.keyboard.press('Shift+Tab');
     await expect(page.getByRole('button', { name: 'Aplicar à organização atual', exact: true })).toBeFocused();
@@ -218,6 +267,8 @@ async function client(browser, actor) {
     await expect(page.getByTestId('corporate-page-message')).toContainText('Abrangência');
     await page.getByRole('button', { name: 'Congelar release', exact: true }).click();
     await expect(page.getByTestId('review-state')).toHaveText('DRAFT');
+    await expect(page.getByRole('combobox', {name:'Vínculo a editar'})).toBeDisabled();
+    await expect(page.getByRole('combobox', {name:'Grupo publicado'})).toBeDisabled();
     await page.getByRole('button', { name: 'Enviar para revisão', exact: true }).click();
     await expect(page.getByTestId('review-state')).toHaveText('SUBMITTED');
     await expect(page.getByRole('button', { name: 'Aprovar release identificada', exact: true })).toBeDisabled();

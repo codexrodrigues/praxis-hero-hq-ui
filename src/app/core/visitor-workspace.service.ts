@@ -56,11 +56,11 @@ export class VisitorWorkspaceService {
   async renameMenu(id: string, label: string): Promise<void> {
     await this.mutate((owner) => this.repository.renameMenu(owner, id, label));
   }
-  async removeMenu(id: string): Promise<void> {
-    await this.mutate((owner) => this.repository.removeMenu(owner, id));
+  async removeMenu(id: string, expected: VisitorWorkspace): Promise<void> {
+    await this.mutate((owner) => this.repository.removeMenu(owner, id, expected));
   }
-  async removePage(id: string): Promise<void> {
-    await this.mutate((owner) => this.repository.removePage(owner, id));
+  async removePage(id: string, expected: VisitorWorkspace): Promise<void> {
+    await this.mutate((owner) => this.repository.removePage(owner, id, expected));
   }
   async linkPage(pageId: string, menuId: string, label: string): Promise<void> {
     await this.mutate((owner) => this.repository.linkPage(owner, pageId, menuId, label));

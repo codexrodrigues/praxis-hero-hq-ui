@@ -14,4 +14,4 @@ li { margin-block: 12px; }
 
 fieldset { border: 1px solid var(--mat-sys-outline-variant, #d7dce2); padding: 16px; margin-block: 16px; min-width: 0; }
 fieldset label { display: block; margin-block: 12px 4px; }
-select { display: block; width: 100%; max-width: 640px; min-height: 44px; margin-block-end: 16px; padding: 8px; font: inherit; color: var(--mat-sys-on-surface); background: var(--mat-sys-surface); border: 1px solid var(--mat-sys-outline); border-radius: 4px; }
+.resize-none { resize: none; }

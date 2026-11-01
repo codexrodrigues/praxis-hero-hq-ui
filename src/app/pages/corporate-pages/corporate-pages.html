@@ -67,16 +67,20 @@
             } @else { <p>Conteúdo congelado nesta release. Uma cópia inicia um novo rascunho editável.</p> }
             <fieldset [disabled]="busy() || !!draft.body.frozenReleaseRef">
               <legend>Vínculo de menu</legend>
-              <label for="binding-selection">Vínculo a editar</label>
-              <select id="binding-selection" [ngModel]="bindingId" (ngModelChange)="selectBinding($event)">
-                <option value="">Adicionar vínculo</option>
-                @for (binding of document()?.config?.navigation || []; track binding.id) { <option [value]="binding.id">{{ binding.label }}</option> }
-              </select>
-              <label for="binding-group">Grupo publicado</label>
-              <select id="binding-group" [(ngModel)]="bindingGroupId" [disabled]="!menu.ready() || menu.busy()">
-                <option value="">Não alterar vínculos</option>
-                @for (group of menu.groups(); track group.id) { <option [value]="group.id">{{ group.label }}</option> }
-              </select>
+              <mat-form-field appearance="outline">
+                <mat-label>Vínculo a editar</mat-label>
+                <mat-select id="binding-selection" [disabled]="busy() || !!draft.body.frozenReleaseRef" [ngModel]="bindingId" (ngModelChange)="selectBinding($event)">
+                  <mat-option value="">Adicionar vínculo</mat-option>
+                  @for (binding of document()?.config?.navigation || []; track binding.id) { <mat-option [value]="binding.id">{{ binding.label }}</mat-option> }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Grupo publicado</mat-label>
+                <mat-select id="binding-group" [(ngModel)]="bindingGroupId" [disabled]="busy() || !!draft.body.frozenReleaseRef || !menu.ready() || menu.busy()">
+                  <mat-option value="">Não alterar vínculos</mat-option>
+                  @for (group of menu.groups(); track group.id) { <mat-option [value]="group.id">{{ group.label }}</mat-option> }
+                </mat-select>
+              </mat-form-field>
               @if (bindingGroupId) {
                 <mat-form-field appearance="outline"><mat-label>Nome no menu</mat-label><input matInput [(ngModel)]="bindingLabel" maxlength="160" /></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Ordem no grupo</mat-label><input matInput type="number" [(ngModel)]="bindingOrder" min="0" max="2147483647" /></mat-form-field>
@@ -93,7 +97,7 @@
         </section>
       }
       @if (pageId()) {
-        <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
+        <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput cdkTextareaAutosize [cdkAutosizeMinRows]="2" [cdkAutosizeMaxRows]="8" class="resize-none" [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
       }
       @if (review(); as value) {
         <section aria-labelledby="review-title">

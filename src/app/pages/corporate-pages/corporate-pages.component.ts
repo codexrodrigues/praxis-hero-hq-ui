@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, effect, inject, signal, untracked } from '@angular/core';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { combineLatest } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -21,7 +23,7 @@ type Receipt<T> = UiLayoutLifecycleHttpReceipt<T>;
 
 @Component({
   selector: 'app-corporate-pages',
-  imports: [FormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule, DynamicWidgetPageComponent, CorporateFormEditorComponent],
+  imports: [FormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, CdkTextareaAutosize, DynamicWidgetPageComponent, CorporateFormEditorComponent],
   templateUrl: './corporate-pages.html', styleUrl: './corporate-pages.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

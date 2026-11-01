@@ -1,4 +1,5 @@
 export const workspaceThemes = [
+  { id: 'brasa', name: 'Brasa', description: 'Marfim e argila · Manrope e Source Sans 3' },
   { id: 'classic', name: 'Essência', description: 'Identidade clara original' },
   { id: 'light-tech', name: 'Aurora', description: 'Claro mineral e azul-petróleo' },
   { id: 'dark-tech', name: 'Órbita', description: 'Grafite com nuances azul-violeta' },
@@ -9,5 +10,5 @@ export function resolveTheme(value: unknown): ThemeMode {
   // Preserve the existing host preference when upgrading the two-mode selector.
   if (value === 'light') return 'classic';
   if (value === 'dark') return 'dark-tech';
-  return workspaceThemes.some(t => t.id === value) ? value as ThemeMode : 'dark-tech';
+  return workspaceThemes.some(t => t.id === value) ? value as ThemeMode : 'brasa';
 }

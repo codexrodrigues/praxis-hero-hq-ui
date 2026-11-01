@@ -9,6 +9,7 @@ const cache = new Map();
 const corporateContext = class CorporateContext {};
 const corporateLifecycle = class CorporateLifecycle {};
 const corporatePages = class CorporatePages {};
+const corporateNavigation = class CorporateNavigation {};
 const corporateOptions = {};
 let guardCalls = 0;
 const guard = () => { guardCalls++; };
@@ -26,6 +27,7 @@ function load(relative) {
     require(id) {
       if (id === '@praxisui/core') return { EnterpriseRuntimeContextService: corporateContext, UiLayoutLifecycleService: corporateLifecycle, PRAXIS_ENTERPRISE_RUNTIME_CONTEXT_OPTIONS: corporateOptions };
       if (id.endsWith('corporate-page-pilot.service')) return { CorporatePagePilotService: corporatePages };
+      if (id.endsWith('corporate-navigation.service')) return { CorporateNavigationService: corporateNavigation };
       if (id.endsWith('tactical-clearance.guard')) return { tacticalClearanceGuard: guard };
       assert.ok(id.startsWith('.'), `Unexpected eager runtime import: ${id}`);
       return load(path.relative(root, path.resolve(path.dirname(file), `${id}.ts`)));
@@ -37,11 +39,20 @@ function load(relative) {
 const { routes: rootRoutes } = load('src/app/app.routes.ts');
 const corporateBoundary = rootRoutes.find(route => route.children);
 assert.ok(corporateBoundary, 'Corporate entry/editor/reader share one provider boundary');
-assert.ok(corporateBoundary.providers.includes(corporateContext));
+assert.ok(!corporateBoundary.providers.includes(corporateContext), 'The corporate child must inherit the root authority');
+assert.ok(!corporateBoundary.providers.some(provider => provider.provide === corporateOptions), 'The corporate child must not override root context policy');
 assert.ok(corporateBoundary.providers.includes(corporateLifecycle));
 assert.ok(corporateBoundary.providers.includes(corporatePages));
-assert.deepEqual(JSON.parse(JSON.stringify(corporateBoundary.providers.find(x => x.provide === corporateOptions).useValue)), { includeGlobalFetchHeaders: false, errorPolicy: 'fail' });
-assert.deepEqual(JSON.parse(JSON.stringify(corporateBoundary.children.map(x => x.path))), ['workspace-corporativo', 'workspace-corporativo/paginas', 'pages/:pageId']);
+assert.ok(corporateBoundary.providers.includes(corporateNavigation));
+const authority = load('src/app/core/corporate-runtime.providers.ts').CORPORATE_RUNTIME_AUTHORITY_PROVIDERS;
+assert.ok(authority.includes(corporateContext));
+assert.deepEqual(JSON.parse(JSON.stringify(authority.find(x => x.provide === corporateOptions).useValue)), { includeGlobalFetchHeaders: false, errorPolicy: 'fail' });
+const appConfigSource = fs.readFileSync(path.join(root, 'src/app/app.config.ts'), 'utf8');
+assert.match(appConfigSource, /providers:\s*\[\s*\.\.\.CORPORATE_RUNTIME_AUTHORITY_PROVIDERS\b/, 'Application injector installs the shared authority');
+assert.deepEqual(JSON.parse(JSON.stringify(corporateBoundary.children.map(x => x.path))), ['workspace-corporativo', 'workspace-corporativo/paginas', 'workspace-corporativo/grupos', 'pages/:pageId']);
+assert.equal(corporateBoundary.children.find(x => x.path === 'workspace-corporativo/grupos').data.corporateGroups, true);
+const explicitRootIndex = rootRoutes.findIndex(route => route.path === '' && !route.children);
+assert.ok(explicitRootIndex >= 0 && explicitRootIndex < rootRoutes.indexOf(corporateBoundary), 'The explicit root page takes precedence over the empty corporate parent');
 assert.equal(corporateBoundary.children.find(x => x.path === 'pages/:pageId').data.corporatePublished, true);
 const routes = rootRoutes.flatMap(route => route.children ?? [route]);
 const { HERO_NAVIGATION } = load('src/app/core/navigation.model.ts');
@@ -70,7 +81,7 @@ const expectedResources = [
 assert.deepEqual(plain(routes.filter(route => route.data?.resource).map(route => route.data.resource)), expectedResources);
 assert.equal(new Set(items.map(item => item.path)).size, items.length, 'Unique menu destinations');
 assert.equal(new Set(routes.map(route => route.path)).size, routes.length, 'Unique routes');
-assert.equal(routes.length, items.length + 4, 'Wildcard, visitor page, corporate editor and published reader are outside the static menu');
+assert.equal(routes.length, items.length + 5, 'Wildcard, visitor page, corporate editor, groups and published reader are outside the static menu');
 assert.equal(typeof routes.find(route => route.path === 'laboratorio/paginas/:pageId')?.loadComponent, 'function', 'Saved visitor pages resolve from their persistent local identity');
 assert.deepEqual(plain(routes.at(-1)), { path: '**', redirectTo: '' });
 for (const definition of definitions) {
