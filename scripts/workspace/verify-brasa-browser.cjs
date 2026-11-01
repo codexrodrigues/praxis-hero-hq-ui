@@ -4,8 +4,10 @@ const {chromium}=require(require.resolve('@playwright/test',{paths:[__dirname,re
 const {mkdirSync,writeFileSync}=require('node:fs');
 const path=require('node:path');
 const assert=require('node:assert/strict');
+const THEME=process.env.HERO_THEME||'brasa';
+const THEME_NAME=THEME==='insignia'?'Insígnia':'Brasa';
 const BASE='http://127.0.0.1:4302';
-const OUT=path.resolve(__dirname,'../../docs/design/evidence/brasa-2026-11-01');
+const OUT=path.resolve(__dirname,'../../docs/design/evidence/'+THEME+'-2026-11-01');
 mkdirSync(OUT,{recursive:true});
 const resource='/api/human-resources/funcionarios';
 // Schema fixture follows the canonical CRUD lifecycle fixture shape and actual
@@ -54,20 +56,20 @@ if(require.main===module)(async()=>{
  const browser=await chromium.launch({headless:true});
  try{
   const context=await browser.newContext({viewport:{width:1440,height:1000},ignoreHTTPSErrors:true});
-  await fixtures(context);const page=await context.newPage();page.on('pageerror',e=>report.pageErrors.push(e.message));
+  await fixtures(context);if(THEME==='brasa')await context.addInitScript(theme=>{if(!localStorage.getItem('praxis_hero_hq_theme'))localStorage.setItem('praxis_hero_hq_theme',theme);},THEME);const page=await context.newPage();page.on('pageerror',e=>report.pageErrors.push(e.message));
   await page.goto(BASE);await page.locator('app-dashboard-page').waitFor({timeout:30000});await page.evaluate(()=>document.fonts.ready);
-  assert.equal(await page.locator('html').getAttribute('data-theme'),'brasa');pass('root route renders dashboard, fresh browser defaults to Brasa');
+  assert.equal(await page.locator('html').getAttribute('data-theme'),THEME);pass('root route renders dashboard with '+THEME_NAME+'; Insígnia uses fresh default');
   await page.waitForTimeout(1500);
-  await page.getByRole('button',{name:'Aparência: Brasa',exact:true}).click();
+  await page.getByRole('button',{name:'Aparência: '+THEME_NAME,exact:true}).click();
   const fonts=await page.evaluate(()=>({body:getComputedStyle(document.body).fontFamily,title:getComputedStyle(document.querySelector('.hero-executive-banner .prx-rich-card-title,.hero-executive-banner .prx-rich-card__title,.hero-executive-banner .pdx-rich-card-title')).fontFamily,material:getComputedStyle(document.querySelector('.mat-mdc-menu-item-text')).fontFamily,loaded:[...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family),bg:getComputedStyle(document.body).backgroundColor}));
   assert(fonts.material.includes('Source Sans 3'));assert(fonts.body.includes('Source Sans 3'));assert(fonts.title.includes('Manrope'));assert(fonts.loaded.includes('Source Sans 3'));assert(fonts.loaded.includes('Manrope'));report.measurements.push({fonts});await shot(page,'desktop-appearance');await page.keyboard.press('Escape');await page.locator('.mat-mdc-menu-panel').waitFor({state:'hidden'});pass('local B fonts loaded in real runtime, headings and Material use the token bridge');
   assert.equal(await page.getByText('Não foi possível carregar os dados do gráfico',{exact:true}).count(),0);
   assert(await page.locator('praxis-chart canvas').count()>0);pass('real Charts renders Canvas from intercepted stats fixtures');
   await shot(page,'desktop-dashboard');
-  await page.getByRole('button',{name:'Aparência: Brasa',exact:true}).click();await page.getByRole('menuitemradio',{name:/Órbita/}).click();
+  await page.getByRole('button',{name:'Aparência: '+THEME_NAME,exact:true}).click();await page.getByRole('menuitemradio',{name:/Órbita/}).click();
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark-tech');
-  await page.getByRole('button',{name:'Aparência: Órbita',exact:true}).click();await page.getByRole('menuitemradio',{name:/Brasa/}).click();await page.reload();await page.locator('app-dashboard-page').waitFor();
-  assert.equal(await page.locator('html').getAttribute('data-theme'),'brasa');pass('appearance menu selects Brasa, preserves old theme, reload persists preference');
+  await page.getByRole('button',{name:'Aparência: Órbita',exact:true}).click();await page.getByRole('menuitemradio',{name: new RegExp(THEME_NAME)}).click();await page.reload();await page.locator('app-dashboard-page').waitFor();
+  assert.equal(await page.locator('html').getAttribute('data-theme'),THEME);pass('appearance menu selects '+THEME_NAME+', preserves old theme, reload persists preference');
   await page.goto(BASE+'/rh/funcionarios');await page.locator('praxis-table').waitFor({timeout:30000});await page.locator('praxis-table').getByText('João Luís Rodrigues',{exact:true}).waitFor({timeout:20000});
   await page.waitForTimeout(500);await shot(page,'desktop-table');
   const table=await page.locator('praxis-table').evaluate(el=>({font:getComputedStyle(el).fontFamily,padding:getComputedStyle(el).getPropertyValue('--p-cell-padding-default').trim(),headerSize:getComputedStyle(el).getPropertyValue('--p-header-font-size-default').trim(),rowHeights:[...el.querySelectorAll('.mat-mdc-row')].map(row=>row.getBoundingClientRect().height)}));
@@ -80,7 +82,7 @@ if(require.main===module)(async()=>{
    await page.setViewportSize({width,height:844});await page.goto(BASE);await page.locator('app-dashboard-page').waitFor();await page.waitForTimeout(500);await shot(page,`dashboard-${width}`);
    const geometry=await page.evaluate(()=>({width:innerWidth,document:document.documentElement.scrollWidth,bodyFont:getComputedStyle(document.body).fontFamily}));report.measurements.push(geometry);
    assert(geometry.document<=geometry.width+1);pass(`${width}px dashboard has no document horizontal overflow`);
-   await page.getByRole('button',{name:'Aparência: Brasa',exact:true}).click();
+   await page.getByRole('button',{name:'Aparência: '+THEME_NAME,exact:true}).click();
    const menu=await page.locator('.mat-mdc-menu-panel').boundingBox();assert(menu.x>=0&&menu.x+menu.width<=width+1);
    await shot(page,`appearance-${width}`);await page.keyboard.press('Escape');
    await page.goto(BASE+'/rh/funcionarios');await page.locator('praxis-table').getByText('João Luís Rodrigues',{exact:true}).waitFor();await page.locator('praxis-table .mat-mdc-row').first().scrollIntoViewIfNeeded();await shot(page,`table-${width}`);
@@ -96,7 +98,7 @@ if(require.main===module)(async()=>{
   }
   await page.goto(BASE+'/workspace-corporativo');await page.locator('app-corporate-layout').waitFor();assert(await page.locator('[data-testid=corporate-navigation]').isVisible());pass('corporate route still uses its canonical layout after root precedence fix');
   // Sample the actual Material overlay and native host headings in every theme.
-  const themes=[['classic','Essência'],['light-tech','Aurora'],['dark-tech','Órbita'],['brasa','Brasa']];
+  const themes=[['classic','Essência'],['light-tech','Aurora'],['dark-tech','Órbita'],['brasa','Brasa'],['insignia','Insígnia']];
   await page.setViewportSize({width:1440,height:1000});
   await page.goto(BASE+'/workspace-corporativo');await page.locator('.session-form').waitFor();
   for(const [id,name] of themes){
@@ -116,7 +118,7 @@ if(require.main===module)(async()=>{
     const border=rgba(getComputedStyle(outline).borderTopColor),fieldBg=surface(field.querySelector('.mat-mdc-text-field-wrapper'));
     return{theme:document.documentElement.dataset.theme,bodyFont:body.fontFamily,titleFont:title.fontFamily,menuFont:getComputedStyle(label).fontFamily,menuContrast:contrast(rgba(getComputedStyle(label).color),surface(menu)),outlineContrast:contrast(border,fieldBg),outlineColor:border,fieldBackground:fieldBg};
    });
-   const expected=id==='brasa'?'Source Sans 3':'Work Sans';assert(visual.bodyFont.includes(expected));assert(visual.menuFont.includes(expected));assert(visual.titleFont.includes(id==='brasa'?'Manrope':'Work Sans'));assert(visual.menuContrast>=4.5);
+   const expected=['brasa','insignia'].includes(id)?'Source Sans 3':'Work Sans';assert(visual.bodyFont.includes(expected));assert(visual.menuFont.includes(expected));assert(visual.titleFont.includes(['brasa','insignia'].includes(id)?'Manrope':'Work Sans'));assert(visual.menuContrast>=4.5);
    report.measurements.push({themeRegression:visual});await shot(page,`theme-${id}-overlay`);
    await page.keyboard.press('Escape');await page.locator('.mat-mdc-menu-panel').waitFor({state:'hidden'});
    if(id==='brasa'){

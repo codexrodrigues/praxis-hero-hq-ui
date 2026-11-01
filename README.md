@@ -142,10 +142,11 @@ a uma sessão corporativa confirmada no Core.
 
 ## Aparência do workspace
 
-O menu **Aparência** no cabeçalho oferece **Essência**, **Aurora** e **Órbita**,
-com as paletas do Ergon Workflow Designer. Órbita permanece o padrão deste host.
-A preferência é local ao navegador e sincronizada entre abas; não altera a persona,
-o dashboard salvo ou dados de negócio. Work Sans é a fonte principal.
+O menu **Aparência** oferece **Insígnia**, **Brasa**, **Essência**, **Aurora** e
+**Órbita**. Insígnia é o padrão para navegadores sem preferência salva. A
+preferência é local e sincronizada entre abas; preserva as escolhas existentes.
+Insígnia e Brasa usam Manrope nos títulos e Source Sans 3 no corpo, com arquivos
+locais. Os demais temas preservam suas famílias. Consulte [DESIGN.md](DESIGN.md).
 
 A folha privada `src/styles/workspace-themes.scss` define as paletas;
 `src/styles/theme-praxis.scss` traduz esses valores para Material e os tokens dos
@@ -206,6 +207,6 @@ um inventário independente dos destinos e recursos esperados.
 
 Em [/workspace-corporativo](http://127.0.0.1:4302/workspace-corporativo), consulte a sessão e selecione um contexto permitido pelo servidor. Personas do Hero não autenticam essa sessão. O laboratório local continua disponível sem login. A seleção real depende da integração SESSION/CSRF/CORS do backend; este recorte de UI tem teste de navegador com APIs interceptadas e não encerra a prova HTTP/Neon. Veja [escopo, provas reutilizadas e próximos incrementos](docs/engineering/p3c-host-adoption.md).
 
-### Jornada de páginas da plataforma — SDK público rc.38
+### Jornada de páginas da plataforma
 
-O laboratório agora consome as ações reutilizáveis Copy/SaveAs do Page Builder, com adapter local de persistência. O host adota os22 pacotes públicos `@praxisui/*` em `10.0.0-rc.38`, com lock reproduzível por `npm ci`. [Contrato de adoção, reprodução e provas](docs/engineering/reusable-page-journey.md).
+O laboratório agora consome as ações reutilizáveis Copy/SaveAs do Page Builder, com adapter local de persistência. O host adota os 22 pacotes públicos `@praxisui/*` em `10.0.0-rc.43`, com lock reproduzível por `npm ci`. [Contrato de adoção, reprodução e provas](docs/engineering/reusable-page-journey.md).
