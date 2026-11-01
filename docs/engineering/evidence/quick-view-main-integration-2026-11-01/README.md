@@ -40,7 +40,10 @@ sem force-push, tag ou desativação de proteção.
   já instalado. `npm run build`: exit 0, 17,24 MB, warning acima de 15 MB e abaixo
   do limite de erro de 18 MB. `npm test`: exit 0, typecheck, 65 asserções de contrato
   e verificações de navegação aprovadas.
-- `git diff --check` passou nos três projetos. Artefatos textuais revisados sem
+- `git diff --check` passou para código e Markdown dos três projetos. Os logs
+  brutos do Maven/Angular e os arquivos `.patch` históricos preservam espaços de
+  formatação/contexto; eles são excluídos desse check de whitespace para manter
+  os bytes e hashes da evidência original. Artefatos textuais revisados sem
   credenciais; propriedades de máquina dos relatórios Surefire históricos foram
   removidas, preservando casos e resultados. Schemas e patches históricos mantêm
   seus hashes; a sanitização não altera código nem prova de teste.
