@@ -58,7 +58,7 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
   },
   filterBar: {
     placement: 'scope-bar',
-    inlineFields: ['local', 'severidade', 'descricao'],
+    inlineFields: ['local', 'severidade', 'descricao', 'missaoId', 'feridosBetween', 'mortosBetween'],
   },
   table: {
     columnProjection: {
@@ -155,7 +155,7 @@ export const INCIDENTES_CRUD_METADATA: CrudMetadata = {
       filtering: {
         advancedFilters: {
           settings: {
-            alwaysVisibleFields: ['local', 'severidade', 'descricao'],
+            alwaysVisibleFields: ['local', 'severidade', 'descricao', 'missaoId', 'feridosBetween', 'mortosBetween'],
           },
         },
       },

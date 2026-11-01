@@ -222,9 +222,11 @@ export class VisitorWorkspaceRepository {
     });
   }
 
-  async removeMenu(owner: string, menuId: string): Promise<VisitorWorkspace> {
+  async removeMenu(owner: string, menuId: string, expected: VisitorWorkspace): Promise<VisitorWorkspace> {
     const id = identifier(menuId);
+    const expectedJson = documentJson(expected);
     return this.change(owner, workspace => {
+      if (documentJson(workspace) !== expectedJson) fail('conflict', 'O laboratório mudou após a confirmação.');
       workspace.menus = workspace.menus.filter(menu => menu.id !== id);
     });
   }
@@ -242,9 +244,11 @@ export class VisitorWorkspaceRepository {
     });
   }
 
-  async removePage(owner: string, pageId: string): Promise<VisitorWorkspace> {
+  async removePage(owner: string, pageId: string, expected: VisitorWorkspace): Promise<VisitorWorkspace> {
     const id = identifier(pageId);
+    const expectedJson = documentJson(expected);
     return this.change(owner, workspace => {
+      if (documentJson(workspace) !== expectedJson) fail('conflict', 'O laboratório mudou após a confirmação.');
       workspace.pages = workspace.pages.filter(page => page.id !== id);
       for (const menu of workspace.menus) menu.items = menu.items.filter(item => item.pageId !== id);
     });

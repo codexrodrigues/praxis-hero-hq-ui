@@ -11,7 +11,7 @@
     @if (session.authenticated()) { <p><strong>Sessão confirmada pelo servidor.</strong></p> }
   </div>
   @if (!session.authenticated() && session.state() !== 'logout-uncertain') {
-    <form class="session-form" (ngSubmit)="login()" aria-label="Entrar no workspace corporativo">
+    <form novalidate class="session-form" (ngSubmit)="login()" aria-label="Entrar no workspace corporativo">
       <mat-form-field appearance="outline"><mat-label>Usuário</mat-label><input matInput name="username" autocomplete="username" required [(ngModel)]="username" [disabled]="session.busy()" /></mat-form-field>
       <mat-form-field appearance="outline"><mat-label>Senha</mat-label><input matInput name="password" type="password" autocomplete="current-password" required [(ngModel)]="password" [disabled]="session.busy()" /></mat-form-field>
       <button mat-flat-button type="submit" [disabled]="session.busy() || !username.trim() || !password">Entrar</button>

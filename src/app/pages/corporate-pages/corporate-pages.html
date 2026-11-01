@@ -124,7 +124,7 @@
           </div>
           @if (pageId()) {
             <div class="draft-workbench__reason">
-              <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
+              <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput cdkTextareaAutosize [cdkAutosizeMinRows]="2" [cdkAutosizeMaxRows]="8" class="resize-none" [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
             </div>
           }
           <div class="express-callout draft-workbench__express">
@@ -139,7 +139,7 @@
         </section>
       } @else if (pageId()) {
         <div class="reason-card">
-          <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
+          <mat-form-field appearance="outline" class="reason"><mat-label>Motivo da alteração ou decisão</mat-label><textarea matInput cdkTextareaAutosize [cdkAutosizeMinRows]="2" [cdkAutosizeMaxRows]="8" class="resize-none" [(ngModel)]="reason" maxlength="500" [disabled]="busy()" rows="2"></textarea></mat-form-field>
         </div>
       }
       @if (workspace(); as draft) {

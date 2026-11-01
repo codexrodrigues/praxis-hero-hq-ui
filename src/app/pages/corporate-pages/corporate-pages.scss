@@ -47,7 +47,7 @@ h1 {
 h2 {
   margin: 0;
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: var(--hero-emphasis-weight, 500);
   letter-spacing: -0.015em;
 }
 
@@ -62,8 +62,8 @@ p {
   gap: 6px;
   margin: 0;
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-weight: var(--hero-emphasis-weight, 500);
+  letter-spacing: var(--hero-label-tracking, .025em);
   text-transform: uppercase;
   color: var(--primary, var(--mat-sys-primary));
 }
@@ -104,7 +104,7 @@ p {
   height: 28px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: var(--hero-emphasis-weight, 500);
   flex-shrink: 0;
   background: var(--muted, var(--mat-sys-surface-container-high));
   color: var(--muted-foreground, var(--mat-sys-on-surface-variant));
@@ -187,7 +187,7 @@ p {
   color: var(--state-success, #15803d);
   background: color-mix(in oklab, var(--state-success, #16a34a) 12%, var(--card, #ffffff));
   border-color: color-mix(in oklab, var(--state-success, #16a34a) 38%, transparent);
-  font-weight: 600;
+  font-weight: var(--hero-emphasis-weight, 500);
 }
 
 /* Stage Cards & Panels */
@@ -218,8 +218,8 @@ p {
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-weight: var(--hero-emphasis-weight, 500);
+  letter-spacing: var(--hero-label-tracking, .025em);
   text-transform: uppercase;
   color: var(--primary, var(--mat-sys-primary));
   background: color-mix(in oklab, var(--primary, #2563eb) 12%, transparent);
@@ -314,7 +314,7 @@ p {
 
 .protocol-actions__label {
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: var(--hero-emphasis-weight, 500);
   color: var(--muted-foreground, var(--mat-sys-on-surface-variant));
   margin-right: 4px;
 }
@@ -353,7 +353,7 @@ p {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--hero-emphasis-weight, 500);
   color: var(--primary, var(--mat-sys-primary));
 }
 
@@ -381,8 +381,8 @@ fieldset.authoring-panel legend {
   line-height: 1.4;
   border-radius: 999px;
   font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
+  font-weight: var(--hero-emphasis-weight, 500);
+  letter-spacing: var(--hero-label-tracking, .025em);
   text-transform: uppercase;
   color: var(--primary, var(--mat-sys-primary));
   background: color-mix(in oklab, var(--primary, #2563eb) 10%, var(--card, #ffffff));
@@ -404,7 +404,7 @@ fieldset label {
   display: block;
   margin-block: 12px 6px;
   font-size: 0.86rem;
-  font-weight: 600;
+  font-weight: var(--hero-emphasis-weight, 500);
 }
 
 select {
@@ -454,7 +454,7 @@ select {
 .icon-chip.is-selected {
   background: color-mix(in oklab, var(--primary, #2563eb) 15%, var(--card, #ffffff));
   border-color: var(--primary, var(--mat-sys-primary));
-  font-weight: 700;
+  font-weight: var(--hero-emphasis-weight, 500);
 }
 
 fieldset:disabled .icon-chip {
@@ -478,9 +478,9 @@ fieldset:disabled .icon-chip {
   gap: 6px;
   margin: 0 0 12px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--hero-emphasis-weight, 500);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--hero-label-tracking, .025em);
   color: var(--primary, var(--mat-sys-primary));
 }
 
@@ -645,7 +645,7 @@ fieldset:disabled .icon-chip {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 600;
+  font-weight: var(--hero-emphasis-weight, 500);
   min-width: 0;
 }
 
@@ -723,3 +723,5 @@ li {
     margin-left: 0;
   }
 }
+
+.resize-none { resize: none; }

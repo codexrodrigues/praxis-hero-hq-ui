@@ -218,3 +218,115 @@
   --prx-micro-label-color: var(--muted-foreground);
   --prx-micro-target-color: var(--foreground);
 }
+
+/* Brasa — private host palette, based on the reviewed Ember/Soft Day/Amber study.
+   Existing themes retain their font stacks and preference IDs. */
+:root[data-theme="brasa"] {
+  color-scheme: light;
+  --overlay: rgb(52 40 30 / 28%);
+  --background: #f4efe7;
+  --foreground: #282a29;
+  --card: #fcf9f4;
+  --card-foreground: var(--foreground);
+  --popover: #fcf9f4;
+  --popover-foreground: var(--foreground);
+  --primary: #a4472f;
+  --primary-deep: #8e3b28;
+  --primary-foreground: #ffffff;
+  --secondary: #ebe4da;
+  --secondary-foreground: var(--foreground);
+  --muted: #ebe4da;
+  --muted-foreground: #68635d;
+  --accent: #f2d0bb;
+  --accent-foreground: var(--foreground);
+  --destructive: #a33335;
+  --destructive-foreground: #ffffff;
+  --border: #d9d0c4;
+  --input: #887c6c;
+  --ring: var(--primary);
+  --canvas: #f4efe7;
+  --workspace-surface: #fcf9f4;
+  --sidebar: var(--card);
+  --sidebar-accent-foreground: var(--foreground);
+  --category-teal: #3f634a;
+  --category-sky: #41677b;
+  --category-violet: #6b527b;
+  --category-indigo: #4f5b7b;
+  --category-event: #a74d74;
+  --state-success: #3f634a;
+  --state-warning: #78520d;
+  --format-orange: #a4472f;
+  --format-amber: #78520d;
+  --node-shadow: 0 5px 10px rgb(89 67 42 / 3%), 0 17px 35px rgb(89 67 42 / 3%);
+  --float-shadow: 0 12px 32px rgb(89 67 42 / 14%);
+  --command-gradient: linear-gradient(150deg, var(--primary), var(--primary-deep));
+  --surface-gradient: linear-gradient(120deg, var(--card), var(--background));
+  --header-surface-gradient: linear-gradient(var(--card), var(--card));
+  --table-column-header-bg: var(--muted);
+  --font-sans: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Manrope', var(--font-sans);
+  --hero-reading-font: var(--font-sans);
+  --hero-small-text: 12px;
+  --hero-strong-weight: 500;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+}
+
+/* Insígnia — private Hero HQ palette. Navy is the readable semantic primary;
+   steel blue highlights light surfaces, gold highlights navy navigation. */
+:root[data-theme="insignia"] {
+  color-scheme: light;
+  --overlay: rgb(13 27 42 / 35%);
+  --background: #f9f7f1;
+  --foreground: #0d1b2a;
+  --card: #f9f7f1;
+  --card-foreground: var(--foreground);
+  --popover: #f9f7f1;
+  --popover-foreground: var(--foreground);
+  --primary: #0d1b2a;
+  --primary-deep: #415a77;
+  --primary-foreground: #f9f7f1;
+  --secondary: #e6dcc6;
+  --secondary-foreground: var(--foreground);
+  --muted: #e6dcc6;
+  --muted-foreground: #415a77;
+  --accent: #e6dcc6;
+  --accent-foreground: var(--foreground);
+  --destructive: #a33335;
+  --destructive-foreground: #ffffff;
+  --border: #d2cbbd;
+  --input: #415a77;
+  --ring: #415a77;
+  --canvas: #f9f7f1;
+  --workspace-surface: #f9f7f1;
+  --sidebar: #0d1b2a;
+  --sidebar-foreground: #f9f7f1;
+  --sidebar-primary: #e6dcc6;
+  --sidebar-primary-foreground: #0d1b2a;
+  --sidebar-accent: #b8860b;
+  --sidebar-accent-foreground: #0d1b2a;
+  --sidebar-border: #415a77;
+  --category-teal: #3f634a;
+  --category-sky: #415a77;
+  --category-violet: #6b527b;
+  --category-indigo: #415a77;
+  --category-event: #954363;
+  --state-success: #3f634a;
+  --state-warning: #78520d;
+  --format-orange: #8a4b14;
+  --format-amber: #78520d;
+  --node-shadow: 0 3px 12px rgb(13 27 42 / 4%);
+  --float-shadow: 0 10px 28px rgb(13 27 42 / 14%);
+  --command-gradient: linear-gradient(#415a77, #415a77);
+  --hero-command-foreground: #f9f7f1;
+  --surface-gradient: linear-gradient(var(--card), var(--card));
+  --header-surface-gradient: linear-gradient(var(--card), var(--card));
+  --table-column-header-bg: var(--muted);
+  --font-sans: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Manrope', var(--font-sans);
+  --hero-reading-font: var(--font-sans);
+  --hero-small-text: 12px;
+  --hero-strong-weight: 500;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+}

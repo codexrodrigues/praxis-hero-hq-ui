@@ -106,7 +106,7 @@ test('stable retries keep the original identity, date and single reference', asy
   const retry = { ...request, definition: { widgets: request.definition.widgets, version: 1 } };
   assert.deepEqual(await repository.savePage(OWNER, retry), saved);
   assert.equal(storage.writes, 1);
-  await repository.removeMenu(OWNER, saved.menus[0].id);
+  await repository.removeMenu(OWNER, saved.menus[0].id, saved);
   const reconciled = await repository.savePage(OWNER, request);
   assert.equal(reconciled.pages.length, 1);
   assert.equal(reconciled.pages[0].createdAt, saved.pages[0].createdAt);
@@ -157,6 +157,55 @@ test('a save snapshots the document before it waits for another tab', async () =
   assert.equal(saved.pages[0].title, 'Minha página');
 });
 
+test('stale deletion confirmations cannot remove another tab’s changes', async () => {
+  for (const operation of ['page', 'menu']) {
+    const { repository, storage, lock } = setup();
+    const otherTab = new VisitorWorkspaceRepository(storage, lock, validatePage);
+    const first = input();
+    const snapshot = await repository.savePage(OWNER, first);
+    const extra = input({ title: 'Outra página' });
+    let release;
+    const barrier = new Promise(resolve => { release = resolve; });
+    const holding = lock(visitorWorkspaceKey(OWNER), () => barrier);
+    const changing = otherTab.savePage(OWNER, extra);
+    const remove = (expected) => operation === 'page'
+      ? repository.removePage(OWNER, first.id, expected)
+      : repository.removeMenu(OWNER, snapshot.menus[0].id, expected);
+    const removing = remove(snapshot);
+    release();
+    await holding;
+    const changed = await changing;
+    const writes = storage.writes;
+    await assert.rejects(removing, hasCode('conflict'));
+    assert.equal(storage.writes, writes);
+    assert.deepEqual(repository.read(OWNER), changed);
+    assertIntegrity(repository.read(OWNER));
+
+    const result = await remove(repository.read(OWNER));
+    if (operation === 'page') {
+      assert.deepEqual(result.pages.map(page => page.id), [extra.id]);
+      assert.deepEqual(result.menus[0].items.map(item => item.pageId), [extra.id]);
+    } else {
+      assert.equal(result.pages.length, 2);
+      assert.equal(result.menus.length, 0);
+    }
+    assertIntegrity(result);
+  }
+});
+
+test('deletion snapshots its expected workspace before waiting for the lock', async () => {
+  const { repository, lock } = setup();
+  const saved = await repository.savePage(OWNER, input());
+  let release;
+  const barrier = new Promise(resolve => { release = resolve; });
+  const holding = lock(visitorWorkspaceKey(OWNER), () => barrier);
+  const removing = repository.removePage(OWNER, saved.pages[0].id, saved);
+  saved.pages[0].title = 'Changed after request';
+  release();
+  await holding;
+  assert.equal((await removing).pages.length, 0);
+});
+
 test('all malformed persisted envelopes fail closed and cannot be overwritten by a mutation', async () => {
   const { repository, storage } = setup();
   const saved = await repository.savePage(OWNER, input());
@@ -178,7 +227,7 @@ test('all malformed persisted envelopes fail closed and cannot be overwritten by
     const raw = JSON.stringify(variant(structuredClone(saved)));
     storage.values.set(visitorWorkspaceKey(OWNER), raw);
     assert.throws(() => repository.read(OWNER), hasCode('corrupt'));
-    await assert.rejects(repository.removePage(OWNER, saved.pages[0].id), hasCode('corrupt'));
+    await assert.rejects(repository.removePage(OWNER, saved.pages[0].id, saved), hasCode('corrupt'));
     assert.equal(storage.values.get(visitorWorkspaceKey(OWNER)), raw);
   }
   storage.values.set(visitorWorkspaceKey(OWNER), '{broken json');
@@ -218,10 +267,10 @@ test('menus can be renamed, linked and removed while pages remain recoverable', 
   assert.equal(state.menus[1].items.find(item => item.pageId === one.id).label, 'Novo atalho');
   await assert.rejects(repository.linkPage(OWNER, randomUUID(), secondMenu.id, 'Missing'), hasCode('invalid'));
   await assert.rejects(repository.linkPage(OWNER, one.id, randomUUID(), 'Missing'), hasCode('invalid'));
-  state = await repository.removeMenu(OWNER, firstMenu.id);
+  state = await repository.removeMenu(OWNER, firstMenu.id, state);
   assert.equal(state.pages.length, 2);
   assert.equal(state.menus.length, 1);
-  state = await repository.removePage(OWNER, one.id);
+  state = await repository.removePage(OWNER, one.id, state);
   assert.equal(state.pages.length, 1);
   assert.ok(state.menus.every(menu => menu.items.every(item => item.pageId !== one.id)));
   assertIntegrity(state);

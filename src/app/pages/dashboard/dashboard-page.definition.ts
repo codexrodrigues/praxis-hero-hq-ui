@@ -182,7 +182,7 @@ export function reconcilePersistedDashboardPage<T extends Record<string, any> | 
         cfg?.templating?.chipColorMap?.['ABERTO'] === 'danger' &&
 trailingCol?.width === '216px' &&
         Array.isArray(cfg?.layout?.rowLayout?.columns) &&
-        cfg?.layout?.virtualScroll?.viewportHeight === '380px' &&
+        // Viewport height is authored presentation, not a feed contract version.
         cfg?.templating?.identity?.type === 'compose' &&
         Boolean(cfg?.templating?.identity?.props?.compose?.items?.[0]?.quickView) &&
         Boolean(cfg?.templating?.trailing?.quickView?.contentRef) &&

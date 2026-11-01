@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +13,8 @@ import {
   type WidgetPageDefinition,
 } from '@praxisui/core';
 import { DynamicPageBuilderComponent, PraxisPageSaveAsComponent, type PageSaveAsAdapter } from '@praxisui/page-builder';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
+import { PRAXIS_DIALOG_DATA, PraxisDialog } from '@praxisui/dialog';
 import { VisitorWorkspaceService } from '../../core/visitor-workspace.service';
 import { visitorPagePath } from '../../core/visitor-workspace.repository';
 import { DASHBOARD_PAGE_DEFINITION } from '../dashboard/dashboard-page.definition';
@@ -21,6 +22,17 @@ import { createBlankWorkspaceStudioPageDefinition } from '../workspace-studio/wo
 import { visitorLocalStorageProviders } from './visitor-local-config-storage';
 import { provideVisitorLabI18n } from './visitor-lab.i18n';
 import type { VisitorLabDraft } from './visitor-lab-copy-action.component';
+
+/** Message only; the canonical dialog renders actions, focus, layers and dismissal. */
+@Component({
+  selector: 'app-visitor-lab-confirm-message',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: '<p>{{ data.message }}</p>',
+  styles: 'p { margin: 0; line-height: 1.5; }',
+})
+class VisitorLabConfirmMessageComponent {
+  readonly data = inject<{ message: string }>(PRAXIS_DIALOG_DATA);
+}
 
 function createVisitorLabPageDefinition(
   defaults?: GlobalDynamicPagesDefaultsConfig,
@@ -43,12 +55,15 @@ export class VisitorLabEditorComponent {
   readonly store = inject(VisitorWorkspaceService);
   private readonly i18n = inject(PraxisI18nService);
   private readonly globalConfig = inject(GlobalConfigService, { optional: true });
+  private readonly dialog = inject(PraxisDialog);
+  private readonly destroyRef = inject(DestroyRef);
   readonly builder = viewChild(DynamicPageBuilderComponent);
   readonly saveAs = viewChild(PraxisPageSaveAsComponent);
   readonly page = signal<WidgetPageDefinition>(
     createVisitorLabPageDefinition(this.globalConfig?.getPages()?.defaults),
   );
   readonly busy = signal(false);
+  private confirming = false;
   readonly error = signal('');
   readonly missing = signal(false);
   readonly title = signal('');
@@ -97,14 +112,10 @@ export class VisitorLabEditorComponent {
   }
   text(key: string): string { return this.i18n.t(`visitorLab.${key}`); }
 
-  start(kind: 'blank' | 'dashboard'): void {
-    if (this.busy() || this.saveAs()?.busy()) return;
-    if (this.builder()?.currentPage().widgets.length && !window.confirm(this.text('confirmRestart'))) return;
-    this.page.set(
-      kind === 'dashboard'
-        ? structuredClone(DASHBOARD_PAGE_DEFINITION)
-        : createVisitorLabPageDefinition(this.globalConfig?.getPages()?.defaults),
-    );
+  async start(kind: 'blank' | 'dashboard'): Promise<void> {
+    if (this.busy() || this.saveAs()?.busy() || this.confirming) return;
+    if (this.builder()?.currentPage().widgets.length && !await this.confirmAction('confirmRestart', 'replaceDraft')) return;
+    this.page.set(kind === 'dashboard' ? structuredClone(DASHBOARD_PAGE_DEFINITION) : createVisitorLabPageDefinition(this.globalConfig?.getPages()?.defaults));
     this.seedRevision.update(revision => revision + 1);
   }
   async addToMenu(id: string): Promise<void> {
@@ -124,17 +135,44 @@ export class VisitorLabEditorComponent {
     await this.action(() => this.store.renameMenu(id, label));
   }
   async removeMenu(id: string): Promise<void> {
-    if (window.confirm(this.text('confirmRemoveMenu'))) await this.action(() => this.store.removeMenu(id));
+    const expected = structuredClone(this.store.workspace());
+    if (await this.confirmAction('confirmRemoveMenu', 'removeMenu')) await this.action(() => this.store.removeMenu(id, expected));
   }
   async removePage(id: string): Promise<void> {
-    if (!window.confirm(this.text('confirmRemove'))) return;
+    const expected = structuredClone(this.store.workspace());
+    if (!await this.confirmAction('confirmRemove', 'removePage')) return;
     await this.action(async () => {
-      await this.store.removePage(id);
+      await this.store.removePage(id, expected);
       if (this.saveAs()?.result()?.routePath === visitorPagePath(id)) this.saveAs()?.clearResult();
     });
   }
+  private async confirmAction(messageKey: string, actionKey: string): Promise<boolean> {
+    if (this.busy() || this.saveAs()?.busy() || this.confirming || this.destroyRef.destroyed) return false;
+    const context = JSON.stringify([this.store.owner(), this.store.revision(), this.pageId(), this.seedRevision()]);
+    this.confirming = true;
+    let unregister: (() => void) | undefined;
+    try {
+      const ref = this.dialog.open(VisitorLabConfirmMessageComponent, {
+        title: this.text(actionKey), data: { message: this.text(messageKey) },
+        actions: [
+          { id: 'cancel', text: this.text('cancel'), role: 'primary', fillMode: 'outline', themeColor: 'neutral', close: true, payload: false },
+          { id: 'confirm', text: this.text(actionKey), role: 'danger', themeColor: 'warn', fillMode: 'solid', close: true, payload: true },
+        ],
+        ariaRole: 'alertdialog', autoFocus: true, autoFocusedElement: '[data-testid="cancel"]',
+        closeOnNavigation: true, restoreFocus: true, disableClose: false,
+      });
+      unregister = this.destroyRef.onDestroy(() => ref.close(false));
+      const confirmed = await firstValueFrom(ref.afterClosed(), { defaultValue: false });
+      // A confirmation belongs to the exact page/persona revision that opened it.
+      return confirmed === true && !this.destroyRef.destroyed
+        && context === JSON.stringify([this.store.owner(), this.store.revision(), this.pageId(), this.seedRevision()]);
+    } finally {
+      unregister?.();
+      this.confirming = false;
+    }
+  }
   private async action(operation: () => Promise<void>): Promise<void> {
-    if (this.busy() || this.saveAs()?.busy()) return;
+    if (this.busy() || this.saveAs()?.busy() || this.confirming) return;
     this.busy.set(true); this.error.set('');
     try { await operation(); } catch (error: unknown) { this.error.set(this.store.errorCode(error)); }
     finally { this.busy.set(false); }

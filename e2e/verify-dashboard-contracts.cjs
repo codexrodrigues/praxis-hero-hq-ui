@@ -293,12 +293,51 @@ const distressItemsExpr = String(distressCfg?.expansion?.sections?.[0]?.itemsExp
 assert(
   donutConfig?.sizing?.height === 340 &&
     defconConfig?.sizing?.height === 340 &&
-    distressCfg?.layout?.virtualScroll?.viewportHeight === '380px' &&
+    distressCfg?.layout?.virtualScroll?.viewportHeight === '340px' &&
+    rawBundle.distressSignalsListConfig?.layout?.virtualScroll?.viewportHeight === '340px' &&
     distressItemsExpr.includes('#${item.id}') &&
     distressItemsExpr.includes('${item.origem}') &&
     distressItemsExpr.includes('${item.local}'),
-  'Row 14 harmoniza altura em 340px (incidentsSeverityDonut, defconGaugeChart, distressSignalsList) e preserva interpolação viva em itemsExpr do Dossiê de Sinais de Socorro',
+  'Row 14 declara altura de 340px nos gráficos e nas duas configurações da lista e preserva interpolação viva em itemsExpr do Dossiê de Sinais de Socorro',
 );
+// Run the real reconciler: the canonical list must not trigger replacement on
+// every load, including after upgrading a stale persisted list.
+const ts = require('typescript');
+const vm = require('node:vm');
+const dashboardModule = { exports: {} };
+const dashboardSource = fs.readFileSync(path.join(ROOT, 'src/app/pages/dashboard/dashboard-page.definition.ts'), 'utf8');
+vm.runInNewContext(ts.transpileModule(dashboardSource, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
+}).outputText, {
+  exports: dashboardModule.exports,
+  structuredClone,
+  require(id) {
+    if (id === './dashboard-page.definition.json') return rawBundle;
+    throw new Error(`Unexpected dashboard dependency: ${id}`);
+  },
+});
+const reconcile = dashboardModule.exports.reconcilePersistedDashboardPage;
+const staleDashboard = structuredClone(pageDef);
+staleDashboard.widgets.find((widget) => widget.key === 'distressSignalsList')
+  .definition.inputs.config.selection.showControl = true;
+const reconciledDashboard = reconcile(staleDashboard);
+assert(
+  reconciledDashboard !== staleDashboard &&
+    reconciledDashboard.widgets.find((widget) => widget.key === 'distressSignalsList')
+      ?.definition?.inputs?.config?.layout?.virtualScroll?.viewportHeight === '340px' &&
+    reconcile(reconciledDashboard) === reconciledDashboard,
+  'Reconciliação atualiza lista persistida desatualizada e é idempotente após aplicar o snapshot canônico',
+);
+// A theme must not replace a modern persisted definition because of its height.
+for (const height of ['340px', '380px', '480px']) {
+  const authored = structuredClone(pageDef);
+  const list = authored.widgets.find(widget => widget.key === 'distressSignalsList');
+  list.definition.inputs.config.layout.virtualScroll.viewportHeight = height;
+  list.definition.inputs.config.templating.risk.props.metric.label = 'RISCO PERSONALIZADO';
+  const before = JSON.stringify(authored);
+  assert(reconcile(authored) === authored && JSON.stringify(authored) === before,
+    `Reconciliação preserva definição authorada e altura ${height} sem reset pelo tema`);
+}
 assert(
   timelineNode?.markerVariant === 'icon' &&
     timelineNode?.itemLayout === 'split' &&

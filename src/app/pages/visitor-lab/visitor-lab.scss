@@ -19,15 +19,15 @@
   box-shadow: var(--node-shadow, 0 6px 24px rgba(15, 23, 42, 0.06));
 }
 h1 { margin: 6px 0 8px; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.03em; }
-h2 { font-size: 18px; font-weight: 700; margin-block: 16px 10px; }
+h2 { font-size: 18px; font-weight: var(--hero-emphasis-weight, 500); margin-block: 16px 10px; }
 p { margin: 0; max-width: 76ch; line-height: 1.6; }
-.eyebrow { color: var(--primary, var(--md-sys-color-primary)); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.eyebrow { color: var(--primary, var(--md-sys-color-primary)); font-size: 11px; font-weight: var(--hero-emphasis-weight, 500); letter-spacing: var(--hero-label-tracking, .025em); text-transform: uppercase; }
 .scope {
   white-space: nowrap;
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--hero-emphasis-weight, 500);
   color: var(--primary, var(--md-sys-color-primary));
   background: color-mix(in oklab, var(--primary, #2563eb) 12%, transparent);
   border: 1px solid color-mix(in oklab, var(--primary, #2563eb) 28%, transparent);

@@ -59,7 +59,7 @@
 .hero-executive-banner .prx-rich-card-title {
   font-family: var(--font-display) !important;
   font-size: clamp(1.45rem, 3.2vw, 2.2rem) !important;
-  font-weight: 700 !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
   line-height: 1.15 !important;
   background: linear-gradient(135deg, var(--foreground) 0%, color-mix(in oklab, var(--foreground) 70%, var(--primary)) 100%);
   -webkit-background-clip: text;
@@ -175,7 +175,7 @@
   height: 42px !important;
   padding: 0 20px !important;
   border-radius: 12px !important;
-  font-weight: 600 !important;
+  font-weight: var(--hero-emphasis-weight, 500) !important;
   font-size: 0.86rem !important;
   cursor: pointer !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
@@ -192,7 +192,7 @@
 .hero-executive-banner .prx-rich-action-button--raised,
 .hero-executive-banner .pdx-rich-action-button--raised {
   background: var(--command-gradient) !important;
-  color: var(--primary-foreground) !important;
+  color: var(--hero-command-foreground, var(--primary-foreground)) !important;
   border: none !important;
   box-shadow: 0 6px 18px color-mix(in oklab, var(--primary) 32%, transparent) !important;
 }
@@ -217,10 +217,10 @@
   gap: 6px;
   padding: 4px 12px;
   border-radius: 9999px;
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: var(--hero-small-text, 0.72rem);
+  font-weight: var(--hero-strong-weight, 500);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--hero-label-tracking, 0.025em);
 
   span.prx-rich-icon {
     font-size: 15px;
@@ -314,7 +314,7 @@
 .bento-kpi-card .pdx-rich-card__title {
   font-family: var(--font-display) !important;
   font-size: clamp(1.15rem, 2.2vw, 1.35rem) !important;
-  font-weight: 700 !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
   color: var(--foreground) !important;
   margin: 6px 0 4px !important;
   white-space: normal !important;
@@ -342,10 +342,10 @@
 .tag-status {
   display: inline-flex;
   align-items: center;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: var(--hero-small-text, 0.68rem);
+  font-weight: var(--hero-strong-weight, 500);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--hero-label-tracking, 0.025em);
   padding: 3px 10px;
   border-radius: 9999px;
 }
@@ -443,7 +443,7 @@
 }
 
 .card-footnote {
-  font-size: 0.72rem;
+  font-size: var(--hero-small-text, 0.72rem);
   line-height: 1.45;
   color: var(--muted-foreground);
   margin-top: 6px;
@@ -550,7 +550,7 @@
 .hub-card-action .pdx-rich-action-card__title {
   font-family: var(--font-display) !important;
   font-size: 1.05rem !important;
-  font-weight: 700 !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
   color: var(--foreground) !important;
 }
 
@@ -568,10 +568,10 @@
   margin-top: 10px !important;
   padding: 3px 10px !important;
   border-radius: 9999px !important;
-  font-family: var(--font-mono) !important;
-  font-size: 0.68rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.05em !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.68rem) !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
+  letter-spacing: var(--hero-label-tracking, 0.025em) !important;
   text-transform: uppercase !important;
   color: var(--hub-accent) !important;
   background: color-mix(in oklab, var(--hub-accent) 12%, transparent) !important;
@@ -597,7 +597,7 @@
   padding: 0 16px !important;
   border-radius: 10px !important;
   font-size: 0.8rem !important;
-  font-weight: 600 !important;
+  font-weight: var(--hero-emphasis-weight, 500) !important;
   cursor: pointer !important;
   border: 1px solid var(--border) !important;
   background: var(--card) !important;
@@ -644,10 +644,10 @@ praxis-widget-shell .pdx-rich-timeline {
 
 praxis-widget-shell .prx-rich-timeline__title,
 praxis-widget-shell .pdx-rich-timeline__title {
-  font-family: var(--font-mono) !important;
-  font-size: 0.72rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.08em !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.72rem) !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
+  letter-spacing: var(--hero-label-tracking, 0.025em) !important;
   text-transform: uppercase !important;
   color: var(--primary) !important;
   margin-bottom: 14px !important;
@@ -705,10 +705,10 @@ praxis-widget-shell .prx-rich-timeline__item-opposite {
   margin-top: 8px !important;
   padding: 2px 8px !important;
   border-radius: 6px !important;
-  font-family: var(--font-mono) !important;
-  font-size: 0.7rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.04em !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.7rem) !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
+  letter-spacing: var(--hero-label-tracking, 0.025em) !important;
   color: var(--primary) !important;
   background: color-mix(in oklab, var(--primary) 10%, transparent) !important;
   border: 1px solid color-mix(in oklab, var(--primary) 24%, transparent) !important;
@@ -753,10 +753,10 @@ praxis-widget-shell .prx-rich-timeline__item-badge {
 }
 
 praxis-widget-shell .prx-rich-timeline__item-badge .prx-rich-badge {
-  font-family: var(--font-mono) !important;
-  font-size: 0.65rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.05em !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.65rem) !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
+  letter-spacing: var(--hero-label-tracking, 0.025em) !important;
   text-transform: uppercase !important;
   line-height: 1.4 !important;
   padding: 3px 10px !important;
@@ -793,8 +793,8 @@ praxis-widget-shell .prx-rich-timeline__item-badge .prx-rich-badge[data-tone='su
 }
 
 praxis-widget-shell .prx-rich-timeline__item-meta {
-  font-family: var(--font-mono) !important;
-  font-size: 0.72rem !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.72rem) !important;
   letter-spacing: 0.02em !important;
   color: var(--muted-foreground) !important;
 }
@@ -880,7 +880,7 @@ praxis-widget-shell praxis-list .list-row-slot--identity {
   .primary .prx-rich-text {
     display: block !important;
     font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: var(--hero-strong-weight, 500);
     font-size: 0.86rem;
     color: var(--foreground);
     line-height: 1.3;
@@ -893,8 +893,8 @@ praxis-widget-shell praxis-list .list-row-slot--identity {
   .secondary,
   .secondary .prx-rich-text {
     display: block !important;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-family: var(--hero-reading-font, var(--font-mono));
+    font-size: var(--hero-small-text, 0.72rem);
     color: var(--muted-foreground);
     line-height: 1.3;
     overflow: hidden !important;
@@ -921,10 +921,10 @@ praxis-widget-shell praxis-list .list-row-slot--risk {
     }
 
     .p-list-metric__label {
-      font-family: var(--font-mono);
-      font-size: 0.58rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
+      font-family: var(--hero-reading-font, var(--font-mono));
+      font-size: var(--hero-small-text, 0.58rem);
+      font-weight: var(--hero-strong-weight, 500);
+      letter-spacing: var(--hero-label-tracking, 0.025em);
       text-transform: uppercase;
       color: var(--muted-foreground);
     }
@@ -932,7 +932,7 @@ praxis-widget-shell praxis-list .list-row-slot--risk {
     .p-list-metric__value {
       font-family: var(--font-display);
       font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: var(--hero-strong-weight, 500);
       font-variant-numeric: tabular-nums;
     }
 
@@ -940,9 +940,9 @@ praxis-widget-shell praxis-list .list-row-slot--risk {
       display: block;
       width: 100%;
       text-align: center;
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      font-weight: 600;
+      font-family: var(--hero-reading-font, var(--font-mono));
+      font-size: var(--hero-small-text, 0.62rem);
+      font-weight: var(--hero-emphasis-weight, 500);
       color: var(--muted-foreground);
     }
   }
@@ -955,10 +955,10 @@ praxis-widget-shell praxis-list .item-expansion {
   background: color-mix(in oklab, var(--background) 48%, var(--card)) !important;
 
   .expansion-section-title {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
+    font-family: var(--hero-reading-font, var(--font-mono));
+    font-size: var(--hero-small-text, 0.68rem);
+    font-weight: var(--hero-strong-weight, 500);
+    letter-spacing: var(--hero-label-tracking, 0.025em);
     color: var(--primary);
   }
 
@@ -979,10 +979,10 @@ praxis-widget-shell praxis-list .item-expansion {
   }
 
   .expansion-key-value-row dt {
-    font-family: var(--font-mono);
-    font-size: 0.63rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    font-family: var(--hero-reading-font, var(--font-mono));
+    font-size: var(--hero-small-text, 0.63rem);
+    font-weight: var(--hero-strong-weight, 500);
+    letter-spacing: var(--hero-label-tracking, 0.025em);
     line-height: 1.25;
     color: var(--muted-foreground);
     white-space: normal;
@@ -992,7 +992,7 @@ praxis-widget-shell praxis-list .item-expansion {
   .expansion-key-value-row dd {
     font-family: var(--font-display);
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: var(--hero-strong-weight, 500);
     line-height: 1.35;
     color: var(--foreground);
     white-space: normal;
@@ -1044,17 +1044,17 @@ praxis-widget-shell praxis-list .item-expansion {
 }
 
 .pfx-expansion-node-card-grid__title-text {
-  font-family: var(--font-mono) !important;
-  font-size: 0.72rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.08em !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.72rem) !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
+  letter-spacing: var(--hero-label-tracking, 0.025em) !important;
   text-transform: uppercase !important;
   color: var(--primary) !important;
 }
 
 .pfx-expansion-node-card-grid__subtitle-text {
-  font-family: var(--font-mono) !important;
-  font-size: 0.68rem !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.68rem) !important;
   font-weight: 500 !important;
   letter-spacing: 0.03em !important;
   color: var(--muted-foreground) !important;
@@ -1101,10 +1101,10 @@ praxis-widget-shell praxis-list .item-expansion {
 }
 
 .pfx-expansion-node-card-grid__card-host .prx-rich-card-title {
-  font-family: var(--font-mono) !important;
-  font-size: 0.7rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.06em !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.7rem) !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
+  letter-spacing: var(--hero-label-tracking, 0.025em) !important;
   text-transform: uppercase !important;
   color: var(--muted-foreground) !important;
 }
@@ -1147,7 +1147,7 @@ praxis-widget-shell praxis-list .item-expansion {
 .pfx-expansion-detail-panel .prx-rich-metric-value {
   font-family: var(--font-display) !important;
   font-size: 1.15rem !important;
-  font-weight: 800 !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
   letter-spacing: -0.02em !important;
   line-height: 1.2 !important;
   font-variant-numeric: tabular-nums !important;
@@ -1155,8 +1155,8 @@ praxis-widget-shell praxis-list .item-expansion {
 }
 
 .pfx-expansion-detail-panel .prx-rich-metric-caption {
-  font-family: var(--font-mono) !important;
-  font-size: 0.72rem !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.72rem) !important;
   color: var(--muted-foreground) !important;
 }
 
@@ -1174,10 +1174,10 @@ praxis-widget-shell praxis-list .item-expansion {
 }
 
 .pfx-expansion-detail-panel .prx-rich-callout__title {
-  font-family: var(--font-mono) !important;
-  font-size: 0.68rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.06em !important;
+  font-family: var(--hero-reading-font, var(--font-mono)) !important;
+  font-size: var(--hero-small-text, 0.68rem) !important;
+  font-weight: var(--hero-strong-weight, 500) !important;
+  letter-spacing: var(--hero-label-tracking, 0.025em) !important;
   text-transform: uppercase !important;
   color: var(--primary) !important;
   margin-bottom: 2px !important;
