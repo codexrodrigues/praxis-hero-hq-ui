@@ -3,7 +3,7 @@
 @use '@praxisui/core/theming' as praxis;
 
 html {
-  @include mat.theme((color: mat.$azure-palette, typography: (plain-family: var(--font-sans), brand-family: var(--font-display)), density: 0));
+  @include mat.theme((color: mat.$azure-palette, typography: (plain-family: var(--font-sans), brand-family: var(--font-display), regular-weight: 400, medium-weight: 400, bold-weight: 600), density: 0));
 }
 $surfaces: (
   'surface-container-lowest': var(--background),
@@ -212,9 +212,9 @@ html[data-theme] button.primary-action-pill:not(:disabled):not([aria-disabled='t
 html[data-theme] button.mat-mdc-unelevated-button.mat-primary:not(:disabled):not([aria-disabled='true']),
 html[data-theme] button.mat-mdc-raised-button.mat-primary:not(:disabled):not([aria-disabled='true']) {
   background: var(--command-gradient) !important;
-  color: var(--primary-foreground) !important;
+  color: var(--hero-command-foreground, var(--primary-foreground)) !important;
   border: none !important;
-  font-weight: 600 !important;
+  font-weight: var(--hero-emphasis-weight, 500) !important;
   box-shadow: var(--float-shadow, 0 4px 14px rgba(0, 0, 0, 0.25)) !important;
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease, filter 0.15s ease !important;
 
@@ -228,6 +228,7 @@ html[data-theme] button.mat-mdc-raised-button.mat-primary:not(:disabled):not([ar
 .theme-swatch {
   display: inline-block; width: 16px; height: 16px; margin-inline-end: 10px;
   border: 1px solid var(--border); border-radius: 50%; vertical-align: middle;
+  &[data-preview='insignia'] { background: #0d1b2a; }
   &[data-preview='brasa'] { background: #a4472f; }
   &[data-preview='classic'] { background: oklch(0.54614972 0.21520775 262.88091714); }
   &[data-preview='light-tech'] { background: oklch(0.45 0.092 232); }
@@ -236,4 +237,24 @@ html[data-theme] button.mat-mdc-raised-button.mat-primary:not(:disabled):not([ar
 :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Theme only through inherited canonical tokens at the shell's sidebar scope.
+   Its brand, active marker and focus share primary/ring with the dark surface. */
+html[data-theme='insignia'] .praxis-shell__sidebar {
+  --command-gradient: linear-gradient(var(--sidebar-accent), var(--sidebar-accent));
+  --hero-command-foreground: var(--sidebar-accent-foreground);
+  --primary: var(--sidebar-accent);
+  --primary-foreground: var(--sidebar-accent-foreground);
+  --ring: var(--sidebar-primary);
+}
+
+/* Material owns the type scale; these existing system roles apply across themes. */
+html {
+  @include mat.theme-overrides((
+    headline-large-weight: 500, headline-medium-weight: 500, headline-small-weight: 500,
+    title-large-weight: 500, title-medium-weight: 500, title-small-weight: 500,
+    label-large-tracking: 0, label-medium-tracking: 0.01em,
+    body-large-tracking: 0.005em, body-medium-tracking: 0.005em,
+  ));
 }

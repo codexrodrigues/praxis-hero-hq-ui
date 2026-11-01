@@ -7,7 +7,7 @@ export class ThemeService {
   private readonly document = inject(DOCUMENT);
   private readonly browser = this.document.defaultView;
   readonly themes = workspaceThemes;
-  private readonly selected = signal<ThemeMode>('brasa');
+  private readonly selected = signal<ThemeMode>('insignia');
   readonly theme = this.selected.asReadonly();
   readonly isDark = computed(() => this.theme() === 'dark-tech');
   readonly current = computed(() => this.themes.find(t => t.id === this.theme())!);

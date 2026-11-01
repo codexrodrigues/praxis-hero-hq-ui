@@ -40,6 +40,10 @@ export const GLOBAL_CONFIG_SEED: Partial<GlobalConfig> = {
       typography: {
         fontSize: '14px',
         headerFontSize: '13px',
+        fontWeight: 400,
+        headerFontWeight: 500,
+        lineHeight: '1.5',
+        letterSpacing: '0.005em',
       },
     },
     toolbar: {

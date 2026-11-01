@@ -5,10 +5,10 @@ import vm from 'node:vm';
 const source = await readFile(new URL('../../src/app/core/theme.model.ts', import.meta.url), 'utf8');
 const code = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.ES2022}}).outputText;
 const {resolveTheme, workspaceThemes} = await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
-assert.deepEqual(workspaceThemes.map(t => t.name), ['Brasa','Essência','Aurora','Órbita']);
+assert.deepEqual(workspaceThemes.map(t => t.name), ['Insígnia','Brasa','Essência','Aurora','Órbita']);
 const html = await readFile(new URL('../../src/index.html', import.meta.url), 'utf8');
 const bootstrap = html.match(/<script>(.*?)<\/script>/s)[1];
-for (const value of [undefined, null, '', 'invalid', 'light', 'dark', 'classic', 'light-tech', 'dark-tech', 'brasa']) {
+for (const value of [undefined, null, '', 'invalid', 'light', 'dark', 'classic', 'light-tech', 'dark-tech', 'brasa', 'insignia']) {
   const root = {dataset: {},classList: {toggle(key, on) { this[key] = on; },add(key){ this[key] = true; },remove(key){this[key]=false;}}};
   vm.runInNewContext(bootstrap, {localStorage: {getItem: () => value},document:{documentElement:root}});
   assert.equal(root.dataset.theme, resolveTheme(value));
@@ -16,11 +16,11 @@ for (const value of [undefined, null, '', 'invalid', 'light', 'dark', 'classic',
 }
 const root={dataset:{},classList:{add(key){this[key]=true;},remove(key){this[key]=false;}}};
 vm.runInNewContext(bootstrap,{localStorage:{getItem(){throw Error('blocked')}},document:{documentElement:root}});
-assert.equal(root.dataset.theme,'brasa');
+assert.equal(root.dataset.theme,'insignia');
 assert.equal(root.classList.dark,false);
 assert.match(html,/family=Material\+Symbols\+Outlined/);
 assert.match(html,/family=Work\+Sans/);
-console.log('Four-theme catalog, 10 preference/bootstrap cases, blocked storage and font links passed.');
+console.log('Five-theme catalog, 11 preference/bootstrap cases, blocked storage and font links passed.');
 const palettes = await readFile(new URL('../../src/styles/workspace-themes.scss', import.meta.url),'utf8');
 function luminance(value) {
   if(value.startsWith('#')) {
@@ -48,12 +48,14 @@ for (const theme of workspaceThemes) {
   }
 }
 
-// Brasa controls must remain distinguishable on all three actual host surfaces.
-const brasaBody=palettes.match(/:root\[data-theme="brasa"\]\s*\{([^}]+)\}/)[1];
-const brasaTokens=Object.fromEntries([...brasaBody.matchAll(/--([\w-]+):\s*([^;]+);/g)].map(m=>[m[1],m[2]]));
-for(const [fore,back,min] of [['input','background',3],['input','card',3],['input','muted',3],['state-success','card',4.5],['state-warning','card',4.5],['primary','background',4.5]]) {
-  const a=luminance(brasaTokens[fore]),b=luminance(brasaTokens[back]);const ratio=(Math.max(a,b)+0.05)/(Math.min(a,b)+0.05);
-  assert.ok(ratio>=min,`Brasa ${fore}/${back}: ${ratio}`);console.log(`Brasa control: ${fore}/${back} ${ratio.toFixed(2)}:1`);
+// Controls must remain distinguishable on all three actual host surfaces.
+for (const id of ['brasa', 'insignia']) {
+ const body=palettes.match(new RegExp(':root\\[data-theme="'+id+'"\\]\\s*\\{([^}]+)\\}'))[1];
+ const tokens=Object.fromEntries([...body.matchAll(/--([\w-]+):\s*([^;]+);/g)].map(m=>[m[1],m[2]]));
+ for(const [fore,back,min] of [['input','background',3],['input','card',3],['input','muted',3],['state-success','card',4.5],['state-warning','card',4.5],['primary','background',4.5]]) {
+  const a=luminance(tokens[fore]),b=luminance(tokens[back]);const ratio=(Math.max(a,b)+0.05)/(Math.min(a,b)+0.05);
+  assert.ok(ratio>=min,`${id} ${fore}/${back}: ${ratio}`);console.log(`${id} control: ${fore}/${back} ${ratio.toFixed(2)}:1`);
+ }
 }
 
 // Optional source-of-truth comparison, without making the host depend on a sibling checkout.
@@ -65,7 +67,7 @@ if (refIndex!==-1) {
   const entry=await readFile(resolve(ref,'src/styles.css'),'utf8');
   const files=[...entry.matchAll(/@import\s+['"](\.\/styles\/[^'"]+)['"]/g)].map(m=>resolve(ref,'src',m[1]));
   files.push(resolve(ref,'src/themes.css'));
-  const referenceThemes=workspaceThemes.filter(theme=>theme.id!=='brasa');
+  const referenceThemes=workspaceThemes.filter(theme=>!['brasa','insignia'].includes(theme.id));
   const declarations=Object.fromEntries(referenceThemes.map(t=>[t.id,{}]));
   for (const file of files) {
     const css=postcss.parse(await readFile(file,'utf8'));

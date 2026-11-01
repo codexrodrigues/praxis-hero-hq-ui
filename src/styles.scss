@@ -30,12 +30,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Private host roles shared by all appearances; component behavior stays canonical. */
+:root {
+  --hero-strong-weight: 500;
+  --hero-emphasis-weight: 500;
+  --hero-label-tracking: 0.025em;
+  --hero-icon-weight: 300;
+}
+
 /* Native host controls inherit their surrounding typography; Material and
    Praxis controls keep their more specific component tokens. */
 button, input, select, textarea { font-family: inherit; }
 
 /* Host headings share the same semantic display role as Material brand text. */
-h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: var(--hero-strong-weight, 500); }
 
 /* Glassmorphism Panel */
 .glass-panel {
@@ -66,7 +74,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); }
 
 /* Primary Button / Highlight Gradient */
 .primary-gradient {
-  color: var(--primary-foreground);
+  color: var(--hero-command-foreground, var(--primary-foreground));
   background: var(--command-gradient, var(--primary));
   box-shadow: 0 10px 28px color-mix(in oklab, var(--primary) 24%, transparent);
 }
@@ -83,8 +91,9 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); }
 }
 
 /* Material Symbols alignment */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+.material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp {
+  font-weight: normal;
+  font-variation-settings: 'FILL' 0, 'wght' var(--hero-icon-weight, 300), 'GRAD' 0, 'opsz' 24;
   vertical-align: middle;
 }
 
@@ -116,7 +125,7 @@ praxis-crud, praxis-table, praxis-dynamic-form {
 .pfx-loading-inline-text {
   font-family: var(--hero-reading-font, var(--font-mono)) !important;
   font-size: var(--hero-small-text, 11px) !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: var(--hero-label-tracking, 0.025em) !important;
   text-transform: uppercase !important;
   margin-right: 64px !important;
 }
@@ -157,7 +166,7 @@ praxis-crud, praxis-table, praxis-dynamic-form {
   border: 1px solid color-mix(in oklab, var(--primary) 35%, var(--border)) !important;
   font-family: var(--hero-reading-font, var(--font-mono)) !important;
   font-size: var(--hero-small-text, 11px) !important;
-  font-weight: 600 !important;
+  font-weight: var(--hero-emphasis-weight, 500) !important;
   letter-spacing: 0.01em !important;
   white-space: nowrap !important;
   overflow: visible !important;
@@ -178,7 +187,7 @@ praxis-crud, praxis-table, praxis-dynamic-form {
   align-items: center !important;
   gap: 8px !important;
   padding: 2px 4px !important;
-  font-weight: 700;
+  font-weight: var(--hero-strong-weight, 500);
   transition: transform 0.2s ease;
 
   &:hover {
@@ -235,7 +244,7 @@ praxis-crud, praxis-table, praxis-dynamic-form {
   .pfx-micro-radial-value {
     font-family: var(--hero-reading-font, var(--font-mono)) !important;
     font-size: var(--hero-small-text, 11.5px) !important;
-    font-weight: 700 !important;
+    font-weight: var(--hero-strong-weight, 500) !important;
     letter-spacing: -0.02em !important;
     padding: 2px 7px !important;
     border-radius: 6px !important;
