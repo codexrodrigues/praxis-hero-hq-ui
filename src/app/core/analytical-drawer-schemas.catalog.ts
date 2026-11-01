@@ -107,7 +107,7 @@ export const MISSION_ANALYTICAL_DRAWER_CONFIG: PraxisAnalyticalDrawerSchema = {
   relations: [
     {
       key: 'participantes',
-      endpoint: '/api/operations/missoes-participantes/filter?missaoId={id}',
+      endpoint: '/api/operations/missao-participantes/filter?missaoId={id}',
       cardinality: 'collection',
       cache: true,
     },
