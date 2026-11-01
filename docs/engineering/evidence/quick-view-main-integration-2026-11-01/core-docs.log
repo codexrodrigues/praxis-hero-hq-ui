@@ -1,0 +1,34 @@
+
+> praxis-ui-workspace@0.0.0 docs:validate-frontmatter:changed
+> node tools/validate-doc-frontmatter.js --changed
+
+Docs governados validados: 182
+Docs legados observados: 5
+Modo incremental: ativo (base=working-tree-only; docs governados alterados=0)
+
+Warnings:
+- docs/2026-04-detail-rich-surfaces-phase-0-decision-record.md: secao recomendada ausente para document_kind=adr-record; esperado um de: `## Context`
+- docs/2026-04-detail-rich-surfaces-phase-0-decision-record.md: secao recomendada ausente para document_kind=adr-record; esperado um de: `## Decision`
+- docs/2026-04-platform-i18n-next-gen-rfc.md: secao recomendada ausente para document_kind=adr-record; esperado um de: `## Context`
+- docs/2026-04-platform-i18n-next-gen-rfc.md: secao recomendada ausente para document_kind=adr-record; esperado um de: `## Decision`
+- docs/2026-04-platform-i18n-phase-0-backlog.md: secao recomendada ausente para document_kind=runbook; esperado um de: `## Operational Response`, `## Resposta operacional`, `## Routing Rules`
+- docs/2026-04-platform-i18n-phase-1-backlog.md: secao recomendada ausente para document_kind=runbook; esperado um de: `## Operational Response`, `## Resposta operacional`, `## Routing Rules`
+- docs/2026-04-platform-i18n-phase-1-task-breakdown.md: secao recomendada ausente para document_kind=runbook; esperado um de: `## Operational Response`, `## Resposta operacional`, `## Routing Rules`
+- docs/2026-04-rich-blocks-host-capabilities-protocol.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Pre-requisitos`, `## Pré-requisitos`, `## Instalacao minima`, `## Instalação mínima`, `## Instalacao base`, `## Instalação base`, `## Prerequisites`
+- docs/2026-04-rich-blocks-implementation-rfc.md: secao recomendada ausente para document_kind=adr-record; esperado um de: `## Context`
+- docs/2026-04-rich-blocks-implementation-rfc.md: secao recomendada ausente para document_kind=adr-record; esperado um de: `## Decision`
+- docs/CRUD-REMOTE-BASELINE.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Quando usar`, `## Objetivo`, `## Escopo`, `## Escopo deste documento`
+- docs/CRUD-REMOTE-BASELINE.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Pre-requisitos`, `## Pré-requisitos`, `## Instalacao minima`, `## Instalação mínima`, `## Instalacao base`, `## Instalação base`, `## Prerequisites`
+- docs/DETERMINISTIC-ARBITRATION-BASELINE.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Quando usar`, `## Objetivo`, `## Escopo`, `## Escopo deste documento`
+- docs/DETERMINISTIC-ARBITRATION-BASELINE.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Pre-requisitos`, `## Pré-requisitos`, `## Instalacao minima`, `## Instalação mínima`, `## Instalacao base`, `## Instalação base`, `## Prerequisites`
+- projects/praxis-core/docs/rfc-rich-content-contract.md: secao recomendada ausente para document_kind=adr-record; esperado um de: `## Context`
+- projects/praxis-core/docs/rfc-rich-content-contract.md: secao recomendada ausente para document_kind=adr-record; esperado um de: `## Decision`
+- projects/praxis-crud/docs/crud-authoring-validation-log.md: secao recomendada ausente para document_kind=runbook; esperado um de: `## Purpose`, `## Objetivo`
+- projects/praxis-crud/docs/crud-authoring-validation-log.md: secao recomendada ausente para document_kind=runbook; esperado um de: `## Operational Response`, `## Resposta operacional`, `## Routing Rules`
+- projects/praxis-crud/docs/crud-authoring-wave-execution.md: secao recomendada ausente para document_kind=runbook; esperado um de: `## Purpose`, `## Objetivo`
+- projects/praxis-crud/docs/crud-authoring-wave-execution.md: secao recomendada ausente para document_kind=runbook; esperado um de: `## Operational Response`, `## Resposta operacional`, `## Routing Rules`
+- projects/praxis-dynamic-form/docs/dynamic-form-llm-rule-authoring-guide.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Quando usar`, `## Objetivo`, `## Escopo`, `## Escopo deste documento`
+- projects/praxis-dynamic-form/docs/dynamic-form-llm-rule-authoring-guide.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Pre-requisitos`, `## Pré-requisitos`, `## Instalacao minima`, `## Instalação mínima`, `## Instalacao base`, `## Instalação base`, `## Prerequisites`
+- projects/praxis-dynamic-form/docs/dynamic-form-visual-builder-parity-audit.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Quando usar`, `## Objetivo`, `## Escopo`, `## Escopo deste documento`
+- projects/praxis-dynamic-form/docs/dynamic-form-visual-builder-parity-audit.md: secao recomendada ausente para document_kind=host-guide; esperado um de: `## Pre-requisitos`, `## Pré-requisitos`, `## Instalacao minima`, `## Instalação mínima`, `## Instalacao base`, `## Instalação base`, `## Prerequisites`
+Frontmatter OK (incremental): 0 docs governados alterados sem bloqueios.

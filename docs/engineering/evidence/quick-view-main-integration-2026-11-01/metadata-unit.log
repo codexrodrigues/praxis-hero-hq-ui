@@ -1,0 +1,274 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------< io.github.codexrodrigues:praxis-metadata-starter >----------
+[INFO] Building Praxis Metadata Starter 8.0.0-rc.188
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ praxis-metadata-starter ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 56 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ praxis-metadata-starter ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 586 source files with javac [debug release 21] to target/classes
+[INFO] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/main/java/org/praxisplatform/uischema/openapi/OpenApiCanonicalOperationResolver.java: Some input files use or override a deprecated API.
+[INFO] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/main/java/org/praxisplatform/uischema/openapi/OpenApiCanonicalOperationResolver.java: Recompile with -Xlint:deprecation for details.
+[INFO] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/main/java/org/praxisplatform/uischema/schema/FilteredSchemaProjection.java: Some input files use unchecked or unsafe operations.
+[INFO] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/main/java/org/praxisplatform/uischema/schema/FilteredSchemaProjection.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- download:2.1.0:wget (download-published-v19-migration-fixture) @ praxis-metadata-starter ---
+Nov 01, 2026 2:17:55 PM org.apache.http.client.protocol.ResponseProcessCookies processCookies
+WARNING: Invalid cookie header: "set-cookie: __cf_bm=PtE7LBA_C.TL6oaMD0Be_2zfW9E_xEUBkKPyokhfTTo-1793553475.9559145-1.0.1.1-y2YAxEhcsIltoPfZ5gbmhinvvC1CGlyTK2bAgJzaG.H_QsafnhZXmlhN.uu11qvxFKKK5sTUllodoU6g8UzVBEFZBAbKDFt4Pc.Lbq__wYsg6jn3H33zP88vOsV3LvDp; HttpOnly; SameSite=None; Secure; Path=/; Domain=repo.maven.apache.org; Expires=Sun, 01 Nov 2026 17:47:55 GMT". Invalid 'expires' attribute: Sun, 01 Nov 2026 17:47:55 GMT
+[INFO] 
+[INFO] --- download:2.1.0:wget (download-published-v17-migration-fixture) @ praxis-metadata-starter ---
+Nov 01, 2026 2:17:56 PM org.apache.http.client.protocol.ResponseProcessCookies processCookies
+WARNING: Invalid cookie header: "set-cookie: __cf_bm=uwBYeC85LYMoMGFLVyGwbyaeAzt92v8VClHSW13gyH0-1793553476.185772-1.0.1.1-ygJT26yu9TETMU6FilsPOwvJDweypKq0eo3Il2sM9Y_3ZMkVcmwTcL2I_WXvs7wUczxibHp3JrcfPxNuT0aoHPk8CbEp17VXrO8oeV4_fE7W6_XGWFZIRD2L4OLgAbhF; HttpOnly; SameSite=None; Secure; Path=/; Domain=repo.maven.apache.org; Expires=Sun, 01 Nov 2026 17:47:56 GMT". Invalid 'expires' attribute: Sun, 01 Nov 2026 17:47:56 GMT
+[INFO] 
+[INFO] --- download:2.1.0:wget (download-published-v16-migration-fixture) @ praxis-metadata-starter ---
+Nov 01, 2026 2:17:56 PM org.apache.http.client.protocol.ResponseProcessCookies processCookies
+WARNING: Invalid cookie header: "set-cookie: __cf_bm=_bWAKX1Q1paZG.WQ5y2yTFfFK4jRmdIZ0Jjs4yWmZXk-1793553476.4054937-1.0.1.1-NHVG2fcJn5tUnSgGGVpl139ZR.S0B1pKONrNICHj3llzL2wjgY2vuAAKEyJfAEsdOwLMpUYkABPlHLHg9F99mqFr9_LbHzAerK4BOvioqb_vhrZ8F.H7MCj5QsUiqWzE; HttpOnly; SameSite=None; Secure; Path=/; Domain=repo.maven.apache.org; Expires=Sun, 01 Nov 2026 17:47:56 GMT". Invalid 'expires' attribute: Sun, 01 Nov 2026 17:47:56 GMT
+[INFO] 
+[INFO] --- download:2.1.0:wget (download-published-v15-migration-fixture) @ praxis-metadata-starter ---
+Nov 01, 2026 2:17:56 PM org.apache.http.client.protocol.ResponseProcessCookies processCookies
+WARNING: Invalid cookie header: "set-cookie: __cf_bm=4Tku2QuaiL12szvs3fXW4ljcIUQ6TPOFyGuya158ywQ-1793553476.6207626-1.0.1.1-h8WdKkE4lgG7Wlm2mpqHeagp7KbB1CkGIEm5rEPxPGYnPn7GT_9HQVZSCNHTnhMsxTBuSXrtUmyy4QhPALYXYeglMbvGZXVRad08smPuvCnY2ueGSseXnPpqTKOLWau2; HttpOnly; SameSite=None; Secure; Path=/; Domain=repo.maven.apache.org; Expires=Sun, 01 Nov 2026 17:47:56 GMT". Invalid 'expires' attribute: Sun, 01 Nov 2026 17:47:56 GMT
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ praxis-metadata-starter ---
+[INFO] Copying 21 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ praxis-metadata-starter ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 344 source files with javac [debug release 21] to target/test-classes
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[INFO] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/docs/ApiDocsControllerSchemaHashTest.java: Some input files use or override a deprecated API.
+[INFO] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/controller/docs/ApiDocsControllerSchemaHashTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/extension/CustomOpenApiResolverTest.java: Some input files use unchecked or unsafe operations.
+[INFO] /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-metadata-quick-view-integration/src/test/java/org/praxisplatform/uischema/extension/CustomOpenApiResolverTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ praxis-metadata-starter ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/Users/rodrigo/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+14:18:04.986 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/missions/filter' -> grupo resolvido: 'missions'
+14:18:05.008 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'missions' (~0KB)
+14:18:05.009 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.010 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.017 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /missions/filter
+14:18:05.035 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/profiles/{id}/details' -> grupo resolvido: 'profiles'
+14:18:05.036 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'profiles' (~0KB)
+14:18:05.036 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.036 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.044 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/administracao-pessoal/codigos-frequencia/{id}/documentos-legais/{id}' -> grupo resolvido: 'administracao-pessoal'
+14:18:05.044 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'administracao-pessoal' (~0KB)
+14:18:05.044 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.044 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.048 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/catalog/produtos/filter' -> grupo resolvido: 'api-catalog-produtos'
+14:18:05.049 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-catalog-produtos' (~0KB)
+14:18:05.049 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.049 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.049 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: ProdutoDTO
+14:18:05.052 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.053 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.053 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.053 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.053 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.056 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats' -> grupo resolvido: 'stats'
+14:18:05.057 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:18:05.057 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.057 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.057 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /stats
+14:18:05.059 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users/missing' -> grupo resolvido: 'users'
+14:18:05.060 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.062 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats/distribution' -> grupo resolvido: 'stats'
+14:18:05.063 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:18:05.063 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.063 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: RestApiResponseDistributionStatsResponse
+14:18:05.063 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Tipo real extraido de RestApiResponseDistributionStatsResponse: DistributionStatsResponse
+14:18:05.063 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.066 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/missions/filter' -> grupo resolvido: 'missions'
+14:18:05.067 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'missions' (~0KB)
+14:18:05.067 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.067 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.067 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /missions/filter
+14:18:05.070 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.071 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.071 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.071 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.071 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.072 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.072 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.072 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.072 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.072 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.072 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UserResponse'
+14:18:05.075 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/missions/{id}/team-plan' -> grupo resolvido: 'missions'
+14:18:05.075 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'missions' (~0KB)
+14:18:05.075 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.075 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.079 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/administracao-pessoal/empresas/filter' -> grupo resolvido: 'api-administracao-pessoal-empresas'
+14:18:05.080 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-administracao-pessoal-empresas' (~0KB)
+14:18:05.080 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.080 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.080 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: EmpresaDTO
+14:18:05.081 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/administracao-pessoal/empresas/filter' -> grupo resolvido: 'api-administracao-pessoal-empresas'
+14:18:05.081 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.081 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: EmpresaDTO
+14:18:05.081 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.081 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: EmpresaDTO
+14:18:05.090 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.090 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.090 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.091 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.091 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.094 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats' -> grupo resolvido: 'stats'
+14:18:05.095 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:18:05.095 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.095 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: StatsResponse
+14:18:05.095 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.095 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: StatsResponse
+14:18:05.097 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/human-resources/vw-perfil-heroi/stats/group-by' -> grupo resolvido: 'api-human-resources-vw-perfil-heroi'
+14:18:05.098 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-human-resources-vw-perfil-heroi' (~0KB)
+14:18:05.098 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.098 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: GroupByStatsResponse
+14:18:05.098 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.100 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats' -> grupo resolvido: 'stats'
+14:18:05.100 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:18:05.100 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.100 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: StatsResponse
+14:18:05.100 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.101 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: StatsResponse
+14:18:05.103 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.103 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.103 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.103 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.104 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.106 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/ui-test/wrappers' -> grupo resolvido: 'api-ui-test-wrappers'
+14:18:05.107 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-ui-test-wrappers' (~0KB)
+14:18:05.107 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.107 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: UiSchemaTestDTO
+14:18:05.107 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.107 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UiSchemaTestDTO'
+14:18:05.122 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.123 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.123 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.123 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.123 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.125 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/payroll/stats/group-by' -> grupo resolvido: 'payroll'
+14:18:05.126 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'payroll' (~0KB)
+14:18:05.126 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.126 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.126 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema concreto de filtro materializado em request de stats '/payroll/stats/group-by' a partir de '/payroll/filter'
+14:18:05.126 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /payroll/filter
+14:18:05.128 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.128 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.128 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.128 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.128 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.129 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.129 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UserResponse'
+14:18:05.132 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users/' -> grupo resolvido: 'users'
+14:18:05.132 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.132 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.132 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.133 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.134 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/nested' -> grupo resolvido: 'nested'
+14:18:05.135 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'nested' (~0KB)
+14:18:05.135 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.135 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.135 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /nested
+14:18:05.135 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/nested' -> grupo resolvido: 'nested'
+14:18:05.136 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.136 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.136 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /nested
+14:18:05.137 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats' -> grupo resolvido: 'stats'
+14:18:05.137 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:18:05.137 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.137 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.138 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /stats
+14:18:05.139 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats/group-by' -> grupo resolvido: 'stats'
+14:18:05.140 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:18:05.140 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.140 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: RestApiResponseGroupByStatsResponse
+14:18:05.140 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Tipo real extraido de RestApiResponseGroupByStatsResponse: GroupByStatsResponse
+14:18:05.140 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.147 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.147 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.147 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.147 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.147 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.148 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.148 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UserResponse'
+14:18:05.150 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/human-resources/funcionarios/{id}/hero-profile' -> grupo resolvido: 'api-human-resources-funcionarios'
+14:18:05.150 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-human-resources-funcionarios' (~0KB)
+14:18:05.150 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.150 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: VwPerfilHeroiDTO
+14:18:05.150 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.151 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: FuncionarioDTO
+14:18:05.152 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -> grupo resolvido: 'users'
+14:18:05.152 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:18:05.152 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.153 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.153 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.153 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:18:05.153 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UserResponse'
+14:18:05.155 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/human-resources/funcionarios/filter' -> grupo resolvido: 'human-resources-funcionarios-filter'
+14:18:05.155 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'human-resources-funcionarios-filter' (~0KB)
+14:18:05.155 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:18:05.155 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:18:05.155 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /api/human-resources/funcionarios/filter
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.622 s -- in org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest
+[INFO] Running org.praxisplatform.uischema.schema.ApiResourceIdentityResolverTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.141 s -- in org.praxisplatform.uischema.schema.ApiResourceIdentityResolverTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 44, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  13.571 s
+[INFO] Finished at: 2026-11-01T14:18:05-03:00
+[INFO] ------------------------------------------------------------------------

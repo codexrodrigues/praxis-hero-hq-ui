@@ -1,0 +1,45 @@
+{
+  "core": {
+    "head": "53f790984dc47da939479dc608a811faee9f1620",
+    "branch": "codex/quick-view-metadata-quality-20261101",
+    "patchSha256": "1c86e9a09c714d3052491407a2421240721aae5ce687bbb7f5638d53ee60e7ea",
+    "files": {
+      "projects/praxis-core/README.md": "db69597bebe7d35661df7883e7a1ac9cd1822a51a01df52e30591731caf3b733",
+      "projects/praxis-core/src/lib/services/resource-quick-view.service.spec.ts": "bb1d77ef77868c93ff73fa600e850919c2a0f40a7cbf5d920518c9971ad1b2ba",
+      "projects/praxis-core/src/lib/services/resource-quick-view.service.ts": "c02cac33b64afb30dc88664a88175b420cac01eaad1184c6f207852e7c0245c7"
+    },
+    "review": "independent-source-review-approved",
+    "published": false,
+    "unitTests": {
+      "tests": 22,
+      "result": "SUCCESS",
+      "rawOutput": "tool session 18668, exit 0; no file log retained"
+    },
+    "build": "npm run build:praxis-core; exit 0; script built dependency chain including Core/Dialog/Table"
+  },
+  "metadata": {
+    "head": "0b162f2abca8502d090e3184fe323342ec88aca2",
+    "branch": "codex/quick-view-resource-identity-20261101",
+    "patchSha256": "4358a1f6ec1ca45005b5ddf22541aa5e96bfb49391a445882354dded30c443e8",
+    "files": {
+      "CHANGELOG.md": "c5e474ef1275acfd63cc7c934bdbb6ca8ba1ca5120e83f36376a73367dc9fc01",
+      "src/main/java/org/praxisplatform/uischema/schema/ApiResourceIdentityResolver.java": "115282c8910f1d97d5a21d287bfd9e7e1625715cd2e9498f7e57708793dce365",
+      "src/test/java/org/praxisplatform/uischema/schema/ApiResourceIdentityResolverTest.java": "26aa1e4b7059223a0426486a4101eb4c0951d43a30fa37454119ea158e960dda"
+    },
+    "review": "independent-source-review-approved",
+    "published": false,
+    "unitTests": {
+      "tests": "13",
+      "errors": "0",
+      "skipped": "0",
+      "failures": "0"
+    },
+    "command": "mvn -B -Dtest=ApiResourceIdentityResolverTest test",
+    "consumerUnitTests": {
+      "tests": "31",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0"
+    }
+  }
+}

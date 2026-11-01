@@ -67,8 +67,8 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
   table: {
     columnProjection: {
       source: 'schema',
-      include: ['id', 'supplierId', 'productId', 'orderDate', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
-      order: ['id', 'supplierId', 'productId', 'orderDate', 'progressoEntrega', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
+      include: ['id', 'supplierId', 'contractId', 'productId', 'orderDate', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
+      order: ['id', 'supplierId', 'contractId', 'productId', 'orderDate', 'progressoEntrega', 'quantity', 'currency', 'status', 'approvedAt', 'receivedAt', 'disabledReason'],
       additions: [
         {
           field: 'progressoEntrega',
@@ -93,6 +93,7 @@ export const PEDIDOS_CRUD_METADATA: CrudMetadata = {
       overrides: {
         id: { width: '80px', align: 'center', header: 'Cód.' },
         supplierId: { width: '160px', header: 'Fornecedor' },
+        contractId: { width: '180px', header: 'Contrato' },
         productId: { width: '160px', header: 'Item / Produto' },
         orderDate: { width: '130px', align: 'center', header: 'Data do Pedido' },
         quantity: { width: '120px', align: 'center', header: 'Qtd. Lote' },

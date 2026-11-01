@@ -1,0 +1,307 @@
+diff --git a/projects/praxis-core/README.md b/projects/praxis-core/README.md
+index 91590a85c..fa587a556 100644
+--- a/projects/praxis-core/README.md
++++ b/projects/praxis-core/README.md
+@@ -1352,24 +1352,40 @@ canonical hover/focus/click contextual dossier across `@praxisui/table`,
+ - **Metadata synthesis (`resolveFieldQuickViewBinding` & `reconcileFieldQuickViewBinding`)**:
+   Synthesizes `ResourceQuickViewBinding` from explicit `field.quickView`,
+   backend `x-ui.resourceReference` (`@ResourceReference`) or
+-  `x-ui.optionSource.detail` (`OptionSourceDescriptor.detail`) when
+-  `detailHrefTemplate` or `resourcePath` is present. Reconciling a persisted user
+-  override preserves server-owned `resourcePath`, `detailHrefTemplate`,
+-  `valueField`, `displayField` and `recordOpen` while allowing safe presentation
+-  customizations (`previewSurfaceId`, `detailPresentation`, `triggerMode`,
+-  `hoverOpenDelayMs`).
++  `x-ui.optionSource.detail` when it declares a `resourceKey`. The binding reuses
++  `recordOpen.sourceIdentityField` and `recordOpen.target.resourceKey/surfaceId`;
++  `previewSurfaceId` can select a separate read projection. Persisted presentation
++  preferences must preserve the server-owned record target and identity field.
+ - **Context resolution (`resolveResourceQuickViewTarget`)**:
+-  Resolves `valuePath` and `labelPath` across direct row objects, nested `row`,
+-  `record`, `item`, `data`, `values` or `context` envelopes, and extracts
++  Resolves `recordOpen.sourceIdentityField` from direct records or nested `row`,
++  `item` and `values` envelopes, including dotted field paths, and extracts
+   scalar IDs (`id`, `value`, `key`) when a form control holds an entity-lookup
+   selection object.
+-- **Enterprise security & cache isolation**:
+-  `ResourceQuickViewService` partitions its LRU cache by tenant, user, locale and
+-  sorted authority fingerprint from `EnterpriseRuntimeContextService`, clearing
+-  active caches and closing any open popover on identity or tenant switches.
++- **Enterprise security and request lifetime**:
++  `ResourceQuickViewService` coalesces matching in-flight projections and invalidates
++  the active generation on context changes; it does not retain a completed-record
++  LRU cache. Every fresh open resolves the current item surface. The hover trigger
++  waits 280 ms by default; explicit activation starts immediately. Discovery reads
++  the resource catalog, the item and its contextual surfaces before resolving the
++  filtered response schema and projection. A pending HTTP request can therefore
++  outlive dismissal even though its obsolete result cannot update that popover.
+   Fields restricted by `x-ui.fieldAccess` are filtered or masked (`•••`) before
+   rendering, and `recordOpen` actions are validated against the item's
+   authorized `_links` / `surfaces` / `actions` snapshot.
++- **Metadata presentation**:
++  Summary labels come from normalized domain metadata (`x-ui.label`), not field-name
++  humanization. Explicit numeric `valuePresentation` uses the shared resolver and
++  formatter for `currency`, `number` and `percentage`, including `currency.code`,
++  zero precision and fractional `digitsInfo`. A presentation-level value config
++  takes precedence over the field config. Existing field currency/decimal defaults
++  remain the fallback when the explicit config omits them. Options, masking and
++  presentation affixes retain their precedence. This numeric correction does not
++  add support for compact notation or change the existing date/time formatting path.
++
++Hosts must install `providePraxisQuickViewDialogPresenter()` from `@praxisui/dialog`.
++Bindings with `contentRef` also require the rich-content body renderer; the standard
++summary does not. Source changes require publication and consumer adoption before
++they can be claimed for an installed package.
+ 
+ ### Optional editing highlight
+ 
+diff --git a/projects/praxis-core/src/lib/services/resource-quick-view.service.spec.ts b/projects/praxis-core/src/lib/services/resource-quick-view.service.spec.ts
+index 10b9429da..f699ad90a 100644
+--- a/projects/praxis-core/src/lib/services/resource-quick-view.service.spec.ts
++++ b/projects/praxis-core/src/lib/services/resource-quick-view.service.spec.ts
+@@ -32,6 +32,7 @@ import {
+   QUICK_VIEW_SERVICE_COMPONENT_SURFACES_FIXTURE,
+ } from '../testing/resource-quick-view.fixtures';
+ import { API_URL } from '../tokens/api-url.token';
++import { PraxisI18nService } from '../i18n/i18n.service';
+ import { EnterpriseRuntimeContextService } from './enterprise-runtime-context.service';
+ import { GlobalActionService } from './global-action.service';
+ import { PraxisQuickViewTriggerDirective } from '../directives/quick-view-trigger.directive';
+@@ -1374,6 +1375,147 @@ describe('ResourceQuickViewService & Quick View Contracts (P0 + P1)', () => {
+     ]);
+   });
+ 
++  async function openSummaryWithSchema(
++    properties: Record<string, unknown>,
++    record: Record<string, unknown>,
++  ): Promise<ResourceQuickViewResolution | null> {
++    const pending = service.openImmediate({
++      binding: QUICK_VIEW_EMPLOYEE_BINDING_FIXTURE,
++      sourceRecord: { employeeId: 42 },
++      anchor: elementAnchor(),
++      trigger: 'explicit-button',
++    });
++    httpMock.expectOne('https://api.acme.com/schemas/surfaces?resource=human-resources.employees')
++      .flush(QUICK_VIEW_EMPLOYEE_SURFACES_FIXTURE);
++    httpMock.expectOne('https://api.acme.com/api/human-resources/employees/42').flush({
++      data: { id: 42 },
++      _links: { surfaces: { href: '/api/human-resources/employees/42/surfaces' } },
++    });
++    httpMock.expectOne('https://api.acme.com/api/human-resources/employees/42/surfaces')
++      .flush({ ...QUICK_VIEW_EMPLOYEE_SURFACES_FIXTURE, resourceId: 42 });
++    httpMock.expectOne('https://api.acme.com/api/human-resources/employees/42/profile')
++      .flush({ data: { id: 42, fullName: 'Helena Vasconcelos', ...record } });
++    httpMock.expectOne(
++      'https://api.acme.com/schemas/filtered?path=%2Fapi%2Fhuman-resources%2Femployees%2F%7Bid%7D%2Fprofile&operation=get&schemaType=response',
++    ).flush({
++      type: 'object',
++      'x-ui': { resource: { idField: 'id', identity: { keyField: 'id', titleField: 'fullName' } } },
++      properties: {
++        id: { type: 'integer', 'x-ui': { label: 'ID' } },
++        fullName: { type: 'string', 'x-ui': { label: 'Colaborador' } },
++        ...properties,
++      },
++    });
++    return pending;
++  }
++
++  it('preserves schema domain labels and materializes canonical currency code, zero precision, numbers and percentages', async () => {
++    const result = await openSummaryWithSchema({
++      budget: { type: 'number', title: 'Technical budget title', 'x-ui': {
++        label: 'Orçamento aprovado', quickViewVisible: true,
++        currency: 'BRL', decimalPlaces: 2,
++        valuePresentation: { type: 'currency', currency: { code: 'USD', precision: 0 } },
++      } },
++      count: { type: 'number', 'x-ui': {
++        label: 'Efetivo mobilizado', quickViewVisible: true,
++        valuePresentation: { type: 'number', number: { defaultPrecision: 0 } },
++      } },
++      coverage: { type: 'number', 'x-ui': {
++        label: 'Cobertura operacional', quickViewVisible: true,
++        valuePresentation: { type: 'percentage', number: { defaultPrecision: 1 } },
++      } },
++      readings: { type: 'array', items: { type: 'number' }, 'x-ui': {
++        label: 'Leituras', quickViewVisible: true,
++        valuePresentation: { type: 'number', format: '1.1-1' },
++      } },
++      allowance: { type: 'number', 'x-ui': {
++        label: 'Adicional', quickViewVisible: true,
++        valuePresentation: { type: 'currency', currency: { code: 'BRL', precision: 2 } },
++        presentation: { prefix: '≈', suffix: '/turno',
++          valuePresentation: { type: 'currency', currency: { code: 'EUR', precision: 0 } } },
++      } },
++    }, { budget: 1234.5, count: 1234.5, coverage: .125, readings: [1.25, null, 2], allowance: 30 });
++
++    expect(result?.state).toBe('ready');
++    const item = (field: string) => result?.summaryItems?.find((entry) => entry.field === field);
++    expect(item('budget')).toEqual(jasmine.objectContaining({
++      label: 'Orçamento aprovado',
++      formattedValue: new Intl.NumberFormat('pt-BR', {
++        style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0,
++      }).format(1234.5),
++    }));
++    expect(item('count')?.formattedValue).toBe('1.235');
++    expect(item('coverage')?.formattedValue).toBe('12,5%');
++    expect(item('readings')?.formattedValue).toBe('1,3, 2,0');
++    expect(item('allowance')?.formattedValue).toBe(`≈${new Intl.NumberFormat('pt-BR', {
++      style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0,
++    }).format(30)}/turno`);
++  });
++
++  it('keeps field-level BRL, currencyCode and decimalPlaces defaults when valuePresentation only declares currency', async () => {
++    const result = await openSummaryWithSchema({
++      danosCivis: { type: 'number', 'x-ui': {
++        label: 'Danos Civis', quickViewVisible: true,
++        currency: 'BRL', decimalPlaces: 2, locale: 'pt-BR',
++        valuePresentation: { type: 'currency' },
++      } },
++      uncoveredAmount: { type: 'number', 'x-ui': {
++        label: 'Valor descoberto', quickViewVisible: true,
++        valuePresentation: { type: 'currency' },
++      } },
++      externalAmount: { type: 'number', 'x-ui': {
++        label: 'Valor externo', quickViewVisible: true,
++        currencyCode: 'EUR', decimalPlaces: 0,
++        valuePresentation: { type: 'currency' },
++      } },
++    }, { danosCivis: 1234.5, uncoveredAmount: 50, externalAmount: 1234.5 });
++
++    const item = (field: string) => result?.summaryItems?.find((entry) => entry.field === field);
++    expect(item('danosCivis')).toEqual(jasmine.objectContaining({
++      label: 'Danos Civis',
++      formattedValue: new Intl.NumberFormat('pt-BR', {
++        style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2,
++      }).format(1234.5),
++    }));
++    expect(item('uncoveredAmount')?.formattedValue).toBe(new Intl.NumberFormat('pt-BR', {
++      style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2,
++    }).format(50));
++    expect(item('externalAmount')?.formattedValue).toBe(new Intl.NumberFormat('pt-BR', {
++      style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0,
++    }).format(1234.5));
++  });
++
++  it('keeps governed option labels, presentation labels and masked tokens ahead of numeric formatting', async () => {
++    spyOn(TestBed.inject(PraxisI18nService), 'getLocale').and.returnValue('en-US');
++    const result = await openSummaryWithSchema({
++      status: { type: 'integer', 'x-ui': {
++        label: 'Estado operacional', quickViewVisible: true,
++        options: [{ value: 1, label: 'Pronto para operação' }],
++        valuePresentation: { type: 'number', number: { defaultPrecision: 2 } },
++        presentation: { prefix: '[', suffix: ']' },
++      } },
++      availability: { type: 'number', 'x-ui': {
++        label: 'Disponibilidade', quickViewVisible: true,
++        valuePresentation: { type: 'percentage' }, presentation: { label: 'Confirmada' },
++      } },
++      compensation: { type: 'string', 'x-ui': {
++        label: 'Remuneração protegida', quickViewVisible: true,
++        valuePresentation: { type: 'currency', currency: { code: 'USD', precision: 0 } },
++      } },
++      budget: { type: 'number', 'x-ui': {
++        label: 'Approved budget', quickViewVisible: true,
++        valuePresentation: { type: 'currency', currency: { code: 'USD', precision: 2 } },
++      } },
++    }, { status: 1, availability: .75, compensation: '••••••', budget: '1234.5' });
++
++    expect(result?.summaryItems).toEqual(jasmine.arrayContaining([
++      jasmine.objectContaining({ field: 'status', label: 'Estado operacional', formattedValue: '[Pronto para operação]' }),
++      jasmine.objectContaining({ field: 'availability', formattedValue: 'Confirmada' }),
++      jasmine.objectContaining({ field: 'compensation', formattedValue: '••••••', masked: true, copyable: false }),
++      jasmine.objectContaining({ field: 'budget', formattedValue: '$1,234.50', value: '1234.5' }),
++    ]));
++  });
++
+   it('gracefully falls back from previewSurfaceId to recordOpen.target.surfaceId when previewSurfaceId is contextually unavailable', async () => {
+     const bindingWithPreviewSurface = {
+       recordOpen: {
+diff --git a/projects/praxis-core/src/lib/services/resource-quick-view.service.ts b/projects/praxis-core/src/lib/services/resource-quick-view.service.ts
+index bc030471a..d721dc689 100644
+--- a/projects/praxis-core/src/lib/services/resource-quick-view.service.ts
++++ b/projects/praxis-core/src/lib/services/resource-quick-view.service.ts
+@@ -23,6 +23,8 @@ import {
+ } from '../models/resource-quick-view.model';
+ import type { MaterializedResourceIdentity } from '../models/resource-identity.model';
+ import { PraxisI18nService } from '../i18n/i18n.service';
++import { resolveValuePresentation } from '../i18n/value-presentation.resolver';
++import { formatCompositionValue } from '../i18n/composition-value-format';
+ import { canonicalJsonSha256 } from '../utils/canonical-json-hash.util';
+ import { EnterpriseRuntimeContextService } from './enterprise-runtime-context.service';
+ import { GlobalActionService } from './global-action.service';
+@@ -1209,6 +1211,10 @@ export class ResourceQuickViewService {
+       const suffix = presentation.suffix ?? '';
+       return `${prefix}${presentation.label}${suffix}`;
+     }
++    const configuredValue = this.formatConfiguredSummaryValue(rawValue, fieldDef);
++    if (configuredValue !== null) {
++      return `${presentation?.prefix ?? ''}${configuredValue}${presentation?.suffix ?? ''}`;
++    }
+     const isCurrencyField =
+       (fieldDef as { numericFormat?: string } | undefined)?.numericFormat ===
+         'currency' ||
+@@ -1298,6 +1304,65 @@ export class ResourceQuickViewService {
+     return `${prefix}${rawKey}${suffix}`;
+   }
+ 
++  private formatConfiguredSummaryValue(
++    rawValue: unknown,
++    fieldDef?: FieldDefinition,
++  ): string | null {
++    const config =
++      fieldDef?.presentation?.valuePresentation ?? fieldDef?.valuePresentation;
++    if (!config || !['number', 'currency', 'percentage'].includes(config.type)) {
++      return null;
++    }
++    // Masked tokens and arbitrary strings must never be coerced into numeric data.
++    if (
++      (typeof rawValue !== 'number' && typeof rawValue !== 'string') ||
++      String(rawValue).trim() === '' ||
++      !Number.isFinite(Number(rawValue))
++    ) {
++      return null;
++    }
++    const rawField = (fieldDef ?? {}) as Record<string, unknown>;
++    // Field-level monetary metadata predates valuePresentation. Keep its host-owned
++    // defaults instead of replacing an amount's currency with the resolver default.
++    const configuredCurrency = config.type === 'currency'
++      ? {
++          ...config,
++          currency: {
++            ...config.currency,
++            code: config.currency?.code ||
++              String(rawField['currency'] ?? rawField['currencyCode'] ?? 'BRL'),
++            precision: config.currency?.precision ??
++              (typeof rawField['decimalPlaces'] === 'number' ? rawField['decimalPlaces'] : 2),
++          },
++        }
++      : config;
++    const resolved = resolveValuePresentation(configuredCurrency, {
++      valueLocale:
++        typeof rawField['locale'] === 'string' ? rawField['locale'] : null,
++      appLocale:
++        this.runtimeContext?.effectiveContext?.locale ??
++        this.i18n?.getLocale?.() ??
++        'pt-BR',
++    });
++    const precision =
++      resolved.currency?.precision ?? resolved.number?.defaultPrecision ?? 2;
++    // Reuse fraction precision from the canonical digitsInfo format when present.
++    const digits = /^(\d+)\.(\d+)-(\d+)$/.exec(resolved.format ?? '');
++    const format = {
++      kind: config.type === 'percentage' ? 'percent' : config.type,
++      locale: resolved.locale,
++      minimumFractionDigits: digits ? Number(digits[2]) : precision,
++      maximumFractionDigits: digits ? Number(digits[3]) : precision,
++      ...(resolved.currency ? { currency: resolved.currency.code } : {}),
++    };
++    try {
++      return formatCompositionValue(rawValue, format);
++    } catch {
++      // An invalid presentation must leave the original value available to the legacy path.
++      return null;
++    }
++  }
++
+   private applyResolution(
+     resolution: ResourceQuickViewResolution,
+     request: ResourceQuickViewOpenRequest,

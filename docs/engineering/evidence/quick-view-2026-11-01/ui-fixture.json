@@ -1,0 +1,439 @@
+{
+  "kind": "ui-only-synthetic-fixture",
+  "schema": {
+    "type": "object",
+    "x-ui": {
+      "resource": {
+        "resourceKey": "operations.incidentes",
+        "idField": "id",
+        "idFieldValid": true,
+        "title": "Incidentes",
+        "identity": {
+          "keyField": "id",
+          "titleField": "descricao",
+          "subtitleField": "local",
+          "metadataFields": [
+            "severidade"
+          ],
+          "valid": true
+        }
+      }
+    },
+    "properties": {
+      "id": {
+        "type": "number",
+        "x-ui": {
+          "name": "id",
+          "label": "id",
+          "controlType": "input",
+          "formHidden": true
+        }
+      },
+      "descricao": {
+        "type": "string",
+        "x-ui": {
+          "name": "descricao",
+          "label": "descricao",
+          "controlType": "input",
+          "resourceReference": {
+            "resourceKey": "operations.incidentes",
+            "surfaceId": "detail",
+            "valueField": "id"
+          }
+        }
+      },
+      "local": {
+        "type": "string",
+        "x-ui": {
+          "name": "local",
+          "label": "local",
+          "controlType": "input"
+        }
+      },
+      "severidade": {
+        "type": "string",
+        "x-ui": {
+          "name": "severidade",
+          "label": "severidade",
+          "controlType": "input",
+          "quickViewVisible": true
+        }
+      },
+      "danosCivis": {
+        "type": "number",
+        "x-ui": {
+          "name": "danosCivis",
+          "label": "danosCivis",
+          "controlType": "input",
+          "quickViewVisible": true
+        }
+      },
+      "feridos": {
+        "type": "number",
+        "x-ui": {
+          "name": "feridos",
+          "label": "feridos",
+          "controlType": "input",
+          "quickViewVisible": true
+        }
+      },
+      "mortos": {
+        "type": "number",
+        "x-ui": {
+          "name": "mortos",
+          "label": "mortos",
+          "controlType": "input"
+        }
+      },
+      "ocorridoEm": {
+        "type": "string",
+        "x-ui": {
+          "name": "ocorridoEm",
+          "label": "ocorridoEm",
+          "controlType": "input"
+        }
+      }
+    }
+  },
+  "record": {
+    "id": 1,
+    "descricao": "Incidente de validação Quick View",
+    "local": "Ambiente de teste de UI",
+    "severidade": "ALTA",
+    "danosCivis": 1000,
+    "feridos": 2,
+    "mortos": 0,
+    "ocorridoEm": "2026-11-01T10:00:00",
+    "_links": {
+      "self": {
+        "href": "/api/operations/incidentes/1"
+      },
+      "surfaces": {
+        "href": "/api/operations/incidentes/1/surfaces"
+      }
+    }
+  },
+  "surface": {
+    "id": "detail",
+    "resourceKey": "operations.incidentes",
+    "kind": "VIEW",
+    "scope": "ITEM",
+    "title": "Resumo do incidente",
+    "intent": "detail",
+    "path": "/api/operations/incidentes/{id}",
+    "method": "GET",
+    "schemaUrl": "/schemas/filtered?path=%2Fapi%2Foperations%2Fincidentes%2F%7Bid%7D&operation=get&schemaType=response",
+    "responseCardinality": "OBJECT",
+    "availability": {
+      "allowed": true
+    },
+    "preferredWidget": "praxis-dynamic-form",
+    "operationId": "getById"
+  },
+  "interceptedRequests": [
+    {
+      "path": "/api/human-resources/funcionarios/stats/group-by",
+      "method": "POST"
+    },
+    {
+      "path": "/api/risk-intelligence/vw-indicadores-incidentes/stats/group-by",
+      "method": "POST"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/stats/group-by",
+      "method": "POST"
+    },
+    {
+      "path": "/api/operations/incidentes/filter",
+      "method": "POST"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "PUT"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "PUT"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "PUT"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "PUT"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/operacoes/incidentes",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/human-resources/funcionarios/stats/group-by",
+      "method": "POST"
+    },
+    {
+      "path": "/api/risk-intelligence/vw-indicadores-incidentes/stats/group-by",
+      "method": "POST"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/stats/group-by",
+      "method": "POST"
+    },
+    {
+      "path": "/api/operations/incidentes/filter",
+      "method": "POST"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "PUT"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "PUT"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "PUT"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/praxis/config/ui",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operations/incidentes/1/surfaces",
+      "method": "GET"
+    },
+    {
+      "path": "/schemas/filtered",
+      "method": "GET"
+    }
+  ]
+}

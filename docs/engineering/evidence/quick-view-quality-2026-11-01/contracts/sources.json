@@ -1,0 +1,157 @@
+{
+  "purpose": "Public schema and semantic surface catalog evidence only. No record or item-surface requests. Raw response bodies preserved without label edits.",
+  "sources": [
+    {
+      "file": "incidentes-filter-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Foperations%2Fincidentes%2Ffilter&operation=post&schemaType=response",
+      "capturedAt": "2026-11-01T16:52:56.228838+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "62e8f3c2d6ba16189415c6affaf4ab1c9cec5f97eb918802e6a9ca318f442989",
+      "bytes": 7019,
+      "jsonValid": true
+    },
+    {
+      "file": "incidentes-surfaces.catalog.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/surfaces?resource=operations.incidentes",
+      "capturedAt": "2026-11-01T16:52:57.003353+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "125d254e18412b6d4e3d5b88cbb6dcaf1925e1e414a6db79ed01962db9451b90",
+      "bytes": 6089,
+      "jsonValid": true
+    },
+    {
+      "file": "missoes-filter-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Foperations%2Fmissoes%2Ffilter&operation=post&schemaType=response",
+      "capturedAt": "2026-11-01T16:52:56.108947+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "1123ef094107dd7efec6bf347007a74093f765c15d41515c6c1e7dfc29aabf63",
+      "bytes": 9117,
+      "jsonValid": true
+    },
+    {
+      "file": "missoes-surfaces.catalog.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/surfaces?resource=operations.missoes",
+      "capturedAt": "2026-11-01T16:52:57.116854+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "570c91785633b8dd81fd2f3d1cad7157ea384a8cf07e96a0f775a8a7ed38aaeb",
+      "bytes": 8916,
+      "jsonValid": true
+    },
+    {
+      "file": "suppliers-filter-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Fprocurement%2Fsuppliers%2Ffilter&operation=post&schemaType=response",
+      "capturedAt": "2026-11-01T16:52:57.340945+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "41182133e4f4f3227632999138416599960c9a6ff563e1122b079b1dc7fed77f",
+      "bytes": 7377,
+      "jsonValid": true
+    },
+    {
+      "file": "suppliers-surfaces.catalog.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/surfaces?resource=procurement.suppliers",
+      "capturedAt": "2026-11-01T16:52:58.290320+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "87fbfce098539f30d6e5265f852a4d726a67e9362aed89eb24296e6b8768b3bb",
+      "bytes": 6907,
+      "jsonValid": true
+    },
+    {
+      "file": "contracts-filter-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Fprocurement%2Fcontracts%2Ffilter&operation=post&schemaType=response",
+      "capturedAt": "2026-11-01T16:52:58.692256+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "e906e05fc3f46051d8e2362327d50ce8f7e64891a5593c5652934b885ac2ea15",
+      "bytes": 6824,
+      "jsonValid": true
+    },
+    {
+      "file": "contracts-surfaces.catalog.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/surfaces?resource=procurement.contracts",
+      "capturedAt": "2026-11-01T16:52:58.832296+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "2fe168e602c999176b417d293e6973d1fbd1388cd64c722d8d774a010c0b7c26",
+      "bytes": 6747,
+      "jsonValid": true
+    },
+    {
+      "file": "purchase-orders-filter-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Fprocurement%2Fpurchase-orders%2Ffilter&operation=post&schemaType=response",
+      "capturedAt": "2026-11-01T16:52:58.323199+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "005b0e95874888aa816cf7682f92964304b29df2f24f39cc0a20de3c118046a2",
+      "bytes": 12515,
+      "jsonValid": true
+    },
+    {
+      "file": "purchase-orders-surfaces.catalog.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/surfaces?resource=procurement.purchase-orders",
+      "capturedAt": "2026-11-01T16:52:58.567153+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "bc7928bc9f30fd80dd10f122e6c28169c3c56a618f3837311dc0824efc8b2f03",
+      "bytes": 4600,
+      "jsonValid": true
+    },
+    {
+      "file": "incidentes-detail-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Foperations%2Fincidentes%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false",
+      "publishedSchemaUrl": "/schemas/filtered?path=%2Fapi%2Foperations%2Fincidentes%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false",
+      "sourceCatalog": "incidentes-surfaces.catalog.json",
+      "surfaceId": "detail",
+      "capturedAt": "2026-11-01T16:53:31.559614+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "62e8f3c2d6ba16189415c6affaf4ab1c9cec5f97eb918802e6a9ca318f442989",
+      "bytes": 7019,
+      "jsonValid": true
+    },
+    {
+      "file": "contracts-detail-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Fprocurement%2Fcontracts%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false",
+      "publishedSchemaUrl": "/schemas/filtered?path=%2Fapi%2Fprocurement%2Fcontracts%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false",
+      "sourceCatalog": "contracts-surfaces.catalog.json",
+      "surfaceId": "detail",
+      "capturedAt": "2026-11-01T16:53:31.671074+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "8b1971c465692ff44f7fe906d2a5554a417e1fb25ac058cab918166b70f8b268",
+      "bytes": 6648,
+      "jsonValid": true
+    },
+    {
+      "file": "suppliers-detail-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Fprocurement%2Fsuppliers%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false",
+      "publishedSchemaUrl": "/schemas/filtered?path=%2Fapi%2Fprocurement%2Fsuppliers%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false",
+      "sourceCatalog": "suppliers-surfaces.catalog.json",
+      "surfaceId": "detail",
+      "capturedAt": "2026-11-01T16:53:31.705064+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "41182133e4f4f3227632999138416599960c9a6ff563e1122b079b1dc7fed77f",
+      "bytes": 7377,
+      "jsonValid": true
+    },
+    {
+      "file": "missoes-summary-response.schema.json",
+      "sourceURL": "https://praxis-api-quickstart.onrender.com/schemas/filtered?path=%2Fapi%2Foperations%2Fmissoes%2F%7Bid%7D%2Fsummary&operation=get&schemaType=response&idField=missaoId&readOnly=false",
+      "publishedSchemaUrl": "/schemas/filtered?path=%2Fapi%2Foperations%2Fmissoes%2F%7Bid%7D%2Fsummary&operation=get&schemaType=response&idField=missaoId&readOnly=false",
+      "sourceCatalog": "missoes-surfaces.catalog.json",
+      "surfaceId": "summary",
+      "capturedAt": "2026-11-01T16:53:31.631693+00:00",
+      "httpStatus": "200",
+      "curlExit": 0,
+      "sha256": "e84ba37a64b55bf8cec2162b1b356a243e7bc948f784948290f60821a6ed1235",
+      "bytes": 5157,
+      "jsonValid": true
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.654" tests="31" errors="0" skipped="0" failures="0" flakes="0">
+  <testcase name="nullableArrayEnumsKeepFiveChoicesForInlineAndReferencedSchemas" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.452">
+    <system-out>14:06:02.503 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/missions/filter' -&gt; grupo resolvido: 'missions'
+14:06:02.527 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'missions' (~0KB)
+14:06:02.527 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.528 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.536 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /missions/filter
+</system-out>
+    <system-err>Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/Users/rodrigo/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+</system-err>
+  </testcase>
+  <testcase name="getFilteredSchemaTreatsPatchIntentAsWritableResourceCapability" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.005">
+    <system-out>14:06:02.556 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/profiles/{id}/details' -&gt; grupo resolvido: 'profiles'
+14:06:02.557 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'profiles' (~0KB)
+14:06:02.557 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.557 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+</system-out>
+  </testcase>
+  <testcase name="invalidSchemaTypeThrowsException" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.002" />
+  <testcase name="findRequestSchemaExtractsName" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.002" />
+  <testcase name="getFilteredSchemaResolvesTemplatedPathByStructureWhenParameterNamesDiffer" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.004">
+    <system-out>14:06:02.565 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/administracao-pessoal/codigos-frequencia/{id}/documentos-legais/{id}' -&gt; grupo resolvido: 'administracao-pessoal'
+14:06:02.566 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'administracao-pessoal' (~0KB)
+14:06:02.566 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.566 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaResolvesIdFieldFromCanonicalResourceResponseForRequestSchema(CapturedOutput)" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.004">
+    <system-out>14:06:02.570 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/catalog/produtos/filter' -&gt; grupo resolvido: 'api-catalog-produtos'
+14:06:02.571 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-catalog-produtos' (~0KB)
+14:06:02.571 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.571 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.571 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: ProdutoDTO
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaAcceptsResourcePathAliasAndNormalizesLeadingSlash" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.574 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.575 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.575 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.575 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.575 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaPreservesExternalValueExamples" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.578 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats' -&gt; grupo resolvido: 'stats'
+14:06:02.579 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:06:02.579 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.579 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.579 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /stats
+</system-out>
+  </testcase>
+  <testcase name="missingPathThrowsNotFoundForFilteredSchema" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.582 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users/missing' -&gt; grupo resolvido: 'users'
+14:06:02.582 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaResolvesDistributionResponseFromRestApiResponseWrapper" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.004">
+    <system-out>14:06:02.585 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats/distribution' -&gt; grupo resolvido: 'stats'
+14:06:02.586 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:06:02.586 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.586 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: RestApiResponseDistributionStatsResponse
+14:06:02.586 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Tipo real extraido de RestApiResponseDistributionStatsResponse: DistributionStatsResponse
+14:06:02.586 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaPropagatesOptionsForArrayEnumReferences" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.589 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/missions/filter' -&gt; grupo resolvido: 'missions'
+14:06:02.590 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'missions' (~0KB)
+14:06:02.590 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.590 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.590 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /missions/filter
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaSelectsSchemas" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.004">
+    <system-out>14:06:02.593 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.594 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.594 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.594 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.594 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.595 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.595 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.595 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.595 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.595 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.595 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UserResponse'
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaIncludesReferencedComponentSchemasForEditableCollections" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.004">
+    <system-out>14:06:02.597 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/missions/{id}/team-plan' -&gt; grupo resolvido: 'missions'
+14:06:02.598 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'missions' (~0KB)
+14:06:02.598 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.598 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaResolvesNaturalIdFieldFromRequiredResourceResponse" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.602 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/administracao-pessoal/empresas/filter' -&gt; grupo resolvido: 'api-administracao-pessoal-empresas'
+14:06:02.603 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-administracao-pessoal-empresas' (~0KB)
+14:06:02.603 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.603 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.603 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: EmpresaDTO
+14:06:02.604 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/administracao-pessoal/empresas/filter' -&gt; grupo resolvido: 'api-administracao-pessoal-empresas'
+14:06:02.604 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.604 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: EmpresaDTO
+14:06:02.604 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.604 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: EmpresaDTO
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaPublishesOnlyCompilerResolvedReactiveDeterminations" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.011">
+    <system-out>14:06:02.613 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.613 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.613 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.613 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.614 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaIncludesOperationExamplesForRequestedSchemaType" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.618 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats' -&gt; grupo resolvido: 'stats'
+14:06:02.618 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:06:02.618 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.618 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: StatsResponse
+14:06:02.618 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.619 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: StatsResponse
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaDoesNotWarnWhenStatsResponseLacksResourceIdField(CapturedOutput)" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.002">
+    <system-out>14:06:02.621 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/human-resources/vw-perfil-heroi/stats/group-by' -&gt; grupo resolvido: 'api-human-resources-vw-perfil-heroi'
+14:06:02.621 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-human-resources-vw-perfil-heroi' (~0KB)
+14:06:02.621 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.621 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: GroupByStatsResponse
+14:06:02.621 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaPrefersExplicitOperationExamplesFromXUi" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.624 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats' -&gt; grupo resolvido: 'stats'
+14:06:02.624 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:06:02.624 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.624 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: StatsResponse
+14:06:02.624 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.625 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: StatsResponse
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaMaterializesEmptyObjectWithoutInventedInputFields" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.628 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.628 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.628 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.628 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.628 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaHandlesDirectDtoResponse" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.631 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/ui-test/wrappers' -&gt; grupo resolvido: 'api-ui-test-wrappers'
+14:06:02.632 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-ui-test-wrappers' (~0KB)
+14:06:02.632 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.632 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: UiSchemaTestDTO
+14:06:02.632 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.632 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UiSchemaTestDTO'
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaDoesNotPublishRecordIdentityForRequestSchemas" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.016">
+    <system-out>14:06:02.647 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.647 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.647 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.647 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.648 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaMaterializesConcreteResourceFilterInsideStatsRequest" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.650 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/payroll/stats/group-by' -&gt; grupo resolvido: 'payroll'
+14:06:02.651 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'payroll' (~0KB)
+14:06:02.651 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.651 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.651 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema concreto de filtro materializado em request de stats '/payroll/stats/group-by' a partir de '/payroll/filter'
+14:06:02.651 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /payroll/filter
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaPublishesStructuredResourceIdentityWithDiagnostics" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.004">
+    <system-out>14:06:02.653 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.654 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.654 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.654 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.654 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.654 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.654 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UserResponse'
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaNormalizesTrailingSlashBeforeOpenApiPathLookup" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.658 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users/' -&gt; grupo resolvido: 'users'
+14:06:02.658 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.658 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.658 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.658 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaDoesNotMutateCachedOpenApiDocumentWhenInliningInternalSchemas" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.004">
+    <system-out>14:06:02.661 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/nested' -&gt; grupo resolvido: 'nested'
+14:06:02.661 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'nested' (~0KB)
+14:06:02.661 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.661 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.661 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /nested
+14:06:02.662 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/nested' -&gt; grupo resolvido: 'nested'
+14:06:02.662 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.662 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.662 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /nested
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaIncludesRequestExamplesWithFallbackMediaType" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.664 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats' -&gt; grupo resolvido: 'stats'
+14:06:02.665 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:06:02.665 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.665 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.665 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /stats
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaResolvesStatsResponseFromRestApiResponseWrapper" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.667 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/stats/group-by' -&gt; grupo resolvido: 'stats'
+14:06:02.668 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'stats' (~0KB)
+14:06:02.668 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.668 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: RestApiResponseGroupByStatsResponse
+14:06:02.668 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Tipo real extraido de RestApiResponseGroupByStatsResponse: GroupByStatsResponse
+14:06:02.668 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaPublishesQuickFiltersFromResolver" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.009">
+    <system-out>14:06:02.676 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.676 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.676 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.676 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.676 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.677 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.677 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UserResponse'
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaUsesDerivedResponseIdentityWhenParentIdentityIsAbsent(CapturedOutput)" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.002">
+    <system-out>14:06:02.679 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/api/human-resources/funcionarios/{id}/hero-profile' -&gt; grupo resolvido: 'api-human-resources-funcionarios'
+14:06:02.680 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'api-human-resources-funcionarios' (~0KB)
+14:06:02.680 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.680 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: VwPerfilHeroiDTO
+14:06:02.680 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.680 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Schema wrapper encontrado: FuncionarioDTO
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaPreservesAnalyticsWithoutOverwritingExistingXUiKeys" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.002">
+    <system-out>14:06:02.682 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/users' -&gt; grupo resolvido: 'users'
+14:06:02.682 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'users' (~0KB)
+14:06:02.682 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.682 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.682 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.683 [main] INFO org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Response schema encontrado em x-ui: UserResponse
+14:06:02.683 [main] WARN org.praxisplatform.uischema.controller.docs.ApiDocsController -- x-ui.resource.idField='id' nao encontrado nas propriedades do schema 'UserResponse'
+</system-out>
+  </testcase>
+  <testcase name="getFilteredSchemaResolvesPathWithoutApiPrefixWhenDocHasApiPrefix" classname="org.praxisplatform.uischema.controller.docs.ApiDocsControllerTest" time="0.003">
+    <system-out>14:06:02.685 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path '/human-resources/funcionarios/filter' -&gt; grupo resolvido: 'human-resources-funcionarios-filter'
+14:06:02.686 [main] INFO org.praxisplatform.uischema.openapi.CachedOpenApiDocumentService -- Documento OpenAPI especifico cacheado para grupo 'human-resources-funcionarios-filter' (~0KB)
+14:06:02.686 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Path and operation node retrieved successfully
+14:06:02.686 [main] INFO org.praxisplatform.uischema.controller.docs.ApiDocsController -- Schema node retrieved successfully
+14:06:02.686 [main] WARN org.praxisplatform.uischema.schema.FilteredSchemaProjection -- Nao foi possivel encontrar um responseSchema para /api/human-resources/funcionarios/filter
+</system-out>
+  </testcase>
+</testsuite>

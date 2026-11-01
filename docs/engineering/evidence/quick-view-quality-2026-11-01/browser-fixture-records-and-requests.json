@@ -1,0 +1,499 @@
+{
+  "kind": "synthetic-records-with-raw-metadata",
+  "resources": {
+    "operations/incidentes": {
+      "id": 253,
+      "key": "operations.incidentes",
+      "row": {
+        "id": 253,
+        "descricao": "Impacto civil durante contenção tática",
+        "local": "Setor de avaliação",
+        "severidade": "ALTA",
+        "danosCivis": 1190000,
+        "feridos": 3,
+        "mortos": 0,
+        "missaoId": 99,
+        "ocorridoEm": "2026-11-01T10:00:00",
+        "_links": {
+          "self": {
+            "href": "/api/operations/incidentes/253"
+          },
+          "surfaces": {
+            "href": "/api/operations/incidentes/253/surfaces"
+          }
+        }
+      }
+    },
+    "operations/missoes": {
+      "id": 99,
+      "key": "operations.missoes",
+      "row": {
+        "id": 99,
+        "titulo": "Operação Escudo de Avaliação",
+        "status": "EM_ANDAMENTO",
+        "local": "Setor de avaliação",
+        "prioridade": "ALTA",
+        "ameacaNome": "Ameaça simulada",
+        "_links": {
+          "self": {
+            "href": "/api/operations/missoes/99"
+          },
+          "surfaces": {
+            "href": "/api/operations/missoes/99/surfaces"
+          }
+        },
+        "statusLabel": "Em andamento",
+        "prioridadeLabel": "Alta",
+        "ameaca": "Ameaça simulada",
+        "qtdHerois": 8,
+        "qtdEventos": 3,
+        "ultimaAcao": "2026-11-01T10:00:00"
+      }
+    },
+    "procurement/purchase-orders": {
+      "id": 41,
+      "key": "procurement.purchase-orders",
+      "row": {
+        "id": 41,
+        "supplierId": 7,
+        "contractId": 3,
+        "companyId": 1,
+        "productId": 5,
+        "status": "APPROVED",
+        "currency": "BRL",
+        "quantity": 12,
+        "orderDate": "2026-11-01",
+        "_links": {
+          "self": {
+            "href": "/api/procurement/purchase-orders/41"
+          },
+          "surfaces": {
+            "href": "/api/procurement/purchase-orders/41/surfaces"
+          }
+        }
+      }
+    },
+    "procurement/suppliers": {
+      "id": 7,
+      "key": "procurement.suppliers",
+      "row": {
+        "id": 7,
+        "legalName": "Fornecedor de Avaliação Ltda.",
+        "code": "FOR-007",
+        "homologationStatus": "APPROVED",
+        "riskLevel": "LOW",
+        "status": "ACTIVE",
+        "documentNumber": "00.000.000/0001-00",
+        "companyId": 1,
+        "_links": {
+          "self": {
+            "href": "/api/procurement/suppliers/7"
+          },
+          "surfaces": {
+            "href": "/api/procurement/suppliers/7/surfaces"
+          }
+        }
+      }
+    },
+    "procurement/contracts": {
+      "id": 3,
+      "key": "procurement.contracts",
+      "row": {
+        "id": 3,
+        "number": "CT-003/2026",
+        "supplierId": 7,
+        "supplierName": "Fornecedor de Avaliação Ltda.",
+        "currency": "BRL",
+        "status": "ACTIVE",
+        "validUntil": "2027-12-31",
+        "companyId": 1,
+        "_links": {
+          "self": {
+            "href": "/api/procurement/contracts/3"
+          },
+          "surfaces": {
+            "href": "/api/procurement/contracts/3/surfaces"
+          }
+        }
+      }
+    }
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/operacoes/incidentes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-global-config-editor&componentId=praxis:global-config"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/human-resources/funcionarios/stats/group-by"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/risk-intelligence/vw-indicadores-incidentes/stats/group-by"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-crud&componentId=crud-authoring:rk=operacoes/incidentes%7Cct=praxis-crud%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/operations/incidentes/stats/group-by"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/operations/incidentes/filter?page=0&size=10"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=/api/operations/incidentes/filter&operation=post&schemaType=response"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=conn:table:rk=operacoes/incidentes%7Cct=praxis-table%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=table-schema-prefs:rk=operacoes/incidentes%7Cct=praxis-table%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-filter&componentId=filter-config:rk=operacoes/incidentes%7Cct=praxis-filter%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=table-schema-prefs:rk=operacoes/incidentes%7Cct=praxis-table%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-crud&componentId=crud-authoring:crud-operations-incidentes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=/api/operations/incidentes/filter&operation=post&schemaType=request"
+    },
+    {
+      "method": "PUT",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=conn:table:rk=operacoes/incidentes%7Cct=praxis-table%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=operations.incidentes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-filter&componentId=filter-dto:rk=operacoes/incidentes%7Cct=praxis-filter%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=table-config:rk=operacoes/incidentes%7Cct=praxis-table%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/incidentes/253"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Foperations%2Fincidentes%2Ffilter&operation=post&schemaType=request&includeInternalSchemas=true"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=table-inputs:rk=operacoes/incidentes%7Cct=praxis-table%7Cid=crud-operations-incidentes%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/incidentes/253/surfaces"
+    },
+    {
+      "method": "PUT",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-filter&componentId=filter-schema-meta:rk=operacoes/incidentes%7Cct=praxis-filter%7Cid=crud-operations-incidentes%7Cik=0:schema:/api/operations/incidentes/filter%7Cpost%7Crequest%7Cinternal:true%7Corigin:http://127.0.0.1:4302"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Foperations%2Fincidentes%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=operations.incidentes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/incidentes/253"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/incidentes/253/surfaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Foperations%2Fincidentes%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=operations.incidentes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=operations.missoes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/incidentes/253"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/incidentes/253/surfaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99/surfaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Foperations%2Fincidentes%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99/summary"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Foperations%2Fmissoes%2F%7Bid%7D%2Fsummary&operation=get&schemaType=response&idField=missaoId&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=operations.missoes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99/surfaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99/summary"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Foperations%2Fmissoes%2F%7Bid%7D%2Fsummary&operation=get&schemaType=response&idField=missaoId&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=operations.missoes"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99/surfaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/operations/missoes/99/summary"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Foperations%2Fmissoes%2F%7Bid%7D%2Fsummary&operation=get&schemaType=response&idField=missaoId&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/suprimentos/pedidos"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-global-config-editor&componentId=praxis:global-config"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/human-resources/funcionarios/stats/group-by"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/risk-intelligence/vw-indicadores-incidentes/stats/group-by"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-crud&componentId=crud-authoring:rk=suprimentos/pedidos%7Cct=praxis-crud%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/procurement/purchase-orders/stats/group-by"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/procurement/purchase-orders/filter?page=0&size=10"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/catalog?path=/api/procurement/purchase-orders/filter&operation=POST"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=/api/procurement/purchase-orders/filter&operation=post&schemaType=response"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=conn:table:rk=suprimentos/pedidos%7Cct=praxis-table%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=table-schema-prefs:rk=suprimentos/pedidos%7Cct=praxis-table%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-filter&componentId=filter-config:rk=suprimentos/pedidos%7Cct=praxis-filter%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=table-schema-prefs:rk=suprimentos/pedidos%7Cct=praxis-table%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-crud&componentId=crud-authoring:crud-procurement-purchase-orders"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=/api/procurement/purchase-orders/filter&operation=post&schemaType=request"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=procurement.contracts"
+    },
+    {
+      "method": "PUT",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=conn:table:rk=suprimentos/pedidos%7Cct=praxis-table%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-filter&componentId=filter-dto:rk=suprimentos/pedidos%7Cct=praxis-filter%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=table-config:rk=suprimentos/pedidos%7Cct=praxis-table%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/procurement/contracts/3"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Fprocurement%2Fpurchase-orders%2Ffilter&operation=post&schemaType=request&includeInternalSchemas=true"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=table-inputs:rk=suprimentos/pedidos%7Cct=praxis-table%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/procurement/contracts/3/surfaces"
+    },
+    {
+      "method": "PUT",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-filter&componentId=filter-schema-meta:rk=suprimentos/pedidos%7Cct=praxis-filter%7Cid=crud-procurement-purchase-orders%7Cik=0:schema:/api/procurement/purchase-orders/filter%7Cpost%7Crequest%7Cinternal:true%7Corigin:http://127.0.0.1:4302"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Fprocurement%2Fcontracts%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=procurement.suppliers"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/procurement/suppliers/7"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/procurement/suppliers/7/surfaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Fprocurement%2Fsuppliers%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=procurement.purchase-orders"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/surfaces?resource=procurement.contracts"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/procurement/purchase-orders/41"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/procurement/contracts/3"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/procurement/purchase-orders/41/surfaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/procurement/contracts/3/surfaces"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Fprocurement%2Fpurchase-orders%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=%2Fapi%2Fprocurement%2Fcontracts%2F%7Bid%7D&operation=get&schemaType=response&idField=id&readOnly=false"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/suprimentos/pedidos"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-global-config-editor&componentId=praxis:global-config"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/human-resources/funcionarios/stats/group-by"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/risk-intelligence/vw-indicadores-incidentes/stats/group-by"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-crud&componentId=crud-authoring:rk=suprimentos/pedidos%7Cct=praxis-crud%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/procurement/purchase-orders/stats/group-by"
+    },
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:4302/api/procurement/purchase-orders/filter?page=0&size=10"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/catalog?path=/api/procurement/purchase-orders/filter&operation=POST"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/schemas/filtered?path=/api/procurement/purchase-orders/filter&operation=post&schemaType=response"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:4302/api/praxis/config/ui?componentType=praxis-table&componentId=conn:table:rk=suprimentos/pedidos%7Cct=praxis-table%7Cid=crud-procurement-purchase-orders%7Cik=0"
+    }
+  ]
+}

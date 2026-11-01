@@ -1,0 +1,396 @@
+
+> praxis-ui-workspace@0.0.0 build:praxis-core
+> node ./scripts/build-libs.js --prod --only praxis-core
+
+
+===============================================================
+🛡️  PRAXIS PLATFORM — AUDITORIA DE PUREZA CORPORATIVA (v2)
+   Verificando isolamento de bibliotecas contra domínio de host
+===============================================================
+
+🔍 Escaneando 2378 arquivos de código-fonte em projects/**/src/**...
+
+✅ SUCESSO: Nenhuma contaminação ou violação de pureza detectada nas bibliotecas!
+===============================================================
+
+Iniciando build das libs (production) em ordem topológica:
+1. praxis-core
+2. praxis-ai
+3. praxis-dialog
+4. praxis-cron-builder
+5. praxis-dynamic-fields
+6. praxis-settings-panel
+7. praxis-visual-builder
+8. praxis-metadata-editor
+9. praxis-rich-content
+10. praxis-dynamic-form
+11. praxis-table-rule-builder
+12. praxis-table
+13. praxis-page-builder
+
+=== [praxis-core] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/core'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/core/schema'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-core
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-core
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:56:46.512Z - Time: 6754ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/core
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+✔ Built @praxisui/core/schema
+
+=== [praxis-ai] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/ai'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-ai
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-ai
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:56:49.183Z - Time: 2048ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/ai
+
+=== [praxis-dialog] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/dialog'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-dialog
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-dialog
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:56:50.661Z - Time: 1018ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/dialog
+
+=== [praxis-cron-builder] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/cron-builder'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-cron-builder
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-cron-builder
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:56:52.019Z - Time: 888ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/cron-builder
+
+=== [praxis-dynamic-fields] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/dynamic-fields'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-dynamic-fields
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-dynamic-fields
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:56:58.657Z - Time: 6148ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/dynamic-fields
+
+=== [praxis-settings-panel] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/settings-panel'
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-settings-panel
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-settings-panel
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:57:00.558Z - Time: 1406ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/settings-panel
+
+=== [praxis-visual-builder] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/visual-builder'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-visual-builder
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-visual-builder
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:57:03.157Z - Time: 2131ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/visual-builder
+
+=== [praxis-metadata-editor] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/metadata-editor'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-metadata-editor
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-metadata-editor
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:57:05.365Z - Time: 1728ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/metadata-editor
+
+=== [praxis-rich-content] ng build (production) ===
+Build de praxis-rich-content direcionado para ng-packagr por compatibilidade canônica do CI.
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/rich-content'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/rich-content/validation'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-rich-content
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-rich-content
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:57:11.086Z - Time: 5243ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/rich-content
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+✔ Built @praxisui/rich-content/validation
+
+=== [praxis-dynamic-form] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/dynamic-form'
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-dynamic-form
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-dynamic-form
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:57:15.607Z - Time: 4043ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/dynamic-form
+
+=== [praxis-table-rule-builder] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/table-rule-builder'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-table-rule-builder
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-table-rule-builder
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:57:17.077Z - Time: 992ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/table-rule-builder
+
+=== [praxis-table] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/table'
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/table/authoring'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/table/filter-drawer-adapter'
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-table
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-table
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:57:26.874Z - Time: 9298ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/table
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+✔ Built @praxisui/table/authoring
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+✔ Built @praxisui/table/filter-drawer-adapter
+
+=== [praxis-page-builder] ng build (production) ===
+Building Angular Package
+
+------------------------------------------------------------------------------
+Building entry point '@praxisui/page-builder'
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+Built Angular Package
+- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-page-builder
+- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-page-builder
+------------------------------------------------------------------------------
+
+Build at: 2026-11-01T16:57:31.111Z - Time: 3730ms
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+- Compiling with Angular sources in partial compilation mode.
+✔ Compiling with Angular sources in partial compilation mode.
+✔ Generating FESM and DTS bundles
+- Copying assets
+✔ Copying assets
+- Writing package manifest
+✔ Writing package manifest
+✔ Built @praxisui/page-builder
+
+Build de todas as libs finalizado com sucesso.
