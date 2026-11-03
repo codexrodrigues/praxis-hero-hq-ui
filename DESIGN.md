@@ -15,6 +15,13 @@ Insígnia combina navy `#0D1B2A`, marfim `#F9F7F1` e azul `#415A77` nas ações 
 superfícies claras. Em menus navy, o destaque ocre `#B8860B` conserva a distinção
 visual. Os tokens de primeiro plano, foco e gradiente acompanham o escopo do menu.
 
+Brasa usa caramelo tostado `#805D3F` nos destaques e no foco, com bege
+`#E7D9C8` na seleção. Os botões principais recebem um gradiente de caramelo a
+castanho. O dashboard usa fibras estáticas sobre o fundo marfim e um halo de
+mel no banner translúcido. A pintura acompanha as quinas arredondadas do banner
+e dos cartões de indicadores. A argila `#A4472F` fica no token de formatação
+laranja.
+
 Insígnia e Brasa usam Manrope nos títulos e Source Sans 3 no corpo, servidas em
 WOFF2 locais. O ritmo base usa corpo 400 e títulos 500; Material Symbols usa eixo
 `wght` 300. Ênfase semântica pode permanecer em 600. Pesos explicitamente

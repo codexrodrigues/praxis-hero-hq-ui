@@ -229,7 +229,7 @@ html[data-theme] button.mat-mdc-raised-button.mat-primary:not(:disabled):not([ar
   display: inline-block; width: 16px; height: 16px; margin-inline-end: 10px;
   border: 1px solid var(--border); border-radius: 50%; vertical-align: middle;
   &[data-preview='insignia'] { background: #0d1b2a; }
-  &[data-preview='brasa'] { background: #a4472f; }
+  &[data-preview='brasa'] { background: #805d3f; }
   &[data-preview='classic'] { background: oklch(0.54614972 0.21520775 262.88091714); }
   &[data-preview='light-tech'] { background: oklch(0.45 0.092 232); }
   &[data-preview='dark-tech'] { background: oklch(0.255 0.022 250); }

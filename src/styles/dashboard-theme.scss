@@ -37,6 +37,25 @@
   line-height: inherit !important;
 }
 
+/* Brasa uses the dashboard canvas as the paper beneath the cards. */
+:root[data-theme='brasa'] app-dashboard-page {
+  .pdx-page-wrapper {
+    background: var(--canvas) url('/textures/brasa-cotton.png') repeat;
+  }
+
+  :is(.hero-executive-banner, .bento-kpi-card) {
+    background-clip: padding-box !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .hero-executive-banner {
+    --surface-gradient:
+      radial-gradient(ellipse at 78% 24%, rgb(236 215 184 / 58%), transparent 64%),
+      linear-gradient(115deg, rgb(252 249 244 / 86%) 20%, rgb(242 233 220 / 58%));
+  }
+}
+
 /* 3. Hero Executive Banner */
 .hero-executive-banner {
   position: relative;
