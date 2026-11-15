@@ -11,7 +11,7 @@ Comece pelo repositório `codexrodrigues/praxis-hero-hq-ui`, branch
 
 Leia também os snapshots de AGENTS e coordenação nessa pasta e os AGENTS locais.
 O README contém os commits, PRs, dependências, evidências remotas e limitações;
-reconfira o GitHub antes de editar. Não dependa de caminhos `/Users/rodrigo`, `/tmp`,
+reconfira o GitHub antes de editar. Não dependa de caminhos `<local-user-home>`, `/tmp`,
 cookies, credenciais ou processos da máquina anterior.
 
 A pasta inclui `remote-only-verification.json`: o material foi conferido a partir

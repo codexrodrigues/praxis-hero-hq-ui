@@ -23,7 +23,7 @@ Antes dos últimos ajustes: Hero 11 unitários/build/E2E controlado nos três te
 
 Último Table: 33 testes focais e build passaram com política authored/command/transient. Novo teste CRUD real encontrou DI incompleta na fixture, depois NG0103 e formulário sem geometria. O autor acrescentou GenericCrudService real, retirou feedback initialValue e começou a usar materializeFormLayoutFromMetadata. **A fonte final desses ajustes não foi validada nem revisada integralmente.** Revisar estabilidade do FormConfig produzido no template (não criar novo objeto a cada detecção), renderização dos parâmetros e payload date-only. Não tratar os104 testes antigos como aprovação do último diff.
 
-Toda prova com banco usou branches Neon exclusivas: API br-twilight-breeze-adq1cqaq (dark-mountain-25788969) e Config br-noisy-mouse-a4vgfjag (ancient-leaf-72055027), PG17/TLS e perfis ordinários verificados. Owner somente para provisionamento/inspeção; não como prova operacional.
+Toda prova com banco usou branches Neon exclusivas: API <neon-branch-api> (<neon-project-api>) e Config <neon-branch-config> (<neon-project-config>), PG17/TLS e perfis ordinários verificados. Owner somente para provisionamento/inspeção; não como prova operacional.
 
 12 comandos oficiais de capacidade foram confirmados, identidade de9campos íntegra, duas instalações e dois slots livres. Primeira publicação503: timeout do controle3s, rollback/readback UNCOMPOSED/geração0 e zeroexecuções. Saturação posterior não prova causa. Nova tentativa serial, sem navegador concorrente: HTTP200, controle localREADY/geração1. Readback posterior: publicação globalPUBLISHED/geração2 e digest correspondente. Restart/reconcile oficial posteriorHTTP200 preservou geração local1.
 

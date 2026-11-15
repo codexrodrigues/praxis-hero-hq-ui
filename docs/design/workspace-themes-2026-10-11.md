@@ -9,7 +9,7 @@ separados. As seções anteriores à release abaixo são histórico de validaç�
 
 ## Escopo e direção
 
-Pedido: manter a estética dos três temas do Ergon Workflow Designer no host Angular, especialmente Órbita. Classificação `local-pequena`: aparência privada do host, sem alteração de contratos públicos, dependências, configurações de build, metadados ou regras de negócio. Baseline limpo `51b6769`, branch `codex/canonical-dashboard-page`, Praxis instalado `10.0.0-rc.7`, Angular/Material `21.2.14`.
+Pedido: manter a estética dos três temas do Praxis Workflow Designer no host Angular, especialmente Órbita. Classificação `local-pequena`: aparência privada do host, sem alteração de contratos públicos, dependências, configurações de build, metadados ou regras de negócio. Baseline limpo `51b6769`, branch `codex/canonical-dashboard-page`, Praxis instalado `10.0.0-rc.7`, Angular/Material `21.2.14`.
 
 Operador: equipe que consulta pessoas, missões, ativos, suprimentos e risco. Superfície: cockpit denso; preservar as páginas e sua navegação. Direção: Work Sans, fundos minerais nos temas claros e grafite azulado no escuro; ação ciano e nuances azul-violeta conforme a referência. A assinatura é a leitura consistente de indicadores, gráficos e tabelas de operação. Evitar preto quase absoluto, superfícies translúcidas que apagam a elevação e cores próprias de cada controle; usar a mesma hierarquia de superfícies e estados. Distinção 3, movimento 1, densidade 4. Não foram adicionadas animações decorativas.
 
@@ -17,7 +17,7 @@ Operador: equipe que consulta pessoas, missões, ativos, suprimentos e risco. Su
 
 | Fonte instalada ou existente | Resultado | Uso |
 | --- | --- | --- |
-| Ergon `src/styles/theme.css`, `presentation.css`, `themes.css` | Identidade base e três paletas já existentes | Cores copiadas para a folha privada `src/styles/workspace-themes.scss`; sem dependência entre os projetos. |
+| Referência base `src/styles/theme.css`, `presentation.css`, `themes.css` | Identidade base e três paletas já existentes | Cores copiadas para a folha privada `src/styles/workspace-themes.scss`; sem dependência entre os projetos. |
 | Core `theming/_theming.scss` | `ja-suportado-mal-nomeado-ou-mal-materializado`: ponte já aceita mapas; default dark usa outros níveis de superfície | Configurar todos os containers, contraste do conteúdo de containers e tokens de overlay. |
 | Angular Material Sass | Base de tema não carregada pelo host; ponte de tokens não substitui base Material | `mat.theme` e `mat.theme-overrides` no stylesheet existente; nenhuma configuração de workspace ou pacote alterada. |
 | Table `--p-table-*` | `ja-suportado-so-ux`: defaults declarados no host da tabela | Sobrescrever os mesmos tokens na instância com especificidade adequada; não editar classes internas MDC. |
@@ -74,7 +74,7 @@ Escopo `local-pequena`, sobre a implementação local anterior, com revisão ind
 ### Provas da revisão
 
 ```sh
-node scripts/workspace/verify-workspace-themes.mjs --reference /caminho/ergon-workflow-designer
+node scripts/workspace/verify-workspace-themes.mjs --reference /caminho/workflow-designer
 npm run build
 ```
 

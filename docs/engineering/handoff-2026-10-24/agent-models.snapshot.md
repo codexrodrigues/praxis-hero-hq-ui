@@ -2,7 +2,7 @@
 
 # Agentes e modelos no Praxis
 
-Guia operacional de toda a plataforma, vinculado às [diretrizes do workspace](../../AGENTS.md). Consolidado em 13/09/2026 a partir da pesquisa e revisão do planejamento de edição em lote. Escopo `docs-apenas`: registra a política de execução e não altera modelos do aplicativo, contratos de produto ou permissões de publicação.
+Guia operacional de toda a plataforma, vinculado às [diretrizes do workspace](workspace-AGENTS.snapshot.md). Consolidado em 13/09/2026 a partir da pesquisa e revisão do planejamento de edição em lote. Escopo `docs-apenas`: registra a política de execução e não altera modelos do aplicativo, contratos de produto ou permissões de publicação.
 
 O `AGENTS.md` estabelece as obrigações; este guia concentra fundamentação, matriz inicial e exemplos. Planos de funcionalidades registram somente sua aplicação específica. Coordenadores e trabalhadores devem consultar também as instruções locais dos arquivos que vão ler ou editar. Ao retomar em outro checkout, confirmar que este guia e as instruções estão presentes; registros locais não se propagam automaticamente entre repositórios ou máquinas.
 

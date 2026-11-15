@@ -125,7 +125,7 @@ O agente executor não deve limitar-se ao fluxo básico de listagem do CRUD. A i
    - Sinalizar na configuração atribuída à tabela que a atualização decorre exclusivamente da resolução de capacidades táticas (`capabilitiesOnlyUpdate = true`), ou atualizar de forma imutável apenas os nós de ação da toolbar sem gerar uma referência de objeto de configuração totalmente desvinculada.
 
 ### Mitigação Temporária Aplicada no Hero HQ
-- Foi criado o interceptor [`praxisQueryDeduplicationInterceptor`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/core/http-deduplication.interceptor.ts) registrado no [`app.config.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/app.config.ts). Ele compartilha chamadas em voo via `shareReplay(1)` e absorve rajadas idênticas (< 1200ms) em memória, resolvendo a segunda requisição em 0ms. Limpa automaticamente o cache em qualquer mutação (`POST` não-filter, `PUT`, `PATCH`, `DELETE`).
+- Foi criado o interceptor `praxisQueryDeduplicationInterceptor` (`src/app/core/http-deduplication.interceptor.ts`) registrado no [`app.config.ts`](src/app/app.config.ts). Ele compartilha chamadas em voo via `shareReplay(1)` e absorve rajadas idênticas (< 1200ms) em memória, resolvendo a segunda requisição em 0ms. Limpa automaticamente o cache em qualquer mutação (`POST` não-filter, `PUT`, `PATCH`, `DELETE`).
 
 ### Critérios de Aceite para Resolução
 - [x] Entrar em uma tela baseada em `<praxis-crud>` e verificar no console de rede que exatamente **1 requisição** `POST /filter` é emitida.
@@ -165,7 +165,7 @@ Em componentes de detalhe, dossiês e painéis com abas (como `HeroDossierDrawer
 2. **Recomendação e Prática de Engenharia para Shells de Aba:**
    - Incorporar na biblioteca de documentação e exemplos oficiais a recomendação de **preservação estrutural no DOM** (`[hidden]="activeTab !== '...'"` com CSS `.pane[hidden] { display: none !important; }`), ou disponibilizar uma diretiva estrutural canônica (ex.: `*praxisKeepAliveTab`).
 
-- No [`hero-dossier-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/rh/hero-dossier-drawer.component.ts#L515-L593) e no [`mission-briefing-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/operacoes/mission-briefing-drawer.component.ts#L375-L405), os painéis de abas foram migrados para `[hidden]="activeTab() !== '...'"` com regras de CSS `.tab-pane[hidden] { display: none !important; }`, garantindo transição instantânea de 0ms sem recriação de DOM nem chamadas de rede repetidas.
+- No `hero-dossier-drawer.component.ts` (`src/app/pages/rh/hero-dossier-drawer.component.ts#L515-L593`) e no `mission-briefing-drawer.component.ts` (`src/app/pages/operacoes/mission-briefing-drawer.component.ts#L375-L405`), os painéis de abas foram migrados para `[hidden]="activeTab() !== '...'"` com regras de CSS `.tab-pane[hidden] { display: none !important; }`, garantindo transição instantânea de 0ms sem recriação de DOM nem chamadas de rede repetidas.
 - **Validação E2E Playwright:** Comprovado no script `test-drawer-tabs-persistence.js` que a alternância entre todas as 5 abas do dossiê e 3 abas do briefing de missão disparou exatamente **0 requisições** para `/schemas/filtered` ou `/locate`, preservando intactos o estado do formulário e os valores preenchidos.
 
 ### Critérios de Aceite para Resolução
@@ -230,7 +230,7 @@ O agente executor deve considerar que essa comunicação precisa ser bidireciona
    - Adicionar suporte a `@Input() filterCriteria` reativo direto (além de `metadata.filterCriteria`), reagindo automaticamente às emissões do event bus.
 
 ### Avanço e Refatoração Canônica no Hero HQ (Etapa 4)
-- **Host Component Refatorado:** O [`dashboard-page.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/dashboard/dashboard-page.component.ts) foi desprovido de 150+ linhas de glue code (`hostCapabilities` e `injectHostCapabilities`), conectando-se diretamente às capacidades nativas do `DynamicWidgetPageComponent` e `GlobalActionService` (`navigation.openRoute`).
+- **Host Component Refatorado:** O [`dashboard-page.component.ts`](src/app/pages/dashboard/dashboard-page.component.ts) foi desprovido de 150+ linhas de glue code (`hostCapabilities` e `injectHostCapabilities`), conectando-se diretamente às capacidades nativas do `DynamicWidgetPageComponent` e `GlobalActionService` (`navigation.openRoute`).
 - **Eliminação de Mutações Imperativas de AST:** A atualização de dados táticos foi migrada para o projetor declarativo `projectTacticalKpis` com `signal<WidgetPageDefinition>`, operando sob `ChangeDetectionStrategy.OnPush`.
 - **Validação E2E Playwright:** Navegação confirmada nos botões do banner e nos cards do Domain Hub (`/rh/funcionarios` e `/operacoes/missoes`) e alternância de customização do Page Builder validada com 100% de sucesso.
 
@@ -316,7 +316,7 @@ No `<praxis-dynamic-form>` em modo de apresentação (`mode="view"`, `presentati
    - No renderer booleano, se `value === false`, selecionar automaticamente `iconFalse` (ou `toggle_off`) e tom `muted` / `neutral`, alterando classes e ligatures de forma reativa sem exigir CSS ad-hoc no consumidor.
 
 ### Mitigação Temporária Aplicada no Hero HQ (Removida)
-- O override por CSS ad-hoc inserido no [`hero-dossier-drawer.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/rh/hero-dossier-drawer.component.ts) foi totalmente removido após a publicação da solução canônica na plataforma.
+- O override por CSS ad-hoc inserido no `hero-dossier-drawer.component.ts` (`src/app/pages/rh/hero-dossier-drawer.component.ts`) foi totalmente removido após a publicação da solução canônica na plataforma.
 
 ### Critérios de Aceite para Resolução
 - [x] Qualquer campo booleano renderizado com valor `false` no dynamic form de apresentação exibe ícone `toggle_off` com tom neutro por padrão.
@@ -1988,7 +1988,7 @@ No entanto, cenários analíticos corporativos avançados (como o **Dossiê de I
    - Fornecer resolução de dados correlacionados via `dataSourceUrl` ou `enrichmentUrl` parametrizado por `{id}`.
 
 ### Mitigação Temporária Adotada no Hero HQ
-Criação do componente de vitrine [`IncidentAnalysisDrawerComponent`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/operacoes/incident-analysis-drawer.component.ts), orquestrando o layout Bento, abas com `[hidden]` preservando DOM (conforme Issue #2) e consumindo `PraxisMicroVisualizationComponent` do `@praxisui/charts`.
+Criação do componente de vitrine `IncidentAnalysisDrawerComponent` (`src/app/pages/operacoes/incident-analysis-drawer.component.ts`), orquestrando o layout Bento, abas com `[hidden]` preservando DOM (conforme Issue #2) e consumindo `PraxisMicroVisualizationComponent` do `@praxisui/charts`.
 
 ### Critérios de Aceite para Resolução
 - [x] O contrato `TableConfig` suporta `behavior.drawer.analyticalSchema` com abas e nós de apresentação.
@@ -2145,7 +2145,7 @@ Construção imperativa dos 5 componentes de gaveta com mais de 5.400 linhas de 
 ### Diagnóstico Detalhado da Causa Raiz
 Todas as 14 páginas de recursos do Hero HQ (Funcionários, Missões, Incidentes, Folha de Pagamento, Equipes, Ameaças, etc.) exibem cartões Bento de resumo executivo no topo da visualização (ex.: *Total Cadastrado*, *Efetivo Ativo*, *Volume Salarial*, *Casos Críticos*).
 Como o componente `<praxis-crud>` não contemplava um slot declarativo nativo para uma faixa de KPIs de recurso:
-1. Criou-se um serviço monolítico [`dashboard-stats.service.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/pages/dashboard/dashboard-stats.service.ts) com 855 linhas disparando dezenas de `http.post` com contadores agregados manuais.
+1. Criou-se um serviço monolítico `dashboard-stats.service.ts` (`src/app/pages/dashboard/dashboard-stats.service.ts`) com 855 linhas disparando dezenas de `http.post` com contadores agregados manuais.
 2. Cada componente de página foi obrigado a injetar o serviço, subscrever requisições em `ngOnInit`, instanciar e gerenciar manualmente `signal<RichContentDocument>`, e posicionar um `<praxis-rich-content [document]="kpiDocument()">` acima do `<praxis-crud>`.
 
 ### Solução Canônica Implementada na Plataforma
@@ -2273,7 +2273,7 @@ O componente `@praxisui/dynamic-form` em modo `disabled` ou `readOnly` continua 
 
 ### Diagnóstico Detalhado da Causa Raiz
 Toda aplicação desenvolvida sobre o ecossistema Praxis necessita de um esqueleto visual corporativo: barra lateral retrátil (sidebar), agrupamentos de navegação por domínio com ícones, indicador de status operacional no rodapé, barra superior com busca/comando, alternador de tema (Light/Dark), badge de perfil do usuário e barra de carregamento reativa.
-Pela ausência de um componente de shell governado na biblioteca `@praxisui/core` (ou em um pacote dedicado `@praxisui/shell`), a aplicação Hero HQ foi obrigada a criar o arquivo [`hero-app-shell.component.ts`](file:///D:/Developer/praxis-plataform/praxis-hero-hq-ui/src/app/shell/hero-app-shell.component.ts) com **1.192 linhas de código** — das quais mais de 850 linhas são puro CSS embutido cuidando de animações de colapso, backdrops móveis, gradientes de borda e posicionamento de elementos.
+Pela ausência de um componente de shell governado na biblioteca `@praxisui/core` (ou em um pacote dedicado `@praxisui/shell`), a aplicação Hero HQ foi obrigada a criar o arquivo [`hero-app-shell.component.ts`](src/app/shell/hero-app-shell.component.ts) com **1.192 linhas de código** — das quais mais de 850 linhas são puro CSS embutido cuidando de animações de colapso, backdrops móveis, gradientes de borda e posicionamento de elementos.
 
 ### Solução Canônica Recomendada de Plataforma
 1. **Criação do Componente Canônico `PraxisAppShellComponent`:**
