@@ -92,7 +92,7 @@
     "canonicalRepo": "codexrodrigues/praxis-codex-skills",
     "branch": "codex/hero-session-transport-guidance",
     "skill": "praxis-angular-host-project",
-    "validation": "41 helper tests;168 Praxis/19 Ergon preflight clean; independently reviewed and integrated",
+    "validation": "41 helper tests;168 Praxis/19 Enterprise preflight clean; independently reviewed and integrated",
     "pullRequest": "https://github.com/codexrodrigues/praxis-codex-skills/pull/845",
     "merge": "abb91d7842d8b62bf0bd3f0822885acb3020a427",
     "localSync": "one selected skill OK via official helper and filtered manifest; backup; baseline30a checked;793 unrelated installed files byte-preserved; no family force"

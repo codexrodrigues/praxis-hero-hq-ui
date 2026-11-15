@@ -41,8 +41,8 @@ Building entry point '@praxisui/core/schema'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-core
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-core
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-core
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-core
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:56:46.512Z - Time: 6754ms
@@ -70,8 +70,8 @@ Building entry point '@praxisui/ai'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-ai
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-ai
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-ai
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-ai
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:56:49.183Z - Time: 2048ms
@@ -95,8 +95,8 @@ Building entry point '@praxisui/dialog'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-dialog
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-dialog
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-dialog
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-dialog
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:56:50.661Z - Time: 1018ms
@@ -120,8 +120,8 @@ Building entry point '@praxisui/cron-builder'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-cron-builder
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-cron-builder
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-cron-builder
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-cron-builder
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:56:52.019Z - Time: 888ms
@@ -145,8 +145,8 @@ Building entry point '@praxisui/dynamic-fields'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-dynamic-fields
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-dynamic-fields
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-dynamic-fields
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-dynamic-fields
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:56:58.657Z - Time: 6148ms
@@ -171,8 +171,8 @@ Building entry point '@praxisui/settings-panel'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-settings-panel
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-settings-panel
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-settings-panel
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-settings-panel
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:57:00.558Z - Time: 1406ms
@@ -196,8 +196,8 @@ Building entry point '@praxisui/visual-builder'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-visual-builder
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-visual-builder
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-visual-builder
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-visual-builder
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:57:03.157Z - Time: 2131ms
@@ -221,8 +221,8 @@ Building entry point '@praxisui/metadata-editor'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-metadata-editor
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-metadata-editor
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-metadata-editor
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-metadata-editor
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:57:05.365Z - Time: 1728ms
@@ -251,8 +251,8 @@ Building entry point '@praxisui/rich-content/validation'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-rich-content
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-rich-content
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-rich-content
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-rich-content
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:57:11.086Z - Time: 5243ms
@@ -284,8 +284,8 @@ Building entry point '@praxisui/dynamic-form'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-dynamic-form
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-dynamic-form
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-dynamic-form
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-dynamic-form
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:57:15.607Z - Time: 4043ms
@@ -309,8 +309,8 @@ Building entry point '@praxisui/table-rule-builder'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-table-rule-builder
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-table-rule-builder
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-table-rule-builder
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-table-rule-builder
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:57:17.077Z - Time: 992ms
@@ -343,8 +343,8 @@ Building entry point '@praxisui/table/filter-drawer-adapter'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-table
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-table
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-table
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-table
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:57:26.874Z - Time: 9298ms
@@ -377,8 +377,8 @@ Building entry point '@praxisui/page-builder'
 
 ------------------------------------------------------------------------------
 Built Angular Package
-- from: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/projects/praxis-page-builder
-- to:   /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-angular-quick-view-quality/dist/praxis-page-builder
+- from: [workspace-root]/praxis-ui-angular/projects/praxis-page-builder
+- to:   [workspace-root]/praxis-ui-angular/dist/praxis-page-builder
 ------------------------------------------------------------------------------
 
 Build at: 2026-11-01T16:57:31.111Z - Time: 3730ms

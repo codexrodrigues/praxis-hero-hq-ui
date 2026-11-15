@@ -7,7 +7,7 @@ AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
 
 '380px' !== '340px'
 
-    at Object.<anonymous> (/Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-hero-hq-ui/test-e2e/test-dashboard-navigation.cjs:224:8)
+    at Object.<anonymous> ([workspace-root]/praxis-hero-hq-ui/test-e2e/test-dashboard-navigation.cjs:224:8)
     at Module._compile (node:internal/modules/cjs/loader:1705:14)
     at Object..js (node:internal/modules/cjs/loader:1838:10)
     at Module.load (node:internal/modules/cjs/loader:1441:32)

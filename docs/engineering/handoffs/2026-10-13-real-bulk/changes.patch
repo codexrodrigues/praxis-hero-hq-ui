@@ -44,7 +44,7 @@ index 35ef8aa..b962df1 100644
 -
 -1. **Zero Formulários Manuais:** Nenhum campo ou validação é codificado em templates HTML. Todos os fluxos de criação e edição são governados por `<praxis-dynamic-form>` e `/schemas/filtered`.
 -2. **Zero Tabelas Estáticas:** Todas as listagens analíticas utilizam `<praxis-table>` e `<praxis-crud>` com paginação server-side, ordenação e filtros remotos.
--3. **Superfícies Dinâmicas:** As visões de detalhe (Dossiê 360) projetam contratos `@UiSurface` do backend ([`FuncionarioController`](file:///D:/Developer/praxis-plataform/praxis-api-quickstart/src/main/java/com/example/praxis/apiquickstart/hr/controller/FuncionarioController.java)).
+-3. **Superfícies Dinâmicas:** As visões de detalhe (Dossiê 360) projetam contratos `@UiSurface` do backend ([`FuncionarioController`]([workspace-root]/praxis-api-quickstart/src/main/java/com/example/praxis/apiquickstart/hr/controller/FuncionarioController.java)).
 -4. **Governança de Workflow:** Ações de ciclo de vida utilizam `@WorkflowAction` com controle de concorrência por ETag (`If-Match`).
 -5. **Design System & HUD Tático:** Tokens OKLCH para temas Claro e Escuro, glassmorphism, indicador de prontidão (98,4%) e Defcon 5.
 -
@@ -122,8 +122,8 @@ index 35ef8aa..b962df1 100644
 -Uma prova operacional de banco exige branch Neon isolada, conforme a governança do workspace.
 -
 -Para mais detalhes sobre as propostas e evoluções canônicas de plataforma, consulte:
--- [`docs/PRAXIS_PLATFORM_EVOLUTIONS.md`](file:///d:/Developer/praxis-plataform/praxis-hero-hq-ui/docs/PRAXIS_PLATFORM_EVOLUTIONS.md)
--- [`../docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md`](file:///d:/Developer/praxis-plataform/docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md)
+-- [`docs/PRAXIS_PLATFORM_EVOLUTIONS.md`]([workspace-root]/praxis-hero-hq-ui/docs/PRAXIS_PLATFORM_EVOLUTIONS.md)
+-- [`../docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md`]([workspace-root]/docs/ENTERPRISE-UI-CUSTOMIZATION-AND-PERSISTENCE-2026-10.md)
 +A ausência inicial do provider corporativo (503) não invalida uma sessão confirmada: os lotes BASIC continuam sujeitos aos grants operacionais atuais do servidor. Nenhum usuário, tenant ou estado READY é inventado. Personalizações do dashboard permanecem desabilitadas. Se um contexto já confirmado deixar de estar disponível, o shell suspende suas projeções até nova confirmação; esse histórico vive no serviço de sessão e sobrevive à recriação das páginas.
  
 +O interceptor remove claims contextuais não confirmados, preserva ETag, idempotência e CSRF, e envia cookies e contexto exclusivamente à origem configurada da API. Não lê os antigos `pax.api.token`, `pax.api.user` nem personas demonstrativas. Perfis visuais e nomes de personagens não concedem autorização. A API continua responsável pelos grants e pela disponibilidade de cada operação.
@@ -183,7 +183,7 @@ index 35ef8aa..b962df1 100644
 +Carga, gravação, reset, conflito e recuperação pertencem ao runtime. `errorPolicy: 'fail'` preserva erros visíveis. “Restaurar Fábrica” depende da confirmação do backend; não remove dados silenciosamente. Uma definição salva é reaberta integralmente, inclusive quando todos os widgets foram removidos.
  
 -O menu **Aparência** no cabeçalho oferece **Essência**, **Aurora** e **Órbita**,
--com as paletas do Ergon Workflow Designer. Órbita permanece o padrão deste host.
+-com as paletas do Praxis Workflow Designer. Órbita permanece o padrão deste host.
 -A preferência é local ao navegador e sincronizada entre abas; não altera a persona,
 -o dashboard salvo ou dados de negócio. Work Sans é a fonte principal.
 +Cards e textos táticos ilustrativos não certificam disponibilidade da API nem efeito de negócio. O aceite operacional deve usar rede e readback protegido. Ensaios antigos de personas simuladas permanecem históricos e não validam a nova sessão corporativa.
@@ -319,7 +319,7 @@ index 0000000..383b59d
 +
 +Último Table: 33 testes focais e build passaram com política authored/command/transient. Novo teste CRUD real encontrou DI incompleta na fixture, depois NG0103 e formulário sem geometria. O autor acrescentou GenericCrudService real, retirou feedback initialValue e começou a usar materializeFormLayoutFromMetadata. **A fonte final desses ajustes não foi validada nem revisada integralmente.** Revisar estabilidade do FormConfig produzido no template (não criar novo objeto a cada detecção), renderização dos parâmetros e payload date-only. Não tratar os104 testes antigos como aprovação do último diff.
 +
-+Toda prova com banco usou branches Neon exclusivas: API br-twilight-breeze-adq1cqaq (dark-mountain-25788969) e Config br-noisy-mouse-a4vgfjag (ancient-leaf-72055027), PG17/TLS e perfis ordinários verificados. Owner somente para provisionamento/inspeção; não como prova operacional.
++Toda prova com banco usou branches Neon exclusivas: API [neon-branch-id] ([neon-project-id]) e Config [neon-branch-id] ([neon-project-id]), PG17/TLS e perfis ordinários verificados. Owner somente para provisionamento/inspeção; não como prova operacional.
 +
 +12 comandos oficiais de capacidade foram confirmados, identidade de9campos íntegra, duas instalações e dois slots livres. Primeira publicação503: timeout do controle3s, rollback/readback UNCOMPOSED/geração0 e zeroexecuções. Saturação posterior não prova causa. Nova tentativa serial, sem navegador concorrente: HTTP200, controle localREADY/geração1. Readback posterior: publicação globalPUBLISHED/geração2 e digest correspondente. Restart/reconcile oficial posteriorHTTP200 preservou geração local1.
 +
@@ -444,7 +444,7 @@ index 0000000..7bc94df
 +sincronização ainda pendentes. Não houve publicação deste incremento.
 +
 +Branches iniciais atribuídas exclusivamente ao ensaio `root/hero-real-bulk`:
-+API `br-twilight-breeze-adq1cqaq` e Config `br-noisy-mouse-a4vgfjag`. PostgreSQL 17,
++API `[neon-branch-id]` e Config `[neon-branch-id]`. PostgreSQL 17,
 +TLS verify-full/channel binding e cinco identidades owner/runtime/control/Config
 +foram atestados, com conexões fechadas. A foto do primeiro baseline é UNCOMPOSED,
 +sem instalação de capacidade ASYNC; portanto ela não conta como prova positiva.
@@ -488,7 +488,7 @@ index dcd3278..442a0fd 100644
 --- a/e2e/run-e2e.cjs
 +++ b/e2e/run-e2e.cjs
 @@ -1,215 +1,74 @@
--const { chromium } = require('D:/Developer/praxis-plataform/.worktrees/hero-hq-batch8/node_modules/@playwright/test');
+-const { chromium } = require('[workspace-root]/node_modules/@playwright/test');
 -
 +const { chromium, expect } = require('@playwright/test');
 +const { mkdir, writeFile } = require('node:fs/promises');

@@ -48,5 +48,5 @@ Application bundle generation complete. [13.898 seconds] - 2026-11-01T17:19:13.0
 ▲ [WARNING] bundle initial exceeded maximum budget. Budget 15.00 MB was not met by 2.24 MB with a total of 17.24 MB.
 
 
-Output location: /Users/rodrigo/Dev/pessoal/praxis-plataform/praxis-hero-hq-quick-view-integration/dist/praxis-hero-hq-ui
+Output location: [workspace-root]/praxis-hero-hq-ui/dist/praxis-hero-hq-ui
 

@@ -1,7 +1,7 @@
 {
   "baseline": "2e93c1a4a0f3c5b09fa26915442ad3a10cac46c3",
   "config": "0.1.0-rc.174",
-  "command": "JAVA_HOME=/Users/rodrigo/.jdks/jdk-21.0.10+7/Contents/Home mvn -o -q -Dtest=QuickstartPageStructureTest,QuickstartPageFormContentPolicyTest,QuickstartPageHostTest test",
+  "command": "JAVA_HOME=[jdk-home] mvn -o -q -Dtest=QuickstartPageStructureTest,QuickstartPageFormContentPolicyTest,QuickstartPageHostTest test",
   "result": "40 PASS; 0 failures/errors/skipped",
   "database": false,
   "http": false,
