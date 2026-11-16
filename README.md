@@ -21,7 +21,7 @@ Esses registros não representam uma verificação atual do serviço.
 ## 🎯 Princípios Fundamentais
 
 1. **Formulários de negócio por metadados:** Os recursos usam `<praxis-dynamic-form>` e `/schemas/filtered`. Controles do shell e do laboratório (nome de página/menu) pertencem ao host; formulários authorados no laboratório usam os editores canônicos Praxis.
-2. **Listagens orientadas a recursos:** As páginas de recursos usam `PraxisResourcePage` e o runtime de CRUD/tabela. Widgets do dashboard também podem usar dados locais e projeções de agregações.
+2. **Listagens orientadas a recursos:** As páginas de recursos usam `PraxisResourcePage` e o runtime de recursos e tabela. Widgets do dashboard também podem usar dados locais e projeções de agregações.
 3. **Superfícies Dinâmicas:** As visões de detalhe (Dossiê 360) projetam contratos `@UiSurface` do backend ([`FuncionarioController`](https://github.com/codexrodrigues/praxis-api-quickstart/blob/main/src/main/java/com/example/praxis/apiquickstart/hr/controller/FuncionarioController.java)).
 4. **Governança de Workflow:** Ações de ciclo de vida utilizam `@WorkflowAction` com controle de concorrência por ETag (`If-Match`).
 5. **Design System & HUD Tático:** Tokens OKLCH para temas Claro e Escuro, glassmorphism, indicadores de prontidão e DEFCON calculados pelo shell.
@@ -150,7 +150,7 @@ locais. Os demais temas preservam suas famílias. Consulte [DESIGN.md](DESIGN.md
 
 A folha privada `src/styles/workspace-themes.scss` define as paletas;
 `src/styles/theme-praxis.scss` traduz esses valores para Material e os tokens dos
-componentes Praxis, incluindo tabela, CRUD/KPI e overlays. Não adicionar cores
+componentes Praxis, incluindo tabela, manutenção de recursos/KPI e overlays. Não adicionar cores
 isoladas em cada página para ajustar o tema.
 
 Validação focal sem backend/banco:
